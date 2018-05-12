@@ -1,0 +1,6 @@
+  Bootstrap Toggle
+--================--
+
+URL: http://www.bootstraptoggle.com/
+Version: 2.2.2
+License: MIT

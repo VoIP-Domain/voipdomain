@@ -1,0 +1,6 @@
+  Select2 Bootstrap Theme
+--=======================--
+
+URL: https://github.com/select2/select2-bootstrap-theme
+Version: 0.1.0-beta10
+License: MIT

@@ -1,0 +1,6 @@
+  html5shiv
+--=========--
+
+URL: https://github.com/aFarkas/html5shiv/
+Version: 3.7.3
+License: GPL 2.0 & MIT

@@ -1,0 +1,6 @@
+  Select2
+--=======--
+
+URL: https://github.com/select2/select2
+Version: 4.0.5
+License: MIT

@@ -1,0 +1,6 @@
+  aSimpleTour
+--===========--
+
+URL: https://alvaroveliz.github.io/aSimpleTour/
+Version: 1.0.7
+License: MIT

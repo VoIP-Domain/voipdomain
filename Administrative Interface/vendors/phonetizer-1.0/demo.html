@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en_US">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="description" content="phonetizer demo">
+  <meta name="author" content="Ernani José Camargo Azevedo">
+  <title>phonetizer - Demo</title>
+  <style>
+    body
+    {
+      width: 100%;
+      text-align: center;
+    }
+    #text
+    {
+      width: 250px;
+    }
+    #button
+    {
+      width: 100px;
+    }
+    #phonetized
+    {
+      width: 354px;
+    }
+    .examples
+    {
+      border: 1px solid black;
+      width: 354px;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+
+<h1>phonetizer</h1>
+<form id="form">
+<input type="text" name="text" id="text" value=""> <input type="submit" value="phonetize!" id="button"><br />
+<input type="text" name="phonetized" id="phonetized" value="" disabled="disabled"><br />
+</form><br />
+<div class="examples">
+  Any way you enter "Priscilla", will became the same phonetic output.<br /><br />
+  Priscilla = PRISILA<br />
+  Priscila = PRISILA<br />
+  Pricilla = PRISILA<br />
+  Pricila = PRISILA
+</div>
+
+<script type="text/javascript" src="phonetizer.js"></script>
+<script type="text/javascript">
+  document.getElementById ( 'form').onsubmit = function ( e)
+  {
+    e && e.preventDefault ();
+    document.getElementById ( 'phonetized').value = phonetizer ( document.getElementById ( 'text').value);
+  };
+</script>
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+  Ladda
+--=====--
+
+URL: https://github.com/hakimel/Ladda
+Version: 1.0.6
+License: MIT
+Modifications: Added compiled sass ladda.scss file, and copied unminified versions to dist/

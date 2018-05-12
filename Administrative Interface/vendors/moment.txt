@@ -1,0 +1,6 @@
+  Moment.js
+--=========--
+
+URL: https://momentjs.com/
+Version: 2.22.1
+License: MIT

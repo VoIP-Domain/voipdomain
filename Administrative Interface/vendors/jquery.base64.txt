@@ -1,0 +1,7 @@
+  jQuery.base64
+--=============--
+
+URL: https://github.com/yatt/jquery.base64
+Version: 0.0.1
+License: MIT
+Modifications: Added minified version at jquery.base64.js

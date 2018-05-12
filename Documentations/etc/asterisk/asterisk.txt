@@ -1,0 +1,46 @@
+    ___ ___       ___ _______     ______                        __
+   |   Y   .-----|   |   _   |   |   _  \ .-----.--------.---.-|__.-----.
+   |.  |   |  _  |.  |.  1   |   |.  |   \|  _  |        |  _  |  |     |
+   |.  |   |_____|.  |.  ____|   |.  |    |_____|__|__|__|___._|__|__|__|
+   |:  1   |     |:  |:  |       |:  1    /
+    \:.. ./      |::.|::.|       |::.. . /
+     `---'       `---`---'       `------'
+
+You must use asterisk 11, 13 or 15 series (recommended serie 13, because it's
+the current LTS serie). You cannot use PJSIP, you *MUST* use the internal
+Asterisk SIP stack, because PJSIP doesn't support channel variables or anything
+similar, that's crucial to keep the server working if there's no network
+connection to other servers.
+
+At Asterisk server, you must include VoIP Domain scripts and configurations,
+changing the following files:
+
+  extensions.conf
+--===============--
+
+Append the following line into the [general] section:
+#include voipdomain/configs/variables-globals.conf
+
+Append the following line at the end of the file:
+#include voipdomain/scripts/dialplan-*.conf
+
+  queues.conf
+--===========--
+
+Append the following line at the end of the file:
+#include voipdomain/configs/queue-*.conf
+
+  sip.conf
+--========--
+
+Append the following lines at the end of the file:
+#include voipdomain/configs/sip-gateway-*.conf
+#include voipdomain/configs/sip-template-*.conf
+#include voipdomain/configs/sip-group-*.conf
+#include voipdomain/configs/sip-user-*.conf
+
+  voicemail.conf
+--==============--
+
+Append the following line at the end of the file:
+#include voipdomain/configs/voicemail-*.conf

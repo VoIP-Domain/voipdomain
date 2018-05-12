@@ -1,0 +1,7 @@
+  jQuery bindWithDelay
+--====================--
+
+URL: https://github.com/bgrins/bindWithDelay
+Version: GIT Jun/16/2014
+License: MIT
+Modifications: Added minified JavaScript file bindWithDelay.min.js

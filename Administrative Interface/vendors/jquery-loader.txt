@@ -1,0 +1,6 @@
+  jQuery Loader
+--=============--
+
+URL: https://github.com/ernaniaz/jquery.loader
+Version: 1.4.1
+License: MIT

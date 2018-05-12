@@ -1,0 +1,6 @@
+  jQuery File Upload
+--==================--
+
+URL: https://blueimp.github.io/jQuery-File-Upload/
+Version: 9.21.0
+License: MIT

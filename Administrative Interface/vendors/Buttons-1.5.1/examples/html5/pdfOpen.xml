@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<dt-example table-type="html" order="14">
+
+<css lib="datatables buttons"/>
+<js lib="jquery datatables buttons pdfmake vfsfonts buttons-html5">
+<![CDATA[
+
+$(document).ready(function() {
+	$('#example').DataTable( {
+		dom: 'Bfrtip',
+		buttons: [
+			{
+				extend: 'pdfHtml5',
+				download: 'open'
+			}
+		]
+	} );
+} );
+
+]]>
+</js>
+
+<title lib="Buttons">PDF - open in new window</title>
+
+<info><![CDATA[
+
+The `-button pdfHtml5` button can be configured to have the PDF automatically opened in a new window / tab (depending on the browser's configuration settings) instead of automatically downloading the file (which is the default action).
+
+This option is controlled by the `download` option for the button, which can be set to be `-string open` as shown in this example.
+
+]]></info>
+
+</dt-example>
+

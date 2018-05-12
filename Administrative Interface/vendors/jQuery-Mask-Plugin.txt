@@ -1,0 +1,6 @@
+  jQuery-Mask-Plugin
+--==================--
+
+URL: https://igorescobar.github.io/jQuery-Mask-Plugin/
+Version: 1.14.15
+License: MIT

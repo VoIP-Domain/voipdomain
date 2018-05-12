@@ -1,0 +1,6 @@
+  bootstrap slider
+--================--
+
+URL: https://github.com/seiyria/bootstrap-slider
+Version: 10.0.2
+License: MIT

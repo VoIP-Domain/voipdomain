@@ -1,0 +1,6 @@
+  jQuery UI
+--=========--
+
+URL: https://jqueryui.com/
+Version: 1.12.1
+License: jQuery License

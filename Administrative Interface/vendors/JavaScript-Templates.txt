@@ -1,0 +1,6 @@
+  JavaScript-Templates
+--====================--
+
+URL: https://github.com/blueimp/JavaScript-Templates
+Version: 3.11.0
+License: MIT

@@ -1,0 +1,6 @@
+  multiselect
+--===========--
+
+URL: http://crlcu.github.io/multiselect/
+Version: 2.5.1
+License: MIT

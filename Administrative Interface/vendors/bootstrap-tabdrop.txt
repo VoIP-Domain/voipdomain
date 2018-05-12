@@ -1,0 +1,7 @@
+  bootstrap tabdrop
+--=================--
+
+URL: http://www.eyecon.ro/bootstrap-tabdrop/
+Version: 0.1 (initial release)
+License: Apache 2.0
+Modifications: Created minified css and js files version.

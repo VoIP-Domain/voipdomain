@@ -1,0 +1,7 @@
+  spin.js
+--=======--
+
+URL: http://spin.js.org/
+Version: 2.3.2
+License: MIT
+Modifications: Added compiled and minified version of spin.js

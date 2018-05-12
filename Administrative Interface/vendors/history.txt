@@ -1,0 +1,6 @@
+  HTML5 History API
+--=================--
+
+URL: https://github.com/devote/HTML5-History-API
+Version: 4.2.10
+License: MIT

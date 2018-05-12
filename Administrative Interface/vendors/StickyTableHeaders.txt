@@ -1,0 +1,6 @@
+  StickyTableHeaders
+--==================--
+
+URL: https://github.com/jmosbech/StickyTableHeaders
+Version: 0.1.24
+License: MIT

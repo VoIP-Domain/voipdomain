@@ -1,0 +1,6 @@
+  datatables.mark
+--===============--
+
+URL: https://github.com/julmot/datatables.mark.js/
+Version: 2.0.1
+License: MIT

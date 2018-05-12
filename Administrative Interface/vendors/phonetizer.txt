@@ -1,0 +1,6 @@
+  phonetizer
+--==========--
+
+URL: https://github.com/ernaniaz/phonetizer
+Version: 1.0
+License: GPLv3

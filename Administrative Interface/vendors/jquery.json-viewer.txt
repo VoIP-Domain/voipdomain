@@ -1,0 +1,7 @@
+  jQuery json-viewer
+--==================--
+
+URL: https://github.com/abodelot/jquery.json-viewer
+Version: 1.1.0
+License: MIT
+Modifications: Added minified version of css and js files.

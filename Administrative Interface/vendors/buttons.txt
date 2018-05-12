@@ -1,0 +1,7 @@
+  Buttons
+--=======--
+
+URL: https://datatables.net/extensions/buttons/
+Version: 1.5.1
+License: MIT
+Modifications: Added compiled css (from scss) at css/. Added minified js and css files.

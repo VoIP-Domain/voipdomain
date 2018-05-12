@@ -1,0 +1,6 @@
+  mark.js
+--=======--
+
+URL: https://markjs.io/
+Version: 8.11.1
+License: MIT
