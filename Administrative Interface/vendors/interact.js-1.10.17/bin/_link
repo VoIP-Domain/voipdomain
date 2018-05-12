@@ -1,0 +1,29 @@
+#!/bin/bash
+ROOT=$(dirname $(dirname $(readlink -f $0)))
+if [ -z "$ROOT" ]
+then
+    ROOT=$(dirname $(dirname $0))
+fi
+
+modules_scope_dir=node_modules/@interactjs
+modules_bin_dir=node_modules/.bin
+
+mkdir -p $modules_scope_dir $modules_bin_dir
+
+rm $modules_scope_dir/* 2> /dev/null
+
+# link _dev package
+ln -sf $ROOT $modules_scope_dir/_dev
+
+# link all scoped packages from CWD
+for package in $(cd packages/@interactjs && ls -d *); do
+  ln -sf ../../packages/@interactjs/$package $modules_scope_dir
+done
+
+# link all packages from this repo
+for package in $(cd $ROOT/packages/@interactjs && ls -d *); do
+  ln -sf $ROOT/packages/@interactjs/$package $modules_scope_dir
+done
+
+# link all bins from this repo and from CWD
+cd node_modules/.bin && ln -sf $ROOT/bin/* ../../bin/* .

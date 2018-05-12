@@ -1,0 +1,256 @@
+  Yealink Network Technology Co., Ltd.
+--====================================--
+
+Website: https://yealink.com/
+Address:
+  309, 3th Floor, No. 16, Yun Ding North Road, Huli District
+  Xiamen City, Fijian
+  P. R. China
+Products: SIP endpoints
+Default user/pass: admin/admin
+
+  Yealink SIP-T19P
+--================--
+
+Type: IP Desk phone
+Support URL: 
+Product URL: https://www.yealink.com/en/product-detail/ip-phone-t19p
+Launch date:
+EOL date: September 30, 2015 (replaced by SIP-T19(P) E2)
+
+  Yealink SIP-T19(P) (E2)
+--=======================--
+
+Type: IP Desk phone
+Support URL: https://support.yealink.com/en/portal/docList?archiveType=document&productCode=b4068c5d25f72c76
+Product URL: https://www.yealink.com/en/product-detail/ip-phone-t19pe2
+Launch date: 
+EOL date: September 30, 2021 (replaced by T30P)
+Recommeded firmware: 53.84.0.160
+POE support: Yes
+BLF support: No
+Extension support: No
+Display type: 132x64 pixel B/W graphical LCD
+Backlight: No
+Wall mountable: Yes
+Ethernet ports:
+  - 2 10/100M Integrated PoE (On "P" models)
+SIP accounts: 1
+IPv6 support: Yes
+SRTP support: Yes
+TLS/SSL support: Yes
+VLAN support: Yes
+QoS support: Yes
+Monophone support: Yes (included in product)
+Headset support: Yes
+Hands-free speakerphone: Yes (with AEC)
+DHCP option 66 auto provisioning support: Yes
+Supported CODEC's:
+  - AMR-WB (optional)
+  - Opus
+  - G.722
+  - G.711 (A/µ)
+  - G.729
+  - G.729A
+  - G.726
+  - iLBC
+DTMF:
+  - In-band
+  - Out-of-band (RFC 2833)
+  - SIP INFO
+Known bugs:
+  - None
+Product notes:
+  - None
+Developer notes:
+  - Good provisioning, very versatile and resistent equipment. Despite beign reached EoL, it's a very reliable and recommended equipment.
+
+  Yealink T20P
+--============--
+
+Description: 
+Type: IP Desk phone
+Support URL:
+Product URL:
+Launch date:
+EOL date: 
+Recommeded firmware: 
+POE support: Yes
+BLF support: No
+Extension support: No
+Display type: 2 text line B/W
+Known bugs:
+  - None
+Product notes:
+  - None
+
+  Yealink T21P
+--============--
+
+Description:
+Type: IP Desk phone
+Support URL:
+Product URL:
+Launch date:
+EOL date:
+Recommeded firmware:
+POE support: Yes
+BLF support: No
+Extension support: No
+Display type: Graphical B/W
+Known bugs:
+  - None
+Product notes:
+  - None
+
+  Yealink T21P (E2)
+--=================--
+
+Description:
+Type: IP Desk phone
+Support URL:
+Product URL:
+Launch date:
+EOL date: 
+Recommeded firmware: 
+POE support: Yes
+BLF support: No
+Extension support: No
+Display type: Graphical B/W
+Known bugs:
+  - None
+Product notes:
+  - None
+
+  Yealink T22P
+--============--
+
+Description: 
+Type: IP Desk phone
+Support URL:
+Product URL:
+Launch date: 
+EOL date: December 31, 2015
+Recommeded firmware: 7.73.0.50
+POE support: Yes
+BLF support: No
+Extension support: No
+Display type: Graphical B/W
+Known bugs:
+  - Second dialtone uses same dialtone as primary
+Product notes:
+  - None
+
+  Yealink T23G
+--============--
+
+Description:
+Type: IP Desk phone
+Support URL:
+Product URL:
+Launch date:
+EOL date: 
+Recommeded firmware: 
+POE support: Yes
+BLF support: No
+Extension support: No
+Display type: Graphical B/W
+Known bugs:
+  - None
+Product notes:
+  - None
+
+  Yealink T26P
+--============--
+
+Description:
+Type: IP Desk phone
+Support URL:
+Product URL:
+Launch date:
+EOL date: 
+Recommeded firmware: 
+POE support: Yes
+BLF support: No
+Extension support: No
+Display type: Graphical B/W
+Known bugs:
+  - None
+Product notes:
+  - None
+
+  Yealink T29G
+--============--
+
+Description:
+Type: IP Desk phone
+Support URL:
+Product URL:
+Launch date:
+EOL date: 
+Recommeded firmware: 
+POE support: Yes
+BLF support: No
+Extension support: No
+Display type: Graphical B/W
+Known bugs:
+  - None
+Product notes:
+  - None
+
+  Yealink T30P
+--============--
+
+Description:
+Type: IP Desk phone
+Support URL:
+Product URL:
+Launch date:
+EOL date: 
+Recommeded firmware: 
+POE support: Yes
+BLF support: No
+Extension support: No
+Display type: Graphical B/W
+Known bugs:
+  - None
+Product notes:
+  - None
+
+  Yealink T40P
+--============--
+
+Description:
+Type: IP Desk phone
+Support URL:
+Product URL:
+Launch date:
+EOL date: 
+Recommeded firmware: 
+POE support: Yes
+BLF support: No
+Extension support: No
+Display type: Graphical B/W
+Known bugs:
+  - None
+Product notes:
+  - None
+
+  Yealink T58V
+--============--
+
+Description:
+Type: IP Desk phone
+Support URL:
+Product URL:
+Launch date:
+EOL date: 
+Recommeded firmware: 
+POE support: Yes
+BLF support: No
+Extension support: No
+Display type: Graphical B/W
+Known bugs:
+  - None
+Product notes:
+  - None

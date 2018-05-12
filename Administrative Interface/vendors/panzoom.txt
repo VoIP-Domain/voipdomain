@@ -1,0 +1,7 @@
+  panzoom
+--=======--
+
+URL: https://github.com/timmywil/panzoom
+Version: 3.2.2
+License: MIT
+Modifications: Patched css transform with panzoom-transform.diff.

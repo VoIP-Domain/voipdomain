@@ -1,0 +1,37 @@
+{
+  "name": "maphilight",
+  "version": "1.4.1",
+  "title": "maphilight",
+  "author": {
+    "name": "David Lynch",
+    "email": "kemayo@gmail.com",
+    "url": "http://davidlynch.org"
+  },
+  "repository": "https://github.com/kemayo/maphilight.git",
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "MIT-LICENSE.txt"
+    }
+  ],
+  "dependencies": {
+    "jquery": "^3.0.0"
+  },
+  "description": "a plugin that adds visual hilights to image maps",
+  "keywords": [
+    "map",
+    "imagemap",
+    "hilight",
+    "highlight",
+    "jquery-plugin",
+    "ecosystem:jquery"
+  ],
+  "homepage": "https://github.com/kemayo/maphilight",
+  "main": "jquery.maphilight.min.js",
+  "devDependencies": {
+    "grunt": "^1.0.4",
+    "grunt-contrib-jshint": "^2.1.0",
+    "grunt-contrib-uglify": "^4.0.1",
+    "grunt-contrib-watch": "^1.1.0"
+  }
+}

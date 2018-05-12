@@ -1,0 +1,6 @@
+  underscore
+--==========--
+
+URL: https://underscorejs.org/
+Version: 1.13.6
+License: MIT

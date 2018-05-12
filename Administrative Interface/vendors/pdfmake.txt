@@ -1,0 +1,7 @@
+  pdfmake
+--=======--
+
+URL: https://github.com/bpampuch/pdfmake
+Version: 0.2.7
+License: MIT
+Modifications: Add minified version of build/vfs_fonts.js

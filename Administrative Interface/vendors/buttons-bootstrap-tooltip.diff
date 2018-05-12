@@ -1,0 +1,12 @@
+diff -ruN Buttons-2.4.1-orig/js/dataTables.buttons.js Buttons-2.4.1/js/dataTables.buttons.js
+--- Buttons-2.4.1-orig/js/dataTables.buttons.js	2023-07-15 12:26:04.497014444 -0300
++++ Buttons-2.4.1/js/dataTables.buttons.js	2023-07-15 12:25:35.764048988 -0300
+@@ -841,6 +841,8 @@
+ 
+ 			if (config.titleAttr) {
+ 				button.attr('title', text(config.titleAttr));
++				button.attr( 'data-toggle', 'tooltip');
++				button.attr( 'data-placement', 'top');
+ 			}
+ 
+ 			if (config.attr) {

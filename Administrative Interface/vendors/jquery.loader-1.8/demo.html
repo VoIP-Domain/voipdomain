@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en_US">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="description" content="jQuery Loader Plugin demo">
+  <meta name="author" content="Ernani José Camargo Azevedo">
+  <title>jQuery Loader Plugin - Demo</title>
+  <style>
+    .loader
+    {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      color: #000000;
+    }
+    .percentage
+    {
+      width: 0%;
+      height: 3px;
+      background-color: #0769ad;
+    }
+    .debug
+    {
+      border: solid 1px black;
+      margin-left: 10%;
+      width: 80%;
+      min-width: 80%;
+      max-width: 80%;
+      height: 30em;
+      min-height: 10em;
+      max-height: 100em;
+      overflow-x: scroll;
+      resize: both;
+      margin-top: 20px;
+      margin-bottom: 17px;
+    }
+    .debug h1
+    {
+      text-align: center;
+    }
+    .center
+    {
+      width: 100%;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="loader"><div class="percentage"></div></div>
+<div class="debug"><h1>Debug</h1></div>
+<div class="center"><button class="reload">Reload page</button></div>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script type="text/javascript" src="jquery.loader.js"></script>
+<script type="text/javascript">
+$(document).ready ( function ()
+{
+  $('.reload').on ( 'click', function ()
+  {
+    location.reload ();
+  }).attr ( 'disabled', 'disabled');
+  $.loader (
+  {
+    'js': [
+            {
+              name: 'templates',
+              src: 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-wysiwyg/0.3.3/templates.min.js',
+              dep: []
+            },
+            {
+              name: 'handlebars',
+              src: 'https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.10/handlebars.min.js',
+              dep: [
+                     'templates'
+                   ]
+            },
+            {
+              name: 'bootstrap-wysiwyg',
+              src: 'https://bootstrap-wysiwyg.github.io/bootstrap3-wysiwyg/dist/bootstrap3-wysihtml5.min.js',
+              dep: [
+                     'bootstrap',
+                     'toolbar',
+                     'handlebars'
+                   ]
+            },
+            {
+              name: 'toolbar',
+              src: 'https://bootstrap-wysiwyg.github.io/bootstrap3-wysiwyg/components/wysihtml5x/dist/wysihtml5x-toolbar.min.js',
+              dep: []
+            },
+            {
+              name: 'bootstrap',
+              src: 'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js',
+              dep: []
+            },
+            {
+              name: 'jquery.hotkeys',
+              src: 'https://rawgit.com/jeresig/jquery.hotkeys/master/jquery.hotkeys.js',
+              dep: []
+            },
+            {
+              name: 'bootstrap-datetimepicker',
+              src: 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js',
+              dep: [
+                     'bootstrap',
+                     'moment'
+                   ]
+            },
+            {
+              name: 'moment',
+              src: 'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js',
+              dep: []
+            },
+            {
+              name: 'moment-locale',
+              src: 'https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/locale/en-gb.js',
+              dep: [
+                     'moment'
+                   ]
+            }
+          ],
+    'css': [
+             {
+               name: 'css-bootstrap',
+               src: 'https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css',
+               dep: []
+             },
+             {
+               name: 'css-font-awesome',
+               src: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css',
+               dep: []
+             },
+             {
+               name: 'css-bootstrap-wysiwyg',
+               src: 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-wysiwyg/0.3.3/bootstrap3-wysihtml5.min.css',
+               dep: [
+                      'css-bootstrap',
+                      'css-font-awesome'
+                    ]
+             },
+             {
+               name: 'css-bootstrap-datetimepicker',
+               src: 'https://bootstrap-wysiwyg.github.io/bootstrap3-wysiwyg/dist/bootstrap3-wysihtml5.min.css',
+               dep: [
+                      'css-bootstrap'
+                    ]
+             }
+           ],
+    'cache': false,
+    'onrefresh': function ( loaded, total, percentage)
+                 {
+                   $('.percentage').animate ( { width: percentage + '%'}, 50);
+                   $('<div>' + loaded + '/' + total + ' loaded with percentage updated to ' + percentage + '%!</div>').appendTo ( '.debug');
+                 },
+    'onfinish': function ( total)
+                {
+                  $('<div><strong>Finished!</strong></div>').appendTo ( '.debug');
+                  $('.reload').removeAttr ( 'disabled');
+                }
+  });
+});
+</script>
+
+</body>
+</html>

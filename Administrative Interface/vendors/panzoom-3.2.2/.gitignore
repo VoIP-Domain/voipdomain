@@ -1,0 +1,4 @@
+node_modules
+dist/.sizecache.json
+bower_components
+*.log

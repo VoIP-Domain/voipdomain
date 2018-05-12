@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<gs_provision version="1">
+  <mac>{{{mac}}}</mac>
+  <config version="1">
+    <P271>1</P271>
+    <P270>{{{displayname}}}</P270>
+    <P47>{{{server1addr}}}:{{{server1port}}}</P47>
+{{{codecconfig}}}    <P35>{{{username}}}</P35>
+    <P36>{{{username}}}</P36>
+    <P34>{{{password}}}</P34>
+    <P3>{{{displayname}}}</P3>
+    <P290>{{{dialplan}}}</P290>
+    <P129>1</P129>
+    <P194>1</P194>
+    <P196>{{{webuserpassword}}}</P196>
+    <P2>{{{webadminpassword}}}</P2>
+    <P238>0</P238>
+    <P1414>0</P1414>
+    <P8375>0</P8375>
+    <P212>0</P212>
+    <P237>{{{tftpserver}}}</P237>
+    <P6767>0</P6767>
+    <P192>{{{tftpserver}}}</P192>
+    <P232>/Grandstream/GXP16XX/</P232>
+    <P1362>{{{language}}}</P1362>
+{{{phonetones}}}    <P1357>1</P1357>
+    <P1382>0</P1382>
+    <P8385>{{{emergencynumbers}}}</P8385>
+    <P30>{{{ntpserver1}}}</P30>
+    <P144>0</P144>
+    <P64>{{{timezone}}}</P64>
+    <P143>0</P143>
+    <P102>{{{dateformat}}}</P102>
+    <P122>{{{timeformat}}}</P122>
+    <P340>2</P340>
+    <P1349>1</P1349>
+    <P1343>1</P1343>
+    <P341>{{{tftpserver}}}/cfg{{{mac}}}-screen.xml</P341>
+  </config>
+</gs_provision>

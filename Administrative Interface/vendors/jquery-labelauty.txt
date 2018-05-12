@@ -1,0 +1,7 @@
+  jquery-labelauty
+--================--
+
+URL: https://github.com/fntneves/jquery-labelauty
+Version: 1.1.4
+License: MIT
+Modified: Added minified version of CSS and JavaScript files.

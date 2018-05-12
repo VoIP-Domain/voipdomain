@@ -1,0 +1,6 @@
+  jquery-mousewheel
+--=================--
+
+URL: https://github.com/jquery/jquery-mousewheel
+Version: 3.1.13
+License: OpenJS BSD style

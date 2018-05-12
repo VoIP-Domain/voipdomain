@@ -1,0 +1,6 @@
+  JSZip
+--=====--
+
+URL: https://github.com/Stuk/jszip
+Version: 3.10.1
+License: MIT or GPLv3

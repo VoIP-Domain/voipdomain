@@ -1,0 +1,25 @@
+{
+  "name": "@interactjs/auto-scroll",
+  "version": "1.10.17",
+  "main": "index",
+  "module": "index",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/taye/interact.js.git",
+    "directory": "packages/@interactjs/auto-scroll"
+  },
+  "peerDependencies": {
+    "@interactjs/utils": "1.10.17"
+  },
+  "optionalDependencies": {
+    "@interactjs/interact": "1.10.17"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": [
+    "**/index.js",
+    "**/index.prod.js"
+  ],
+  "license": "MIT"
+}

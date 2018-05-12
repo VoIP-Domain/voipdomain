@@ -1,0 +1,7 @@
+  sysend
+--======--
+
+URL: https://github.com/jcubic/sysend.js
+Version: 1.16.3
+License: MIT
+Modifications: Added minified js version file.

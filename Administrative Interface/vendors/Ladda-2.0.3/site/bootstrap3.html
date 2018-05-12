@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Ladda: Bootstrap compatibility test</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+			integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">
+		<link rel="stylesheet" href="demo.css">
+		<link rel="stylesheet" href="dist/ladda-themeless.min.css">
+	</head>
+	<body>
+		<article class="examples">
+			<div class="intro">
+				<h1>Ladda Bootstrap 3 test</h1>
+			</div>
+		
+			<section class="button-demo">
+				<h3>expand-left</h3>
+				<button class="btn btn-primary ladda-button" data-style="expand-left">Submit</button>
+			</section>
+			
+			<section class="button-demo">
+				<h3>expand-right</h3>
+				<button class="btn btn-primary ladda-button" data-style="expand-right">Submit</button>
+			</section>
+			
+			<section class="button-demo">
+				<h3>expand-up</h3>
+				<button class="btn btn-primary ladda-button" data-style="expand-up">Submit</button>
+			</section>
+			
+			<section class="button-demo">
+				<h3>expand-down</h3>
+				<button class="btn btn-primary ladda-button" data-style="expand-down">Submit</button>
+			</section>
+			
+			
+			<section class="button-demo">
+				<h3>zoom-in</h3>
+				<button class="btn btn-info ladda-button" data-style="zoom-in">Submit</button>
+			</section>
+			
+			<section class="button-demo">
+				<h3>zoom-out</h3>
+				<button class="btn btn-info ladda-button" data-style="zoom-out">Submit</button>
+			</section>
+			
+			
+			<section class="button-demo">
+				<h3>slide-left</h3>
+				<button class="btn btn-warning ladda-button" data-style="slide-left">Submit</button>
+			</section>
+			
+			<section class="button-demo">
+				<h3>slide-right</h3>
+				<button class="btn btn-warning ladda-button" data-style="slide-right">Submit</button>
+			</section>
+			
+			<section class="button-demo">
+				<h3>slide-up</h3>
+				<button class="btn btn-warning ladda-button" data-style="slide-up">Submit</button>
+			</section>
+			
+			<section class="button-demo">
+				<h3>slide-down</h3>
+				<button class="btn btn-warning ladda-button" data-style="slide-down">Submit</button>
+			</section>
+		
+			<h3 id="progress">Built-in progress bar</h3>
+		
+			<section class="progress-demo">
+				<h3>expand-right</h3>
+				<button class="btn btn-success ladda-button" data-style="expand-right">Submit</button>
+			</section>
+		
+			<section class="progress-demo">
+				<h3>contract</h3>
+				<button class="btn btn-success ladda-button" data-style="contract">Submit</button>
+			</section>
+		
+			<h3 id="sizes">Sizes</h3>
+		
+			<section class="progress-demo">
+				<h3>Small</h3>
+				<button class="btn btn-danger btn-sm ladda-button" data-style="expand-right">Submit</button>
+			</section>
+		
+			<section class="progress-demo">
+				<h3>Large</h3>
+				<button class="btn btn-danger btn-lg ladda-button" data-style="expand-right">Submit</button>
+			</section>
+		
+			<h3>Buttons in forms containing required inputs</h3>
+		
+			<section>
+				<form action="https://example.com">
+					<div class="form-group">
+						<input class="form-control" type="text" name="aText" placeholder="Please fill me" required />
+					</div>
+					<div class="form-group">
+						<button id="aFormSubmitButton" type="submit" class="btn btn-primary ladda-button"
+							data-style="expand-left">Submit</button>
+					</div>
+				</form>
+			</section>
+		</article>
+
+		<script src="dist/index-bundle.js"></script>
+	</body>
+</html>

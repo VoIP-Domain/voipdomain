@@ -1,0 +1,4 @@
+  Bootswatch Bootstrap Themes
+--===========================--
+
+These bootstrap themes are from Bootswatch website (https://bootswatch.com/). V3 stands for bootstrap 3 series, and v4 for newer 4 release. We need to work hard to implement each theme, because of plugins compatibility. This could be a great framework theme resource, and has a very nice themes. Testes with lumen and paper themes, two beautiful themes.

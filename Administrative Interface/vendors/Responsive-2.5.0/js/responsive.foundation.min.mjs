@@ -1,0 +1,4 @@
+/*! Foundation integration for DataTables' Responsive
+ * © SpryMedia Ltd - datatables.net/license
+ */
+import jQuery from"jquery";import DataTable from"datatables.net-zf";import Responsive from"datatables.net-responsive";let $=jQuery;var _display=DataTable.Responsive.display,_original=_display.modal;_display.modal=function(r){return function(e,a,l,o){var t;return $.fn.foundation?(a||(t=$('<div class="reveal-overlay" style="display:block"/>'),$('<div class="reveal reveal-modal" style="display:block; top: 150px;" data-reveal/>').append('<button class="close-button" aria-label="Close">&#215;</button>').append(r&&r.header?"<h4>"+r.header(e)+"</h4>":null).append(l()).appendTo(t),t.appendTo("body"),$("button.close-button").on("click",function(){$(".reveal-overlay").remove(),o()}),$(".reveal-overlay").on("click",function(){$(".reveal-overlay").remove(),o()})),!0):_original(e,a,l,o)}};export default DataTable;

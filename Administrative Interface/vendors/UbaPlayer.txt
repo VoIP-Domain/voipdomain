@@ -1,0 +1,7 @@
+  UbaPlayer
+--=========--
+
+URL: http://brianhadaway.github.io/UbaPlayer/
+Version: 2.0.4
+License: MIT
+Modified: dist/css/styles.css to remove a lot of unused styles, conflict ones and to transform player into a single button.

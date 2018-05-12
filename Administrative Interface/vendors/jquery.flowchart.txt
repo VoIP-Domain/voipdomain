@@ -1,0 +1,9 @@
+  jquery.flowchart
+--================--
+
+URL: https://github.com/sdrdis/jquery.flowchart
+Version: 1.2
+License: MIT
+Modifications: Made some implementations (jquery.flowchart-implementations.diff).
+               Implemented fix when using panzoom feature, that affect jQuery-UI drag feature (jquery.flowchart-dragzoom.diff).
+               Fixed link render path with zoom (jquery.flowchart-zoomfix.diff).

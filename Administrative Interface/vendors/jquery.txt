@@ -1,0 +1,6 @@
+  jQuery
+--======--
+
+URL: http://jquery.com/
+Version: 3.7.0
+License: MIT

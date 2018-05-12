@@ -1,0 +1,103 @@
+  Khomp
+--=====--
+
+Website: https://khomp.com/
+Products: Media gateway and SIP endpoints
+Default user/pass: root/root
+Models:
+  IPS 200 - IP Desk phone with HD audio
+            This equipment is a generic (need to discover the main company), the same as:
+            - Alcatel-Lucent 8001 DeskPhone
+            - Escene ES290 IP Innovative
+
+  Yealink
+--=======--
+
+Website: https://yealink.com/
+Products: SIP endpoints
+Default user/pass: admin/admin
+Models:
+  T18 - IP Desk phone
+  T18P - IP Desk phone
+  T19P - IP Desk phone with HD audio
+  T19P (E2) - IP Desk phone with HD audio
+  T20P - IP Desk phone with HD audio
+  T21P (E2) - IP Desk phone with HD audio
+  T22P - IP Desk phone with HD audio
+  T29G - IP Desk phone with HD audio
+  T30P - IP Desk phone with HD audio
+  T40P - IP Desk phone with HD audio
+
+  Htek (Hanlong Technology)
+--=========================--
+
+Website: https://www.htek.com/
+Products: SIP endpoints
+Default user/pass: admin/admin
+Models:
+  UCV Pro Series Video Phones:
+  UCV50 Pro - Cordless Smart Video IP Phone with Built-in Camera
+  UCV52 Pro - Cordless Smart Video IP Phone with Built-in Camera
+  UCV53 Pro - Cordless Smart Video IP Phone with Built-in Camera
+  UCV10 Pro - Cordless Smart Video IP Phone with Built-in Camera
+
+  UCV Series Video Phones:
+  UCV50 - Enterprise Video Smart IP Phone with Built-in Camera
+  UCV52 - Enterprise Video Smart IP Phone with Built-in Camera
+  UCV53 - Enterprise Video Smart IP Phone with Built-in Camera
+  UCV10 - Enterprise Video Smart IP Phone with Built-in Camera
+  UCV20 - Enterprise Video Smart IP Phone with Optional Camera
+  UCV22 - Enterprise Video Smart IP Phone with Built-in Camera
+
+  UC900U Series IP Phones:
+  UC926U - Ultra-executive Business Phone
+  UC926S - OST-executive Business Phone
+  UC924U - OST-executive Business Phone
+  UC924W - Ultra-executive Business Phone
+  UC923U - OST-classic Business Phone
+  UC921U - Giga-OST Standard Business Phone
+
+  UC900 Series IP Phones:
+  UC926E - BT&Wi-Fi Executive Business Phone
+  UC926 - Giga-executive Business Phone
+  UC924E - BT&Wi-Fi Executive Business Phone
+  UC924 - Giga-executive Business Phone
+  UC923 - Giga-classic Business Phone
+  UC921E - BT&Wi-Fi Standard Business Phone
+  UC921G - Giga-standard Business Phone
+  UC921P - Eco-standard Business Phone
+  UC902SP - Eco-entry Level Phone
+  UC902P - Eco-entry Level Phone
+  UC912E - BT&Wi-Fi Standard Business Phone
+  UC912G - Giga-entry Level Phone
+  UC912P - Eco-entry Level Phone
+  UC903 - Eco-graphic Standard Business Phone
+  UC902E - Wi-Fi Entry Level Phone
+  UC902G - Giga-entry Level Phone
+
+  Acessories:
+  WFBT60 - Bluetooth 4.2 & Dual-band Wi-Fi Dongle
+  UC46 - Expansion Module
+  EHS30 - Wireless Headset Adapter
+
+  EoL Products:
+  UCV22 - 
+  UC902P - 
+  UC903 - 
+  UC923 - 
+  UC924 - 
+  UC924E - 
+  U926 - 
+  U926E - 
+  UC862 - 
+  UC860 - 
+  UC842 - 
+  UC840P - 
+  UC806P - 
+  UC804P - 
+  UC803P - 
+  UC802P - 
+
+Notes:
+  - The firmware upgrade process is a really mess. You need to have a lot of patience with commands without immediatelly return, that look's like it's not working or not started. When the upgrade starts, it takes a very long time (took more than 30 minutes to me) with a lot of reboots. Also, take attention that the hardware MAC address was changed when upgrading from 2.0.X to 2.42.X firmware!
+  - Dialplan support second dial tone (same dialtone), but it's buggy to implement, because it removes the code that preceed second dial tone and keep looking for the rest of number. If we implement the dialplan without the outline prefix, could conflict with extensions.

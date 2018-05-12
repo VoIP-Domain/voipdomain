@@ -1,0 +1,6 @@
+  interact.js
+--===========--
+
+URL: https://interactjs.io/
+Version: 1.10.17
+License: MIT

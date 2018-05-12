@@ -1,0 +1,9 @@
+  timezonepicker
+--==============--
+
+Version: 1.2
+URL: https://github.com/quicksketch/timezonepicker
+License: MIT
+Modifications: Added living earth image map to images/living-600.jpg
+               Added changeHandler option (timezonepicker-changeHandler.patch).
+               Added readOnly option (timezonepicker-readOnly.patch).

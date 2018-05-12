@@ -1,0 +1,7 @@
+  js-sequence-diagrams
+--====================--
+
+URL: https://bramp.github.io/js-sequence-diagrams/
+Version: 2.0.1
+License: BSD
+Modifications: Added string replace for "|" to ":" into player name. Patch file js-sequence-diagrams-replace-string.diff

@@ -1,0 +1,7 @@
+  Toast UI - Snippet
+--==================--
+
+URL: https://github.com/nhnent/tui.code-snippet
+Version: 2.3.3
+License: MIT
+Modifications: Added compiled script to dist/ directory.

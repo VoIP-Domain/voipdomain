@@ -1,0 +1,24 @@
+diff -ruN jQuery-QueryBuilder-2.7.0-orig/dist/js/query-builder.js jQuery-QueryBuilder-2.7.0/dist/js/query-builder.js
+--- jQuery-QueryBuilder-2.7.0-orig/dist/js/query-builder.js	2023-07-02 07:35:03.000000000 -0300
++++ jQuery-QueryBuilder-2.7.0/dist/js/query-builder.js	2023-07-17 14:32:48.389489127 -0300
+@@ -4024,7 +4024,7 @@
+  * @throws MissingLibraryError
+  */
+ QueryBuilder.define('bt-tooltip-errors', function(options) {
+-    if (!$.fn.tooltip || !$.fn.tooltip.Constructor || !$.fn.tooltip.Constructor.prototype.fixTitle) {
++    if (!$.fn.tooltip || !$.fn.tooltip.Constructor.prototype.fixTitle) {
+         Utils.error('MissingLibrary', 'Bootstrap Tooltip is required to use "bt-tooltip-errors" plugin. Get it here: http://getbootstrap.com');
+     }
+ 
+diff -ruN jQuery-QueryBuilder-2.7.0-orig/dist/js/query-builder.standalone.js jQuery-QueryBuilder-2.7.0/dist/js/query-builder.standalone.js
+--- jQuery-QueryBuilder-2.7.0-orig/dist/js/query-builder.standalone.js	2023-07-02 07:35:03.000000000 -0300
++++ jQuery-QueryBuilder-2.7.0/dist/js/query-builder.standalone.js	2023-07-17 14:32:58.249474844 -0300
+@@ -4158,7 +4158,7 @@
+  * @throws MissingLibraryError
+  */
+ QueryBuilder.define('bt-tooltip-errors', function(options) {
+-    if (!$.fn.tooltip || !$.fn.tooltip.Constructor || !$.fn.tooltip.Constructor.prototype.fixTitle) {
++    if (!$.fn.tooltip || !$.fn.tooltip.Constructor.prototype.fixTitle) {
+         Utils.error('MissingLibrary', 'Bootstrap Tooltip is required to use "bt-tooltip-errors" plugin. Get it here: http://getbootstrap.com');
+     }
+ 

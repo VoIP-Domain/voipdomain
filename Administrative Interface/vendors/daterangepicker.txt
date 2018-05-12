@@ -1,0 +1,7 @@
+  Bootstrap Date Range Picker
+--===========================--
+
+URL: http://www.daterangepicker.com/
+Version: 3.1
+License: MIT
+Modifications: Added minified css and js files.

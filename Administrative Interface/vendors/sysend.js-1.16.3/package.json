@@ -1,0 +1,33 @@
+{
+  "name": "sysend",
+  "version": "1.16.3",
+  "description": "Communication and Synchronization between browser tabs/windows. Works cross-domain.",
+  "main": "sysend.js",
+  "typings": "sysend.d.ts",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jcubic/sysend.js.git"
+  },
+  "keywords": [
+    "tabs",
+    "rpc",
+    "windows",
+    "messages",
+    "cross-domain",
+    "cors",
+    "domain",
+    "communication",
+    "events",
+    "callback",
+    "notifications",
+    "browser"
+  ],
+  "author": "Jakub T. Jankiewicz <jcubic@onet.pl> (https://jcubic.pl/me/)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jcubic/sysend.js/issues"
+  },
+  "homepage": "https://github.com/jcubic/sysend.js#readme"
+}

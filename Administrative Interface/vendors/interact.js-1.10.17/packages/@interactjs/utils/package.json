@@ -1,0 +1,15 @@
+{
+  "name": "@interactjs/utils",
+  "version": "1.10.17",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/taye/interact.js.git",
+    "directory": "packages/@interactjs/utils"
+  },
+  "peerDependencies": {},
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false,
+  "license": "MIT"
+}

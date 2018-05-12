@@ -1,0 +1,6 @@
+  web-audio-recorder-js
+--=====================--
+
+URL: https://github.com/higuma/web-audio-recorder-js
+Version: 0.1.1
+License: MIT

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt_BR" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="description" content="Sistema de administração de centrais VoIP.">
+  <meta name="author" content="Ernani José Camargo Azevedo">
+  <link rel="icon" type="" href="phone-api.png">
+  <title>VoIP Domain - REST API Test</title>
+  <link type="text/css" rel="stylesheet" href="/vendors/bootstrap/css/bootstrap.css" />
+  <link type="text/css" rel="stylesheet" href="/vendors/jquery-json-viewer/json-viewer/jquery.json-viewer.css" />
+  <style type="text/css">
+    form
+    {
+      display: block;
+      width: 100%;
+      padding-left: 15px;
+      padding-right: 15px;
+    }
+    .results
+    {
+      display: flex;
+    }
+    span.result
+    {
+      height: 8em;
+      resize: vertical;
+      overflow: auto;
+    }
+    div.result
+    {
+      width: 100%;
+    }
+    .result:first-of-type
+    {
+      padding-right: 15px;
+    }
+    .result:last-of-type
+    {
+      padding-left: 15px;
+    }
+    h2
+    {
+      text-align: center;
+    }
+  </style>
+  <script type="text/javascript" src="/vendors/jquery/dist/jquery.js"></script>
+  <script type="text/javascript" src="/vendors/jquery-json-viewer/json-viewer/jquery.json-viewer.js"></script>
+  <script type="text/javascript" src="/vendors/bootstrap/js/bootstrap.js"></script>
+  <script type="text/javascript">
+    function VoIP_REST ( path, route, data, token = '')
+    {
+      if ( path.substring ( 0, 1) != '/')
+      {
+        path = '/' + path;
+      }
+      $.ajax (
+      {
+        type: 'POST',
+        url: '/api' + path + ( token != '' ? '?token=' + token : ''),
+        data: data,
+        headers:
+        {
+          'X-HTTP-Method-Override': route,
+          'Accept': 'application/json'
+        },
+        contentType: 'application/json',
+        dataType: 'json',
+        beforeSend: function ( jqXHR, settings)
+                    {
+                      $('#sentheaders').html ( '<strong>POST /api' + path + ( token != '' ? '?token=' + token : '') + ' HTTP/1.1<br />');
+                      for ( var key in settings.headers)
+                      {
+                        $('#sentheaders').html ( $('#sentheaders').html () + '<strong>' + key + '</strong>: ' + settings.headers[key] + '<br />');
+                      }
+                    },
+        success: function ( data, textStatus, jqXHR)
+                 {
+                   $('#receivedheaders').html ( '<strong><font color="' + ( jqXHR.statusCode ().status == '200' ? 'green' : 'red') + '">' + jqXHR.statusCode ().status + ' ' + jqXHR.statusCode ().statusText + '</font></strong>' + jqXHR.getAllResponseHeaders ().replace ( /^.*: /gm, function ( text) { return '<br /><strong>' + text.substring ( 0, text.length - 2) + '</strong>: '; }));
+                   $('#receivedvars').jsonViewer ( data, { collapsed: true, withQuotes: true});
+                 },
+        error: function ( jqXHR, textStatus, errorThrown)
+               {
+                 $('#receivedheaders').html ( '<strong><font color="' + ( jqXHR.statusCode ().status == '200' ? 'green' : 'red') + '">' + jqXHR.statusCode ().status + ' ' + jqXHR.statusCode ().statusText + '</font></strong>' + jqXHR.getAllResponseHeaders ().replace ( /^.*: /gm, function ( text) { return '<br /><strong>' + text.substring ( 0, text.length - 2) + '</strong>: '; }));
+                 if ( textStatus == 'parsererror')
+                 {
+                   $('#receivedvars').html ( '<strong><font color="red">JSON parser error. Clear text follows:</font></strong><br />' + jqXHR.responseText);
+                 } else {
+                   if ( typeof jqXHR.responseJSON === 'object')
+                   {
+                     $('#receivedvars').jsonViewer ( jqXHR.responseJSON, { collapsed: true, withQuotes: true});
+                   } else {
+                     $('#receivedvars').html ( '<strong><font color="red">jqXHR text status result: ' + textStatus + '</font></strong>');
+                   }
+                 }
+               }
+      });
+    }
+
+    $(document).ready ( function ()
+    {
+      $('#form').on ( 'submit', function ( event)
+      {
+        event && event.preventDefault ();
+        VoIP_REST ( $('#path').val (), $('#route').val (), $('#data').val (), $('#token').val ());
+      });
+      $('#clear').on ( 'click', function ( e)
+      {
+        e && e.preventDefault ();
+        $('#sentheaders,#receivedheaders,#receivedvars').html ( '');
+      });
+      var height = $(window).height () - $('#sentheaders').offset ().top - $('body').offset ().top;
+      if ( parseInt ( $('#sentheaders').css ( 'height')) < height)
+      {
+        $('#sentheaders,#receivedheaders,#receivedvars').css ( 'height', height);
+      }
+    });
+  </script>
+  <!--[if lt IE 9]>
+    <script type="text/javascript" src="/vendors/html5shiv/dist/html5shiv.js"></script>
+    <script type="text/javascript" src="/vendors/respond/src/respond.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h2>VoIP Domain - REST API debugger</h2>
+<form id="form">
+  <div class="form-group">
+    <label for="token" class="col-2 col-form-label">Token</label>
+    <div class="col-10"><input class="form-control" type="text" value="" name="token" id="token" /></div>
+  </div>
+  <div class="form-group">
+    <label for="path" class="col-2 col-form-label">Path</label>
+    <div class="col-10"><input class="form-control" type="text" value="" name="path" id="path" /></div>
+  </div>
+  <div class="form-group">
+    <label for="route" class="col-2 col-form-label">Route</label>
+    <div class="col-10">
+      <select class="form-control" name="route" id="route">
+        <option value="">Select a route</option>
+        <option value="POST">Create</option>
+        <option value="GET">Read</option>
+        <option value="PUT">Update</option>
+        <option value="DELETE">Delete</option>
+        <option value="PATCH">Modify</option>
+        <option value="OPTIONS">Help</option>
+        <option value="HEAD">Test</option>
+        <option value="TRACE">Trace</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="data" class="col-2 col-form-label">Data</label>
+    <div class="col-10"><textarea class="form-control" name="data" id="data" rows="4"></textarea></div>
+  </div>
+  <div class="form-group">
+    <button type="submit" class="btn btn-primary">Submit</button>
+    <button type="button" class="btn btn-success" id="clear">Clear</button>
+  </div>
+  <div class="form-group results">
+    <div class="col-4 result"><label class="col-form-label">Sent headers</label><span class="form-control result" id="sentheaders"></span></div>
+    <div class="col-4 result"><label class="col-form-label">Received headers</label><span class="form-control col-4 result" id="receivedheaders"></span></div>
+    <div class="col-4 result"><label class="col-form-label">Received data</label><span class="form-control col-4 result" id="receivedvars"></span></div>
+  </div>
+</form>
+
+</body>
+</html>

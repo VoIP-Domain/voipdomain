@@ -1,0 +1,6 @@
+.sizecache.json
+/dist
+/external
+/node_modules
+/*.log
+/*.err

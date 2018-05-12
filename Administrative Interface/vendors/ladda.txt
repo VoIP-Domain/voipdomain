@@ -1,0 +1,7 @@
+  Ladda
+--=====--
+
+URL: https://github.com/hakimel/Ladda
+Version: 2.0.3
+License: MIT
+Modifications: Added compiled SCSS files, added ES6 module loader and minified version of all files
