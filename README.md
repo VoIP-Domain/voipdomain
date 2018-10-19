@@ -1,5 +1,5 @@
-VoIP Domain ANATEL plugin
-=========================
+VoIP Domain
+===========
 [![GitHub release](https://img.shields.io/github/release/VoIP-Domain/voipdomain.svg?maxAge=2592000)](https://github.com/VoIP-Domain/voipdomain)
 [![GitHub license](https://img.shields.io/github/license/VoIP-Domain/voipdomain.svg)](https://github.com/VoIP-Domain/voipdomain)
 
