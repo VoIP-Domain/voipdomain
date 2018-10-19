@@ -30,7 +30,7 @@
  * requested call, format output data into requested format and return to the
  * user.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Core
@@ -101,16 +101,7 @@ if ( array_key_exists ( "HTTP_X_VD_TOKEN", $_SERVER))
   $token = $result->fetch_assoc ();
 
   // Check if client IP is allowed:
-  $networks = json_decode ( $token["Networks"], true);
-  $allowed = false;
-  foreach ( $networks as $cidr)
-  {
-    if ( cidrMatch ( $_SERVER["REMOTE_ADDR"], $cidr))
-    {
-      $allowed = true;
-    }
-  }
-  if ( ! $allowed)
+  if ( ! cidrMatch ( $_SERVER["REMOTE_ADDR"], $cidr))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 403 Forbidden");
     exit ();
@@ -120,7 +111,19 @@ if ( array_key_exists ( "HTTP_X_VD_TOKEN", $_SERVER))
    * Create token permissions variable
    */
   $_in["token"] = $token;
-  $_in["permissions"] = array_merge ( array ( "token"), explode ( ",", $_in["token"]["Permissions"]));
+  $_in["permissions"] = array ( "token" => true);
+  foreach ( explode ( ",", $_in["token"]["Permissions"]) as $permission)
+  {
+    $_in["permissions"][$permission] = true;
+  }
+
+  /**
+   * Set system language if token has different language than system default
+   */
+  if ( ! empty ( $_in["token"]["Language"]) && array_key_exists ( $_in["token"]["Language"], $_in["languages"]))
+  {
+    $_in["general"]["language"] = $_in["token"]["Language"];
+  }
 }
 if ( array_key_exists ( "HTTP_X_VD_SID", $_SERVER) && array_key_exists ( "HTTP_X_VD_SPWD", $_SERVER))
 {
@@ -148,7 +151,7 @@ if ( array_key_exists ( "HTTP_X_VD_SID", $_SERVER) && array_key_exists ( "HTTP_X
    * Create server permissions variable
    */
   $_in["server"] = $server;
-  $_in["permissions"] = array ( "server");
+  $_in["permissions"] = array ( "server" => true);
 }
 if ( ! array_key_exists ( "HTTP_X_VD_TOKEN", $_SERVER) && ! array_key_exists ( "HTTP_X_VD_SID", $_SERVER))
 {
@@ -171,6 +174,14 @@ if ( ! array_key_exists ( "HTTP_X_VD_TOKEN", $_SERVER) && ! array_key_exists ( "
      */
     $_in["session"]["LastSeen"] = time ();
     @$_in["mysql"]["id"]->query ( "UPDATE `Sessions` SET `LastSeen` = '" . $_in["mysql"]["id"]->real_escape_string ( time ()) . "' WHERE `SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["SID"]) . "'");
+
+    /**
+     * Set system language if user has different language than system default
+     */
+    if ( ! empty ( $_in["session"]["Language"]) && array_key_exists ( $_in["session"]["Language"], $_in["languages"]))
+    {
+      $_in["general"]["language"] = $_in["session"]["Language"];
+    }
 
     /**
      * Create user permissions variable

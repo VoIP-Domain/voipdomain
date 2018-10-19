@@ -27,7 +27,7 @@
  * VoIP Domain blocks api module. This module add the api calls related to
  * blocks.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Blocks
@@ -221,6 +221,14 @@ function blocks_add ( $buffer, $parameters)
   }
 
   /**
+   * Call add pre hook, if exist
+   */
+  if ( framework_has_hook ( "blocks_add_pre"))
+  {
+    $parameters = framework_call ( "blocks_add_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Add new block record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Blocks` (`Description`, `Number`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["number"]) . "')"))
@@ -361,6 +369,14 @@ function blocks_edit ( $buffer, $parameters)
   }
 
   /**
+   * Call edit pre hook, if exist
+   */
+  if ( framework_has_hook ( "blocks_edit_pre"))
+  {
+    $parameters = framework_call ( "blocks_edit_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Change block record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Blocks` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["number"]) . "' WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
@@ -453,6 +469,14 @@ function blocks_remove ( $buffer, $parameters)
   $block = $result->fetch_assoc ();
 
   /**
+   * Call remove pre hook, if exist
+   */
+  if ( framework_has_hook ( "blocks_remove_pre"))
+  {
+    $parameters = framework_call ( "blocks_remove_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Remove block database record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Blocks` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
@@ -496,12 +520,13 @@ function blocks_remove ( $buffer, $parameters)
 }
 
 /**
- * API call to intercept new server
+ * API call to intercept new server and server reinstall
  */
-framework_add_hook ( "servers_add_post", "blocks_servers_add_post");
+framework_add_hook ( "servers_add_post", "blocks_server_reconfig");
+framework_add_hook ( "servers_reinstall_config", "blocks_server_reconfig");
 
 /**
- * Function to notify new server to include all blocks.
+ * Function to notify server to include all blocks.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -509,12 +534,12 @@ framework_add_hook ( "servers_add_post", "blocks_servers_add_post");
  * @param array $parameters Optional parameters to the function
  * @return string Output of the generated page
  */
-function blocks_servers_add_post ( $buffer, $parameters)
+function blocks_server_reconfig ( $buffer, $parameters)
 {
   global $_in;
 
   /**
-   * Fetch all blocks and send to new server
+   * Fetch all blocks and send to server
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Blocks`"))
   {

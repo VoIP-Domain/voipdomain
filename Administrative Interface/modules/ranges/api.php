@@ -27,7 +27,7 @@
  * VoIP Domain ranges api module. This module add the api calls related to
  * ranges.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Ranges
@@ -303,6 +303,14 @@ function ranges_add ( $buffer, $parameters)
   }
 
   /**
+   * Call add pre hook, if exist
+   */
+  if ( framework_has_hook ( "ranges_add_pre"))
+  {
+    $parameters = framework_call ( "ranges_add_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Add new range record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Ranges` (`Description`, `Server`, `Start`, `Finish`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $parameters["server"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $parameters["start"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $parameters["finish"]) . ")"))
@@ -473,6 +481,14 @@ function ranges_edit ( $buffer, $parameters)
   }
 
   /**
+   * Call edit pre hook, if exist
+   */
+  if ( framework_has_hook ( "ranges_edit_pre"))
+  {
+    $parameters = framework_call ( "ranges_edit_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Change range record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Ranges` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', `Server` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["server"]) . ", `Start` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["start"]) . ", `Finish` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["finish"]) . " WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
@@ -500,6 +516,14 @@ function ranges_edit ( $buffer, $parameters)
       $notify = framework_call ( "ranges_edit_notify", $parameters, false, $notify);
     }
     notify_server ( 0, "changerange", $notify);
+  }
+
+  /**
+   * Call range server change hooker if needed
+   */
+  if ( $range["Server"] != $parameters["server"] && framework_has_hook ( "ranges_server_changed"))
+  {
+    framework_call ( "ranges_server_changed", array ( "ID" => $range["ID"], "Old" => $range["Server"], "New" => $parameters["server"]));
   }
 
   /**
@@ -591,6 +615,14 @@ function ranges_remove ( $buffer, $parameters)
   }
 
   /**
+   * Call remove pre hook, if exist
+   */
+  if ( framework_has_hook ( "ranges_remove_pre"))
+  {
+    $parameters = framework_call ( "ranges_remove_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Remove range database record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Ranges` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
@@ -634,12 +666,13 @@ function ranges_remove ( $buffer, $parameters)
 }
 
 /**
- * API call to intercept new server
+ * API call to intercept new server and server reinstall
  */
-framework_add_hook ( "servers_add_post", "ranges_servers_add_post");
+framework_add_hook ( "servers_add_post", "ranges_server_reconfig");
+framework_add_hook ( "servers_reinstall_config", "ranges_server_reconfig");
 
 /**
- * Function to notify new server to include all ranges.
+ * Function to notify server to include all ranges.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -647,12 +680,12 @@ framework_add_hook ( "servers_add_post", "ranges_servers_add_post");
  * @param array $parameters Optional parameters to the function
  * @return string Output of the generated page
  */
-function ranges_servers_add_post ( $buffer, $parameters)
+function ranges_server_reconfig ( $buffer, $parameters)
 {
   global $_in;
 
   /**
-   * Fetch all ranges and send to new server
+   * Fetch all ranges and send to server
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges`"))
   {

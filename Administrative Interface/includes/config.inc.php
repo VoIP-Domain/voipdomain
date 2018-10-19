@@ -30,7 +30,7 @@
  * framework functions needed to control JavaScript and CSS dependencies, page
  * informations, and more.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Core
@@ -106,7 +106,7 @@ if ( ! array_key_exists ( "title", $_in["general"]))
 /**
  * Include basic available languages
  */
-$_in["languages"] = array ( "pt_BR" => "Português (Brasil)", "en_US" => "English (United States)");
+$_in["languages"] = array ( "en_US" => "English (United States)", "pt_BR" => "Português (Brasil)");
 
 /**
  * Configure locale and encoding
@@ -766,7 +766,7 @@ function api_call ( $path, $route, $parameters = array ())
      * Check if path is allowed for non authenticated users, and if user is
      * logged in or not.
      */
-    if ( $entry[$route]["unauthenticated"] == false && ! array_key_exists ( "token", $_in) && ! array_key_exists ( "session", $_in))
+    if ( $entry[$route]["unauthenticated"] == false && ! array_key_exists ( "token", $_in) && ! array_key_exists ( "session", $_in) && ! array_key_exists ( "server", $_in))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 401 Unauthorized");
       exit ();

@@ -27,7 +27,7 @@
  * VoIP Domain auditory module. This module add the system auditory management
  * pages.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Auditory
@@ -153,7 +153,7 @@ function auditory_report_page ( $buffer, $parameters)
   sys_addjs ( "$('#author').select2 (\n" .
               "{\n" .
               "  allowClear: true,\n" .
-              "  data: VoIP.select2 ( '/auditory/authors/search', 'GET')\n" .
+              "  data: VoIP.select2 ( '/auditory/authors', 'GET')\n" .
               "});\n" .
               "$('#report').on ( 'update', function ( event, data)\n" .
               "{\n" .

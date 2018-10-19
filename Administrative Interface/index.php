@@ -28,7 +28,7 @@
  * default variables, to provide the basic interface, like authentication,
  * session control, output buffer control, basic CRUD and others.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Core
@@ -106,6 +106,14 @@ if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE) && $result = @$_in[
    */
   if ( $_in["general"]["timeout"] > 0 && $_in["session"]["LastSeen"] + $_in["general"]["timeout"] < time ())
   {
+    /**
+     * Insert audit entry
+     */
+    audit ( "system", "logout", array ( "ID" => $_in["session"]["ID"], "User" => $_in["session"]["User"], "Reason" => "Timedout"));
+
+    /**
+     * Print response
+     */
     if ( array_key_exists ( "HTTP_X_INFRAMEWORK", $_SERVER) && $_SERVER["HTTP_X_INFRAMEWORK"] == "page")
     {
       echo json_encode ( array ( "event" => "session_timeout"));
@@ -121,6 +129,14 @@ if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE) && $result = @$_in[
    */
   $_in["session"]["LastSeen"] = time ();
   @$_in["mysql"]["id"]->query ( "UPDATE `Sessions` SET `LastSeen` = '" . $_in["mysql"]["id"]->real_escape_string ( time ()) . "' WHERE `SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["SID"]) . "'");
+
+  /**
+   * Set system language if user has different language than system default
+   */
+  if ( ! empty ( $_in["session"]["Language"]) && array_key_exists ( $_in["session"]["Language"], $_in["languages"]))
+  {
+    $_in["general"]["language"] = $_in["session"]["Language"];
+  }
 
   /**
    * Create user permissions variable

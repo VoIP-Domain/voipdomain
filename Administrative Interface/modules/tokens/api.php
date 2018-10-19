@@ -26,7 +26,7 @@
 /**
  * VoIP Domain tokens api module. This module add the api calls related to tokens.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Tokens
@@ -35,13 +35,13 @@
  */
 
 /**
- * API call to search token permissions (datatables compatible response)
+ * API call to fetch token permissions (datatables compatible response)
  */
-framework_add_hook ( "tokens_permissions_search", "tokens_permissions_search");
-framework_add_api_call ( "/tokens/permissions/search", "Read", "tokens_permissions_search", array ( "permissions" => array ( "user", "token")));
+framework_add_hook ( "tokens_permissions_fetch", "tokens_permissions_fetch");
+framework_add_api_call ( "/tokens/permissions", "Read", "tokens_permissions_fetch", array ( "permissions" => array ( "user", "token")));
 
 /**
- * Function to generate extension list to select box.
+ * Function to generate token permissions list to select box.
  *
  * @global array $_api Framework global API configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -49,7 +49,7 @@ framework_add_api_call ( "/tokens/permissions/search", "Read", "tokens_permissio
  * @param array $parameters Optional parameters to the function
  * @return string Output of the generated page
  */
-function tokens_permissions_search ( $buffer, $parameters)
+function tokens_permissions_fetch ( $buffer, $parameters)
 {
   global $_api;
 
@@ -178,6 +178,7 @@ function tokens_view ( $buffer, $parameters)
     $data["permissions"][$permission] = $_api["permissions"][$permission];
   }
   $data["validity"] = format_db_date ( $token["Expire"]);
+  $data["language"] = ( $token["Language"] != "" ? $token["Language"] : "default");
 
   /**
    * Return structured data
@@ -196,6 +197,7 @@ framework_add_api_call ( "/tokens", "Create", "tokens_add", array ( "permissions
  * Function to add a new token.
  *
  * @global array $_in Framework global configuration variable
+ * @global array $_api Framework global API configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
@@ -203,7 +205,7 @@ framework_add_api_call ( "/tokens", "Create", "tokens_add", array ( "permissions
  */
 function tokens_add ( $buffer, $parameters)
 {
-  global $_in;
+  global $_in, $_api;
 
   /**
    * Check basic parameters
@@ -249,9 +251,13 @@ function tokens_add ( $buffer, $parameters)
   }
   foreach ( $parameters["permissions"] as $key => $value)
   {
-    $parameters["permissions"][$key] = (int) $value;
+    if ( ! array_key_exists ( $value, $_api["permissions"]))
+    {
+      $data["result"] = false;
+      $data["permissions"] = __ ( "Invalid permission.");
+    }
   }
-  if ( sizeof ( $parameters["permissions"]) == 0)
+  if ( ! array_key_exists ( "permissions", $data) && sizeof ( $parameters["permissions"]) == 0)
   {
     $data["result"] = false;
     $data["permissions"] = __ ( "At least one permission is required.");
@@ -276,6 +282,24 @@ function tokens_add ( $buffer, $parameters)
     $data["result"] = false;
     $data["token"] = __ ( "The provided token is already in use.");
   }
+  if ( $parameters["language"] == "default")
+  {
+    $parameters["language"] = "";
+  } else {
+    if ( ! array_key_exists ( $parameters["language"], $_in["languages"]))
+    {
+      $data["result"] = false;
+      $data["language"] = __ ( "The select language are invalid.");
+    }
+  }
+
+  /**
+   * Call add sanitize hook, if exist
+   */
+  if ( framework_has_hook ( "tokens_add_sanitize"))
+  {
+    $data = framework_call ( "tokens_add_sanitize", $parameters, false, $data);
+  }
 
   /**
    * Return error data if some error ocurred
@@ -287,25 +311,46 @@ function tokens_add ( $buffer, $parameters)
   }
 
   /**
+   * Call add pre hook, if exist
+   */
+  if ( framework_has_hook ( "tokens_add_pre"))
+  {
+    $parameters = framework_call ( "tokens_add_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Add new token record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Tokens` (`Description`, `Token`, `Access`, `Permissions`, `Expire`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["token"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["access"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $parameters["permissions"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["validity"]) . "')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Tokens` (`Description`, `Token`, `Access`, `Permissions`, `Expire`, `Language`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["token"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["access"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $parameters["permissions"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["validity"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["language"]) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  $id = $_in["mysql"]["id"]->insert_id;
+  $parameters["id"] = $_in["mysql"]["id"]->insert_id;
+
+  /**
+   * Call add post hook, if exist
+   */
+  if ( framework_has_hook ( "tokens_add_post"))
+  {
+    framework_call ( "tokens_add_post", $parameters);
+  }
 
   /**
    * Insert audit registry
    */
-  audit ( "token", "add", array ( "ID" => $id, "Description" => $parameters["description"], "Token" => $parameters["token"], "Access" => $parameters["access"], "Permissions" => $parameters["permissions"], "Expire" => $parameters["validity"]));
+  $audit = array ( "ID" => $parameters["id"], "Description" => $parameters["description"], "Token" => $parameters["token"], "Access" => $parameters["access"], "Permissions" => $parameters["permissions"], "Expire" => $parameters["validity"], "Language" => $parameters["language"]);
+  if ( framework_has_hook ( "tokens_add_audit"))
+  {
+    $audit = framework_call ( "tokens_add_audit", $parameters, false, $audit);
+  }
+  audit ( "token", "add", $audit);
 
   /**
    * Return OK to token
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . $_in["general"]["baseurl"] . "tokens/" . $id . "/view");
+  header ( "Location: " . $_in["general"]["baseurl"] . "tokens/" . $parameters["id"] . "/view");
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 
@@ -321,6 +366,7 @@ framework_add_api_call ( "/tokens/:id", "Edit", "tokens_edit", array ( "permissi
  * Function to edit an existing token.
  *
  * @global array $_in Framework global configuration variable
+ * @global array $_api Framework global API configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
@@ -328,7 +374,7 @@ framework_add_api_call ( "/tokens/:id", "Edit", "tokens_edit", array ( "permissi
  */
 function tokens_edit ( $buffer, $parameters)
 {
-  global $_in;
+  global $_in, $_api;
 
   /**
    * Check basic parameters
@@ -375,9 +421,13 @@ function tokens_edit ( $buffer, $parameters)
   }
   foreach ( $parameters["permissions"] as $key => $value)
   {
-    $parameters["permissions"][$key] = (int) $value;
+    if ( ! array_key_exists ( $value, $_api["permissions"]))
+    {
+      $data["result"] = false;
+      $data["permissions"] = __ ( "Invalid permission.");
+    }
   }
-  if ( sizeof ( $parameters["permissions"]) == 0)
+  if ( ! array_key_exists ( "permissions", $data) && sizeof ( $parameters["permissions"]) == 0)
   {
     $data["result"] = false;
     $data["permissions"] = __ ( "At least one permission is required.");
@@ -388,6 +438,16 @@ function tokens_edit ( $buffer, $parameters)
     $data["validity"] = __ ( "The token validity is required.");
   }
   $parameters["validity"] = format_form_datetime ( empty ( $parameters["validity"]) ? date ( "d/m/Y 23:59", time ()) : urldecode ( $parameters["validity"]));
+  if ( $parameters["language"] == "default")
+  {
+    $parameters["language"] = "";
+  } else {
+    if ( ! array_key_exists ( $parameters["language"], $_in["languages"]))
+    {
+      $data["result"] = false;
+      $data["language"] = __ ( "The select language are invalid.");
+    }
+  }
 
   /**
    * Check if token was already in use
@@ -419,6 +479,14 @@ function tokens_edit ( $buffer, $parameters)
   $token = $result->fetch_assoc ();
 
   /**
+   * Call edit sanitize hook, if exist
+   */
+  if ( framework_has_hook ( "tokens_edit_sanitize"))
+  {
+    $data = framework_call ( "tokens_edit_sanitize", $parameters, false, $data);
+  }
+
+  /**
    * Return error data if some error ocurred
    */
   if ( $data["result"] == false)
@@ -428,24 +496,32 @@ function tokens_edit ( $buffer, $parameters)
   }
 
   /**
-   * If there's no change, return OK to token
+   * Call edit pre hook, if exist
    */
-  if ( $token["Description"] == $parameters["description"] && $token["Token"] == $parameters["token"] && $token["Access"] == $parameters["access"] && array_compare ( explode ( ",", $token["Permissions"]), $parameters["permissions"]) && $token["Expire"] == $parameters["validity"])
+  if ( framework_has_hook ( "tokens_edit_pre"))
   {
-    return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
+    $parameters = framework_call ( "tokens_edit_pre", $parameters, false, $parameters);
   }
 
   /**
    * Change token record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Tokens` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', `Token` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["token"]) . "', `Access` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["access"]) . "', `Permissions` = '" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $parameters["permissions"])) . "', `Expire` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["validity"]) . "' WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Tokens` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', `Token` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["token"]) . "', `Access` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["access"]) . "', `Permissions` = '" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $parameters["permissions"])) . "', `Expire` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["validity"]) . "', `Language` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["language"]) . "' WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
 
   /**
-   * Create audit record
+   * Call edit post hook, if exist
+   */
+  if ( framework_has_hook ( "tokens_edit_post"))
+  {
+    framework_call ( "tokens_edit_post", $parameters);
+  }
+
+  /**
+   * Insert audit registry
    */
   $audit = array ();
   $audit["ID"] = $token["ID"];
@@ -468,6 +544,14 @@ function tokens_edit ( $buffer, $parameters)
   if ( $token["Expire"] != $parameters["validity"])
   {
     $audit["Expire"] = array ( "Old" => $token["Expire"], "New" => $parameters["validity"]);
+  }
+  if ( $token["Language"] != $parameters["language"])
+  {
+    $audit["Language"] = array ( "Old" => $token["Language"], "New" => $parameters["language"]);
+  }
+  if ( framework_has_hook ( "tokens_edit_audit"))
+  {
+    $audit = framework_call ( "tokens_edit_audit", $parameters, false, $audit);
   }
   audit ( "token", "edit", $audit);
 
@@ -518,6 +602,14 @@ function tokens_remove ( $buffer, $parameters)
   $token = $result->fetch_assoc ();
 
   /**
+   * Call remove pre hook, if exist
+   */
+  if ( framework_has_hook ( "tokens_remove_pre"))
+  {
+    $parameters = framework_call ( "tokens_remove_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Remove token database record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Tokens` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
@@ -527,9 +619,22 @@ function tokens_remove ( $buffer, $parameters)
   }
 
   /**
-   * Create audit record
+   * Call remove post hook, if exist
    */
-  audit ( "token", "remove", $token);
+  if ( framework_has_hook ( "tokens_remove_post"))
+  {
+    framework_call ( "tokens_remove_post", $parameters);
+  }
+
+  /**
+   * Insert audit registry
+   */
+  $audit = $token;
+  if ( framework_has_hook ( "tokens_remove_audit"))
+  {
+    $audit = framework_call ( "tokens_remove_audit", $parameters, false, $audit);
+  }
+  audit ( "token", "remove", $audit);
 
   /**
    * Retorn OK to token

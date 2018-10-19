@@ -27,7 +27,7 @@
  * VoIP Domain exceptions filter module. This module add the filter calls related
  * to exceptions.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Exceptions

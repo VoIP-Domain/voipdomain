@@ -2,5 +2,6 @@
 --===========================--
 
 URL: http://www.daterangepicker.com/
-Version: 3.0.0
+Version: 3.0.3
 License: MIT
+Modifications: Added minified css and js files.

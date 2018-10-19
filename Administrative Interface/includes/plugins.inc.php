@@ -30,7 +30,7 @@
  * interface that's highly based on method calls, even the most internal function
  * and basic interface calls.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Core

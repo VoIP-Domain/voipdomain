@@ -27,7 +27,7 @@
  * VoIP Domain extensions api module. This module add the api calls related to
  * extensions.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Extensions
@@ -65,6 +65,48 @@ function extensions_search ( $buffer, $parameters)
    */
   $data = array ();
   if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` " . ( ! empty ( $parameters["q"]) ? "WHERE `Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["q"]) . "%' OR `Extension` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["q"]) . "' " : "") . "ORDER BY `Name`, `Extension`"))
+  {
+    while ( $extension = $result->fetch_assoc ())
+    {
+      $data[] = array ( $extension["ID"], $extension["Name"] . " (" . $extension["Extension"] . ")");
+    }
+  }
+
+  /**
+   * Return structured data
+   */
+  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
+}
+
+/**
+ * API call to search extensions (excluding myself)
+ */
+framework_add_hook ( "extensions_search_except", "extensions_search_except");
+framework_add_api_call ( "/extensions/search/except/:id", "Read", "extensions_search_except", array ( "permissions" => array ( "user", "extensions_search")));
+
+/**
+ * Function to generate extension list (excluding myself) to select box.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function extensions_search_except ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Check for modifications time
+   */
+  check_table_modification ( "Extensions");
+
+  /**
+   * Search extensions
+   */
+  $data = array ();
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `ID` != " . (int) $parameters["id"] . ( ! empty ( $parameters["q"]) ? " AND (`Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["q"]) . "%' OR `Extension` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["q"]) . "')" : "") . " ORDER BY `Name`, `Extension`"))
   {
     while ( $extension = $result->fetch_assoc ())
     {
@@ -202,9 +244,23 @@ function extensions_view ( $buffer, $parameters)
   }
 
   /**
+   * Search hints for the extension
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`ID`, `Extensions`.`Name`, `Extensions`.`Extension` FROM `ExtensionHint` LEFT JOIN `Extensions` ON `ExtensionHint`.`Hint` = `Extensions`.`ID`  WHERE `ExtensionHint`.`Extension` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  $hints = array ();
+  while ( $hint = $result->fetch_assoc ())
+  {
+    $hints[$hint["ID"]] = $hint["Name"] . " (" . $hint["Extension"] . ")";
+  }
+
+  /**
    * Search accounts for the extension
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Accounts`.*, `Equipments`.`ID` AS `EID`, `Equipments`.`Name`, `Equipments`.`Shortcuts`, `Equipments`.`Extensions`, `Phones`.`MAC` FROM `Accounts` LEFT JOIN `Phones` ON `Accounts`.`Phone` = `Phones`.`ID` LEFT JOIN `Equipments` ON `Phones`.`Type` = `Equipments`.`ID` WHERE `Accounts`.`Extension` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"]) . " ORDER BY `Accounts`.`Username`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Accounts`.*, `Equipments`.`ID` AS `EID`, `Equipments`.`Name`, `Equipments`.`Template`, `Equipments`.`Shortcuts`, `Equipments`.`Extensions`, `Phones`.`MAC` FROM `Accounts` LEFT JOIN `Phones` ON `Accounts`.`Phone` = `Phones`.`ID` LEFT JOIN `Equipments` ON `Phones`.`Type` = `Equipments`.`ID` WHERE `Accounts`.`Extension` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"]) . " ORDER BY `Accounts`.`Username`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -212,7 +268,12 @@ function extensions_view ( $buffer, $parameters)
   $accounts = array ();
   while ( $account = $result->fetch_assoc ())
   {
-    $accounts[] = array ( "type" => $account["EID"], "typename" => $account["Name"], "mac" => ( $account["MAC"] != "" ? substr ( $account["MAC"], 0, 2) . ":" . substr ( $account["MAC"], 2, 2) . ":" . substr ( $account["MAC"], 4, 2) . ":" . substr ( $account["MAC"], 6, 2) . ":" . substr ( $account["MAC"], 8, 2) . ":" . substr ( $account["MAC"], 10, 2) : ""), "blf" => ( $account["Shortcuts"] > 0 || $account["Extensions"] > 0 ? true : false), "fields" => ( $account["Shortcuts"] + $account["Extensions"]));
+    if ( $account["Template"] == "softphone")
+    {
+      $accounts[] = array ( "type" => $account["EID"], "typename" => $account["Name"], "id" => $account["ID"], "username" => $account["Username"], "password" => $account["Password"]);
+    } else {
+      $accounts[] = array ( "type" => $account["EID"], "typename" => $account["Name"], "mac" => ( $account["MAC"] != "" ? substr ( $account["MAC"], 0, 2) . ":" . substr ( $account["MAC"], 2, 2) . ":" . substr ( $account["MAC"], 4, 2) . ":" . substr ( $account["MAC"], 6, 2) . ":" . substr ( $account["MAC"], 8, 2) . ":" . substr ( $account["MAC"], 10, 2) : ""));
+    }
   }
 
   /**
@@ -240,6 +301,69 @@ function extensions_view ( $buffer, $parameters)
   $data["monitor"] = $perms["monitor"];
   $data["volrx"] = $perms["volrx"];
   $data["voltx"] = $perms["voltx"];
+  $data["hints"] = $hints;
+
+  /**
+   * Return structured data
+   */
+  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
+}
+
+/**
+ * API call to get extension information
+ */
+framework_add_hook ( "extensions_account_view", "extensions_account_view");
+framework_add_permission ( "extensions_account_view", __ ( "View extensions accounts informations"));
+framework_add_api_call ( "/extensions/account/:id", "Read", "extensions_account_view", array ( "permissions" => array ( "user", "extensions_account_view")));
+
+/**
+ * Function to generate extension account informations.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function extensions_account_view ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Check for modifications time
+   */
+  check_table_modification ( array ( "Extensions", "Accounts", "Ranges", "Servers"));
+
+  /**
+   * Check basic parameters
+   */
+  $parameters["id"] = (int) $parameters["id"];
+
+  /**
+   * Search extensions
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Servers`.`Domain`, `Servers`.`Address`, `Extensions`.`Name`, `Accounts`.`Username`, `Accounts`.`Password` FROM `Extensions` LEFT JOIN `Accounts` ON `Accounts`.`Extension` = `Extensions`.`ID` LEFT JOIN `Ranges` ON `Ranges`.`ID` = `Extensions`.`Range` LEFT JOIN `Servers` ON `Servers`.`ID` = `Ranges`.`Server` WHERE `Accounts`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( $result->num_rows != 1)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  $extension = $result->fetch_assoc ();
+
+  /**
+   * Format data
+   */
+  $data = array ();
+  $data["result"] = true;
+  $data["domain"] = $extension["Domain"];
+  $data["serverip"] = $extension["Address"];
+  $data["name"] = $extension["Name"];
+  $data["username"] = $extension["Username"];
+  $data["password"] = $extension["Password"];
 
   /**
    * Return structured data
@@ -354,6 +478,19 @@ function extensions_add ( $buffer, $parameters)
   {
     $parameters["transhipments"][$key] = (int) $value;
   }
+  if ( ! is_array ( $parameters["hints"]))
+  {
+    if ( ! empty ( $parameters["hints"]))
+    {
+      $parameters["hints"] = array ( $parameters["hints"]);
+    } else {
+      $parameters["hints"] = array ();
+    }
+  }
+  foreach ( $parameters["hints"] as $key => $value)
+  {
+    $parameters["hints"][$key] = (int) $value;
+  }
 
   /**
    * Check if extension number was already in use
@@ -439,6 +576,27 @@ function extensions_add ( $buffer, $parameters)
     } else {
       $tmp = $result->fetch_assoc ();
       $transhipments[] = $tmp["Extension"];
+    }
+  }
+
+  /**
+   * Check if hint extensions exists
+   */
+  $hints = array ();
+  foreach ( $parameters["hints"] as $hint)
+  {
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $hint)))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    if ( $result->num_rows == 0)
+    {
+      $data["result"] = false;
+      $data["hints"] = __ ( "One or more informed hint are invalid.");
+    } else {
+      $tmp = $result->fetch_assoc ();
+      $hints[] = $tmp["Extension"];
     }
   }
 
@@ -548,6 +706,14 @@ function extensions_add ( $buffer, $parameters)
   );
 
   /**
+   * Call add pre hook, if exist
+   */
+  if ( framework_has_hook ( "extensions_add_pre"))
+  {
+    $parameters = framework_call ( "extensions_add_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Add new extension record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Extensions` (`Extension`, `Name`, `NameFon`, `Email`, `Range`, `Group`, `Password`, `Permissions`, `CostCenter`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $parameters["extension"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( fonetiza ( $parameters["name"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["email"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $range["ID"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $group["ID"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["voicemailpass"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $permissions)) . "', " . $_in["mysql"]["id"]->real_escape_string ( ( $parameters["costcenter"] != "" ? $parameters["costcenter"] : "null")) . ")"))
@@ -575,6 +741,18 @@ function extensions_add ( $buffer, $parameters)
   foreach ( $parameters["transhipments"] as $transhipment)
   {
     if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `ExtensionTranshipment` (`Extension`, `Transhipment`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $transhipment) . ")"))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+  }
+
+  /**
+   * Add each extension hint extensions
+   */
+  foreach ( $parameters["hints"] as $hint)
+  {
+    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `ExtensionHint` (`Extension`, `Hint`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $hint) . ")"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -647,6 +825,28 @@ function extensions_add ( $buffer, $parameters)
   }
 
   /**
+   * Create hint configuration if needed
+   */
+  foreach ( $parameters["hints"] as $hint)
+  {
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Extension`, COUNT(*) AS `Total` FROM `ExtensionHint` LEFT JOIN `Extensions` ON `ExtensionHint`.`Hint` = `Extensions`.`ID` WHERE `ExtensionHint`.`Hint` = " . $_in["mysql"]["id"]->real_escape_string ( $hint)))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    $tmp = $result->fetch_assoc ();
+    if ( $tmp["Total"] == 1)
+    {
+      $notify = array ( "Extension" => $tmp["Extension"]);
+      if ( framework_has_hook ( "extensions_add_hint_notify"))
+      {
+        $notify = framework_call ( "extensions_add_hint_notify", $parameters, false, $notify);
+      }
+      notify_server ( $range["Server"], "createhint", $notify);
+    }
+  }
+
+  /**
    * Call add post hook, if exist
    */
   if ( framework_has_hook ( "extensions_add_post"))
@@ -657,7 +857,7 @@ function extensions_add ( $buffer, $parameters)
   /**
    * Insert audit registry
    */
-  $audit = array ( "ID" => $parameters["id"], "Range" => $range["ID"], "Extension" => $parameters["extension"], "Name" => $parameters["name"], "Email" => $parameters["email"], "Group" => $group["ID"], "Password" => $parameters["voicemailpass"], "Permissions" => $permissions, "CostCenter" => ( $parameters["costcenter"] != "" ? $parameters["costcenter"] : ""), "Transhipments" => $parameters["transhipments"], "Capture" => $parameters["capture"], "Accounts" => $accounts);
+  $audit = array ( "ID" => $parameters["id"], "Range" => $range["ID"], "Extension" => $parameters["extension"], "Name" => $parameters["name"], "Email" => $parameters["email"], "Group" => $group["ID"], "Password" => $parameters["voicemailpass"], "Permissions" => $permissions, "CostCenter" => ( $parameters["costcenter"] != "" ? $parameters["costcenter"] : ""), "Transhipments" => $parameters["transhipments"], "Capture" => $parameters["capture"], "Accounts" => $accounts, "Hints" => $parameters["hints"]);
   if ( framework_has_hook ( "extensions_add_audit"))
   {
     $audit = framework_call ( "extensions_add_audit", $parameters, false, $audit);
@@ -781,6 +981,19 @@ function extensions_edit ( $buffer, $parameters)
   {
     $parameters["transhipments"][$key] = (int) $value;
   }
+  if ( ! is_array ( $parameters["hints"]))
+  {
+    if ( ! empty ( $parameters["hints"]))
+    {
+      $parameters["hints"] = array ( $parameters["hints"]);
+    } else {
+      $parameters["hints"] = array ();
+    }
+  }
+  foreach ( $parameters["hints"] as $key => $value)
+  {
+    $parameters["hints"][$key] = (int) $value;
+  }
 
   /**
    * Get actual extension from database
@@ -839,6 +1052,20 @@ function extensions_edit ( $buffer, $parameters)
   while ( $transhipment = $result->fetch_assoc ())
   {
     $oldtranshipments[] = $transhipment["Transhipment"];
+  }
+
+  /**
+   * Get each actual hints from database
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `ExtensionHint` WHERE `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( $extension["ID"])))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  $oldhints = array ();
+  while ( $hint = $result->fetch_assoc ())
+  {
+    $oldhints[] = $hint["Hint"];
   }
 
   /**
@@ -932,13 +1159,34 @@ function extensions_edit ( $buffer, $parameters)
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
     }
-    if ( $result->num_rows == 0 || ( $parameters["extension"] != $extension["Extension"] && $transhipment == $extension["Extension"]))
+    if ( $result->num_rows == 0 || $transhipment == $extension["ID"])
     {
       $data["result"] = false;
       $data["transhipments"] = __ ( "One or more informed transhipment are invalid.");
     } else {
       $tmp = $result->fetch_assoc ();
       $transhipments[] = $tmp["Extension"];
+    }
+  }
+
+  /**
+   * Check if hint extensions exists
+   */
+  $hints = array ();
+  foreach ( $parameters["hints"] as $hint)
+  {
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $hint)))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    if ( $result->num_rows == 0 || $hint == $extension["ID"])
+    {
+      $data["result"] = false;
+      $data["hints"] = __ ( "One or more informed hint are invalid.");
+    } else {
+      $tmp = $result->fetch_assoc ();
+      $hints[] = $tmp["Extension"];
     }
   }
 
@@ -1090,6 +1338,14 @@ function extensions_edit ( $buffer, $parameters)
   );
 
   /**
+   * Call edit pre hook, if exist
+   */
+  if ( framework_has_hook ( "extensions_edit_pre"))
+  {
+    $parameters = framework_call ( "extensions_edit_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Update extension database record if something changed
    */
   if ( $parameters["extension"] != $extension["Extension"] || $parameters["name"] != $extension["Name"] || $parameters["email"] != $extension["Email"] || $parameters["group"] != $extension["Group"] || ! array_compare_with_keys ( $permissions, $extension["Permissions"]) || $parameters["costcenter"] != $extension["CostCenter"])
@@ -1134,6 +1390,26 @@ function extensions_edit ( $buffer, $parameters)
     foreach ( $parameters["transhipments"] as $transhipment)
     {
       if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `ExtensionTranshipment` (`Extension`, `Transhipment`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $extension["ID"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $transhipment) . ")"))
+      {
+        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+        exit ();
+      }
+    }
+  }
+
+  /**
+   * Update extension hint records if something changed
+   */
+  if ( ! array_compare ( $oldhints, $parameters["hints"]))
+  {
+    if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ExtensionHint` WHERE `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( $extension["ID"])))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    foreach ( $parameters["hints"] as $hint)
+    {
+      if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `ExtensionHint` (`Extension`, `Hint`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $extension["ID"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $hint) . ")"))
       {
         header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
         exit ();
@@ -1279,6 +1555,57 @@ function extensions_edit ( $buffer, $parameters)
   }
 
   /**
+   * Check if there's any change with hints
+   */
+  if ( ! array_compare ( $oldhints, $parameters["hints"]))
+  {
+    /**
+     * Check if need to remove a hint
+     */
+    foreach ( array_diff ( $oldhints, $parameters["hints"]) as $hint)
+    {
+$data["hints"][] = "Adicionado hint: " . $hint;
+      if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Extension`, COUNT(*) AS `Total` FROM `ExtensionHint` LEFT JOIN `Extensions` ON `ExtensionHint`.`Hint` = `Extensions`.`ID` WHERE `ExtensionHint`.`Hint` = " . $_in["mysql"]["id"]->real_escape_string ( $hint)))
+      {
+        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+        exit ();
+      }
+      $tmp = $result->fetch_assoc ();
+      if ( $tmp["Total"] == 0)
+      {
+        $notify = array ( "Extension" => $tmp["Extension"]);
+        if ( framework_has_hook ( "extensions_remove_hint_notify"))
+        {
+          $notify = framework_call ( "extensions_remove_hint_notify", $parameters, false, $notify);
+        }
+        notify_server ( $range["Server"], "removehint", $notify);
+      }
+    }
+
+    /**
+     * Check if need to add a hint
+     */
+    foreach ( array_diff ( $parameters["hints"], $oldhints) as $hint)
+    {
+      if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Extension`, COUNT(*) AS `Total` FROM `ExtensionHint` LEFT JOIN `Extensions` ON `ExtensionHint`.`Hint` = `Extensions`.`ID` WHERE `ExtensionHint`.`Hint` = " . $_in["mysql"]["id"]->real_escape_string ( $hint)))
+      {
+        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+        exit ();
+      }
+      $tmp = $result->fetch_assoc ();
+      if ( $tmp["Total"] == 1)
+      {
+        $notify = array ( "Extension" => $tmp["Extension"]);
+        if ( framework_has_hook ( "extensions_add_hint_notify"))
+        {
+          $notify = framework_call ( "extensions_add_hint_notify", $parameters, false, $notify);
+        }
+        notify_server ( 0, "createhint", $notify);
+      }
+    }
+  }
+
+  /**
    * Call edit post hook, if exist
    */
   if ( framework_has_hook ( "extensions_edit_post"))
@@ -1287,11 +1614,64 @@ function extensions_edit ( $buffer, $parameters)
   }
 
   /**
+   * Check if any other extension need to update Asterisk configurations
+   */
+  if ( $parameters["extension"] != $extension["Extension"])
+  {
+    /**
+     * First, check if extension exist at any other extension transhipment
+     */
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Extension`, `Extensions`.`ID`, `Ranges`.`Server` FROM `ExtensionTranshipment` LEFT JOIN `Extensions` ON `ExtensionTranshipment`.`Extension` = `Extensions`.`ID` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` WHERE `ExtensionTranshipment`.`Transhipment` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $extension["ID"])))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    while ( $data = $result->fetch_assoc ())
+    {
+      if ( ! $tmpresult = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Extension` FROM `ExtensionTranshipment` LEFT JOIN `Extensions` ON `ExtensionTranshipment`.`Transhipment` = `Extensions`.`ID` WHERE `ExtensionTranshipment`.`Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $data["ID"])))
+      {
+        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+        exit ();
+      }
+      $notify = array ();
+      $notify["Extension"] = $data["Extension"];
+      $notify["Transhipments"] = array ();
+      while ( $tmp = $tmpresult->fetch_assoc ())
+      {
+        $notify["Transhipments"][] = $tmp["Extension"];
+      }
+      notify_server ( $data["Server"], "changetranshipment", $notify);
+    }
+
+    /**
+     * Second, check if extension exist at any other extension hint
+     */
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Extension`, `Extensions`.`ID`, `Ranges`.`Server` FROM `ExtensionHint` LEFT JOIN `Extensions` ON `ExtensionHint`.`Extension` = `Extensions`.`ID` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` WHERE `ExtensionHint`.`Hint` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $extension["ID"])))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    if ( $result->num_rows != 0)
+    {
+      notify_server ( $oldrange["Server"], "removehint", array ( "Extension" => $extension["Extension"]));
+      notify_server ( $range["Server"], "createhint", array ( "Extension" => $parameters["extension"]));
+    }
+  }
+
+  /**
+   * Call extension number change hooker if needed
+   */
+  if ( $parameters["extension"] != $extension["Extension"] && framework_has_hook ( "extensions_number_changed"))
+  {
+    framework_call ( "extensions_number_changed", array ( "ID" => $extension["ID"], "Old" => $extension["Extension"], "New" => $parameters["extension"], "OldServer" => $oldrange["Server"], "NewServer" => $range["Server"]));
+  }
+
+  /**
    * Insert audit registry
    */
   $audit = array ();
   $audit["ID"] = $extension["ID"];
-  if ( $parameters["extension"] == $extension["Extension"])
+  if ( $parameters["extension"] != $extension["Extension"])
   {
     $audit["Extension"] = array ( "Original" => $extension["Extension"], "New" => $parameters["extension"]);
   } else {
@@ -1333,6 +1713,10 @@ function extensions_edit ( $buffer, $parameters)
   {
     $audit["CostCenter"] = array ( "Original" => $extension["CostCenter"], "New" => $parameters["costcenter"]);
   }
+  if ( ! array_compare ( $oldhints, $parameters["hints"]))
+  {
+    $audit["Hints"] = array ( "Original" => $oldhints, "New" => $parameters["hints"]);
+  }
   if ( framework_has_hook ( "extensions_edit_audit"))
   {
     $audit = framework_call ( "extensions_edit_audit", $parameters, false, $audit);
@@ -1365,11 +1749,15 @@ function extensions_remove ( $buffer, $parameters)
 {
   global $_in;
 
-// ***TODO***: Fazer esta função... ver como será para tratar as centrais, blf, etc, que apontam para uma extensão que está sendo removida...
+  /**
+   * Check basic parameters
+   */
+  $parameters["id"] = (int) $parameters["id"];
+
   /**
    * Check if extension exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Centrais`.*, `Faixas`.`Servidor` FROM `Centrais`, `Faixas` WHERE `Centrais`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["path_parameters"][0]) . " AND `Centrais`.`Faixa` = `Faixas`.`ID`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.*, `Ranges`.`Server` FROM `Extensions` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` WHERE `Extensions`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["id"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1382,37 +1770,203 @@ function extensions_remove ( $buffer, $parameters)
   $extension = $result->fetch_assoc ();
 
   /**
-   * Get extension extensions to audit record
+   * Get extension capture groups
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "SELECT `Ramais`.`Ramal` FROM `CentralRamal`, `Ramais` WHERE `CentralRamal`.`Central` = " . $_in["mysql"]["id"]->real_escape_string ( $extension["ID"]) . " AND `CentralRamal`.`Ramal` = `Ramais`.`ID`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `ExtensionCapture` WHERE `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["id"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  $ramais = array ();
-  while ( $tmp = $result->fetch_assoc ())
+  if ( $result->num_rows != 1)
   {
-    $ramais[] = $tmp["Ramal"];
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  $extension["CaptureGroups"] = array ();
+  while ( $capture = $result->fetch_assoc ())
+  {
+    $extension["CaptureGroups"][] = $capture["Group"];
+  }
+
+  /**
+   * Get extension transhipment extensions
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `ExtensionTranshipment` WHERE `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["id"])))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( $result->num_rows != 1)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  $extension["Transhipments"] = array ();
+  while ( $transhipment = $result->fetch_assoc ())
+  {
+    $extension["Transhipments"][] = $transhipment["Transhipment"];
+  }
+
+  /**
+   * Get extension hint extensions
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `ExtensionHint` WHERE `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["id"])))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( $result->num_rows != 1)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  $extension["Hints"] = array ();
+  while ( $hint = $result->fetch_assoc ())
+  {
+    $extension["Hints"][] = $hint["Hint"];
+  }
+
+  /**
+   * Get extension accounts
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Accounts` WHERE `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["id"])))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( $result->num_rows != 1)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  $extension["Accounts"] = array ();
+  while ( $account = $result->fetch_assoc ())
+  {
+    $extension["Accounts"][] = $account;
+  }
+
+  /**
+   * Call remove pre hook, if exist
+   */
+  if ( framework_has_hook ( "extensions_remove_pre"))
+  {
+    $parameters = framework_call ( "extensions_remove_pre", $parameters, false, $parameters);
+  }
+
+  /**
+   * Remove extension from other extensions hint
+   */
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "DELETE FROM `ExtensionHint` WHERE `Hint` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["id"])))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( intval ( $count->affected_rows) != 0)
+  {
+    $notify = array ( "Extension" => $extension["Extension"]);
+    if ( framework_has_hook ( "extensions_remove_hint_notify"))
+    {
+      $notify = framework_call ( "extensions_remove_hint_notify", $parameters, false, $notify);
+    }
+    notify_server ( $extension["Server"], "removehint", $notify);
+  }
+
+  /**
+   * Remove unique hints from extension
+   */
+  foreach ( $extension["Hints"] as $hint)
+  {
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Extension`, `Ranges`.`Server`, COUNT(*) AS `Total` FROM `ExtensionHint` LEFT JOIN `Extensions` ON `ExtensionHint`.`Hint` = `Extensions`.`ID` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` WHERE `ExtensionHint`.`Hint` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $hint)))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    $hintdata = $result->fetch_assoc ();
+    if ( $hintdata["Total"] == 1)
+    {
+      $notify = array ( "Extension" => $hintdata["Extension"]);
+      if ( framework_has_hook ( "extensions_remove_hint_notify"))
+      {
+        $notify = framework_call ( "extensions_remove_hint_notify", $parameters, false, $notify);
+      }
+      notify_server ( $hintdata["Server"], "removehint", $notify);
+    }
+  }
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ExtensionHint` WHERE `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["id"])))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+
+  /**
+   * Remove extension from other extensions transhipment
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Extension`, `Extensions`.`ID`, `Ranges`.`Server` FROM `ExtensionTranshipment` LEFT JOIN `Extensions` ON `Extensions`.`ID` = `ExtensionTranshipment`.`Extension` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` WHERE `ExtensionTranshipment`.`Transhipment` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["id"])))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $transhipment = $result->fetch_assoc ())
+  {
+    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Extension` FROM `ExtensionTranshipment` LEFT JOIN `Extensions` ON `ExtensionTranshipment`.`Transhipment` = `Extensions`.`ID` WHERE `ExtensionTranshipment`.`Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $transhipment["ID"])))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    $transhipmentdata = array ();
+    while ( $tmp = $result2->fetch_assoc ())
+    {
+      $transhipmentdata[] = $tmp["Extension"];
+    }
+    $notify = array ( "Extension" => $transhipment["Extension"], "Transhipments" => $transhipmentdata);
+    if ( framework_has_hook ( "extensions_change_transhipment_notify"))
+    {
+      $notify = framework_call ( "extensions_change_transhipment_notify", $parameters, false, $notify);
+    }
+    notify_server ( $transhipment["Server"], "changetranshipment", $notify);
+    if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ExtensionTranshipment` WHERE `Transhipment` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["id"])))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
   }
 
   /**
    * Remove extension database record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Centrais` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $extension["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Extensions` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $extension["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
 
   /**
-   * Remove extension from asterisk extensions
+   * Call remove post hook, if exist
    */
-  notify_server ( $extension["Servidor"], "removeextension", array ( "Username" => $extension["Ramal"]));
+  if ( framework_has_hook ( "extensions_remove_post"))
+  {
+    framework_call ( "extensions_remove_post", $parameters);
+  }
 
   /**
-   * Create audit record
+   * Notify servers about change
    */
-  audit ( "extension", "remove", $extension);
+  $notify = array ( "Extension" => $extension["Extension"]);
+  if ( framework_has_hook ( "extensions_remove_notify"))
+  {
+    $notify = framework_call ( "extensions_remove_notify", $parameters, false, $notify);
+  }
+  notify_server ( $extension["Server"], "removeextension", $notify);
+
+  /**
+   * Insert audit registry
+   */
+  $audit = $extension;
+  if ( framework_has_hook ( "extensions_remove_audit"))
+  {
+    $audit = framework_call ( "extensions_remove_audit", $parameters, false, $audit);
+  }
+  audit ( "extension", "remove", $audit);
 
   /**
    * Retorn OK to user
@@ -1485,14 +2039,13 @@ function extensions_report ( $buffer, $parameters)
 }
 
 /**
- * API call to get call information
+ * API call to intercept new server and server reinstall
  */
-framework_add_hook ( "calls_view", "calls_view");
-framework_add_permission ( "calls_view", "Visualizar informações de ligação");
-framework_add_api_call ( "/calls/:id", "Read", "calls_view", array ( "permissions" => array ( "user", "calls_view")));
+framework_add_hook ( "servers_add_post", "extensions_server_reconfig");
+framework_add_hook ( "servers_reinstall_config", "extensions_server_reconfig");
 
 /**
- * Function to generate call informations.
+ * Function to notify server to include all extensions.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -1500,130 +2053,110 @@ framework_add_api_call ( "/calls/:id", "Read", "calls_view", array ( "permission
  * @param array $parameters Optional parameters to the function
  * @return string Output of the generated page
  */
-function calls_view ( $buffer, $parameters)
+function extensions_server_reconfig ( $buffer, $parameters)
 {
   global $_in;
 
   /**
-   * Check if call exist into database
+   * Fetch all extensions and send to server
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `cdr`.*, `Gateways`.`Description` AS `GatewayDescription`, `Servers`.`Name` AS `ServerName`, `CostCenters`.`ID` AS `CostCenterID`, `CostCenters`.`Description` AS `CostCenterDescription` FROM `cdr` LEFT JOIN `Gateways` ON `Gateways`.`ID` = `cdr`.`gateway` LEFT JOIN `Servers` ON `Servers`.`ID` = `cdr`.`server` LEFT JOIN `CostCenters` ON `CostCenters`.`Code` = `cdr`.`accountcode` WHERE `cdr`.`uniqueid` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"]) . "'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`ID`, `Extensions`.`Extension`, `Extensions`.`Name`, `Extensions`.`Email`, `Extensions`.`Password`, `Extensions`.`Group`, `Groups`.`Code` AS `GroupCode`, `Extensions`.`Permissions`, `CostCenters`.`Code` AS `CostCenter`, GROUP_CONCAT(`ExtensionCapture`.`Group` SEPARATOR ',') AS `Captures`, `Servers`.`Domain` FROM `Extensions` LEFT JOIN `Groups` ON `Extensions`.`Group` = `Groups`.`ID` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` LEFT JOIN `Servers` ON `Ranges`.`Server` = `Servers`.`ID` LEFT JOIN `CostCenters` ON `Extensions`.`CostCenter` = `CostCenters`.`ID` LEFT JOIN `ExtensionCapture` ON `ExtensionCapture`.`Extension` = `Extensions`.`ID` WHERE `Ranges`.`Server` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["id"]) . " GROUP BY `Extensions`.`ID`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  if ( $result->num_rows != 1)
+  while ( $extension = $result->fetch_assoc ())
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
-  }
-  $call = $result->fetch_assoc ();
+    /**
+     * Explode capture groups and permissions
+     */
+    $extension["Captures"] = explode ( ",", $extension["Captures"]);
+    $extension["Permissions"] = json_decode ( $extension["Permissions"], true);
 
-  /**
-   * Format data
-   */
-  $result = array ();
-  $result["result"] = true;
-  $result["date"] = format_db_datetime ( $call["calldate"]);
-  $result["clid"] = $call["clid"];
-  $result["src"] = $call["src"];
-  $result["dst"] = $call["dst"];
-  $result["duration"] = htmlentities ( strip_tags ( format_secs_to_string ( $call["duration"])), ENT_COMPAT, "UTF-8");
-  $result["billsec"] = htmlentities ( strip_tags ( format_secs_to_string ( $call["billsec"])), ENT_COMPAT, "UTF-8");
-  if ( $call["userfield"] == "DND")
-  {
-    $call["disposition"] = "NO ANSWER";
-  }
-  switch ( $call["disposition"])
-  {
-    case "ANSWERED":
-      $result["disposition"] = "Atendida";
-      if ( $call["lastapp"] == "VoiceMail")
-      {
-        $result["disposition"] .= " (Correio de voz)";
-      }
-      break;
-    case "NO ANSWER":
-      $result["disposition"] = "Não atendida";
-      break;
-    case "BUSY":
-      $result["disposition"] = "Ocupado";
-      break;
-    case "FAILED":
-      $result["disposition"] = "Falha na ligação";
-      break;
-    default:
-      $result["disposition"] = "Desconhecido: " . strip_tags ( $call["disposition"]);
-      break;
-  }
-  $result["cc"] = $call["CostCenterID"];
-  $result["ccdesc"] = $call["CostCenterDesc"] . " (" . $call["accountcode"] . ")";
-  $result["userfield"] = $call["userfield"];
-  $result["uniqueid"] = $call["uniqueid"];
-  $result["server"] = $call["server"];
-  $result["serverdesc"] = $call["ServerName"];
-  $result["type"] = $call["calltype"];
-  switch ( $call["calltype"])
-  {
-    case "1":
-      $result["typedesc"] = "Ramal";
-      break;
-    case "2":
-      $result["typedesc"] = "Fixo local";
-      break;
-    case "3":
-      $result["typedesc"] = "Celular local";
-      break;
-    case "4":
-      $result["typedesc"] = "DDD";
-      break;
-    case "5":
-      $result["typedesc"] = "DDI";
-      break;
-    case "6":
-      $result["typedesc"] = "0300";
-      break;
-    case "7":
-      $result["typedesc"] = "0800";
-      break;
-    case "8":
-      $result["typedesc"] = "Serviços";
-      break;
-    default:
-      $result["typedesc"] = "N/D";
-      break;
-  }
-  $result["gw"] = $call["gateway"];
-  $result["gwdesc"] = $call["GatewayDescription"];
-  if ( $call["processed"])
-  {
-    $result["value"] = sprintf ( "%.5f", $call["value"]);
-  } else {
-    $result["value"] = "N/D";
-  }
-  $result["codec"] = $call["codec"];
-  $result["QOSa"] = $call["QOSa"];
-  $result["QOSb"] = $call["QOSb"];
-  $result["monitor"] = $call["monitor"];
-  $result["userfieldextra"] = $call["userfieldextra"];
-  $result["SIPID"] = $call["SIPID"];
-
-  /**
-   * Verifica se existe captura da ligação (se tiver, processa ela)
-   */
-  $result["siptrace"] = array ();
-  $files = scandir ( "/var/spool/pcapsipdump/" . date ( "Ymd", format_db_timestamp ( $call["calldate"])) . "/" . date ( "H", format_db_timestamp ( $call["calldate"])) . "/");
-  foreach ( $files as $file)
-  {
-    if ( strpos ( $file, "-" . $call["SIPID"] . ".pcap") !== false)
+    /**
+     * Fetch extension transhipments
+     */
+    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`Extensions`.`Extension` SEPARATOR ',') AS `Transhipments` FROM `ExtensionTranshipment` LEFT JOIN `Extensions` ON `ExtensionTranshipment`.`Transhipment` = `Extensions`.`ID` WHERE `ExtensionTranshipment`.`Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $extension["ID"])))
     {
-      $result["siptrace"] = filters_call ( "process_sipdump", array ( "filename" => "/var/spool/pcapsipdump/" . date ( "Ymd", format_db_timestamp ( $call["calldate"])) . "/" . date ( "H", format_db_timestamp ( $call["calldate"])) . "/" . $file));
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    $extension["Transhipments"] = explode ( ",", $result2->fetch_assoc ()["Transhipments"]);
+
+    /**
+     * Fetch extension hints
+     */
+    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`Extensions`.`Extension` SEPARATOR ',') AS `Hints` FROM `ExtensionHint` LEFT JOIN `Extensions` ON `ExtensionHint`.`Hint` = `Extensions`.`ID` WHERE `ExtensionHint`.`Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $extension["ID"])))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    $extension["Hints"] = explode ( ",", $result2->fetch_assoc ()["Hints"]);
+
+    /**
+     * If extension doesn't has cost center, get group default cost center
+     */
+    if ( $extension["CostCenter"] == "")
+    {
+      if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT `CostCenters`.`Code` FROM `Groups` LEFT JOIN `CostCenters` WHERE `Groups`.`CostCenter` = `CostCenters`.`ID` WHERE `Groups`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $extension["Group"])))
+      {
+        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+        exit ();
+      }
+      $extension["CostCenter"] = $result2->fetch_assoc ()["Code"];
+    }
+
+    /**
+     * Fetch all accounts from extension
+     */
+    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT `Accounts`.`ID`, `Accounts`.`Username`, `Accounts`.`Password`, `Phones`.`MAC`, `Phones`.`Template`, `Equipments`.`Template` AS `EquipmentTemplate`, `Equipments`.`AP` FROM `Accounts` LEFT JOIN `Phones` ON `Accounts`.`Phone` = `Phones`.`ID` LEFT JOIN `Equipments` ON `Phones`.`Type` = `Equipments`.`ID` WHERE `Accounts`.`Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $extension["ID"])))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    while ( $account = $result2->fetch_assoc ())
+    {
+      /**
+       * Add new extension at Asterisk servers
+       */
+      $notify = array ( "Extension" => $extension["Extension"], "UID" => $account["ID"], "Username" => $account["Username"], "Password" => $account["Password"], "Group" => $extension["GroupCode"], "Capture" => $extension["Capture"], "Name" => $extension["Name"], "Template" => $account["Template"], "Transhipments" => $extension["Transhipments"], "CostCenter" => $extension["CostCenter"], "PhonePass" => $extension["Permissions"]["voicemailpass"], "Permissions" => $extension["Permissions"]);
+      if ( framework_has_hook ( "extensions_add_notify"))
+      {
+        $notify = framework_call ( "extensions_add_notify", $parameters, false, $notify);
+      }
+      notify_server ( $parameters["id"], "createextension", $notify);
+
+      /**
+       * Add auto provisioning file if supported
+       */
+      if ( ! empty ( $account["MAC"]))
+      {
+        $notify = array ( "Extension" => $extension["Extension"], "Username" => $account["Username"], "Password" => $account["Password"], "Name" => $extension["Name"], "MAC" => $account["MAC"], "Template" => $account["Template"], "Domain" => $extension["Domain"]);
+        if ( framework_has_hook ( "extensions_add_ap_notify"))
+        {
+          $notify = framework_call ( "extensions_add_ap_notify", $parameters, false, $notify);
+        }
+        notify_server ( $parameters["id"], "createap", $notify);
+      }
+    }
+
+    /**
+     * Create voicemail configuration if needed
+     */
+    if ( $extension["Permissions"]["voicemail"] == true)
+    {
+      $notify = array ( "Extension" => $extension["Extension"], "Name" => $extension["Name"], "Password" => $extension["Password"], "Email" => $extension["Email"]);
+      if ( framework_has_hook ( "extensions_add_voicemail_notify"))
+      {
+        $notify = framework_call ( "extensions_add_voicemail_notify", $parameters, false, $notify);
+      }
+      notify_server ( $parameters["id"], "createvoicemail", $notify);
     }
   }
 
   /**
-   * Return structured data
+   * Return buffer
    */
-  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $result);
+  return $buffer;
 }
 ?>

@@ -2,5 +2,5 @@
 --==========--
 
 URL: https://www.datatables.net/extensions/responsive/
-Version: 2.2.1
+Version: 2.2.2
 License: MIT

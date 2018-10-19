@@ -1,0 +1,6 @@
+  Raphael
+--=======--
+
+URL: https://github.com/DmitryBaranovskiy/raphael/
+Version: 2.2.7
+License: MIT

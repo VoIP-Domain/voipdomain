@@ -1,0 +1,7 @@
+  driver.js
+--=========--
+
+URL: https://github.com/kamranahmedse/driver.js
+Version: 0.5.0
+License: MIT
+Modifications: Created symlinks to minified version as uncompressed version.

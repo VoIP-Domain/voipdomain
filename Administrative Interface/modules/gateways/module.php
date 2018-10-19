@@ -28,7 +28,7 @@
  * that rings in one or many gateways at same time when called. This is usefull
  * to service numbers inside a company, where many employees can answer the call.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Gateways
@@ -150,7 +150,7 @@ function gateways_search_page ( $buffer, $parameters)
               "  columnDefs: [\n" .
               "                { orderable: false, targets: [ 5 ]},\n" .
               "                { searchable: false, targets: [ 0, 2, 5 ]},\n" .
-              "                { data: 'links', render: function ( data, type, full) { return '<span class=\"btn-group\"><a class=\"btn btn-xs btn-info ladda-button\" data-style=\"zoom-in\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "View") . "\" role=\"button\" title=\"\" href=\"/gateways/' + full[0] + '/view\"><i class=\"fa fa-search\"></i></a><a class=\"btn btn-xs btn-success ladda-button\" data-style=\"zoom-in\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Report") . "\" role=\"button\" title=\"\" href=\"/gateways/' + full[0] + '/report\"><i class=\"fa fa-list\"></i></a><a class=\"btn btn-xs btn-warning ladda-button\" data-style=\"zoom-in\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Edit") . "\" role=\"button\" title=\"\" href=\"/gateways/' + full[0] + '/edit\"><i class=\"fa fa-pencil-alt\"></i></a><button class=\"btn btn-xs btn-danger ladda-button\" data-style=\"zoom-in\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Remove") . "\" role=\"button\" title=\"\" data-id=\"' + full[0] + '\" data-description=\"' + full[1] + '\" data-number=\"' + full[4] + '\"><i class=\"fa fa-times\"></i></button></span>'; }, targets: [ 5 ]},\n" .
+              "                { data: 'links', render: function ( data, type, full) { return '<span class=\"btn-group\"><a class=\"btn btn-xs btn-info\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "View") . "\" role=\"button\" title=\"\" href=\"/gateways/' + full[0] + '/view\"><i class=\"fa fa-search\"></i></a><a class=\"btn btn-xs btn-success\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Report") . "\" role=\"button\" title=\"\" href=\"/gateways/' + full[0] + '/report\"><i class=\"fa fa-list\"></i></a><a class=\"btn btn-xs btn-warning\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Edit") . "\" role=\"button\" title=\"\" href=\"/gateways/' + full[0] + '/edit\"><i class=\"fa fa-pencil-alt\"></i></a><button class=\"btn btn-xs btn-danger\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Remove") . "\" role=\"button\" title=\"\" data-id=\"' + full[0] + '\" data-description=\"' + full[1] + '\" data-number=\"' + full[4] + '\"><i class=\"fa fa-times\"></i></button></span>'; }, targets: [ 5 ]},\n" .
               "                { 'render': function ( data, type, full) { return '<span class=\"label label-' + ( full[2] ? 'success' : 'danger') + '\">' + ( full[2] ? '" . __ ( "Active") . "' : '" . __ ( "Inactive") . "') + '</span>'; }, 'targets': [ 2 ]}\n" .
               "              ],\n" .
               "  columns: [\n" .
@@ -459,7 +459,7 @@ function gateways_add_page ( $buffer, $parameters)
   // Add load button
   $output .= "      <div class=\"form-group\">\n";
   $output .= "        <div class=\"col-xs-12\">\n";
-  $output .= "          <button id=\"gateway_add_file_load\" class=\"btn btn-danger ladda-button pull-right\" disabled=\"disabled\">" . __ ( "Load") . "</button><br /><br />\n";
+  $output .= "          <button id=\"gateway_add_file_load\" class=\"btn btn-danger ladda-button\" data-style=\"pull-right\" disabled=\"disabled\">" . __ ( "Load") . "</button><br /><br />\n";
   $output .= "          <p class=\"pull-right\"><strong>" . __ ( "WARNING") . "</strong>: " . __ ( "When loading fares file, the filled data will be overwritted!") . "</p>\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";
@@ -1203,7 +1203,7 @@ function gateways_edit_page ( $buffer, $parameters)
   // Add load button
   $output .= "      <div class=\"form-group\">\n";
   $output .= "        <div class=\"col-xs-12\">\n";
-  $output .= "          <button id=\"gateway_edit_file_load\" class=\"btn btn-danger ladda-button pull-right\" disabled=\"disabled\">" . __ ( "Load") . "</button><br /><br />\n";
+  $output .= "          <button id=\"gateway_edit_file_load\" class=\"btn btn-danger ladda-button\" data-style=\"pull-right\" disabled=\"disabled\">" . __ ( "Load") . "</button><br /><br />\n";
   $output .= "          <p class=\"pull-right\"><strong>" . __ ( "WARNING") . "</strong>: " . __ ( "When loading fares file, the filled data will be overwritted!") . "</p>\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";

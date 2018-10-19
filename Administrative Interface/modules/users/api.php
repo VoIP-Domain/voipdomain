@@ -26,7 +26,7 @@
 /**
  * VoIP Domain users api module. This module add the api calls related to users.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Users
@@ -137,6 +137,7 @@ function users_view ( $buffer, $parameters)
   $data["name"] = $user["Name"];
   $data["user"] = $user["User"];
   $data["email"] = $user["Email"];
+  $data["language"] = ( $user["Language"] != "" ? $user["Language"] : "default");
   $data["administrator"] = $user["Permissions"]["administrator"];
   $data["auditor"] = $user["Permissions"]["auditor"];
 
@@ -209,6 +210,16 @@ function users_add ( $buffer, $parameters)
     $data["result"] = false;
     $data["confirmation"] = __ ( "The passwords didn't match.");
   }
+  if ( $parameters["language"] == "default")
+  {
+    $parameters["language"] = "";
+  } else {
+    if ( ! array_key_exists ( $parameters["language"], $_in["languages"]))
+    {
+      $data["result"] = false;
+      $data["language"] = __ ( "The select language are invalid.");
+    }
+  }
 
   /**
    * Check if user was already added
@@ -255,10 +266,18 @@ function users_add ( $buffer, $parameters)
   }
 
   /**
+   * Call add pre hook, if exist
+   */
+  if ( framework_has_hook ( "users_add_pre"))
+  {
+    $parameters = framework_call ( "users_add_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Add new user record
    */
   $salt = secure_rand ( 32);
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Users` (`Name`, `User`, `Pass`, `Permissions`, `Email`, `Since`, `Salt`, `Iterations`, `AvatarID`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["user"]) . "', '" . hash_pbkdf2 ( "sha256", $parameters["password"], $salt, ( $_in["security"]["iterations"] != 0 ? $_in["security"]["iterations"] : 40000), 64) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $permissions)) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["email"]) . "', NOW(), '" . $_in["mysql"]["id"]->real_escape_string ( $salt) . "', " . $_in["mysql"]["id"]->real_escape_string ( ( $_in["security"]["iterations"] != 0 ? $_in["security"]["iterations"] : 40000)) . ", '')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Users` (`Name`, `User`, `Pass`, `Permissions`, `Email`, `Since`, `Salt`, `Iterations`, `AvatarID`, `Language`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["user"]) . "', '" . hash_pbkdf2 ( "sha256", $parameters["password"], $salt, ( $_in["security"]["iterations"] != 0 ? $_in["security"]["iterations"] : 40000), 64) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $permissions)) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["email"]) . "', NOW(), '" . $_in["mysql"]["id"]->real_escape_string ( $salt) . "', " . $_in["mysql"]["id"]->real_escape_string ( ( $_in["security"]["iterations"] != 0 ? $_in["security"]["iterations"] : 40000)) . ", '', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["language"]) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -276,7 +295,7 @@ function users_add ( $buffer, $parameters)
   /**
    * Insert audit registry
    */
-  $audit = array ( "ID" => $parameters["id"], "Name" => $parameters["name"], "User" => $parameters["user"], "Password" => $parameters["password"], "Permissions" => $permissions, "Email" => $parameters["email"], "Salt" => $salt, "Iterations" => ( $_in["security"]["iterations"] != 0 ? $_in["security"]["iterations"] : 40000));
+  $audit = array ( "ID" => $parameters["id"], "Name" => $parameters["name"], "User" => $parameters["user"], "Password" => $parameters["password"], "Permissions" => $permissions, "Email" => $parameters["email"], "Salt" => $salt, "Iterations" => ( $_in["security"]["iterations"] != 0 ? $_in["security"]["iterations"] : 40000), "Language" => $parameters["language"]);
   if ( framework_has_hook ( "users_add_audit"))
   {
     $audit = framework_call ( "users_add_audit", $parameters, false, $audit);
@@ -351,6 +370,16 @@ function users_edit ( $buffer, $parameters)
     $data["result"] = false;
     $data["confirmation"] = __ ( "The passwords didn't match.");
   }
+  if ( $parameters["language"] == "default")
+  {
+    $parameters["language"] = "";
+  } else {
+    if ( ! array_key_exists ( $parameters["language"], $_in["languages"]))
+    {
+      $data["result"] = false;
+      $data["language"] = __ ( "The select language are invalid.");
+    }
+  }
 
   /**
    * Check if user was already in use
@@ -412,10 +441,18 @@ function users_edit ( $buffer, $parameters)
   }
 
   /**
+   * Call edit pre hook, if exist
+   */
+  if ( framework_has_hook ( "users_edit_pre"))
+  {
+    $parameters = framework_call ( "users_edit_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Change user record
    */
   $salt = secure_rand ( 32);
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Users` SET `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "', `User` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["user"]) . "', `Permissions` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $permissions)) . "', `Email` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["email"]) . "'" . ( ! empty ( $parameters["password"]) ? ", `Pass` = '" . hash_pbkdf2 ( "sha256", $parameters["password"], $salt, ( $_in["security"]["iterations"] != 0 ? $_in["security"]["iterations"] : 40000), 64) . "', `Salt` = '" . $_in["mysql"]["id"]->real_escape_string ( $salt) . "', `Iterations` = " . $_in["mysql"]["id"]->real_escape_string ( ( $_in["security"]["iterations"] != 0 ? $_in["security"]["iterations"] : 40000)) : "") . " WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Users` SET `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "', `User` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["user"]) . "', `Permissions` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $permissions)) . "', `Email` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["email"]) . "'" . ( ! empty ( $parameters["password"]) ? ", `Pass` = '" . hash_pbkdf2 ( "sha256", $parameters["password"], $salt, ( $_in["security"]["iterations"] != 0 ? $_in["security"]["iterations"] : 40000), 64) . "', `Salt` = '" . $_in["mysql"]["id"]->real_escape_string ( $salt) . "', `Iterations` = " . $_in["mysql"]["id"]->real_escape_string ( ( $_in["security"]["iterations"] != 0 ? $_in["security"]["iterations"] : 40000)) : "") . ", `Language` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["language"]) . "' WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -449,6 +486,10 @@ function users_edit ( $buffer, $parameters)
   if ( $user["Email"] != $parameters["email"])
   {
     $audit["Email"] = array ( "Old" => $user["Email"], "New" => $parameters["email"]);
+  }
+  if ( $user["Language"] != $parameters["language"])
+  {
+    $audit["Language"] = array ( "Old" => $user["Language"], "New" => $parameters["language"]);
   }
   if ( ! empty ( $parameters["password"]))
   {
@@ -514,6 +555,14 @@ function users_remove ( $buffer, $parameters)
     exit ();
   }
   $user = $result->fetch_assoc ();
+
+  /**
+   * Call remove pre hook, if exist
+   */
+  if ( framework_has_hook ( "users_remove_pre"))
+  {
+    $parameters = framework_call ( "users_remove_pre", $parameters, false, $parameters);
+  }
 
   /**
    * Remove user database record

@@ -28,7 +28,7 @@
  * that rings in one or many extensions at same time when called. This is usefull
  * to service numbers inside a company, where many employees can answer the call.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Extensions
@@ -150,7 +150,7 @@ function extensions_search_page ( $buffer, $parameters)
               "  columnDefs: [\n" .
               "                { orderable: false, targets: [ 0, 5 ]},\n" .
               "                { searchable: false, targets: [ 0, 5 ]},\n" .
-              "                { data: 'links', render: function ( data, type, full) { return '<span class=\"btn-group\"><a class=\"btn btn-xs btn-info ladda-button\" data-style=\"zoom-in\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "View") . "\" role=\"button\" title=\"\" href=\"/extensions/' + full[0] + '/view\"><i class=\"fa fa-search\"></i></a><a class=\"btn btn-xs btn-success ladda-button\" data-style=\"zoom-in\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Report") . "\" role=\"button\" title=\"\" href=\"/extensions/' + full[0] + '/report\"><i class=\"fa fa-list\"></i></a><a class=\"btn btn-xs btn-warning ladda-button\" data-style=\"zoom-in\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Edit") . "\" role=\"button\" title=\"\" href=\"/extensions/' + full[0] + '/edit\"><i class=\"fa fa-pencil-alt\"></i></a><button class=\"btn btn-xs btn-danger ladda-button\" data-style=\"zoom-in\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Remove") . "\" role=\"button\" title=\"\" data-id=\"' + full[0] + '\" data-extension=\"' + full[1] + '\" data-name=\"' + full[2] + '\"><i class=\"fa fa-times\"></i></button></span>'; }, targets: [ 5 ]},\n" .
+              "                { data: 'links', render: function ( data, type, full) { return '<span class=\"btn-group\"><a class=\"btn btn-xs btn-info\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "View") . "\" role=\"button\" title=\"\" href=\"/extensions/' + full[0] + '/view\"><i class=\"fa fa-search\"></i></a><a class=\"btn btn-xs btn-success\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Report") . "\" role=\"button\" title=\"\" href=\"/extensions/' + full[0] + '/report\"><i class=\"fa fa-list\"></i></a><a class=\"btn btn-xs btn-warning\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Edit") . "\" role=\"button\" title=\"\" href=\"/extensions/' + full[0] + '/edit\"><i class=\"fa fa-pencil-alt\"></i></a><button class=\"btn btn-xs btn-danger\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Remove") . "\" role=\"button\" title=\"\" data-id=\"' + full[0] + '\" data-extension=\"' + full[1] + '\" data-name=\"' + full[2] + '\"><i class=\"fa fa-times\"></i></button></span>'; }, targets: [ 5 ]},\n" .
               "                { visible: false, targets: [ 0 ]}\n" .
               "              ],\n" .
               "  columns: [\n" .
@@ -349,16 +349,11 @@ function extensions_add_page ( $buffer, $parameters)
   $output .= "              </div>\n";
   $output .= "            </div>\n";
 
-  // Add address and BLF fields
+  // Add MAC address field
   $output .= "            <div class=\"form-group\">\n";
   $output .= "              <label for=\"extension_add_account__ID__mac\" class=\"control-label col-xs-2\">" . __ ( "MAC address") . "</label>\n";
-  $output .= "              <div>\n";
-  $output .= "                <div class=\"col-xs-9\">\n";
-  $output .= "                  <input type=\"text\" name=\"account__ID__mac\" class=\"form-control\" id=\"extension_add_account__ID__mac\" placeholder=\"" . __ ( "MAC address") . "\" disabled=\"disabled\" />\n";
-  $output .= "                </div>\n";
-  $output .= "                <span class=\"col-xs-1 pull-right\">\n";
-  $output .= "                  <button class=\"btn btn-success btn-blf\" role=\"button\" id=\"extension_add_account__ID__blf\" disabled=\"disabled\"><i class=\"glyphicon glyphicon-tasks\"></i> " . __ ( "BLF") . "</button>\n";
-  $output .= "                </span>\n";
+  $output .= "              <div class=\"col-xs-10\">\n";
+  $output .= "                <input type=\"text\" name=\"account__ID__mac\" class=\"form-control\" id=\"extension_add_account__ID__mac\" placeholder=\"" . __ ( "MAC address") . "\" disabled=\"disabled\" />\n";
   $output .= "              </div>\n";
   $output .= "            </div>\n";
   $output .= "          </div>\n";
@@ -400,6 +395,14 @@ function extensions_add_page ( $buffer, $parameters)
   $output .= "          <input type=\"text\" name=\"voltx\" id=\"extension_add_voltx\" class=\"form-control\" />\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";
+
+  // Add extension hint selectors
+  $output .= "      <div class=\"form-group\">\n";
+  $output .= "        <label for=\"extension_add_hints\" class=\"control-label col-xs-2\">" . __ ( "Hints") . "</label>\n";
+  $output .= "        <div class=\"col-xs-10\">\n";
+  $output .= "          <select name=\"hints\" id=\"extension_add_hints\" class=\"form-control\" data-placeholder=\"" . __ ( "Hints extensions") . "\" multiple=\"multiple\"></select>\n";
+  $output .= "        </div>\n";
+  $output .= "      </div>\n";
   $output .= "    </div>\n";
   $output .= "  </div>\n";
 
@@ -426,7 +429,7 @@ function extensions_add_page ( $buffer, $parameters)
               "});\n" .
               "$('#extension_add_form input[type=checkbox]').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});\n" .
               "$('#extension_add_voicemailpass').mask ( '000000');\n" .
-              "$('#extension_add_transhipments').select2 (\n" .
+              "$('#extension_add_transhipments,#extension_add_hints').select2 (\n" .
               "{\n" .
               "  allowClear: true,\n" .
               "  data: VoIP.select2 ( '/extensions/search', 'GET')\n" .
@@ -505,7 +508,6 @@ function extensions_add_page ( $buffer, $parameters)
               "  $('#extension_add_account_' + $(this).data ( 'tabid') + '_type').select2 ( { allowClear: true, data: $('#extension_add_accounts').data ( 'typesformated') }).on ( 'select2:select', function ( event)\n" .
               "  {\n" .
               "    $('#' + $(this).attr ( 'id').replace ( /type$/, 'mac')).val ( '').attr ( 'disabled', 'disabled');\n" .
-              "    $('#' + $(this).attr ( 'id').replace ( /type$/, 'blf')).attr ( 'disabled', 'disabled');\n" .
               "    for ( var id in $('#extension_add_accounts').data ( 'types').result)\n" .
               "    {\n" .
               "      if ( $('#extension_add_accounts').data ( 'types').result[id][0] == $(this).val ())\n" .
@@ -514,16 +516,11 @@ function extensions_add_page ( $buffer, $parameters)
               "        {\n" .
               "          $('#' + $(this).attr ( 'id').replace ( /type$/, 'mac')).removeAttr ( 'disabled').focus ();\n" .
               "        }\n" .
-              "        if ( $('#extension_add_accounts').data ( 'types').result[id][3] != 0)\n" .
-              "        {\n" .
-              "          $('#' + $(this).attr ( 'id').replace ( /type$/, 'blf')).removeAttr ( 'disabled').data ( 'shortcuts', $('#extension_add_accounts').data ( 'types').result[id][3]).data ( 'extensions', $('#extension_add_accounts').data ( 'types').result[id][4]).data ( 'shortxext', $('#extension_add_accounts').data ( 'types').result[id][5]);\n" .
-              "        }\n" .
               "      }\n" .
               "    }\n" .
               "  }).on ( 'select2:unselect', function ( event)\n" .
               "  {\n" .
               "    $('#' + $(this).attr ( 'id').replace ( /type$/, 'mac')).val ( '').attr ( 'disabled', 'disabled');\n" .
-              "    $('#' + $(this).attr ( 'id').replace ( /type$/, 'blf')).attr ( 'disabled', 'disabled');\n" .
               "  });\n" .
               "  $('#extension_add_account_' + $(this).data ( 'tabid') + '_mac').mask ( 'xx:xx:xx:xx:xx:xx', { 'translation': { x: { pattern: /[A-Fa-f0-9]/}}});\n" .
               "  $('#extension_add_accounts ul.nav-tabs a:last').tab ( 'show');\n" .
@@ -597,6 +594,7 @@ function extensions_view_page ( $buffer, $parameters)
   sys_addjs ( array ( "name" => "bootstrap-toggle", "src" => "/vendors/bootstrap-toggle/js/bootstrap-toggle.js", "dep" => array ()));
   sys_addjs ( array ( "name" => "bootstrap-slider", "src" => "/vendors/bootstrap-slider/dist/bootstrap-slider.js", "dep" => array ()));
   sys_addjs ( array ( "name" => "bootstrap-tabdrop", "src" => "/vendors/bootstrap-tabdrop/js/bootstrap-tabdrop.js", "dep" => array ()));
+  sys_addjs ( array ( "name" => "jquery-qrcode", "src" => "/vendors/jquery-qrcode/jquery-qrcode-0.14.0.js", "dep" => array ()));
 
   /**
    * Create page code
@@ -714,16 +712,11 @@ function extensions_view_page ( $buffer, $parameters)
   $output .= "              </div>\n";
   $output .= "            </div>\n";
 
-  // Add address and BLF fields
+  // Add MAC address field
   $output .= "            <div class=\"form-group\">\n";
   $output .= "              <label for=\"extension_view_account__ID__mac\" class=\"control-label col-xs-2\">" . __ ( "MAC address") . "</label>\n";
-  $output .= "              <div>\n";
-  $output .= "                <div class=\"col-xs-9\">\n";
-  $output .= "                  <input type=\"text\" name=\"account__ID__mac\" class=\"form-control\" id=\"extension_view_account__ID__mac\" placeholder=\"" . __ ( "MAC address") . "\" disabled=\"disabled\" />\n";
-  $output .= "                </div>\n";
-  $output .= "                <span class=\"col-xs-1 pull-right text-right\">\n";
-  $output .= "                  <button class=\"btn btn-success btn-blf\" role=\"button\" id=\"extension_view_account__ID__blf\" disabled=\"disabled\"><i class=\"glyphicon glyphicon-tasks\"></i> " . __ ( "BLF") . "</button>\n";
-  $output .= "                </span>\n";
+  $output .= "              <div class=\"col-xs-10\">\n";
+  $output .= "                <input type=\"text\" name=\"account__ID__mac\" class=\"form-control\" id=\"extension_view_account__ID__mac\" placeholder=\"" . __ ( "MAC address") . "\" disabled=\"disabled\" />\n";
   $output .= "              </div>\n";
   $output .= "            </div>\n";
   $output .= "          </div>\n";
@@ -765,6 +758,14 @@ function extensions_view_page ( $buffer, $parameters)
   $output .= "          <input type=\"text\" name=\"voltx\" id=\"extension_view_voltx\" class=\"form-control\" />\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";
+
+  // Add extension hint selectors
+  $output .= "      <div class=\"form-group\">\n";
+  $output .= "        <label for=\"extension_view_hints\" class=\"control-label col-xs-2\">" . __ ( "Hints") . "</label>\n";
+  $output .= "        <div class=\"col-xs-10\">\n";
+  $output .= "          <select name=\"hints\" id=\"extension_view_hints\" class=\"form-control\" data-placeholder=\"" . __ ( "Hints extensions") . "\" multiple=\"multiple\" disabled=\"disabled\"></select>\n";
+  $output .= "        </div>\n";
+  $output .= "      </div>\n";
   $output .= "    </div>\n";
   $output .= "  </div>\n";
 
@@ -780,11 +781,29 @@ function extensions_view_page ( $buffer, $parameters)
   $output .= "</form>\n";
 
   /**
+   * Add extension remove modal code
+   */
+  $output .= "<div id=\"extension_qrcode\" class=\"modal fade\" role=\"dialog\" aria-labelledby=\"extension_qrcode\" aria-hidden=\"true\">\n";
+  $output .= "  <div class=\"modal-dialog\">\n";
+  $output .= "    <div class=\"modal-content\">\n";
+  $output .= "      <div class=\"modal-header\">\n";
+  $output .= "        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">×</button>\n";
+  $output .= "        <h3 class=\"modal-title\">" . __ ( "Grandstream extension QR Code") . "</h3>\n";
+  $output .= "      </div>\n";
+  $output .= "      <div class=\"modal-body text-center\"></div>\n";
+  $output .= "      <div class=\"modal-footer\">\n";
+  $output .= "        <button class=\"btn\" data-dismiss=\"modal\">" . __ ( "Close") . "</button>\n";
+  $output .= "      </div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+  $output .= "</div>\n";
+
+  /**
    * Add view form JavaScript code
    */
   sys_addjs ( "$('#extension_view_group').select2 ();\n" .
               "$('#extension_view_capture').select2 ();\n" .
-              "$('#extension_view_transhipments').select2 ();\n" .
+              "$('#extension_view_transhipments,#extension_view_hints').select2 ();\n" .
               "$('#extension_view_form input[type=checkbox]').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});\n" .
               "$('#extension_view_accounts ul.nav-tabs').tabdrop ();\n" .
               "$('#extension_view_costcenter').select2 ();\n" .
@@ -843,13 +862,15 @@ function extensions_view_page ( $buffer, $parameters)
               "    $('#extension_view_accounts div.tab-content').append ( '<div class=\"tab-pane\" id=\"extension_view_account_' + id + '\"></div>');\n" .
               "    $('#extension_view_account_' + id).html ( $('#extension_view_account_template').html ().replace ( /_ID_/mg, id));\n" .
               "    $('#extension_view_account_' + id + '_type').append ( $('<option>', { value: data.accounts[id].type, text: data.accounts[id].typename})).val ( data.accounts[id].type).select2 ();\n" .
-              "    $('#extension_view_account_' + id + '_mac').val ( data.accounts[id].mac);\n" .
-              "    $('#extension_view_account_' + id + '_blf').on ( 'click', function ( event) { event && event.preventDefault (); $('#ramal-vis').data ( 'noclean', true).modal ( 'hide'); $('#ramal-blf').data ( 'return', $('#ramal-vis')).modal ( 'show', { fields: $(this).data ( 'fields')}); });\n" .
-              "    if ( data.accounts[id].blf == true)\n" .
+              "    if ( 'username' in data.accounts[id])\n" .
               "    {\n" .
-              "      $('#extension_view_account_' + id + '_blf').data ( 'fields', data.accounts[id].fields).removeAttr ( 'disabled');\n" .
+              "      var field = $('#extension_view_account_' + id + '_mac').parent ().html ();\n" .
+              "      $('#extension_view_account_' + id + '_mac').parent ().empty ().html ( '<div class=\"input-group\">' + field + '<div class=\"input-group-btn\"><button class=\"btn btn-default btn-qrcode ladda-button\" data-style=\"zoom-in\" data-id=\"' + data.accounts[id].id + '\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Extension QR Code") . "\" type=\"button\"><i class=\"fa fa-qrcode\"></i></button></div></div>');\n" .
+              "      $('#extension_view_account_' + id + '_mac').find ( 'button').tooltip ();\n" .
+              "      $('#extension_view_account_' + id + '_mac').attr ( 'placeholder', '" . __ ( "Username / Password") . "').val ( data.accounts[id].username + ' / ' + data.accounts[id].password);\n" .
+              "      $('#extension_view_account_' + id + '_mac').closest ( '.form-group').find ( 'label').text ( '" . __ ( "Username / Password") . "');\n" .
               "    } else {\n" .
-              "      $('#extension_view_account_' + id + '_blf').attr ( 'disabled', 'disabled');\n" .
+              "      $('#extension_view_account_' + id + '_mac').val ( data.accounts[id].mac);\n" .
               "    }\n" .
               "  }\n" .
               "  $('#extension_view_accounts ul.nav-tabs li:not(.hide) a:first').tab ( 'show');\n" .
@@ -858,6 +879,46 @@ function extensions_view_page ( $buffer, $parameters)
               "  $('#extension_view_monitor').bootstrapToggle ( 'enable').bootstrapToggle ( ( data.monitor ? 'on' : 'off')).bootstrapToggle ( 'disable');\n" .
               "  $('#extension_view_volrx').slider ( 'setValue', data.volrx);\n" .
               "  $('#extension_view_voltx').slider ( 'setValue', data.voltx);\n" .
+              "  var ids = [];\n" .
+              "  for ( var id in data.hints)\n" .
+              "  {\n" .
+              "    if ( ! data.hints.hasOwnProperty ( id))\n" .
+              "    {\n" .
+              "      continue;\n" .
+              "    }\n" .
+              "    ids.push ( id);\n" .
+              "    $('#extension_view_hints').append ( $('<option>', { value: id, text: data.hints[id]}));\n" .
+              "  }\n" .
+              "  $('#extension_view_hints').val ( ids).trigger ( 'change');\n" .
+              "});\n" .
+              "$('#content').on ( 'click', 'button.btn-qrcode', function ( event)\n" .
+              "{\n" .
+              "  var l = Ladda.create ( this);\n" .
+              "  l.start ();\n" .
+              "  var extension = VoIP.rest ( '/extensions/account/' + $(this).data ( 'id'), 'GET');\n" .
+              "  if ( extension.API.status == 'ok')\n" .
+              "  {\n" .
+              "    $('#extension_qrcode div.modal-body').empty ().qrcode (\n" .
+              "    {\n" .
+              "      render: 'image',\n" .
+              "      minVersion: 1,\n" .
+              "      maxVersion: 40,\n" .
+              "      ecLevel: 'H',\n" .
+              "      size: 400,\n" .
+              "      fill: '#000000',\n" .
+              "      background: '#ffffff',\n" .
+              "      mode: 2,\n" .
+              "      label: 'VoIP Domain',\n" .
+              "      fontname: '\"Helvetica Neue\", Helvetica, Arial, sans-serif',\n" .
+              "      fontcolor: '#932092',\n" .
+              "      text: '<?xml version=\"1.0\" encoding=\"utf-8\"?><AccountConfig version=\"1\"><Account><RegisterServer>' + extension.result.domain + '</RegisterServer><OutboundServer>' + extension.result.serverip + '</OutboundServer><UserID>' + extension.result.name + '</UserID><AuthID>' + extension.result.username + '</AuthID><AuthPass>' + extension.result.password + '</AuthPass><AccountName>' + extension.result.name + '</AccountName><DisplayName>' + extension.result.name + '</DisplayName><Dialplan>{x+|*x+|*++}</Dialplan><RandomPort>0</RandomPort><SecOutboundServer></SecOutboundServer><Voicemail>*97</Voicemail></Account></AccountConfig>'\n" .
+              "    });\n" .
+              "    $('#extension_qrcode div.modal-body').append ( '<br /><br /><a class=\"btn btn-info\" href=\"' + $('#extension_qrcode div.modal-body img').attr ( 'src') + '\" download=\"VoIP Domain - ' + extension.result.username + '.png\">" . __ ( "Download") . "</a>');\n" .
+              "    $('#extension_qrcode').modal ( 'show');\n" .
+              "  } else {\n" .
+              "    new PNotify ( { title: '" . __ ( "Extension QR Code") . "', text: '" . __ ( "Error retrieving extension account!") . "', type: 'error'});\n" .
+              "  }\n" .
+              "  l.stop ();\n" .
               "});\n" .
               "setTimeout ( function ()\n" .
               "{\n" .
@@ -1032,16 +1093,11 @@ function extensions_edit_page ( $buffer, $parameters)
   $output .= "              </div>\n";
   $output .= "            </div>\n";
 
-  // Add address and BLF fields
+  // Add MAC address field
   $output .= "            <div class=\"form-group\">\n";
   $output .= "              <label for=\"extension_edit_account__ID__mac\" class=\"control-label col-xs-2\">" . __ ( "MAC address") . "</label>\n";
-  $output .= "              <div>\n";
-  $output .= "                <div class=\"col-xs-9\">\n";
-  $output .= "                  <input type=\"text\" name=\"account__ID__mac\" class=\"form-control\" id=\"extension_edit_account__ID__mac\" placeholder=\"" . __ ( "MAC address") . "\" disabled=\"disabled\" />\n";
-  $output .= "                </div>\n";
-  $output .= "                <span class=\"col-xs-1 pull-right\">\n";
-  $output .= "                  <button class=\"btn btn-success btn-blf\" role=\"button\" id=\"extension_edit_account__ID__blf\" disabled=\"disabled\"><i class=\"glyphicon glyphicon-tasks\"></i> " . __ ( "BLF") . "</button>\n";
-  $output .= "                </span>\n";
+  $output .= "              <div class=\"col-xs-10\">\n";
+  $output .= "                <input type=\"text\" name=\"account__ID__mac\" class=\"form-control\" id=\"extension_edit_account__ID__mac\" placeholder=\"" . __ ( "MAC address") . "\" disabled=\"disabled\" />\n";
   $output .= "              </div>\n";
   $output .= "            </div>\n";
   $output .= "          </div>\n";
@@ -1083,6 +1139,14 @@ function extensions_edit_page ( $buffer, $parameters)
   $output .= "          <input type=\"text\" name=\"voltx\" id=\"extension_edit_voltx\" class=\"form-control\" />\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";
+
+  // Add extension hint selectors
+  $output .= "      <div class=\"form-group\">\n";
+  $output .= "        <label for=\"extension_edit_hints\" class=\"control-label col-xs-2\">" . __ ( "Hints") . "</label>\n";
+  $output .= "        <div class=\"col-xs-10\">\n";
+  $output .= "          <select name=\"hints\" id=\"extension_edit_hints\" class=\"form-control\" data-placeholder=\"" . __ ( "Hints extensions") . "\" multiple=\"multiple\"></select>\n";
+  $output .= "        </div>\n";
+  $output .= "      </div>\n";
   $output .= "    </div>\n";
   $output .= "  </div>\n";
 
@@ -1108,10 +1172,10 @@ function extensions_edit_page ( $buffer, $parameters)
               "});\n" .
               "$('#extension_edit_form input[type=checkbox]').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});\n" .
               "$('#extension_edit_voicemailpass').mask ( '000000');\n" .
-              "$('#extension_edit_transhipments').select2 (\n" .
+              "$('#extension_edit_transhipments,#extension_edit_hints').select2 (\n" .
               "{\n" .
               "  allowClear: true,\n" .
-              "  data: VoIP.select2 ( '/extensions/search', 'GET')\n" .
+              "  data: VoIP.select2 ( '/extensions/search/except/' + VoIP.parameters.id, 'GET')\n" .
               "});\n" .
               "$('#extension_edit_costcenter').select2 (\n" .
               "{\n" .
@@ -1187,7 +1251,6 @@ function extensions_edit_page ( $buffer, $parameters)
               "  $('#extension_edit_account_' + $(this).data ( 'tabid') + '_type').select2 ( { allowClear: true, data: $('#extension_edit_accounts').data ( 'typesformated') }).on ( 'select2:select', function ( event)\n" .
               "  {\n" .
               "    $('#' + $(this).attr ( 'id').replace ( /type$/, 'mac')).val ( '').attr ( 'disabled', 'disabled');\n" .
-              "    $('#' + $(this).attr ( 'id').replace ( /type$/, 'blf')).attr ( 'disabled', 'disabled');\n" .
               "    for ( var id in $('#extension_edit_accounts').data ( 'types').result)\n" .
               "    {\n" .
               "      if ( $('#extension_edit_accounts').data ( 'types').result[id][0] == $(this).val ())\n" .
@@ -1196,16 +1259,11 @@ function extensions_edit_page ( $buffer, $parameters)
               "        {\n" .
               "          $('#' + $(this).attr ( 'id').replace ( /type$/, 'mac')).removeAttr ( 'disabled').focus ();\n" .
               "        }\n" .
-              "        if ( $('#extension_edit_accounts').data ( 'types').result[id][3] != 0)\n" .
-              "        {\n" .
-              "          $('#' + $(this).attr ( 'id').replace ( /type$/, 'blf')).removeAttr ( 'disabled').data ( 'shortcuts', $('#extension_edit_accounts').data ( 'types').result[id][3]).data ( 'extensions', $('#extension_edit_accounts').data ( 'types').result[id][4]).data ( 'shortxext', $('#extension_edit_accounts').data ( 'types').result[id][5]);\n" .
-              "        }\n" .
               "      }\n" .
               "    }\n" .
               "  }).on ( 'select2:unselect', function ( event)\n" .
               "  {\n" .
               "    $('#' + $(this).attr ( 'id').replace ( /type$/, 'mac')).val ( '').attr ( 'disabled', 'disabled');\n" .
-              "    $('#' + $(this).attr ( 'id').replace ( /type$/, 'blf')).attr ( 'disabled', 'disabled');\n" .
               "  });\n" .
               "  $('#extension_edit_account_' + $(this).data ( 'tabid') + '_mac').mask ( 'xx:xx:xx:xx:xx:xx', { 'translation': { x: { pattern: /[A-Fa-f0-9]/}}});\n" .
               "  $('#extension_edit_accounts ul.nav-tabs a:last').tab ( 'show');\n" .
@@ -1268,7 +1326,6 @@ function extensions_edit_page ( $buffer, $parameters)
               "    $('#extension_edit_account_' + id + '_type').select2 ( { allowClear: true, data: $('#extension_edit_accounts').data ( 'typesformated') }).on ( 'select2:select', function ( event)\n" .
               "    {\n" .
               "      $('#' + $(this).attr ( 'id').replace ( /type$/, 'mac')).val ( '').attr ( 'disabled', 'disabled');\n" .
-              "      $('#' + $(this).attr ( 'id').replace ( /type$/, 'blf')).attr ( 'disabled', 'disabled');\n" .
               "      for ( var id in $('#extension_edit_accounts').data ( 'types').result)\n" .
               "      {\n" .
               "        if ( $('#extension_edit_accounts').data ( 'types').result[id][0] == $(this).val ())\n" .
@@ -1277,19 +1334,13 @@ function extensions_edit_page ( $buffer, $parameters)
               "          {\n" .
               "            $('#' + $(this).attr ( 'id').replace ( /type$/, 'mac')).removeAttr ( 'disabled').focus ();\n" .
               "          }\n" .
-              "          if ( $('#extension_edit_accounts').data ( 'types').result[id][3] != 0)\n" .
-              "          {\n" .
-              "            $('#' + $(this).attr ( 'id').replace ( /type$/, 'blf')).removeAttr ( 'disabled').data ( 'shortcuts', $('#extension_edit_accounts').data ( 'types').result[id][3]).data ( 'extensions', $('#extension_edit_accounts').data ( 'types').result[id][4]).data ( 'shortxext', $('#extension_edit_accounts').data ( 'types').result[id][5]);\n" .
-              "          }\n" .
               "        }\n" .
               "      }\n" .
               "    }).on ( 'select2:unselect', function ( event)\n" .
               "    {\n" .
               "      $('#' + $(this).attr ( 'id').replace ( /type$/, 'mac')).attr ( 'disabled', 'disabled');\n" .
-              "      $('#' + $(this).attr ( 'id').replace ( /type$/, 'blf')).attr ( 'disabled', 'disabled');\n" .
               "    }).val ( data.accounts[id].type);\n" .
               "    $('#extension_edit_account_' + id + '_mac').attr ( 'disabled', 'disabled').mask ( 'xx:xx:xx:xx:xx:xx', { 'translation': { x: { pattern: /[A-Fa-f0-9]/}}}).val ( data.accounts[id].mac);\n" .
-              "    $('#extension_edit_account_' + id + '_blf').attr ( 'disabled', 'disabled').on ( 'click', function ( event) { event && event.preventDefault (); $('#ramal-vis').data ( 'noclean', true).modal ( 'hide'); $('#ramal-blf').data ( 'return', $('#ramal-vis')).modal ( 'show', { fields: $(this).data ( 'fields')}); });\n" .
               "    for ( var sid in $('#extension_edit_accounts').data ( 'types').result)\n" .
               "    {\n" .
               "      if ( $('#extension_edit_accounts').data ( 'types').result[sid][0] == data.accounts[id].type)\n" .
@@ -1297,10 +1348,6 @@ function extensions_edit_page ( $buffer, $parameters)
               "        if ( $('#extension_edit_accounts').data ( 'types').result[sid][2] == 'Y')\n" .
               "        {\n" .
               "          $('#extension_edit_account_' + id + '_mac').removeAttr ( 'disabled');\n" .
-              "        }\n" .
-              "        if ( $('#extension_edit_accounts').data ( 'types').result[sid][3] != 0)\n" .
-              "        {\n" .
-              "          $('#extension_edit_account_' + id + '_blf').removeAttr ( 'disabled').data ( 'shortcuts', $('#extension_edit_accounts').data ( 'types').result[sid][3]).data ( 'extensions', $('#extension_edit_accounts').data ( 'types').result[sid][4]).data ( 'shortxext', $('#extension_edit_accounts').data ( 'types').result[sid][5]);\n" .
               "        }\n" .
               "      }\n" .
               "    }\n" .
@@ -1312,6 +1359,16 @@ function extensions_edit_page ( $buffer, $parameters)
               "  $('#extension_edit_monitor').bootstrapToggle ( ( data.monitor ? 'on' : 'off'));\n" .
               "  $('#extension_edit_volrx').slider ( 'setValue', data.volrx);\n" .
               "  $('#extension_edit_voltx').slider ( 'setValue', data.voltx);\n" .
+              "  var ids = [];\n" .
+              "  for ( var id in data.hints)\n" .
+              "  {\n" .
+              "    if ( ! data.hints.hasOwnProperty ( id))\n" .
+              "    {\n" .
+              "      continue;\n" .
+              "    }\n" .
+              "    ids.push ( id);\n" .
+              "  }\n" .
+              "  $('#extension_edit_hints').val ( ids).trigger ( 'change');\n" .
               "  $('#extension_edit_extension').focus ();\n" .
               "});\n" .
               "setTimeout ( function ()\n" .

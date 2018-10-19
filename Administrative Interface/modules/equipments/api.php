@@ -27,7 +27,7 @@
  * VoIP Domain equipments database module. This module provides the equipments
  * database API to the system.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments

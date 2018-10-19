@@ -27,7 +27,7 @@
  * VoIP Domain costcenters api module. This module add the api calls related to
  * costcenters.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Cost Centers
@@ -217,16 +217,15 @@ function costcenters_add ( $buffer, $parameters)
     $data["result"] = false;
     $data["description"] = __ ( "The cost center description is required.");
   }
-  if ( $parameters["code"] != (int) $parameters["code"])
-  {
-    $data["result"] = false;
-    $data["code"] = __ ( "The informed code is invalid.");
-  }
-  $parameters["code"] = (int) $parameters["code"];
-  if ( ! array_key_exists ( "code", $data) && empty ( $parameters["code"]))
+  if ( empty ( $parameters["code"]))
   {
     $data["result"] = false;
     $data["code"] = __ ( "The cost center code is required.");
+  }
+  if ( ! array_key_exists ( "code", $data) && ! preg_match ( "/^[0-9]+$/", $parameters["code"]))
+  {
+    $data["result"] = false;
+    $data["code"] = __ ( "The informed code is invalid.");
   }
 
   /**
@@ -234,7 +233,7 @@ function costcenters_add ( $buffer, $parameters)
    */
   if ( ! array_key_exists ( "code", $data))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Code` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["code"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["code"]) . "'"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -264,9 +263,17 @@ function costcenters_add ( $buffer, $parameters)
   }
 
   /**
+   * Call add pre hook, if exist
+   */
+  if ( framework_has_hook ( "costcenters_add_pre"))
+  {
+    $parameters = framework_call ( "costcenters_add_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Add new costcenter record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `CostCenters` (`Description`, `Code`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $parameters["code"]) . ")"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `CostCenters` (`Description`, `Code`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["code"]) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -332,16 +339,15 @@ function costcenters_edit ( $buffer, $parameters)
     $data["result"] = false;
     $data["description"] = __ ( "The cost center description is required.");
   }
-  if ( $parameters["code"] != (int) $parameters["code"])
-  {
-    $data["result"] = false;
-    $data["code"] = __ ( "The informed code is invalid.");
-  }
-  $parameters["code"] = (int) $parameters["code"];
-  if ( ! array_key_exists ( "code", $data) && empty ( $parameters["code"]))
+  if ( empty ( $parameters["code"]))
   {
     $data["result"] = false;
     $data["code"] = __ ( "The cost center code is required.");
+  }
+  if ( ! array_key_exists ( "code", $data) && ! preg_match ( "/^[0-9]+$/", $parameters["code"]))
+  {
+    $data["result"] = false;
+    $data["code"] = __ ( "The informed code is invalid.");
   }
 
   /**
@@ -349,7 +355,7 @@ function costcenters_edit ( $buffer, $parameters)
    */
   if ( ! array_key_exists ( "code", $data))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Code` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["code"]) . " AND `ID` != " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["code"]) . "' AND `ID` != " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -394,9 +400,17 @@ function costcenters_edit ( $buffer, $parameters)
   }
 
   /**
+   * Call edit pre hook, if exist
+   */
+  if ( framework_has_hook ( "costcenters_edit_pre"))
+  {
+    $parameters = framework_call ( "costcenters_edit_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Change cost center record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `CostCenters` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', `Code` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["code"]) . " WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `CostCenters` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["code"]) . "' WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -474,6 +488,14 @@ function costcenters_remove ( $buffer, $parameters)
     exit ();
   }
   $costcenter = $result->fetch_assoc ();
+
+  /**
+   * Call remove pre hook, if exist
+   */
+  if ( framework_has_hook ( "costcenters_remove_pre"))
+  {
+    $parameters = framework_call ( "costcenters_remove_pre", $parameters, false, $parameters);
+  }
 
   /**
    * Remove costcenter database record

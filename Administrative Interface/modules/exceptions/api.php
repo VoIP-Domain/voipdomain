@@ -27,7 +27,7 @@
  * VoIP Domain exceptions api module. This module add the api calls related to
  * exceptions.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Exceptions
@@ -496,12 +496,13 @@ function exceptions_remove ( $buffer, $parameters)
 }
 
 /**
- * API call to intercept new server
+ * API call to intercept new server and server reinstall
  */
-framework_add_hook ( "servers_add_post", "exceptions_servers_add_post");
+framework_add_hook ( "servers_add_post", "exceptions_server_reconfig");
+framework_add_hook ( "servers_reinstall_config", "exceptions_server_reconfig");
 
 /**
- * Function to notify new server to include all exceptions.
+ * Function to notify server to include all exceptions.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -509,12 +510,12 @@ framework_add_hook ( "servers_add_post", "exceptions_servers_add_post");
  * @param array $parameters Optional parameters to the function
  * @return string Output of the generated page
  */
-function exceptions_servers_add_post ( $buffer, $parameters)
+function exceptions_server_reconfig ( $buffer, $parameters)
 {
   global $_in;
 
   /**
-   * Fetch all exceptions and send to new server
+   * Fetch all exceptions and send to server
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Exceptions`"))
   {

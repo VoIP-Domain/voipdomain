@@ -27,7 +27,7 @@
  * VoIP Domain centrals api module. This module add the api calls related to
  * centrals.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Centrals
@@ -326,6 +326,14 @@ function centrals_add ( $buffer, $parameters)
   }
 
   /**
+   * Call add pre hook, if exist
+   */
+  if ( framework_has_hook ( "centrals_add_pre"))
+  {
+    $parameters = framework_call ( "centrals_add_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Add new central record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Centrals` (`Extension`, `Name`, `Range`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $parameters["extension"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $range["ID"]) . ")"))
@@ -356,7 +364,7 @@ function centrals_add ( $buffer, $parameters)
   }
 
   /**
-   * Add new central at Asterisk servers
+   * Add new central at Asterisk server
    */
   $notify = array ( "Extension" => $parameters["extension"], "Name" => $parameters["name"], "Extensions" => $extensions);
   if ( framework_has_hook ( "centrals_add_notify"))
@@ -481,7 +489,7 @@ function centrals_edit ( $buffer, $parameters)
   /**
    * Check if central exist (could be removed by other user meanwhile)
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Centrals` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Centrals`.*, `Ranges`.`Server` FROM `Centrals` LEFT JOIN `Ranges` ON `Centrals`.`Range` = `Ranges`.`ID` WHERE `Centrals`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -516,6 +524,14 @@ function centrals_edit ( $buffer, $parameters)
   }
 
   /**
+   * Call edit pre hook, if exist
+   */
+  if ( framework_has_hook ( "centrals_edit_pre"))
+  {
+    $parameters = framework_call ( "centrals_edit_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Check the actual central extensions
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`ID`, `Extensions`.`Extension` FROM `CentralExtension` LEFT JOIN `Extensions` ON `CentralExtension`.`Extension` = `Extensions`.`ID` WHERE `CentralExtension`.`Central` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
@@ -534,9 +550,9 @@ function centrals_edit ( $buffer, $parameters)
   /**
    * Change central record
    */
-  if ( $parameters["name"] != $central["Name"])
+  if ( $parameters["extension"] != $central["Extension"] || $parameters["name"] != $central["Name"])
   {
-    if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Centrals` SET `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["extension"]) . ", `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "' WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+    if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Centrals` SET `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["extension"]) . ", `Range` = " . $_in["mysql"]["id"]->real_escape_string ( $range["ID"]) . ", `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "' WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -685,7 +701,7 @@ function centrals_remove ( $buffer, $parameters)
   /**
    * Get central extensions to audit record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Extension` FROM `CentralExtension` LEFT JOIN `Extensions` ON `CentralExtension`.`Extension` = `Extensions`.`ID` WHERE `CentralExtension`.`Central` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Extension` FROM `CentralExtension` LEFT JOIN `Extensions` ON `CentralExtension`.`Extension` = `Extensions`.`ID` WHERE `CentralExtension`.`Central` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -704,6 +720,14 @@ function centrals_remove ( $buffer, $parameters)
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
+  }
+
+  /**
+   * Call remove pre hook, if exist
+   */
+  if ( framework_has_hook ( "centrals_remove_pre"))
+  {
+    $parameters = framework_call ( "centrals_remove_pre", $parameters, false, $parameters);
   }
 
   /**
@@ -812,5 +836,158 @@ function centrals_report ( $buffer, $parameters)
   }
 
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $output);
+}
+
+/**
+ * API call to intercept extensions number change
+ */
+framework_add_hook ( "extensions_number_changed", "centrals_extensions_changed");
+
+/**
+ * Function to check if a changed extension are present at centrals.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function centrals_extensions_changed ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Search for centrals that has the changed extension
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Central` FROM `CentralExtension` WHERE `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $central = $result->fetch_assoc ())
+  {
+    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT `Centrals`.`Extension`, `Centrals`.`Name`, GROUP_CONCAT(`Extensions`.`Extension` SEPARATOR ',') AS `Extensions`, `Ranges`.`Server` FROM `Centrals` LEFT JOIN `CentralExtension` ON `CentralExtension`.`Central` = `Centrals`.`ID` LEFT JOIN `Extensions` ON `CentralExtension`.`Extension` = `Extensions`.`ID` LEFT JOIN `Ranges` ON `Centrals`.`Range` = `Ranges`.`ID` WHERE `Centrals`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $central["Central"])))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    $data = $result2->fetch_assoc ();
+    $notify = array ( "Extension" => $data["Extension"], "NewExtension" => $data["Extension"], "Name" => $data["Name"], "Extensions" => explode ( ",", $data["Extensions"]));
+    if ( framework_has_hook ( "centrals_edit_notify"))
+    {
+      $notify = framework_call ( "centrals_edit_notify", $parameters, false, $notify);
+    }
+    notify_server ( $data["Server"], "changecentral", $notify);
+  }
+
+  /**
+   * Return buffer
+   */
+  return $buffer;
+}
+
+/**
+ * API call to intercept extension removal
+ */
+framework_add_hook ( "extensions_remove_pre", "centrals_extensions_remove_pre");
+
+/**
+ * Function to check if a removed extension are present at centrals.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function centrals_extensions_remove_pre ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Search for centrals that has the removed extension
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Central` FROM `CentralExtension` WHERE `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["id"])))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $central = $result->fetch_assoc ())
+  {
+    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT `Centrals`.`Extension`, `Centrals`.`Name`, GROUP_CONCAT(`Extensions`.`Extension` SEPARATOR ',') AS `Extensions`, `Ranges`.`Server` FROM `Centrals` LEFT JOIN `CentralExtension` ON `CentralExtension`.`Central` = `Centrals`.`ID` LEFT JOIN `Extensions` ON `CentralExtension`.`Extension` = `Extensions`.`ID` LEFT JOIN `Ranges` ON `Centrals`.`Range` = `Ranges`.`ID` WHERE `Centrals`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $central["Central"]) . " AND `CentralExtension`.`Extension` != " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["id"])))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    $data = $result2->fetch_assoc ();
+
+    /**
+     * Here we call framework remove event to respect all process hook call's. To change number at configuration, we did it directly respecting only the notify hook.
+     */
+    if ( $data["Extensions"] == "")
+    {
+      framework_call ( "centrals_remove", array ( "id" => (int) $central["Central"]));
+    } else {
+      if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `CentralExtension` WHERE `Central` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $central["Central"]) . " AND `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $central["Extension"])))
+      {
+        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+        exit ();
+      }
+      $notify = array ( "Extension" => $data["Extension"], "NewExtension" => $data["Extension"], "Name" => $data["Name"], "Extensions" => explode ( ",", $data["Extensions"]));
+      if ( framework_has_hook ( "centrals_edit_notify"))
+      {
+        $notify = framework_call ( "centrals_edit_notify", $parameters, false, $notify);
+      }
+      notify_server ( $data["Server"], "changecentral", $notify);
+    }
+  }
+
+  /**
+   * Return buffer
+   */
+  return $buffer;
+}
+
+/**
+ * API call to intercept new server and server reinstall
+ */
+framework_add_hook ( "servers_add_post", "centrals_server_reconfig");
+framework_add_hook ( "servers_reinstall_config", "centrals_server_reconfig");
+
+/**
+ * Function to notify server to include all centrals.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function centrals_server_reconfig ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Fetch all centrals and send to server
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Centrals`.`Extension`, `Centrals`.`Name`, GROUP_CONCAT(`Extensions`.`Extension` SEPARATOR ',') AS `Extensions` FROM `Centrals` LEFT JOIN `Ranges` ON `Centrals`.`Range` = `Ranges`.`ID` LEFT JOIN `CentralExtension` ON `CentralExtension`.`Central` = `Centrals`.`ID` LEFT JOIN `Extensions` ON `CentralExtension`.`Extension` = `Extensions`.`ID` WHERE `Ranges`.`Server` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["id"])))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $central = $result->fetch_assoc ())
+  {
+    $notify = array ( "Extension" => $central["Extension"], "Name" => $central["Name"], "Extensions" => explode ( ",", $central["Extensions"]));
+    if ( framework_has_hook ( "centrals_add_notify"))
+    {
+      $notify = framework_call ( "centrals_add_notify", $parameters, false, $notify);
+    }
+    notify_server ( $parameters["id"], "createcentral", $notify);
+  }
+
+  /**
+   * Return buffer
+   */
+  return $buffer;
 }
 ?>

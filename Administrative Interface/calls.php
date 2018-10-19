@@ -28,7 +28,7 @@
  * recorded calls. This request method is not available through API because it
  * returns binary content, which isn't compatible with REST API.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Extensions

@@ -27,7 +27,7 @@
  * VoIP Domain costcenters module. This module add cost centers support to VoIP
  * Central, with cost reports.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Cost Centers
@@ -147,7 +147,7 @@ function costcenters_search_page ( $buffer, $parameters)
               "  columnDefs: [\n" .
               "                { orderable: false, targets: [ 0, 3 ]},\n" .
               "                { searchable: false, targets: [ 0, 3 ]},\n" .
-              "                { data: 'links', render: function ( data, type, full) { return '<span class=\"btn-group\"><a class=\"btn btn-xs btn-info ladda-button\" data-style=\"zoom-in\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "View") . "\" role=\"button\" title=\"\" href=\"/costcenters/' + full[0] + '/view\"><i class=\"fa fa-search\"></i></a><a class=\"btn btn-xs btn-warning ladda-button\" data-style=\"zoom-in\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Edit") . "\" role=\"button\" title=\"\" href=\"/costcenters/' + full[0] + '/edit\"><i class=\"fa fa-pencil-alt\"></i></a><button class=\"btn btn-xs btn-danger ladda-button\" data-style=\"zoom-in\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Remove") . "\" role=\"button\" title=\"\" data-id=\"' + full[0] + '\" data-description=\"' + full[1] + '\" data-code=\"' + full[2] + '\"><i class=\"fa fa-times\"></i></button></span>'; }, targets: [ 3 ]},\n" .
+              "                { data: 'links', render: function ( data, type, full) { return '<span class=\"btn-group\"><a class=\"btn btn-xs btn-info\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "View") . "\" role=\"button\" title=\"\" href=\"/costcenters/' + full[0] + '/view\"><i class=\"fa fa-search\"></i></a><a class=\"btn btn-xs btn-warning\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Edit") . "\" role=\"button\" title=\"\" href=\"/costcenters/' + full[0] + '/edit\"><i class=\"fa fa-pencil-alt\"></i></a><button class=\"btn btn-xs btn-danger\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Remove") . "\" role=\"button\" title=\"\" data-id=\"' + full[0] + '\" data-description=\"' + full[1] + '\" data-code=\"' + full[2] + '\"><i class=\"fa fa-times\"></i></button></span>'; }, targets: [ 3 ]},\n" .
               "                { visible: false, targets: [ 0 ]}\n" .
               "              ],\n" .
               "  columns: [\n" .
@@ -230,7 +230,7 @@ function costcenters_add_page ( $buffer, $parameters)
   $output .= "  <div class=\"form-group\">\n";
   $output .= "    <label for=\"costcenter_add_code\" class=\"control-label col-xs-2\">" . __ ( "Code") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
-  $output .= "      <input type=\"text\" name=\"code\" class=\"form-control\" id=\"costcenter_add_code\" placeholder=\"" . __ ( "Cost center code") . "\" />\n";
+  $output .= "      <input type=\"text\" name=\"code\" class=\"form-control\" id=\"costcenter_add_code\" placeholder=\"" . __ ( "Cost center code") . "\" maxlength=\"10\" />\n";
   $output .= "    </div>\n";
   $output .= "  </div>\n";
 
@@ -393,7 +393,7 @@ function costcenters_edit_page ( $buffer, $parameters)
   $output .= "  <div class=\"form-group\">\n";
   $output .= "    <label for=\"costcenter_edit_code\" class=\"control-label col-xs-2\">" . __ ( "Code") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
-  $output .= "      <input type=\"text\" name=\"code\" class=\"form-control\" id=\"costcenter_edit_code\" placeholder=\"" . __ ( "Cost center code") . "\" />\n";
+  $output .= "      <input type=\"text\" name=\"code\" class=\"form-control\" id=\"costcenter_edit_code\" placeholder=\"" . __ ( "Cost center code") . "\" maxlength=\"10\" />\n";
   $output .= "    </div>\n";
   $output .= "  </div>\n";
 

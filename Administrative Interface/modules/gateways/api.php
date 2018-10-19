@@ -27,7 +27,7 @@
  * VoIP Domain gateways api module. This module add the api calls related to
  * gateways.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Gateways
@@ -494,6 +494,14 @@ function gateways_add ( $buffer, $parameters)
   }
 
   /**
+   * Call add pre hook, if exist
+   */
+  if ( framework_has_hook ( "gateways_add_pre"))
+  {
+    $parameters = framework_call ( "gateways_add_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Add new gateway record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Gateways` (`Description`, `Config`, `Active`, `Country`, `CountryCode`, `AreaCode`, `Number`, `Type`, `Priority`, `Address`, `Port`, `Username`, `Password`, `Routes`, `Translations`, `Discard`, `Minimum`, `Fraction`, `NAT`, `RPID`, `Qualify`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["state"] == "on" ? "Y" : "N") . "', " . $_in["mysql"]["id"]->real_escape_string ( $number["country"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $number["countrycode"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $number["areacode"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $number["number"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["type"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $parameters["priority"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["address"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $parameters["port"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["username"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["password"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $routes)) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $translations)) . "', " . $_in["mysql"]["id"]->real_escape_string ( $parameters["discard"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $parameters["minimum"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $parameters["fraction"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["nat"] == "on" ? "Y" : "N") . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["rpid"] == "on" ? "Y" : "N") . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["qualify"] == "on" ? "Y" : "N") . "')"))
@@ -719,6 +727,14 @@ function gateways_edit ( $buffer, $parameters)
   }
 
   /**
+   * Call edit pre hook, if exist
+   */
+  if ( framework_has_hook ( "gateways_edit_pre"))
+  {
+    $parameters = framework_call ( "gateways_edit_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Get gateway informations from database
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
@@ -918,6 +934,14 @@ function gateways_remove ( $buffer, $parameters)
   $gateway = $result->fetch_assoc ();
 
   /**
+   * Call remove pre hook, if exist
+   */
+  if ( framework_has_hook ( "gateways_remove_pre"))
+  {
+    $parameters = framework_call ( "gateways_remove_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Remove gateway database record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Gateways` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
@@ -961,12 +985,13 @@ function gateways_remove ( $buffer, $parameters)
 }
 
 /**
- * API call to intercept new server
+ * API call to intercept new server and server reinstall
  */
-framework_add_hook ( "servers_add_post", "gateways_servers_add_post");
+framework_add_hook ( "servers_add_post", "gateways_server_reconfig");
+framework_add_hook ( "servers_reinstall_config", "gateways_server_reconfig");
 
 /**
- * Function to notify new server to include all gateways.
+ * Function to notify server to include all gateways.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -974,12 +999,12 @@ framework_add_hook ( "servers_add_post", "gateways_servers_add_post");
  * @param array $parameters Optional parameters to the function
  * @return string Output of the generated page
  */
-function gateways_servers_add_post ( $buffer, $parameters)
+function gateways_server_reconfig ( $buffer, $parameters)
 {
   global $_in;
 
   /**
-   * Fetch all gateways and send to new server
+   * Fetch all gateways and send to server
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways`"))
   {

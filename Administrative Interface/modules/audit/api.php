@@ -27,7 +27,7 @@
  * VoIP Domain auditory api module. This module add the api calls related to
  * auditory.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Auditory
@@ -36,10 +36,10 @@
  */
 
 /**
- * API call to search users and tokens
+ * API call to list auditory authors
  */
-framework_add_hook ( "auditory_authors_search", "auditory_authors_search");
-framework_add_api_call ( "/auditory/authors/search", "Read", "auditory_authors_search", array ( "permissions" => array ( "auditor")));
+framework_add_hook ( "auditory_authors", "auditory_authors");
+framework_add_api_call ( "/auditory/authors", "Read", "auditory_authors", array ( "permissions" => array ( "auditor")));
 
 /**
  * Function to generate users and tokens list to select box.
@@ -50,7 +50,7 @@ framework_add_api_call ( "/auditory/authors/search", "Read", "auditory_authors_s
  * @param array $parameters Optional parameters to the function
  * @return string Output of the generated page
  */
-function auditory_authors_search ( $buffer, $parameters)
+function auditory_authors ( $buffer, $parameters)
 {
   global $_in;
 

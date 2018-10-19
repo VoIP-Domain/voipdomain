@@ -28,7 +28,7 @@
  * public external calls. Usefull to user tele marketing, spammers and other
  * annoying calls.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Users
@@ -145,7 +145,7 @@ function users_search_page ( $buffer, $parameters)
               "  columnDefs: [\n" .
               "                { orderable: false, targets: [ 0, 3 ]},\n" .
               "                { searchable: false, targets: [ 0, 3 ]},\n" .
-              "                { data: 'links', render: function ( data, type, full) { return '<span class=\"btn-group\"><a class=\"btn btn-xs btn-info ladda-button\" data-style=\"zoom-in\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "View") . "\" role=\"button\" title=\"\" href=\"/users/' + full[0] + '/view\"><i class=\"fa fa-search\"></i></a><a class=\"btn btn-xs btn-warning ladda-button\" data-style=\"zoom-in\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Edit") . "\" role=\"button\" title=\"\" href=\"/users/' + full[0] + '/edit\"><i class=\"fa fa-pencil-alt\"></i></a><button class=\"btn btn-xs btn-danger ladda-button\" data-style=\"zoom-in\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Remove") . "\" role=\"button\" title=\"\" data-id=\"' + full[0] + '\" data-name=\"' + full[1] + '\" data-user=\"' + full[2] + '\"' + ( VoIP.getUID () == full[0] ? ' disabled=\"disabled\"' : '') + '><i class=\"fa fa-times\"></i></button></span>'; }, targets: [ 3 ]},\n" .
+              "                { data: 'links', render: function ( data, type, full) { return '<span class=\"btn-group\"><a class=\"btn btn-xs btn-info\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "View") . "\" role=\"button\" title=\"\" href=\"/users/' + full[0] + '/view\"><i class=\"fa fa-search\"></i></a><a class=\"btn btn-xs btn-warning\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Edit") . "\" role=\"button\" title=\"\" href=\"/users/' + full[0] + '/edit\"><i class=\"fa fa-pencil-alt\"></i></a><button class=\"btn btn-xs btn-danger\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Remove") . "\" role=\"button\" title=\"\" data-id=\"' + full[0] + '\" data-name=\"' + full[1] + '\" data-user=\"' + full[2] + '\"' + ( VoIP.getUID () == full[0] ? ' disabled=\"disabled\"' : '') + '><i class=\"fa fa-times\"></i></button></span>'; }, targets: [ 3 ]},\n" .
               "                { visible: false, targets: [ 0 ]}\n" .
               "              ],\n" .
               "  columns: [\n" .
@@ -189,6 +189,7 @@ function users_search_page ( $buffer, $parameters)
 /**
  * Function to generate the user add page code.
  *
+ * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
@@ -196,6 +197,8 @@ function users_search_page ( $buffer, $parameters)
  */
 function users_add_page ( $buffer, $parameters)
 {
+  global $_in;
+
   /**
    * Set page title
    */
@@ -214,7 +217,6 @@ function users_add_page ( $buffer, $parameters)
   /**
    * Add page JavaScript requirements
    */
-  sys_addjs ( array ( "name" => "jquery-mask", "src" => "/vendors/jQuery-Mask-Plugin/dist/jquery.mask.js", "dep" => array ()));
   sys_addjs ( array ( "name" => "bootstrap-toggle", "src" => "/vendors/bootstrap-toggle/js/bootstrap-toggle.js", "dep" => array ()));
 
   /**
@@ -262,6 +264,20 @@ function users_add_page ( $buffer, $parameters)
   $output .= "    </div>\n";
   $output .= "  </div>\n";
 
+  // Add user language field
+  $output .= "  <div class=\"form-group\">\n";
+  $output .= "    <label for=\"user_add_language\" class=\"control-label col-xs-2\">" . __ ( "Language") . "</label>\n";
+  $output .= "    <div class=\"col-xs-10\">\n";
+  $output .= "      <select name=\"language\" id=\"user_add_language\" class=\"form-control\" data-placeholder=\"" . __ ( "User language") . "\">\n";
+  $output .= "        <option value=\"default\" selected>" . __ ( "System default language") . "</option>\n";
+  foreach ( $_in["languages"] as $locale => $language)
+  {
+    $output .= "        <option value=\"" . addslashes ( strip_tags ( $locale)) . "\">" . addslashes ( strip_tags ( $language)) . "</option>\n";
+  }
+  $output .= "      </select>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
   // Add user administrator option
   $output .= "  <div class=\"form-group\">\n";
   $output .= "    <label for=\"user_add_administrator\" class=\"control-label col-xs-2\">" . __ ( "Administrator") . "</label>\n";
@@ -294,6 +310,10 @@ function users_add_page ( $buffer, $parameters)
    * Add add form JavaScript code
    */
   sys_addjs ( "$('#user_add_form input[type=checkbox]').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});\n" .
+              "$('#user_add_language').select2 (\n" .
+              "{\n" .
+              "  allowClear: false\n" .
+              "});\n" .
               "$('#user_add_name').focus ();\n" .
               "$('#user_add_form').alerts ( 'form',\n" .
               "{\n" .
@@ -377,6 +397,20 @@ function users_view_page ( $buffer, $parameters)
   $output .= "    </div>\n";
   $output .= "  </div>\n";
 
+  // Add user language field
+  $output .= "  <div class=\"form-group\">\n";
+  $output .= "    <label for=\"user_view_language\" class=\"control-label col-xs-2\">" . __ ( "Language") . "</label>\n";
+  $output .= "    <div class=\"col-xs-10\">\n";
+  $output .= "      <select name=\"language\" id=\"user_view_language\" class=\"form-control\" data-placeholder=\"" . __ ( "User language") . "\"  disabled=\"disabled\">\n";
+  $output .= "        <option value=\"default\" selected>" . __ ( "System default language") . "</option>\n";
+  foreach ( $_in["languages"] as $locale => $language)
+  {
+    $output .= "        <option value=\"" . addslashes ( strip_tags ( $locale)) . "\">" . addslashes ( strip_tags ( $language)) . "</option>\n";
+  }
+  $output .= "      </select>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
   // Add user administrator option
   $output .= "  <div class=\"form-group\">\n";
   $output .= "    <label for=\"user_view_administrator\" class=\"control-label col-xs-2\">" . __ ( "Administrator") . "</label>\n";
@@ -408,11 +442,13 @@ function users_view_page ( $buffer, $parameters)
    * Add view form JavaScript code
    */
   sys_addjs ( "$('#user_view_form input[type=checkbox]').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});\n" .
+              "$('#user_view_language').select2 ();\n" .
               "$('#user_view_form').on ( 'fill', function ( event, data)\n" .
               "{\n" .
               "  $('#user_view_name').val ( data.name);\n" .
               "  $('#user_view_user').val ( data.user);\n" .
               "  $('#user_view_email').val ( data.email);\n" .
+              "  $('#user_view_language').val ( data.language).trigger ( 'change');\n" .
               "  $('#user_view_administrator').bootstrapToggle ( 'enable').bootstrapToggle ( ( data.administrator ? 'on' : 'off')).bootstrapToggle ( 'disable');\n" .
               "  $('#user_view_auditor').bootstrapToggle ( 'enable').bootstrapToggle ( ( data.auditor ? 'on' : 'off')).bootstrapToggle ( 'disable');\n" .
               "  $('#user_view_name').focus ();\n" .
@@ -462,7 +498,6 @@ function users_edit_page ( $buffer, $parameters)
   /**
    * Add page JavaScript requirements
    */
-  sys_addjs ( array ( "name" => "jquery-mask", "src" => "/vendors/jQuery-Mask-Plugin/dist/jquery.mask.js", "dep" => array ()));
   sys_addjs ( array ( "name" => "bootstrap-toggle", "src" => "/vendors/bootstrap-toggle/js/bootstrap-toggle.js", "dep" => array ()));
 
   /**
@@ -510,6 +545,20 @@ function users_edit_page ( $buffer, $parameters)
   $output .= "    </div>\n";
   $output .= "  </div>\n";
 
+  // Add user language field
+  $output .= "  <div class=\"form-group\">\n";
+  $output .= "    <label for=\"user_edit_language\" class=\"control-label col-xs-2\">" . __ ( "Language") . "</label>\n";
+  $output .= "    <div class=\"col-xs-10\">\n";
+  $output .= "      <select name=\"language\" id=\"user_edit_language\" class=\"form-control\" data-placeholder=\"" . __ ( "User language") . "\">\n";
+  $output .= "        <option value=\"default\" selected>" . __ ( "System default language") . "</option>\n";
+  foreach ( $_in["languages"] as $locale => $language)
+  {
+    $output .= "        <option value=\"" . addslashes ( strip_tags ( $locale)) . "\">" . addslashes ( strip_tags ( $language)) . "</option>\n";
+  }
+  $output .= "      </select>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
   // Add user administrator option
   $output .= "  <div class=\"form-group\">\n";
   $output .= "    <label for=\"user_edit_administrator\" class=\"control-label col-xs-2\">" . __ ( "Administrator") . "</label>\n";
@@ -542,12 +591,16 @@ function users_edit_page ( $buffer, $parameters)
    * Add edit form JavaScript code
    */
   sys_addjs ( "$('#user_edit_form input[type=checkbox]').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});\n" .
-              "$('#user_edit_user').mask ( '+0#');\n" .
+              "$('#user_edit_language').select2 (\n" .
+              "{\n" .
+              "  allowClear: false\n" .
+              "});\n" .
               "$('#user_edit_form').on ( 'fill', function ( event, data)\n" .
               "{\n" .
               "  $('#user_edit_name').val ( data.name);\n" .
               "  $('#user_edit_user').val ( data.user);\n" .
               "  $('#user_edit_email').val ( data.email);\n" .
+              "  $('#user_edit_language').val ( data.language).trigger ( 'change');\n" .
               "  $('#user_edit_administrator').bootstrapToggle ( ( data.administrator ? 'on' : 'off'));\n" .
               "  $('#user_edit_auditor').bootstrapToggle ( ( data.auditor ? 'on' : 'off'));\n" .
               "  $('#user_edit_name').focus ();\n" .

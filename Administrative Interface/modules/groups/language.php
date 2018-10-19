@@ -26,7 +26,7 @@
 /**
  * VoIP Domain groups module language file.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Groups
@@ -74,6 +74,11 @@ i18n_add ( "Group added sucessfully!");
 i18n_add ( "groups visualization");
 i18n_add ( "Group view");
 i18n_add ( "Error viewing group!");
+i18n_add ( "Extension");
+i18n_add ( "Filter...");
+i18n_add ( "groups report");
+i18n_add ( "Groups use report");
+i18n_add ( "Services");
 
 /**
  * Add Brazilian Portuguese support
@@ -115,4 +120,9 @@ i18n_add ( "Group added sucessfully!", "Grupo adicionado com sucesso!", "pt_BR")
 i18n_add ( "groups visualization", "visualização de grupos", "pt_BR");
 i18n_add ( "Group view", "Visualização de grupo", "pt_BR");
 i18n_add ( "Error viewing group!", "Erro ao visualizar grupo!", "pt_BR");
+i18n_add ( "Extension", "Extensão", "pt_BR");
+i18n_add ( "Filter...", "Filtro...", "pt_BR");
+i18n_add ( "groups report", "relatório de grupos", "pt_BR");
+i18n_add ( "Groups use report", "Relatório de uso por grupos", "pt_BR");
+i18n_add ( "Services", "Serviços", "pt_BR");
 ?>

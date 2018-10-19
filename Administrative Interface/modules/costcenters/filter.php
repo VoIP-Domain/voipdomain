@@ -27,7 +27,7 @@
  * VoIP Domain costcenters filter module. This module add the filter calls related
  * to costcenters.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Cost Centers

@@ -28,7 +28,7 @@
  * that rings in one or many reports at same time when called. This is usefull
  * to service numbers inside a company, where many employees can answer the call.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Reports
@@ -70,18 +70,18 @@ function reports_graph_heat ( $buffer, $parameters)
   sys_addcss ( array ( "name" => "select2", "src" => "/vendors/select2/dist/css/select2.css", "dep" => array ( "bootstrap", "AdminLTE")));
   sys_addcss ( array ( "name" => "select2-bootstrap-theme", "src" => "/vendors/select2-bootstrap-theme/dist/select2-bootstrap.css", "dep" => array ( "bootstrap", "select2")));
   sys_addcss ( array ( "name" => "bootstrap-datetimepicker", "src" => "/vendors/bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css", "dep" => array ( "bootstrap")));
-  sys_addcss ( array ( "name" => "pnotify", "src" => "/vendors/pnotify/dist/pnotify.css", "dep" => array ()));
+  sys_addcss ( array ( "name" => "tui.chart", "src" => "/vendors/tui.chart/dist/tui-chart.css", "dep" => array ()));
 
   /**
    * Add page JavaScript requirements
    */
   sys_addjs ( array ( "name" => "select2", "src" => "/vendors/select2/dist/js/select2.full.js", "dep" => array ()));
   sys_addjs ( array ( "name" => "select2-locale", "src" => "/vendors/select2/dist/js/i18n/pt-BR.js", "dep" => array ( "select2")));
-  sys_addjs ( array ( "name" => "d3", "src" => "/vendors/d3/d3.js", "dep" => array ()));
   sys_addjs ( array ( "name" => "moment", "src" => "/vendors/moment/min/moment-with-locales.js", "dep" => array ()));
   sys_addjs ( array ( "name" => "bootstrap-datetimepicker", "src" => "/vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.js", "dep" => array ( "moment")));
-  sys_addjs ( array ( "name" => "pnotify", "src" => "/vendors/pnotify/dist/pnotify.js", "dep" => array ()));
-  sys_addjs ( array ( "name" => "system-pnotify", "src" => "/js/pnotify.js", "dep" => array ( "pnotify")));
+  sys_addjs ( array ( "name" => "raphael", "src" => "/vendors/raphael/raphael.js", "dep" => array ()));
+  sys_addjs ( array ( "name" => "tui.code-snippet", "src" => "/vendors/tui.code-snippet/dist/tui-code-snippet.js", "dep" => array ()));
+  sys_addjs ( array ( "name" => "tui.chart", "src" => "/vendors/tui.chart/dist/tui-chart.js", "dep" => array ( "raphael", "tui.code-snippet")));
 
   /**
    * Report main div
@@ -103,7 +103,7 @@ function reports_graph_heat ( $buffer, $parameters)
   $output .= "    <div id=\"week\" class=\"week-picker\"><input type=\"text\" id=\"weekinput\" /><i class=\"fa fa-calendar\"></i> <span> - </span> <b class=\"caret pull-right\"></b></div>\n";
   $output .= "  </span>\n";
   $output .= "</div>\n";
-  $output .= "<div id=\"graph\" class=\"table-center\"></div>\n";
+  $output .= "<div id=\"graph\" style=\"width: 100% !important\"></div>\n";
 
   /**
    * Add heat map graphic JavaScript code
@@ -138,41 +138,92 @@ function reports_graph_heat ( $buffer, $parameters)
               "});\n" .
               "( function ()\n" .
               "{\n" .
+              "  var container = document.getElementById ( 'graph');\n" .
+              "  var data = {\n" .
+              "    categories: {\n" .
+              "      x: [ '00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'],\n" .
+              "      y: [ '" . __ ( "Sa") . "', '" . __ ( "Fr") . "', '" . __ ( "Th") . "', '" . __ ( "We") . "', '" . __ ( "Tu") . "', '" . __ ( "Mo") . "', '" . __ ( "Su") . "']\n" .
+              "    },\n" .
+              "    series: [\n" .
+              "      [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],\n" .
+              "      [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],\n" .
+              "      [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],\n" .
+              "      [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],\n" .
+              "      [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],\n" .
+              "      [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],\n" .
+              "      [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]\n" .
+              "    ]\n" .
+              "  };\n" .
               "  var margin = { top: 50, right: 0, bottom: 100, left: 30};\n" .
-              "  var width = 960 - margin.left - margin.right;\n" .
-              "  var height = 430 - margin.top - margin.bottom;\n" .
-              "  var gridSize = Math.floor ( width / 24);\n" .
-              "  var legendElementWidth = gridSize * 2;\n" .
-              "  var buckets = 9;\n" .
-              "  var colors = [ '#ffffd9', '#edf8b1', '#c7e9b4', '#7fcdbb', '#41b6c4', '#1d91c0', '#225ea8', '#253494', '#081d58'];\n" .
-              "  var days = [ '" . __ ( "Su") . "', '" . __ ( "Mo") . "', '" . __ ( "Tu") . "', '" . __ ( "We") . "', '" . __ ( "Th") . "', '" . __ ( "Fr") . "', '" . __ ( "Sa") . "'];\n" .
-              "  var times = [ '00', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];\n" .
-              "  var svg = d3.select ( '#graph').append ( 'svg').attr ( 'width', width + margin.left + margin.right).attr ( 'height', height + margin.top + margin.bottom).append ( 'g').attr ( 'transform', 'translate(' + margin.left + ',' + margin.top + ')');\n" .
-              "  var dayLabels = svg.selectAll ( '.dayLabel').data ( days).enter ().append ( 'text').text ( function ( d) { return d;}).attr ( 'x', 0).attr ( 'y', function ( d, i) { return i * gridSize;}).style ( 'text-anchor', 'end').attr ( 'transform', 'translate(-6,' + gridSize / 1.5 + ')').attr ( 'class', function ( d, i) { return (( i >= 0 && i <= 4) ? 'dayLabel mono axis axis-workweek' : 'dayLabel mono axis');});\n" .
-              "  var timeLabels = svg.selectAll ( '.timeLabel').data ( times).enter ().append ( 'text').text ( function ( d) { return d;}).attr ( 'x', function ( d, i) { return i * gridSize;}).attr ( 'y', 0).style ( 'text-anchor', 'middle').attr ( 'transform', 'translate(' + gridSize / 2 + ', -6)').attr ( 'class', function ( d, i) { return (( i >= 7 && i <= 16) ? 'timeLabel mono axis axis-worktime' : 'timeLabel mono axis');});\n" .
+              "  var options = {\n" .
+              "    chart: {\n" .
+              "      width: 960 - margin.left - margin.right,\n" .
+              "      height: 430 - margin.top - margin.bottom\n" .
+              "    },\n" .
+              "    series: {\n" .
+              "      showLabel: true\n" .
+              "    },\n" .
+              "    tooltip: {\n" .
+              "      template: function ( category, item, categoryTimestamp)\n" .
+              "                {\n" .
+              "                  switch ( category.substr ( 4))\n" .
+              "                  {\n" .
+              "                    case '" . __ ( "Su") . "':\n" .
+              "                      var day = moment ( $('#weekinput').val (), '" . __ ( "MM/DD/YYYY") . "').day ( 0).format ( '" . __ ( "MM/DD/YYYY") . "');\n" .
+              "                      break;\n" .
+              "                    case '" . __ ( "Mo") . "':\n" .
+              "                      var day = moment ( $('#weekinput').val (), '" . __ ( "MM/DD/YYYY") . "').day ( 1).format ( '" . __ ( "MM/DD/YYYY") . "');\n" .
+              "                      break;\n" .
+              "                    case '" . __ ( "Tu") . "':\n" .
+              "                      var day = moment ( $('#weekinput').val (), '" . __ ( "MM/DD/YYYY") . "').day ( 2).format ( '" . __ ( "MM/DD/YYYY") . "');\n" .
+              "                      break;\n" .
+              "                    case '" . __ ( "We") . "':\n" .
+              "                      var day = moment ( $('#weekinput').val (), '" . __ ( "MM/DD/YYYY") . "').day ( 3).format ( '" . __ ( "MM/DD/YYYY") . "');\n" .
+              "                      break;\n" .
+              "                    case '" . __ ( "Th") . "':\n" .
+              "                      var day = moment ( $('#weekinput').val (), '" . __ ( "MM/DD/YYYY") . "').day ( 4).format ( '" . __ ( "MM/DD/YYYY") . "');\n" .
+              "                      break;\n" .
+              "                    case '" . __ ( "Fr") . "':\n" .
+              "                      var day = moment ( $('#weekinput').val (), '" . __ ( "MM/DD/YYYY") . "').day ( 5).format ( '" . __ ( "MM/DD/YYYY") . "');\n" .
+              "                      break;\n" .
+              "                    case '" . __ ( "Sa") . "':\n" .
+              "                      var day = moment ( $('#weekinput').val (), '" . __ ( "MM/DD/YYYY") . "').day ( 6).format ( '" . __ ( "MM/DD/YYYY") . "');\n" .
+              "                      break;\n" .
+              "                    default:\n" .
+              "                      var day = category.substr ( 4);\n" .
+              "                      break;\n" .
+              "                  }\n" .
+              "                  return '<div class=\"tui-chart-default-tooltip\"><div class=\"tui-chart-tooltip-head show\">' + day + ' ' + category.substr ( 0, 2) + 'h</div><div class=\"tui-chart-tooltip-body\"><span class=\"tui-chart-legend-rect heatmap\" style=\"' + item.cssText + '\"></span><span>' + item.label + ' ' + ( item.label == 1 ? '" . __ ( "call") . "' : '" . __ ( "calls") . "') + '</span></div></div>';\n" .
+              "                }\n" .
+              "    },\n" .
+              "    chartExportMenu: {\n" .
+              "      filename: 'VoIPDomain-Heatmap'\n" .
+              "    }\n" .
+              "  };\n" .
+              "  var theme = {\n" .
+              "    series: {\n" .
+              "      startColor: '#ffefef',\n" .
+              "      endColor: '#ac4142',\n" .
+              "      overColor: '#75b5aa',\n" .
+              "      borderColor: '#f4511e'\n" .
+              "    }\n" .
+              "  };\n" .
               "  $('#graph').on ( 'update', function ()\n" .
               "  {\n" .
-              "    var data = VoIP.rest ( '/reports/heat', 'GET', { type: $('#type').val (), start: $('#weekinput').data ( 'start'), end: $('#weekinput').data ( 'end')});\n" .
-              "    if ( data.API.status != 'ok')\n" .
+              "    var apidata = VoIP.rest ( '/reports/heat', 'GET', { type: $('#type').val (), start: $('#weekinput').data ( 'start'), end: $('#weekinput').data ( 'end')});\n" .
+              "    if ( apidata.API.status != 'ok')\n" .
               "    {\n" .
               "      new PNotify ( { title: '" . __ ( "Heat map graph") . "', text: '" . __ ( "Error requesting informations!") . "', type: 'error'});\n" .
               "      return false;\n" .
               "    }\n" .
-              "    var colorScale = d3.scaleQuantile ().domain ( [ 0, buckets - 1, d3.max ( data.result, function ( d) { return d.value;})]).range ( colors);\n" .
-              "    var cards = svg.selectAll ( '.hour').data ( data.result, function ( d) { return d.day + ':' + d.hour;});\n" .
-              "    cards.append ( 'title');\n" .
-              "    cards.enter ().append ( 'rect').attr ( 'x', function ( d) { return d.hour * gridSize;}).attr ( 'y', function ( d) { return ( d.day - 1) * gridSize;}).attr ( 'rx', 4).attr ( 'ry', 4).attr ( 'class', 'hour bordered').attr ( 'width', gridSize).attr ( 'height', gridSize).style ( 'fill', colors[0]);\n" .
-              "    cards.transition ().duration ( 1000).style ( 'fill', function ( d) { return colorScale ( d.value);});\n" .
-              "    cards.select ( 'title').text ( function ( d) { return d.value;});\n" .
-              "    cards.exit ().remove ();\n" .
-              "    var legend = svg.selectAll ( '.legend').data ( [0].concat ( colorScale.quantiles ()), function ( d) { return d;});\n" .
-              "    legend.enter ().append ( 'g').attr ( 'class', 'legend');\n" .
-              "    legend.append ( 'rect').attr ( 'x', function ( d, i) { return legendElementWidth * i;}).attr ( 'y', height).attr ( 'width', legendElementWidth).attr ( 'height', gridSize / 2).style ( 'fill', function ( d, i) { return colors[i];});\n" .
-              "    legend.append ( 'text').attr ( 'class', 'mono').text ( function ( d) { return '≥ ' + Math.round ( d);}).attr ( 'x', function ( d, i) { return legendElementWidth * i;}).attr ( 'y', height + gridSize);\n" .
-              "    legend.exit ().remove ();\n" .
+              "    data.series = apidata.result;\n" .
+              "    $('#graph').empty ();\n" .
+              "    tui.chart.heatmapChart ( container, data, options);\n" .
+              "    $('div.tui-chart').css ( 'margin', '0 auto');\n" .
+              "    $('li.tui-chart-chartExportMenu-head').html ( '" . __ ( "Export to") . "');\n" .
               "  });\n" .
               "} ());\n" .
-              "$('#graph').trigger ( 'update').trigger ( 'update');\n");
+              "$('#graph').trigger ( 'update');\n");
 
   return $output;
 }
@@ -6596,6 +6647,698 @@ function system_made_report_page ( $buffer, $parameters)
               "});\n" .
               "$.hashForm ( 'check', { onfill: function () { $('#filters').trigger ( 'submit'); }});\n" .
               "$('#end').focus ();\n");
+
+  return $output;
+}
+
+/**
+ * Add consolidated extension calls report page
+ */
+framework_add_path ( "/reports/consolidated/user", "consolidated_extensions_report_page");
+framework_add_hook ( "consolidated_extensions_report_page", "consolidated_extensions_report_page", IN_HOOK_INSERT_FIRST);
+
+/**
+ * Function to generate the consolidated extensions calls report page code.
+ *
+ * @param mixed $buffer Buffer from plugin system if processed by other function
+ *                      before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function consolidated_extensions_report_page ( $buffer, $parameters)
+{
+  /**
+   * Set page title
+   */
+  sys_set_title ( __ ( "Reports"));
+  sys_set_subtitle ( __ ( "consolidated per extension"));
+  sys_set_path ( array (
+    1 => array ( "title" => __ ( "Reports"))
+  ));
+
+  /**
+   * Add page CSS requirements
+   */
+  sys_addcss ( array ( "name" => "dataTables", "src" => "/vendors/datatables/media/css/dataTables.bootstrap.css", "dep" => array ( "bootstrap")));
+  sys_addcss ( array ( "name" => "buttons", "src" => "/vendors/buttons/css/buttons.bootstrap.css", "dep" => array ()));
+  sys_addcss ( array ( "name" => "dataTables-buttons", "src" => "/vendors/buttons/css/buttons.dataTables.css", "dep" => array ( "buttons", "dataTables")));
+  sys_addcss ( array ( "name" => "dataTables-responsive", "src" => "/vendors/responsive/css/responsive.bootstrap.css", "dep" => array ( "dataTables")));
+  sys_addcss ( array ( "name" => "datetimepicker", "src" => "/vendors/bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css", "dep" => array ( "bootstrap")));
+
+  /**
+   * Add page JavaScript requirements
+   */
+  sys_addjs ( array ( "name" => "jquery-mask", "src" => "/vendors/jQuery-Mask-Plugin/dist/jquery.mask.js", "dep" => array ()));
+  sys_addjs ( array ( "name" => "moment", "src" => "/vendors/moment/min/moment-with-locales.js", "dep" => array ()));
+  sys_addjs ( array ( "name" => "jquery-dataTables", "src" => "/vendors/datatables/media/js/jquery.dataTables.js", "dep" => array ( "moment")));
+  sys_addjs ( array ( "name" => "dataTables", "src" => "/vendors/datatables/media/js/dataTables.bootstrap.js", "dep" => array ( "bootstrap", "jquery-dataTables")));
+  sys_addjs ( array ( "name" => "dataTables-buttons", "src" => "/vendors/buttons/js/dataTables.buttons.js", "dep" => array ( "dataTables")));
+  sys_addjs ( array ( "name" => "dataTables-buttons-html5", "src" => "/vendors/buttons/js/buttons.html5.js", "dep" => array ( "dataTables-buttons", "jszip", "pdfmake", "vfs_fonts")));
+  sys_addjs ( array ( "name" => "dataTables-buttons-print", "src" => "/vendors/buttons/js/buttons.print.js", "dep" => array ( "dataTables-buttons")));
+  sys_addjs ( array ( "name" => "dataTables-responsive", "src" => "/vendors/responsive/js/dataTables.responsive.js", "dep" => array ( "dataTables")));
+  sys_addjs ( array ( "name" => "dataTables-bootstrap-responsive", "src" => "/vendors/responsive/js/responsive.bootstrap.js", "dep" => array ( "dataTables-responsive")));
+  sys_addjs ( array ( "name" => "jszip", "src" => "/vendors/jszip/dist/jszip.js", "dep" => array ()));
+  sys_addjs ( array ( "name" => "vfs_fonts", "src" => "/vendors/pdfmake/build/vfs_fonts.js", "dep" => array ( "pdfmake")));
+  sys_addjs ( array ( "name" => "pdfmake", "src" => "/vendors/pdfmake/build/pdfmake.js", "dep" => array ( "jszip")));
+  sys_addjs ( array ( "name" => "datetimepicker", "src" => "/vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.js", "dep" => array ( "moment", "bootstrap")));
+  sys_addjs ( array ( "name" => "dataTables-processing", "src" => "/js/processing.js", "dep" => array ( "dataTables")));
+  sys_addjs ( array ( "name" => "system-dataTables", "src" => "/js/datatables.js", "dep" => array ( "dataTables", "dataTables-buttons", "stickytableheaders")));
+  sys_addjs ( array ( "name" => "stickytableheaders", "src" => "/vendors/StickyTableHeaders/js/jquery.stickytableheaders.js", "dep" => array ()));
+
+  /**
+   * Create page code
+   */
+  $output = "<div class=\"container\">\n";
+  $output .= "  <form id=\"filters\">\n";
+  $output .= "  <div class=\"col-xs-12\">\n";
+  $output .= "    <div class=\"col-xs-10\">\n";
+  $output .= "      <div class=\"form-group\">\n";
+  $output .= "        <div class=\"input-group date\">\n";
+  $output .= "          <input name=\"month\" id=\"month\" type=\"text\" class=\"form-control\" placeholder=\"" . __ ( "Month/Year") . "\" maxlength=\"7\" />\n";
+  $output .= "          <div class=\"input-group-btn\">\n";
+  $output .= "            <button class=\"btn btn-default btn-calendar\" type=\"button\"><i class=\"fa fa-calendar\"></i></button>\n";
+  $output .= "            <button class=\"btn btn-default btn-clean\" type=\"button\"><i class=\"fa fa-times\"></i></button>\n";
+  $output .= "          </div>\n";
+  $output .= "        </div>\n";
+  $output .= "      </div>\n";
+  $output .= "    </div>\n";
+  $output .= "    <button type=\"submit\" class=\"btn btn-default btn-update\"><span class=\"fa fa-search\"></span></button>\n";
+  $output .= "  </div>\n";
+  $output .= "  </form>\n";
+  $output .= "</div>\n";
+  $output .= "<table id=\"report\" class=\"table table-hover table-condensed table-report\" cellspacing=\"0\" width=\"100%\">\n";
+  $output .= "  <thead>\n";
+  $output .= "    <tr>\n";
+  $output .= "      <th rowspan=\"2\"></th>\n";
+  $output .= "      <th rowspan=\"2\" class=\"dt-vtop\">" . __ ( "Extension") . "</th>\n";
+  $output .= "      <th rowspan=\"2\" class=\"dt-vtop\">" . __ ( "Name") . "</th>\n";
+  $output .= "      <th colspan=\"2\" class=\"center\">" . __ ( "Local") . "</th>\n";
+  $output .= "      <th colspan=\"2\" class=\"center\">" . __ ( "Mobile") . "</th>\n";
+  $output .= "      <th colspan=\"2\" class=\"center\">" . __ ( "Interstate") . "</th>\n";
+  $output .= "      <th colspan=\"2\" class=\"center\">" . __ ( "International") . "</th>\n";
+  $output .= "      <th colspan=\"2\" class=\"center\">" . __ ( "Others") . "</th>\n";
+  $output .= "    </tr>\n";
+  $output .= "    <tr>\n";
+  $output .= "      <th>" . __ ( "Calls") . "</th>\n";
+  $output .= "      <th>" . __ ( "Duration") . "</th>\n";
+  $output .= "      <th>" . __ ( "Calls") . "</th>\n";
+  $output .= "      <th>" . __ ( "Duration") . "</th>\n";
+  $output .= "      <th>" . __ ( "Calls") . "</th>\n";
+  $output .= "      <th>" . __ ( "Duration") . "</th>\n";
+  $output .= "      <th>" . __ ( "Calls") . "</th>\n";
+  $output .= "      <th>" . __ ( "Duration") . "</th>\n";
+  $output .= "      <th>" . __ ( "Calls") . "</th>\n";
+  $output .= "      <th>" . __ ( "Duration") . "</th>\n";
+  $output .= "    </tr>\n";
+  $output .= "  </thead>\n";
+  $output .= "  <tbody>\n";
+  $output .= "  </tbody>\n";
+  $output .= "  <tfoot>\n";
+  $output .= "    <tr>\n";
+  $output .= "      <th colspan=\"3\">" . __ ( "Totals") . "</th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "    </tr>\n";
+  $output .= "    <tr>\n";
+  $output .= "      <th colspan=\"13\">" . __ ( "All durations are billing time in [[DD:]HH:]MM:SS format.") . "</th>\n";
+  $output .= "    </tr>\n";
+  $output .= "  </tfoot>\n";
+  $output .= "</table>\n";
+
+  /**
+   * Add report table JavaScript code
+   */
+  sys_addjs ( "$('#month').mask ( '00/0000');\n" .
+              "$('#report').on ( 'update', function ( event, data)\n" .
+              "{\n" .
+              "  var table = $(this).data ( 'dt');\n" .
+              "  var total_local_calls = 0;\n" .
+              "  var total_local_time = 0;\n" .
+              "  var total_mobile_calls = 0;\n" .
+              "  var total_mobile_time = 0;\n" .
+              "  var total_interstate_calls = 0;\n" .
+              "  var total_interstate_time = 0;\n" .
+              "  var total_international_calls = 0;\n" .
+              "  var total_international_time = 0;\n" .
+              "  var total_others_calls = 0;\n" .
+              "  var total_others_time = 0;\n" .
+              "  var start = moment ( new Date($('#month').val ().substr ( 3), parseInt ( $('#month').val ().substr ( 0, 2) - 1), 1)).format ( 'MM/DD/YYYY 00:00:00');\n" .
+              "  var end = moment ( new Date($('#month').val ().substr ( 3), parseInt ( $('#month').val ().substr ( 0, 2)), 0)).format ( 'MM/DD/YYYY 23:59:59');\n" .
+              "  table.clear ();\n" .
+              "  for ( var x in data.result)\n" .
+              "  {\n" .
+              "    data.result[x][1] = '<a href=\"/extensions/' + data.result[x][0] + '/report#start=' + encodeURIComponent ( start) + '&end=' + encodeURIComponent ( end) + '&filter=\">' + data.result[x][1] + '</a>';\n" .
+              "    total_local_calls += parseInt ( data.result[x][3]) || 0;\n" .
+              "    total_local_time += parseInt ( data.result[x][4]) || 0;\n" .
+              "    data.result[x][4] = format_secs_to_string ( data.result[x][4]);\n" .
+              "    total_mobile_calls += parseInt ( data.result[x][5]) || 0;\n" .
+              "    total_mobile_time += parseInt ( data.result[x][6]) || 0;\n" .
+              "    data.result[x][6] = format_secs_to_string ( data.result[x][6]);\n" .
+              "    total_interstate_calls += parseInt ( data.result[x][7]) || 0;\n" .
+              "    total_interstate_time += parseInt ( data.result[x][8]) || 0;\n" .
+              "    data.result[x][8] = format_secs_to_string ( data.result[x][8]);\n" .
+              "    total_international_calls += parseInt ( data.result[x][9]) || 0;\n" .
+              "    total_international_time += parseInt ( data.result[x][10]) || 0;\n" .
+              "    data.result[x][10] = format_secs_to_string ( data.result[x][10]);\n" .
+              "    total_others_calls += parseInt ( data.result[x][11]) || 0;\n" .
+              "    total_others_time += parseInt ( data.result[x][12]) || 0;\n" .
+              "    data.result[x][12] = format_secs_to_string ( data.result[x][12]);\n" .
+              "    $(table.row.add ( data.result[x]).node ());\n" .
+              "  }\n" .
+              "  table.draw ();\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 1).html ( total_local_calls);\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 2).html ( format_secs_to_string ( total_local_time));\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 3).html ( total_mobile_calls);\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 4).html ( format_secs_to_string ( total_mobile_time));\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 5).html ( total_interstate_calls);\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 6).html ( format_secs_to_string ( total_interstate_time));\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 7).html ( total_international_calls);\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 8).html ( format_secs_to_string ( total_international_time));\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 9).html ( total_others_calls);\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 10).html ( format_secs_to_string ( total_others_time));\n" .
+              "  table.responsive.recalc ();\n" .
+              "  table.processing ( false);\n" .
+              "});\n" .
+              "$('#report').data ( 'dt', $('#report').DataTable (\n" .
+              "{\n" .
+              "  columnDefs: [\n" .
+              "                { orderable: false, targets: [ 0 ]},\n" .
+              "                { visible: false, targets: [ 0 ]}\n" .
+              "              ],\n" .
+              "  columns: [\n" .
+              "             { class: 'never'},\n" .
+              "             { class: 'export tablel-l'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'}\n" .
+              "           ],\n" .
+              "  lengthMenu: [[ -1], [ '']],\n" .
+              "  displayLength: -1,\n" .
+              "  dom: '<\"row-center\"Br>t+<\"row\"<\"col-xs-12\">>'\n" .
+              "}));\n" .
+              "$('#month').datetimepicker ( { locale: '" . __ ( "en-us") . "', useCurrent: false, format: '" . __ ( "MM/YYYY") . "', viewMode: 'months'});\n" .
+              "$('button.btn-calendar').on ( 'click', function ( event)\n" .
+              "{\n" .
+              "  event && event.preventDefault ();\n" .
+              "  $(this).parent ().parent ().find ( 'input').datetimepicker ( 'show');\n" .
+              "});\n" .
+              "$('button.btn-clean').on ( 'click', function ( event)\n" .
+              "{\n" .
+              "  event && event.preventDefault ();\n" .
+              "  $(this).parent ().parent ().find ( 'input').val ( '');\n" .
+              "});\n" .
+              "$('#month').val ( moment ().format ( '" . __ ( "MM/YYYY") . "'));\n" .
+              "$('#filters').on ( 'submit', function ( event)\n" .
+              "{\n" .
+              "  event && event.preventDefault ();\n" .
+              "  $('#filters').alerts ( 'clearAll');\n" .
+              "  if ( $('#month').val () == '')\n" .
+              "  {\n" .
+              "    $('#month').alerts ( 'add', { message: '" . __ ( "The month/year is required.") . "'});\n" .
+              "    return false;\n" .
+              "  }\n" .
+              "  $.hashForm ( 'set', { form: '#filters'});\n" .
+              "  $('#report').data ( 'dt').processing ( true);\n" .
+              "  $('#report').trigger ( 'update', VoIP.rest ( '/reports/consolidated/extensions', 'GET', { month: $('#month').val ()}));\n" .
+              "});\n" .
+              "$.hashForm ( 'check', { onfill: function () { $('#filters').trigger ( 'submit'); }});\n" .
+              "$('#month').focus ();\n");
+
+  return $output;
+}
+
+/**
+ * Add consolidated group calls report page
+ */
+framework_add_path ( "/reports/consolidated/group", "consolidated_groups_report_page");
+framework_add_hook ( "consolidated_groups_report_page", "consolidated_groups_report_page", IN_HOOK_INSERT_FIRST);
+
+/**
+ * Function to generate the consolidated groups calls report page code.
+ *
+ * @param mixed $buffer Buffer from plugin system if processed by other function
+ *                      before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function consolidated_groups_report_page ( $buffer, $parameters)
+{
+  /**
+   * Set page title
+   */
+  sys_set_title ( __ ( "Reports"));
+  sys_set_subtitle ( __ ( "consolidated per group"));
+  sys_set_path ( array (
+    1 => array ( "title" => __ ( "Reports"))
+  ));
+
+  /**
+   * Add page CSS requirements
+   */
+  sys_addcss ( array ( "name" => "dataTables", "src" => "/vendors/datatables/media/css/dataTables.bootstrap.css", "dep" => array ( "bootstrap")));
+  sys_addcss ( array ( "name" => "buttons", "src" => "/vendors/buttons/css/buttons.bootstrap.css", "dep" => array ()));
+  sys_addcss ( array ( "name" => "dataTables-buttons", "src" => "/vendors/buttons/css/buttons.dataTables.css", "dep" => array ( "buttons", "dataTables")));
+  sys_addcss ( array ( "name" => "dataTables-responsive", "src" => "/vendors/responsive/css/responsive.bootstrap.css", "dep" => array ( "dataTables")));
+  sys_addcss ( array ( "name" => "datetimepicker", "src" => "/vendors/bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css", "dep" => array ( "bootstrap")));
+
+  /**
+   * Add page JavaScript requirements
+   */
+  sys_addjs ( array ( "name" => "jquery-mask", "src" => "/vendors/jQuery-Mask-Plugin/dist/jquery.mask.js", "dep" => array ()));
+  sys_addjs ( array ( "name" => "moment", "src" => "/vendors/moment/min/moment-with-locales.js", "dep" => array ()));
+  sys_addjs ( array ( "name" => "jquery-dataTables", "src" => "/vendors/datatables/media/js/jquery.dataTables.js", "dep" => array ( "moment")));
+  sys_addjs ( array ( "name" => "dataTables", "src" => "/vendors/datatables/media/js/dataTables.bootstrap.js", "dep" => array ( "bootstrap", "jquery-dataTables")));
+  sys_addjs ( array ( "name" => "dataTables-buttons", "src" => "/vendors/buttons/js/dataTables.buttons.js", "dep" => array ( "dataTables")));
+  sys_addjs ( array ( "name" => "dataTables-buttons-html5", "src" => "/vendors/buttons/js/buttons.html5.js", "dep" => array ( "dataTables-buttons", "jszip", "pdfmake", "vfs_fonts")));
+  sys_addjs ( array ( "name" => "dataTables-buttons-print", "src" => "/vendors/buttons/js/buttons.print.js", "dep" => array ( "dataTables-buttons")));
+  sys_addjs ( array ( "name" => "dataTables-responsive", "src" => "/vendors/responsive/js/dataTables.responsive.js", "dep" => array ( "dataTables")));
+  sys_addjs ( array ( "name" => "dataTables-bootstrap-responsive", "src" => "/vendors/responsive/js/responsive.bootstrap.js", "dep" => array ( "dataTables-responsive")));
+  sys_addjs ( array ( "name" => "jszip", "src" => "/vendors/jszip/dist/jszip.js", "dep" => array ()));
+  sys_addjs ( array ( "name" => "vfs_fonts", "src" => "/vendors/pdfmake/build/vfs_fonts.js", "dep" => array ( "pdfmake")));
+  sys_addjs ( array ( "name" => "pdfmake", "src" => "/vendors/pdfmake/build/pdfmake.js", "dep" => array ( "jszip")));
+  sys_addjs ( array ( "name" => "datetimepicker", "src" => "/vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.js", "dep" => array ( "moment", "bootstrap")));
+  sys_addjs ( array ( "name" => "dataTables-processing", "src" => "/js/processing.js", "dep" => array ( "dataTables")));
+  sys_addjs ( array ( "name" => "system-dataTables", "src" => "/js/datatables.js", "dep" => array ( "dataTables", "dataTables-buttons", "stickytableheaders")));
+  sys_addjs ( array ( "name" => "stickytableheaders", "src" => "/vendors/StickyTableHeaders/js/jquery.stickytableheaders.js", "dep" => array ()));
+
+  /**
+   * Create page code
+   */
+  $output = "<div class=\"container\">\n";
+  $output .= "  <form id=\"filters\">\n";
+  $output .= "  <div class=\"col-xs-12\">\n";
+  $output .= "    <div class=\"col-xs-10\">\n";
+  $output .= "      <div class=\"form-group\">\n";
+  $output .= "        <div class=\"input-group date\">\n";
+  $output .= "          <input name=\"month\" id=\"month\" type=\"text\" class=\"form-control\" placeholder=\"" . __ ( "Month/Year") . "\" maxlength=\"7\" />\n";
+  $output .= "          <div class=\"input-group-btn\">\n";
+  $output .= "            <button class=\"btn btn-default btn-calendar\" type=\"button\"><i class=\"fa fa-calendar\"></i></button>\n";
+  $output .= "            <button class=\"btn btn-default btn-clean\" type=\"button\"><i class=\"fa fa-times\"></i></button>\n";
+  $output .= "          </div>\n";
+  $output .= "        </div>\n";
+  $output .= "      </div>\n";
+  $output .= "    </div>\n";
+  $output .= "    <button type=\"submit\" class=\"btn btn-default btn-update\"><span class=\"fa fa-search\"></span></button>\n";
+  $output .= "  </div>\n";
+  $output .= "  </form>\n";
+  $output .= "</div>\n";
+  $output .= "<table id=\"report\" class=\"table table-hover table-condensed table-report\" cellspacing=\"0\" width=\"100%\">\n";
+  $output .= "  <thead>\n";
+  $output .= "    <tr>\n";
+  $output .= "      <th rowspan=\"2\"></th>\n";
+  $output .= "      <th rowspan=\"2\" class=\"dt-vtop\">" . __ ( "Group") . "</th>\n";
+  $output .= "      <th colspan=\"2\" class=\"center\">" . __ ( "Local") . "</th>\n";
+  $output .= "      <th colspan=\"2\" class=\"center\">" . __ ( "Mobile") . "</th>\n";
+  $output .= "      <th colspan=\"2\" class=\"center\">" . __ ( "Interstate") . "</th>\n";
+  $output .= "      <th colspan=\"2\" class=\"center\">" . __ ( "International") . "</th>\n";
+  $output .= "      <th colspan=\"2\" class=\"center\">" . __ ( "Others") . "</th>\n";
+  $output .= "    </tr>\n";
+  $output .= "    <tr>\n";
+  $output .= "      <th>" . __ ( "Calls") . "</th>\n";
+  $output .= "      <th>" . __ ( "Duration") . "</th>\n";
+  $output .= "      <th>" . __ ( "Calls") . "</th>\n";
+  $output .= "      <th>" . __ ( "Duration") . "</th>\n";
+  $output .= "      <th>" . __ ( "Calls") . "</th>\n";
+  $output .= "      <th>" . __ ( "Duration") . "</th>\n";
+  $output .= "      <th>" . __ ( "Calls") . "</th>\n";
+  $output .= "      <th>" . __ ( "Duration") . "</th>\n";
+  $output .= "      <th>" . __ ( "Calls") . "</th>\n";
+  $output .= "      <th>" . __ ( "Duration") . "</th>\n";
+  $output .= "    </tr>\n";
+  $output .= "  </thead>\n";
+  $output .= "  <tbody>\n";
+  $output .= "  </tbody>\n";
+  $output .= "  <tfoot>\n";
+  $output .= "    <tr>\n";
+  $output .= "      <th colspan=\"2\">" . __ ( "Totals") . "</th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "    </tr>\n";
+  $output .= "    <tr>\n";
+  $output .= "      <th colspan=\"12\">" . __ ( "All durations are billing time in [[DD:]HH:]MM:SS format.") . "</th>\n";
+  $output .= "    </tr>\n";
+  $output .= "  </tfoot>\n";
+  $output .= "</table>\n";
+
+  /**
+   * Add report table JavaScript code
+   */
+  sys_addjs ( "$('#month').mask ( '00/0000');\n" .
+              "$('#report').on ( 'update', function ( event, data)\n" .
+              "{\n" .
+              "  var table = $(this).data ( 'dt');\n" .
+              "  var total_local_calls = 0;\n" .
+              "  var total_local_time = 0;\n" .
+              "  var total_mobile_calls = 0;\n" .
+              "  var total_mobile_time = 0;\n" .
+              "  var total_interstate_calls = 0;\n" .
+              "  var total_interstate_time = 0;\n" .
+              "  var total_international_calls = 0;\n" .
+              "  var total_international_time = 0;\n" .
+              "  var total_others_calls = 0;\n" .
+              "  var total_others_time = 0;\n" .
+              "  var start = moment ( new Date($('#month').val ().substr ( 3), parseInt ( $('#month').val ().substr ( 0, 2) - 1), 1)).format ( 'MM/DD/YYYY 00:00:00');\n" .
+              "  var end = moment ( new Date($('#month').val ().substr ( 3), parseInt ( $('#month').val ().substr ( 0, 2)), 0)).format ( 'MM/DD/YYYY 23:59:59');\n" .
+              "  table.clear ();\n" .
+              "  for ( var x in data.result)\n" .
+              "  {\n" .
+              "    data.result[x][1] = '<a href=\"/groups/' + data.result[x][0] + '/report#start=' + encodeURIComponent ( start) + '&end=' + encodeURIComponent ( end) + '&filter=\">' + data.result[x][1] + '</a>';\n" .
+              "    total_local_calls += parseInt ( data.result[x][2]) || 0;\n" .
+              "    total_local_time += parseInt ( data.result[x][3]) || 0;\n" .
+              "    data.result[x][3] = format_secs_to_string ( data.result[x][3]);\n" .
+              "    total_mobile_calls += parseInt ( data.result[x][4]) || 0;\n" .
+              "    total_mobile_time += parseInt ( data.result[x][5]) || 0;\n" .
+              "    data.result[x][5] = format_secs_to_string ( data.result[x][5]);\n" .
+              "    total_interstate_calls += parseInt ( data.result[x][6]) || 0;\n" .
+              "    total_interstate_time += parseInt ( data.result[x][7]) || 0;\n" .
+              "    data.result[x][7] = format_secs_to_string ( data.result[x][7]);\n" .
+              "    total_international_calls += parseInt ( data.result[x][8]) || 0;\n" .
+              "    total_international_time += parseInt ( data.result[x][9]) || 0;\n" .
+              "    data.result[x][9] = format_secs_to_string ( data.result[x][9]);\n" .
+              "    total_others_calls += parseInt ( data.result[x][10]) || 0;\n" .
+              "    total_others_time += parseInt ( data.result[x][11]) || 0;\n" .
+              "    data.result[x][11] = format_secs_to_string ( data.result[x][11]);\n" .
+              "    $(table.row.add ( data.result[x]).node ());\n" .
+              "  }\n" .
+              "  table.draw ();\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 1).html ( total_local_calls);\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 2).html ( format_secs_to_string ( total_local_time));\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 3).html ( total_mobile_calls);\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 4).html ( format_secs_to_string ( total_mobile_time));\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 5).html ( total_interstate_calls);\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 6).html ( format_secs_to_string ( total_interstate_time));\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 7).html ( total_international_calls);\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 8).html ( format_secs_to_string ( total_international_time));\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 9).html ( total_others_calls);\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 10).html ( format_secs_to_string ( total_others_time));\n" .
+              "  table.responsive.recalc ();\n" .
+              "  table.processing ( false);\n" .
+              "});\n" .
+              "$('#report').data ( 'dt', $('#report').DataTable (\n" .
+              "{\n" .
+              "  columnDefs: [\n" .
+              "                { orderable: false, targets: [ 0 ]},\n" .
+              "                { visible: false, targets: [ 0 ]}\n" .
+              "              ],\n" .
+              "  columns: [\n" .
+              "             { class: 'never'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'}\n" .
+              "           ],\n" .
+              "  lengthMenu: [[ -1], [ '']],\n" .
+              "  displayLength: -1,\n" .
+              "  dom: '<\"row-center\"Br>t+<\"row\"<\"col-xs-12\">>'\n" .
+              "}));\n" .
+              "$('#month').datetimepicker ( { locale: '" . __ ( "en-us") . "', useCurrent: false, format: '" . __ ( "MM/YYYY") . "', viewMode: 'months'});\n" .
+              "$('button.btn-calendar').on ( 'click', function ( event)\n" .
+              "{\n" .
+              "  event && event.preventDefault ();\n" .
+              "  $(this).parent ().parent ().find ( 'input').datetimepicker ( 'show');\n" .
+              "});\n" .
+              "$('button.btn-clean').on ( 'click', function ( event)\n" .
+              "{\n" .
+              "  event && event.preventDefault ();\n" .
+              "  $(this).parent ().parent ().find ( 'input').val ( '');\n" .
+              "});\n" .
+              "$('#month').val ( moment ().format ( '" . __ ( "MM/YYYY") . "'));\n" .
+              "$('#filters').on ( 'submit', function ( event)\n" .
+              "{\n" .
+              "  event && event.preventDefault ();\n" .
+              "  $('#filters').alerts ( 'clearAll');\n" .
+              "  if ( $('#month').val () == '')\n" .
+              "  {\n" .
+              "    $('#month').alerts ( 'add', { message: '" . __ ( "The month/year is required.") . "'});\n" .
+              "    return false;\n" .
+              "  }\n" .
+              "  $.hashForm ( 'set', { form: '#filters'});\n" .
+              "  $('#report').data ( 'dt').processing ( true);\n" .
+              "  $('#report').trigger ( 'update', VoIP.rest ( '/reports/consolidated/groups', 'GET', { month: $('#month').val ()}));\n" .
+              "});\n" .
+              "$.hashForm ( 'check', { onfill: function () { $('#filters').trigger ( 'submit'); }});\n" .
+              "$('#month').focus ();\n");
+
+  return $output;
+}
+
+/**
+ * Add consolidated gateway calls report page
+ */
+framework_add_path ( "/reports/consolidated/gateway", "consolidated_gateways_report_page");
+framework_add_hook ( "consolidated_gateways_report_page", "consolidated_gateways_report_page", IN_HOOK_INSERT_FIRST);
+
+/**
+ * Function to generate the consolidated gateways calls report page code.
+ *
+ * @param mixed $buffer Buffer from plugin system if processed by other function
+ *                      before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function consolidated_gateways_report_page ( $buffer, $parameters)
+{
+  /**
+   * Set page title
+   */
+  sys_set_title ( __ ( "Reports"));
+  sys_set_subtitle ( __ ( "consolidated per gateway"));
+  sys_set_path ( array (
+    1 => array ( "title" => __ ( "Reports"))
+  ));
+
+  /**
+   * Add page CSS requirements
+   */
+  sys_addcss ( array ( "name" => "dataTables", "src" => "/vendors/datatables/media/css/dataTables.bootstrap.css", "dep" => array ( "bootstrap")));
+  sys_addcss ( array ( "name" => "buttons", "src" => "/vendors/buttons/css/buttons.bootstrap.css", "dep" => array ()));
+  sys_addcss ( array ( "name" => "dataTables-buttons", "src" => "/vendors/buttons/css/buttons.dataTables.css", "dep" => array ( "buttons", "dataTables")));
+  sys_addcss ( array ( "name" => "dataTables-responsive", "src" => "/vendors/responsive/css/responsive.bootstrap.css", "dep" => array ( "dataTables")));
+  sys_addcss ( array ( "name" => "datetimepicker", "src" => "/vendors/bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css", "dep" => array ( "bootstrap")));
+
+  /**
+   * Add page JavaScript requirements
+   */
+  sys_addjs ( array ( "name" => "jquery-mask", "src" => "/vendors/jQuery-Mask-Plugin/dist/jquery.mask.js", "dep" => array ()));
+  sys_addjs ( array ( "name" => "moment", "src" => "/vendors/moment/min/moment-with-locales.js", "dep" => array ()));
+  sys_addjs ( array ( "name" => "jquery-dataTables", "src" => "/vendors/datatables/media/js/jquery.dataTables.js", "dep" => array ( "moment")));
+  sys_addjs ( array ( "name" => "dataTables", "src" => "/vendors/datatables/media/js/dataTables.bootstrap.js", "dep" => array ( "bootstrap", "jquery-dataTables")));
+  sys_addjs ( array ( "name" => "dataTables-buttons", "src" => "/vendors/buttons/js/dataTables.buttons.js", "dep" => array ( "dataTables")));
+  sys_addjs ( array ( "name" => "dataTables-buttons-html5", "src" => "/vendors/buttons/js/buttons.html5.js", "dep" => array ( "dataTables-buttons", "jszip", "pdfmake", "vfs_fonts")));
+  sys_addjs ( array ( "name" => "dataTables-buttons-print", "src" => "/vendors/buttons/js/buttons.print.js", "dep" => array ( "dataTables-buttons")));
+  sys_addjs ( array ( "name" => "dataTables-responsive", "src" => "/vendors/responsive/js/dataTables.responsive.js", "dep" => array ( "dataTables")));
+  sys_addjs ( array ( "name" => "dataTables-bootstrap-responsive", "src" => "/vendors/responsive/js/responsive.bootstrap.js", "dep" => array ( "dataTables-responsive")));
+  sys_addjs ( array ( "name" => "jszip", "src" => "/vendors/jszip/dist/jszip.js", "dep" => array ()));
+  sys_addjs ( array ( "name" => "vfs_fonts", "src" => "/vendors/pdfmake/build/vfs_fonts.js", "dep" => array ( "pdfmake")));
+  sys_addjs ( array ( "name" => "pdfmake", "src" => "/vendors/pdfmake/build/pdfmake.js", "dep" => array ( "jszip")));
+  sys_addjs ( array ( "name" => "datetimepicker", "src" => "/vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.js", "dep" => array ( "moment", "bootstrap")));
+  sys_addjs ( array ( "name" => "dataTables-processing", "src" => "/js/processing.js", "dep" => array ( "dataTables")));
+  sys_addjs ( array ( "name" => "system-dataTables", "src" => "/js/datatables.js", "dep" => array ( "dataTables", "dataTables-buttons", "stickytableheaders")));
+  sys_addjs ( array ( "name" => "stickytableheaders", "src" => "/vendors/StickyTableHeaders/js/jquery.stickytableheaders.js", "dep" => array ()));
+
+  /**
+   * Create page code
+   */
+  $output = "<div class=\"container\">\n";
+  $output .= "  <form id=\"filters\">\n";
+  $output .= "  <div class=\"col-xs-12\">\n";
+  $output .= "    <div class=\"col-xs-10\">\n";
+  $output .= "      <div class=\"form-group\">\n";
+  $output .= "        <div class=\"input-group date\">\n";
+  $output .= "          <input name=\"month\" id=\"month\" type=\"text\" class=\"form-control\" placeholder=\"" . __ ( "Month/Year") . "\" maxlength=\"7\" />\n";
+  $output .= "          <div class=\"input-group-btn\">\n";
+  $output .= "            <button class=\"btn btn-default btn-calendar\" type=\"button\"><i class=\"fa fa-calendar\"></i></button>\n";
+  $output .= "            <button class=\"btn btn-default btn-clean\" type=\"button\"><i class=\"fa fa-times\"></i></button>\n";
+  $output .= "          </div>\n";
+  $output .= "        </div>\n";
+  $output .= "      </div>\n";
+  $output .= "    </div>\n";
+  $output .= "    <button type=\"submit\" class=\"btn btn-default btn-update\"><span class=\"fa fa-search\"></span></button>\n";
+  $output .= "  </div>\n";
+  $output .= "  </form>\n";
+  $output .= "</div>\n";
+  $output .= "<table id=\"report\" class=\"table table-hover table-condensed table-report\" cellspacing=\"0\" width=\"100%\">\n";
+  $output .= "  <thead>\n";
+  $output .= "    <tr>\n";
+  $output .= "      <th rowspan=\"2\"></th>\n";
+  $output .= "      <th rowspan=\"2\" class=\"dt-vtop\">" . __ ( "Gateway") . "</th>\n";
+  $output .= "      <th colspan=\"2\" class=\"center\">" . __ ( "Local") . "</th>\n";
+  $output .= "      <th colspan=\"2\" class=\"center\">" . __ ( "Mobile") . "</th>\n";
+  $output .= "      <th colspan=\"2\" class=\"center\">" . __ ( "Interstate") . "</th>\n";
+  $output .= "      <th colspan=\"2\" class=\"center\">" . __ ( "International") . "</th>\n";
+  $output .= "      <th colspan=\"2\" class=\"center\">" . __ ( "Others") . "</th>\n";
+  $output .= "    </tr>\n";
+  $output .= "    <tr>\n";
+  $output .= "      <th>" . __ ( "Calls") . "</th>\n";
+  $output .= "      <th>" . __ ( "Duration") . "</th>\n";
+  $output .= "      <th>" . __ ( "Calls") . "</th>\n";
+  $output .= "      <th>" . __ ( "Duration") . "</th>\n";
+  $output .= "      <th>" . __ ( "Calls") . "</th>\n";
+  $output .= "      <th>" . __ ( "Duration") . "</th>\n";
+  $output .= "      <th>" . __ ( "Calls") . "</th>\n";
+  $output .= "      <th>" . __ ( "Duration") . "</th>\n";
+  $output .= "      <th>" . __ ( "Calls") . "</th>\n";
+  $output .= "      <th>" . __ ( "Duration") . "</th>\n";
+  $output .= "    </tr>\n";
+  $output .= "  </thead>\n";
+  $output .= "  <tbody>\n";
+  $output .= "  </tbody>\n";
+  $output .= "  <tfoot>\n";
+  $output .= "    <tr>\n";
+  $output .= "      <th colspan=\"2\">" . __ ( "Totals") . "</th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "      <th></th>\n";
+  $output .= "    </tr>\n";
+  $output .= "    <tr>\n";
+  $output .= "      <th colspan=\"12\">" . __ ( "All durations are billing time in [[DD:]HH:]MM:SS format.") . "</th>\n";
+  $output .= "    </tr>\n";
+  $output .= "  </tfoot>\n";
+  $output .= "</table>\n";
+
+  /**
+   * Add report table JavaScript code
+   */
+  sys_addjs ( "$('#month').mask ( '00/0000');\n" .
+              "$('#report').on ( 'update', function ( event, data)\n" .
+              "{\n" .
+              "  var table = $(this).data ( 'dt');\n" .
+              "  var total_local_calls = 0;\n" .
+              "  var total_local_time = 0;\n" .
+              "  var total_mobile_calls = 0;\n" .
+              "  var total_mobile_time = 0;\n" .
+              "  var total_interstate_calls = 0;\n" .
+              "  var total_interstate_time = 0;\n" .
+              "  var total_international_calls = 0;\n" .
+              "  var total_international_time = 0;\n" .
+              "  var total_others_calls = 0;\n" .
+              "  var total_others_time = 0;\n" .
+              "  var start = moment ( new Date($('#month').val ().substr ( 3), parseInt ( $('#month').val ().substr ( 0, 2) - 1), 1)).format ( 'MM/DD/YYYY 00:00:00');\n" .
+              "  var end = moment ( new Date($('#month').val ().substr ( 3), parseInt ( $('#month').val ().substr ( 0, 2)), 0)).format ( 'MM/DD/YYYY 23:59:59');\n" .
+              "  table.clear ();\n" .
+              "  for ( var x in data.result)\n" .
+              "  {\n" .
+              "    data.result[x][1] = '<a href=\"/gateways/' + data.result[x][0] + '/report#start=' + encodeURIComponent ( start) + '&end=' + encodeURIComponent ( end) + '&filter=\">' + data.result[x][1] + '</a>';\n" .
+              "    total_local_calls += parseInt ( data.result[x][2]) || 0;\n" .
+              "    total_local_time += parseInt ( data.result[x][3]) || 0;\n" .
+              "    data.result[x][3] = format_secs_to_string ( data.result[x][3]);\n" .
+              "    total_mobile_calls += parseInt ( data.result[x][4]) || 0;\n" .
+              "    total_mobile_time += parseInt ( data.result[x][5]) || 0;\n" .
+              "    data.result[x][5] = format_secs_to_string ( data.result[x][5]);\n" .
+              "    total_interstate_calls += parseInt ( data.result[x][6]) || 0;\n" .
+              "    total_interstate_time += parseInt ( data.result[x][7]) || 0;\n" .
+              "    data.result[x][7] = format_secs_to_string ( data.result[x][7]);\n" .
+              "    total_international_calls += parseInt ( data.result[x][8]) || 0;\n" .
+              "    total_international_time += parseInt ( data.result[x][9]) || 0;\n" .
+              "    data.result[x][9] = format_secs_to_string ( data.result[x][9]);\n" .
+              "    total_others_calls += parseInt ( data.result[x][10]) || 0;\n" .
+              "    total_others_time += parseInt ( data.result[x][11]) || 0;\n" .
+              "    data.result[x][11] = format_secs_to_string ( data.result[x][11]);\n" .
+              "    $(table.row.add ( data.result[x]).node ());\n" .
+              "  }\n" .
+              "  table.draw ();\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 1).html ( total_local_calls);\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 2).html ( format_secs_to_string ( total_local_time));\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 3).html ( total_mobile_calls);\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 4).html ( format_secs_to_string ( total_mobile_time));\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 5).html ( total_interstate_calls);\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 6).html ( format_secs_to_string ( total_interstate_time));\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 7).html ( total_international_calls);\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 8).html ( format_secs_to_string ( total_international_time));\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 9).html ( total_others_calls);\n" .
+              "  $(table.table ().footer ()).find ( 'th').eq ( 10).html ( format_secs_to_string ( total_others_time));\n" .
+              "  table.responsive.recalc ();\n" .
+              "  table.processing ( false);\n" .
+              "});\n" .
+              "$('#report').data ( 'dt', $('#report').DataTable (\n" .
+              "{\n" .
+              "  columnDefs: [\n" .
+              "                { orderable: false, targets: [ 0 ]},\n" .
+              "                { visible: false, targets: [ 0 ]}\n" .
+              "              ],\n" .
+              "  columns: [\n" .
+              "             { class: 'never'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'},\n" .
+              "             { class: 'export all'}\n" .
+              "           ],\n" .
+              "  lengthMenu: [[ -1], [ '']],\n" .
+              "  displayLength: -1,\n" .
+              "  dom: '<\"row-center\"Br>t+<\"row\"<\"col-xs-12\">>'\n" .
+              "}));\n" .
+              "$('#month').datetimepicker ( { locale: '" . __ ( "en-us") . "', useCurrent: false, format: '" . __ ( "MM/YYYY") . "', viewMode: 'months'});\n" .
+              "$('button.btn-calendar').on ( 'click', function ( event)\n" .
+              "{\n" .
+              "  event && event.preventDefault ();\n" .
+              "  $(this).parent ().parent ().find ( 'input').datetimepicker ( 'show');\n" .
+              "});\n" .
+              "$('button.btn-clean').on ( 'click', function ( event)\n" .
+              "{\n" .
+              "  event && event.preventDefault ();\n" .
+              "  $(this).parent ().parent ().find ( 'input').val ( '');\n" .
+              "});\n" .
+              "$('#month').val ( moment ().format ( '" . __ ( "MM/YYYY") . "'));\n" .
+              "$('#filters').on ( 'submit', function ( event)\n" .
+              "{\n" .
+              "  event && event.preventDefault ();\n" .
+              "  $('#filters').alerts ( 'clearAll');\n" .
+              "  if ( $('#month').val () == '')\n" .
+              "  {\n" .
+              "    $('#month').alerts ( 'add', { message: '" . __ ( "The month/year is required.") . "'});\n" .
+              "    return false;\n" .
+              "  }\n" .
+              "  $.hashForm ( 'set', { form: '#filters'});\n" .
+              "  $('#report').data ( 'dt').processing ( true);\n" .
+              "  $('#report').trigger ( 'update', VoIP.rest ( '/reports/consolidated/gateways', 'GET', { month: $('#month').val ()}));\n" .
+              "});\n" .
+              "$.hashForm ( 'check', { onfill: function () { $('#filters').trigger ( 'submit'); }});\n" .
+              "$('#month').focus ();\n");
 
   return $output;
 }

@@ -28,7 +28,7 @@
  * interface to the user browser. It controls the authentication, menu, basic
  * interface forms like user profile page, and other things related to UI.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Interface
@@ -161,14 +161,8 @@ function page_structure ( $content)
   $head .= "  <meta charset=\"" . ( ! empty ( $_in["general"]["charset"]) ? strtolower ( $_in["general"]["charset"]) : "utf-8") . "\">\n";
   $head .= "  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n";
   $head .= "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no\">\n";
-  if ( ! empty ( $_in["general"]["description"]))
-  {
-    $head .= "  <meta name=\"description\" content=\"" . addslashes ( strip_tags ( $_in["general"]["description"])) . "\">\n";
-  }
-  if ( ! empty ( $_in["general"]["author"]))
-  {
-    $head .= "  <meta name=\"author\" content=\"" . addslashes ( strip_tags ( $_in["general"]["author"])) . "\">\n";
-  }
+  $head .= "  <meta name=\"description\" content=\"" . __ ( "VoIP PBX management system.") . "\">\n";
+  $head .= "  <meta name=\"author\" content=\"Ernani José Camargo Azevedo\">\n";
   if ( ! empty ( $_in["general"]["version"]))
   {
     $head .= "  <meta name=\"version\" content=\"" . addslashes ( strip_tags ( $_in["general"]["version"])) . "\">\n";
@@ -223,7 +217,7 @@ function page_structure ( $content)
   $body .= "<noscript>\n";
   $body .= "  <div class=\"alert alert-block col-sm-10\">\n";
   $body .= "    <h4 class=\"alert-bodying\">" . __ ( "Warning!") . "</h4>\n";
-  $body .= "    <p>" . __ ( "You must have") . " <a href=\"http://pt.wikipedia.org/wiki/JavaScript\" target=\"_blank\">JavaScript</a> " . __ ( "enabled to use this system.") . "</p>\n";
+  $body .= "    <p>" . __ ( "You must have") . " <a href=\"http://pt.wikipedia.org/wiki/JavaScript\" target=\"_blank\" rel=\"noopener\">JavaScript</a> " . __ ( "enabled to use this system.") . "</p>\n";
   $body .= "  </div>\n";
   $body .= "</noscript>\n";
   $body .= "\n";
@@ -246,96 +240,6 @@ function page_structure ( $content)
   $body .= "      </a>\n";
   $body .= "      <div class=\"navbar-custom-menu\">\n";
   $body .= "        <ul class=\"nav navbar-nav\">\n";
-/*
-  Dropdown de mensagens...
-
-  $body .= "          <li class=\"dropdown messages-menu\">\n";
-  $body .= "            <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">\n";
-  $body .= "              <i class=\"fa fa-envelope-o\"></i>\n";
-  $body .= "              <span class=\"label label-success\">4</span>\n";
-  $body .= "            </a>\n";
-  $body .= "            <ul class=\"dropdown-menu\">\n";
-  $body .= "              <li class=\"header\">You have 4 messages</li>\n";
-  $body .= "              <li>\n";
-  $body .= "                <ul class=\"menu\">\n";
-  $body .= "                  <li>\n";
-  $body .= "                    <a href=\"#\">\n";
-  $body .= "                      <div class=\"pull-left\">\n";
-  $body .= "                        <img src=\"/img/avatars/profile-" . ( ! empty ( $_in["session"]["AvatarID"]) ? $_in["session"]["AvatarID"] : "default") . ".jpg\" class=\"img-circle\" alt=\"\">\n";
-  $body .= "                      </div>\n";
-  $body .= "                      <h4>\n";
-  $body .= "                        Support Team\n";
-  $body .= "                        <small><i class=\"fa fa-calendar-alt\"></i> 5 mins</small>\n";
-  $body .= "                      </h4>\n";
-  $body .= "                      <p>Why not buy a new awesome theme?</p>\n";
-  $body .= "                    </a>\n";
-  $body .= "                  </li>\n";
-  $body .= "                </ul>\n";
-  $body .= "              </li>\n";
-  $body .= "              <li class=\"footer\"><a href=\"#\">See All Messages</a></li>\n";
-  $body .= "            </ul>\n";
-  $body .= "          </li>\n";
-*/
-
-/*
-  Dropdown de notificações...
-
-  $body .= "          <li class=\"dropdown notifications-menu\">\n";
-  $body .= "            <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">\n";
-  $body .= "              <i class=\"fa fa-bell-o\"></i>\n";
-  $body .= "              <span class=\"label label-warning\">10</span>\n";
-  $body .= "            </a>\n";
-  $body .= "            <ul class=\"dropdown-menu\">\n";
-  $body .= "              <li class=\"header\">You have 10 notifications</li>\n";
-  $body .= "              <li>\n";
-  $body .= "                <ul class=\"menu\">\n";
-  $body .= "                  <li>\n";
-  $body .= "                    <a href=\"#\">\n";
-  $body .= "                      <i class=\"fa fa-users text-aqua\"></i> 5 new members joined today\n";
-  $body .= "                    </a>\n";
-  $body .= "                  </li>\n";
-  $body .= "                </ul>\n";
-  $body .= "              </li>\n";
-  $body .= "              <li class=\"footer\"><a href=\"#\">View all</a></li>\n";
-  $body .= "            </ul>\n";
-  $body .= "          </li>\n";
-*/
-
-/*
-  Dropdown de tarefas...
-
-  $body .= "          <li class=\"dropdown tasks-menu\">\n";
-  $body .= "            <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">\n";
-  $body .= "              <i class=\"fa fa-flag-o\"></i>\n";
-  $body .= "              <span class=\"label label-danger\">9</span>\n";
-  $body .= "            </a>\n";
-  $body .= "            <ul class=\"dropdown-menu\">\n";
-  $body .= "              <li class=\"header\">You have 9 tasks</li>\n";
-  $body .= "              <li>\n";
-  $body .= "                <ul class=\"menu\">\n";
-  $body .= "                  <li>\n";
-  $body .= "                    <a href=\"#\">\n";
-  $body .= "                      <h3>\n";
-  $body .= "                        Design some buttons\n";
-  $body .= "                        <small class=\"pull-right\">20%</small>\n";
-  $body .= "                      </h3>\n";
-  $body .= "                      <div class=\"progress xs\">\n";
-  $body .= "                        <div class=\"progress-bar progress-bar-aqua\" style=\"width: 20%\" role=\"progressbar\"\n";
-  $body .= "                             aria-valuenow=\"20\" aria-valuemin=\"0\" aria-valuemax=\"100\">\n";
-  $body .= "                          <span class=\"sr-only\">20% Complete</span>\n";
-  $body .= "                        </div>\n";
-  $body .= "                      </div>\n";
-  $body .= "                    </a>\n";
-  $body .= "                  </li>\n";
-  $body .= "                </ul>\n";
-  $body .= "              </li>\n";
-  $body .= "              <li class=\"footer\">\n";
-  $body .= "                <a href=\"#\">View all tasks</a>\n";
-  $body .= "              </li>\n";
-  $body .= "            </ul>\n";
-  $body .= "          </li>\n";
-*/
-
   $body .= "          <li class=\"dropdown user user-menu\">\n";
   $body .= "            <a href=\"#\" class=\"dropdown-toggle\" data-toggle=\"dropdown\">\n";
   $body .= "              <img src=\"/img/avatars/profile-" . ( ! empty ( $_in["session"]["AvatarID"]) ? $_in["session"]["AvatarID"] : "default") . ".jpg\" class=\"user-image\" alt=\"\">\n";
@@ -349,23 +253,6 @@ function page_structure ( $content)
   $body .= "                  <small>" . __ ( "Since") . " " . date ( __ ( "m/d/Y"), mktime ( 0, 0, 0, substr ( $_in["session"]["Since"], 5, 2), substr ( $_in["session"]["Since"], 8, 2), substr ( $_in["session"]["Since"], 0, 4))) . "</small>\n";
   $body .= "                </p>\n";
   $body .= "              </li>\n";
-/*
-  Aba de baixo do nome do usuário...
-
-  $body .= "              <li class=\"user-body\">\n";
-  $body .= "                <div class=\"row\">\n";
-  $body .= "                  <div class=\"col-xs-4 text-center\">\n";
-  $body .= "                    <a href=\"#\">Followers</a>\n";
-  $body .= "                  </div>\n";
-  $body .= "                  <div class=\"col-xs-4 text-center\">\n";
-  $body .= "                    <a href=\"#\">Sales</a>\n";
-  $body .= "                  </div>\n";
-  $body .= "                  <div class=\"col-xs-4 text-center\">\n";
-  $body .= "                    <a href=\"#\">Friends</a>\n";
-  $body .= "                  </div>\n";
-  $body .= "                </div>\n";
-  $body .= "              </li>\n";
-*/
   $body .= "              <li class=\"user-footer\">\n";
   $body .= "                <div class=\"pull-left\">\n";
   $body .= "                  <a href=\"/users/" . $_in["session"]["ID"] . "/edit\" class=\"btn btn-default btn-flat\">" . __ ( "Profile") . "</a>\n";
@@ -376,59 +263,19 @@ function page_structure ( $content)
   $body .= "              </li>\n";
   $body .= "            </ul>\n";
   $body .= "          </li>\n";
-
-/*
-  Slider de configurações...
-
-  $body .= "          <li>\n";
-  $body .= "            <a href=\"#\" data-toggle=\"control-sidebar\"><i class=\"fa fa-gears\"></i></a>\n";
-  $body .= "          </li>\n";
-*/
-
   $body .= "        </ul>\n";
   $body .= "      </div>\n";
   $body .= "    </nav>\n";
   $body .= "  </header>\n";
 
-//  $body .= "        <div class=\"navbar nav_title\" style=\"border: 0;\"><a href=\"/\" class=\"site_title\"><img src=\"/images/" . preg_replace ( "([^\w\s\d\.\-_~,;:\[\]\(\]]|[\.]{2,})", "", $_in["logo"]["filename"]) . "\" width=\"" . (int) $_in["logo"]["width"] . "\" height=\"" . (int) $_in["logo"]["height"] . "\" alt=\"\" /> <span>VoIP Domain</span></a></div>\n";
-//  $body .= "            <h2>" . strip_tags ( $_in["session"]["Name"]) . "</h2>\n";
-
   /**
    * Create basic menu structure
    */
   $menu = array ();
-  // $menu[] = array ( "type" => "entry", "icon" => "home", "color" => "red", "href" => "/", "text" => __ ( "Start"), "labels" => array ( array ( "color" => "yellow", "text" => 2), array ( "color" => "aqua", "text" => 1)));
   $menu[] = array ( "type" => "entry", "icon" => "home", "color" => "red", "href" => "/", "text" => __ ( "Start"));
   $menu[] = array ( "type" => "submenu", "icon" => "book", "text" => __ ( "Entries"), "entries" => (array) filters_call ( "page_menu_registers"));
-  $menu[] = array ( "type" => "submenu", "icon" => "file", "text" => __ ( "Reports"), "entries" => array_merge ( array (
-              array ( "type" => "submenu", "group" => "subs", "icon" => "cloud-upload-alt", "text" => "Ligações efetuadas", "entries" => array (
-                array ( "type" => "entry", "icon" => "user", "href" => "/reports/made/user", "text" => "Por usuário"),
-                array ( "type" => "entry", "icon" => "users", "href" => "/reports/made/group", "text" => "Por grupo"),
-                array ( "type" => "entry", "icon" => "cloud-upload-alt", "href" => "/reports/made/gateway", "text" => "Por gateway"),
-                array ( "type" => "entry", "icon" => "globe", "href" => "/reports/made/all", "text" => "Todas")
-              )),
-              array ( "type" => "submenu", "group" => "subs", "icon" => "cloud-download-alt", "text" => "Ligações recebidas", "entries" => array (
-                array ( "type" => "entry", "icon" => "user", "href" => "/reports/received/user", "text" => "Por usuário"),
-                array ( "type" => "entry", "icon" => "users", "href" => "/reports/received/group", "text" => "Por grupo"),
-                array ( "type" => "entry", "icon" => "cloud-upload-alt", "href" => "/reports/received/gateway", "text" => "Por gateway"),
-                array ( "type" => "entry", "icon" => "globe", "href" => "/reports/received/all", "text" => "Todas")
-              )),
-              array ( "type" => "submenu", "group" => "subs", "icon" => "dollar-sign", "text" => "Financeiros", "entries" => array_merge ( array (
-                array ( "type" => "entry", "icon" => "dollar-sign", "href" => "/reports/financial/costcenter", "text" => "Centros de Custo"),
-                array ( "type" => "entry", "icon" => "users", "href" => "/reports/financial/group", "text" => "Grupos"),
-                array ( "type" => "entry", "icon" => "cloud-upload-alt", "href" => "/reports/financial/gateway", "text" => "Gateways")
-              ), (array) filters_call ( "page_menu_reports_financial"))),
-              array ( "type" => "submenu", "group" => "subs", "icon" => "paint-brush", "text" => "Gráficos", "entries" => array_merge ( array (
-                array ( "type" => "entry", "icon" => "globe", "href" => "/reports/graphs/server", "text" => "Por servidor"),
-                array ( "type" => "entry", "icon" => "dollar-sign", "href" => "/reports/graphs/cost", "text" => "Custos"),
-                array ( "type" => "entry", "icon" => "search", "href" => "/reports/graphs/monitor", "text" => "Monitoria")
-              ), (array) filters_call ( "page_menu_reports_graph"))),
-              array ( "type" => "entry", "group" => "listing", "icon" => "list", "href" => "/reports/list", "text" => "Listagem de ramais"),
-              array ( "type" => "entry", "group" => "listing", "icon" => "random", "href" => "/reports/ranges", "text" => "Listagem de faixas"),
-              array ( "type" => "entry", "group" => "listing", "icon" => "thermometer-empty", "href" => "/reports/activity", "text" => "Listagem por atividade"),
-              array ( "type" => "entry", "group" => "listing", "icon" => "heart", "href" => "/reports/status", "text" => "Estado do servidor"),
-            ), (array) filters_call ( "page_menu_reports")));
-//  $menu[] = array ( "type" => "submenu", "icon" => "cog", "text" => __ ( "Configurations"), "permission" => "administrator", "entries" => (array) filters_call ( "page_menu_configurations"));
+  $menu[] = array ( "type" => "submenu", "icon" => "file", "text" => __ ( "Reports"), "entries" => (array) filters_call ( "page_menu_reports"));
+  $menu[] = array ( "type" => "submenu", "icon" => "cog", "text" => __ ( "Configurations"), "permission" => "administrator", "entries" => (array) filters_call ( "page_menu_configurations"));
   $menu[] = array ( "type" => "submenu", "icon" => "suitcase", "text" => __ ( "Resources"), "entries" => (array) filters_call ( "page_menu_resources"));
   $menu[] = (array) filters_call ( "page_menu_others");
 
@@ -456,178 +303,6 @@ function page_structure ( $content)
   $body .= "      </form>\n";
   $body .= "      <ul class=\"sidebar-menu\" data-widget=\"tree\">\n";
   $body .= page_menu ( $menu);
-
-/*
-  $body .= "        <li class=\"header\">MAIN NAVIGATION</li>\n";
-  $body .= "        <li class=\"treeview\">\n";
-  $body .= "          <a href=\"#\">\n";
-  $body .= "            <i class=\"fa fa-dashboard\"></i> <span>Dashboard</span>\n";
-  $body .= "            <span class=\"pull-right-container\">\n";
-  $body .= "              <i class=\"fa fa-angle-left pull-right\"></i>\n";
-  $body .= "            </span>\n";
-  $body .= "          </a>\n";
-  $body .= "          <ul class=\"treeview-menu\">\n";
-  $body .= "            <li><a href=\"../../index.html\"><i class=\"fa fa-circle-o\"></i> Dashboard v1</a></li>\n";
-  $body .= "            <li><a href=\"../../index2.html\"><i class=\"fa fa-circle-o\"></i> Dashboard v2</a></li>\n";
-  $body .= "          </ul>\n";
-  $body .= "        </li>\n";
-  $body .= "        <li class=\"treeview\">\n";
-  $body .= "          <a href=\"#\">\n";
-  $body .= "            <i class=\"fa fa-files-o\"></i>\n";
-  $body .= "            <span>Layout Options</span>\n";
-  $body .= "            <span class=\"pull-right-container\">\n";
-  $body .= "              <span class=\"label label-primary pull-right\">4</span>\n";
-  $body .= "            </span>\n";
-  $body .= "          </a>\n";
-  $body .= "          <ul class=\"treeview-menu\">\n";
-  $body .= "            <li><a href=\"../layout/top-nav.html\"><i class=\"fa fa-circle-o\"></i> Top Navigation</a></li>\n";
-  $body .= "            <li><a href=\"../layout/boxed.html\"><i class=\"fa fa-circle-o\"></i> Boxed</a></li>\n";
-  $body .= "            <li><a href=\"../layout/fixed.html\"><i class=\"fa fa-circle-o\"></i> Fixed</a></li>\n";
-  $body .= "            <li><a href=\"../layout/collapsed-sidebar.html\"><i class=\"fa fa-circle-o\"></i> Collapsed Sidebar</a></li>\n";
-  $body .= "          </ul>\n";
-  $body .= "        </li>\n";
-  $body .= "        <li>\n";
-  $body .= "          <a href=\"../widgets.html\">\n";
-  $body .= "            <i class=\"fa fa-th\"></i> <span>Widgets</span>\n";
-  $body .= "            <span class=\"pull-right-container\">\n";
-  $body .= "              <small class=\"label pull-right bg-green\">Hot</small>\n";
-  $body .= "            </span>\n";
-  $body .= "          </a>\n";
-  $body .= "        </li>\n";
-  $body .= "        <li class=\"treeview\">\n";
-  $body .= "          <a href=\"#\">\n";
-  $body .= "            <i class=\"fa fa-pie-chart\"></i>\n";
-  $body .= "            <span>Charts</span>\n";
-  $body .= "            <span class=\"pull-right-container\">\n";
-  $body .= "              <i class=\"fa fa-angle-left pull-right\"></i>\n";
-  $body .= "            </span>\n";
-  $body .= "          </a>\n";
-  $body .= "          <ul class=\"treeview-menu\">\n";
-  $body .= "            <li><a href=\"../charts/chartjs.html\"><i class=\"fa fa-circle-o\"></i> ChartJS</a></li>\n";
-  $body .= "            <li><a href=\"../charts/morris.html\"><i class=\"fa fa-circle-o\"></i> Morris</a></li>\n";
-  $body .= "            <li><a href=\"../charts/flot.html\"><i class=\"fa fa-circle-o\"></i> Flot</a></li>\n";
-  $body .= "            <li><a href=\"../charts/inline.html\"><i class=\"fa fa-circle-o\"></i> Inline charts</a></li>\n";
-  $body .= "          </ul>\n";
-  $body .= "        </li>\n";
-  $body .= "        <li class=\"treeview\">\n";
-  $body .= "          <a href=\"#\">\n";
-  $body .= "            <i class=\"fa fa-laptop\"></i>\n";
-  $body .= "            <span>UI Elements</span>\n";
-  $body .= "            <span class=\"pull-right-container\">\n";
-  $body .= "              <i class=\"fa fa-angle-left pull-right\"></i>\n";
-  $body .= "            </span>\n";
-  $body .= "          </a>\n";
-  $body .= "          <ul class=\"treeview-menu\">\n";
-  $body .= "            <li><a href=\"../UI/general.html\"><i class=\"fa fa-circle-o\"></i> General</a></li>\n";
-  $body .= "            <li><a href=\"../UI/icons.html\"><i class=\"fa fa-circle-o\"></i> Icons</a></li>\n";
-  $body .= "            <li><a href=\"../UI/buttons.html\"><i class=\"fa fa-circle-o\"></i> Buttons</a></li>\n";
-  $body .= "            <li><a href=\"../UI/sliders.html\"><i class=\"fa fa-circle-o\"></i> Sliders</a></li>\n";
-  $body .= "            <li><a href=\"../UI/timeline.html\"><i class=\"fa fa-circle-o\"></i> Timeline</a></li>\n";
-  $body .= "            <li><a href=\"../UI/modals.html\"><i class=\"fa fa-circle-o\"></i> Modals</a></li>\n";
-  $body .= "          </ul>\n";
-  $body .= "        </li>\n";
-  $body .= "        <li class=\"treeview\">\n";
-  $body .= "          <a href=\"#\">\n";
-  $body .= "            <i class=\"fa fa-edit\"></i> <span>Forms</span>\n";
-  $body .= "            <span class=\"pull-right-container\">\n";
-  $body .= "              <i class=\"fa fa-angle-left pull-right\"></i>\n";
-  $body .= "            </span>\n";
-  $body .= "          </a>\n";
-  $body .= "          <ul class=\"treeview-menu\">\n";
-  $body .= "            <li><a href=\"../forms/general.html\"><i class=\"fa fa-circle-o\"></i> General Elements</a></li>\n";
-  $body .= "            <li><a href=\"../forms/advanced.html\"><i class=\"fa fa-circle-o\"></i> Advanced Elements</a></li>\n";
-  $body .= "            <li><a href=\"../forms/editors.html\"><i class=\"fa fa-circle-o\"></i> Editors</a></li>\n";
-  $body .= "          </ul>\n";
-  $body .= "        </li>\n";
-  $body .= "        <li class=\"treeview\">\n";
-  $body .= "          <a href=\"#\">\n";
-  $body .= "            <i class=\"fa fa-table\"></i> <span>Tables</span>\n";
-  $body .= "            <span class=\"pull-right-container\">\n";
-  $body .= "              <i class=\"fa fa-angle-left pull-right\"></i>\n";
-  $body .= "            </span>\n";
-  $body .= "          </a>\n";
-  $body .= "          <ul class=\"treeview-menu\">\n";
-  $body .= "            <li><a href=\"../tables/simple.html\"><i class=\"fa fa-circle-o\"></i> Simple tables</a></li>\n";
-  $body .= "            <li><a href=\"../tables/data.html\"><i class=\"fa fa-circle-o\"></i> Data tables</a></li>\n";
-  $body .= "          </ul>\n";
-  $body .= "        </li>\n";
-  $body .= "        <li>\n";
-  $body .= "          <a href=\"../calendar.html\">\n";
-  $body .= "            <i class=\"fa fa-calendar\"></i> <span>Calendar</span>\n";
-  $body .= "            <span class=\"pull-right-container\">\n";
-  $body .= "              <small class=\"label pull-right bg-red\">3</small>\n";
-  $body .= "              <small class=\"label pull-right bg-blue\">17</small>\n";
-  $body .= "            </span>\n";
-  $body .= "          </a>\n";
-  $body .= "        </li>\n";
-  $body .= "        <li>\n";
-  $body .= "          <a href=\"../mailbox/mailbox.html\">\n";
-  $body .= "            <i class=\"fa fa-envelope\"></i> <span>Mailbox</span>\n";
-  $body .= "            <span class=\"pull-right-container\">\n";
-  $body .= "              <small class=\"label pull-right bg-yellow\">12</small>\n";
-  $body .= "              <small class=\"label pull-right bg-green\">16</small>\n";
-  $body .= "              <small class=\"label pull-right bg-red\">5</small>\n";
-  $body .= "            </span>\n";
-  $body .= "          </a>\n";
-  $body .= "        </li>\n";
-  $body .= "        <li class=\"treeview active\">\n";
-  $body .= "          <a href=\"#\">\n";
-  $body .= "            <i class=\"fa fa-folder\"></i> <span>Examples</span>\n";
-  $body .= "            <span class=\"pull-right-container\">\n";
-  $body .= "              <i class=\"fa fa-angle-left pull-right\"></i>\n";
-  $body .= "            </span>\n";
-  $body .= "          </a>\n";
-  $body .= "          <ul class=\"treeview-menu\">\n";
-  $body .= "            <li><a href=\"invoice.html\"><i class=\"fa fa-circle-o\"></i> Invoice</a></li>\n";
-  $body .= "            <li><a href=\"profile.html\"><i class=\"fa fa-circle-o\"></i> Profile</a></li>\n";
-  $body .= "            <li><a href=\"login.html\"><i class=\"fa fa-circle-o\"></i> Login</a></li>\n";
-  $body .= "            <li><a href=\"register.html\"><i class=\"fa fa-circle-o\"></i> Register</a></li>\n";
-  $body .= "            <li><a href=\"lockscreen.html\"><i class=\"fa fa-circle-o\"></i> Lockscreen</a></li>\n";
-  $body .= "            <li><a href=\"404.html\"><i class=\"fa fa-circle-o\"></i> 404 Error</a></li>\n";
-  $body .= "            <li><a href=\"500.html\"><i class=\"fa fa-circle-o\"></i> 500 Error</a></li>\n";
-  $body .= "            <li class=\"active\"><a href=\"blank.html\"><i class=\"fa fa-circle-o\"></i> Blank Page</a></li>\n";
-  $body .= "            <li><a href=\"pace.html\"><i class=\"fa fa-circle-o\"></i> Pace Page</a></li>\n";
-  $body .= "          </ul>\n";
-  $body .= "        </li>\n";
-  $body .= "        <li class=\"treeview\">\n";
-  $body .= "          <a href=\"#\">\n";
-  $body .= "            <i class=\"fa fa-share\"></i> <span>Multilevel</span>\n";
-  $body .= "            <span class=\"pull-right-container\">\n";
-  $body .= "              <i class=\"fa fa-angle-left pull-right\"></i>\n";
-  $body .= "            </span>\n";
-  $body .= "          </a>\n";
-  $body .= "          <ul class=\"treeview-menu\">\n";
-  $body .= "            <li><a href=\"#\"><i class=\"fa fa-circle-o\"></i> Level One</a></li>\n";
-  $body .= "            <li class=\"treeview\">\n";
-  $body .= "              <a href=\"#\"><i class=\"fa fa-circle-o\"></i> Level One\n";
-  $body .= "                <span class=\"pull-right-container\">\n";
-  $body .= "                  <i class=\"fa fa-angle-left pull-right\"></i>\n";
-  $body .= "                </span>\n";
-  $body .= "              </a>\n";
-  $body .= "              <ul class=\"treeview-menu\">\n";
-  $body .= "                <li><a href=\"#\"><i class=\"fa fa-circle-o\"></i> Level Two</a></li>\n";
-  $body .= "                <li class=\"treeview\">\n";
-  $body .= "                  <a href=\"#\"><i class=\"fa fa-circle-o\"></i> Level Two\n";
-  $body .= "                    <span class=\"pull-right-container\">\n";
-  $body .= "                      <i class=\"fa fa-angle-left pull-right\"></i>\n";
-  $body .= "                    </span>\n";
-  $body .= "                  </a>\n";
-  $body .= "                  <ul class=\"treeview-menu\">\n";
-  $body .= "                    <li><a href=\"#\"><i class=\"fa fa-circle-o\"></i> Level Three</a></li>\n";
-  $body .= "                    <li><a href=\"#\"><i class=\"fa fa-circle-o\"></i> Level Three</a></li>\n";
-  $body .= "                  </ul>\n";
-  $body .= "                </li>\n";
-  $body .= "              </ul>\n";
-  $body .= "            </li>\n";
-  $body .= "            <li><a href=\"#\"><i class=\"fa fa-circle-o\"></i> Level One</a></li>\n";
-  $body .= "          </ul>\n";
-  $body .= "        </li>\n";
-  $body .= "        <li><a href=\"https://adminlte.io/docs\"><i class=\"fa fa-book\"></i> <span>Documentation</span></a></li>\n";
-  $body .= "        <li class=\"header\">LABELS</li>\n";
-  $body .= "        <li><a href=\"#\"><i class=\"fa fa-circle-o text-red\"></i> <span>Important</span></a></li>\n";
-  $body .= "        <li><a href=\"#\"><i class=\"fa fa-circle-o text-yellow\"></i> <span>Warning</span></a></li>\n";
-  $body .= "        <li><a href=\"#\"><i class=\"fa fa-circle-o text-aqua\"></i> <span>Information</span></a></li>\n";
-*/
   $body .= "      </ul>\n";
   $body .= "    </section>\n";
   $body .= "  </aside>\n";
@@ -653,159 +328,8 @@ function page_structure ( $content)
   {
     $body .= "    <div class=\"pull-right hidden-xs\"><b>" . __ ( "Version") . "</b> " . $_in["general"]["version"] . "</div>\n";
   }
-  $body .= "    <strong>" . __ ( "Developed by") . " <a href=\"mailto:azevedo@intellinews.com.br\">Ernani Azevedo</a>. " . sprintf ( __ ( "Published under %s license."), "<a href=\"https://www.gnu.org/licenses/gpl-3.0.en.html\" target=\"_blank\">GPLv3</a>") . "</strong>\n";
+  $body .= "    <strong>" . __ ( "Developed by") . " <a href=\"mailto:azevedo@voipdomain.io\">Ernani Azevedo</a>. " . sprintf ( __ ( "Published under %s license."), "<a href=\"https://www.gnu.org/licenses/gpl-3.0.en.html\" target=\"_blank\" rel=\"noopener\">GPLv3</a>") . "</strong>\n";
   $body .= "  </footer>\n";
-/*
-  $body .= "  <aside class=\"control-sidebar control-sidebar-dark\">\n";
-  $body .= "    <ul class=\"nav nav-tabs nav-justified control-sidebar-tabs\">\n";
-  $body .= "      <li class=\"active\"><a href=\"#control-sidebar-home-tab\" data-toggle=\"tab\"><i class=\"fa fa-home\"></i></a></li>\n";
-  $body .= "      <li><a href=\"#control-sidebar-settings-tab\" data-toggle=\"tab\"><i class=\"fa fa-gears\"></i></a></li>\n";
-  $body .= "    </ul>\n";
-  $body .= "    <div class=\"tab-content\">\n";
-  $body .= "      <div class=\"tab-pane active\" id=\"control-sidebar-home-tab\">\n";
-  $body .= "        <h3 class=\"control-sidebar-heading\">Recent Activity</h3>\n";
-  $body .= "        <ul class=\"control-sidebar-menu\">\n";
-  $body .= "          <li>\n";
-  $body .= "            <a href=\"javascript:void(0)\">\n";
-  $body .= "              <i class=\"menu-icon fa fa-birthday-cake bg-red\"></i>\n";
-  $body .= "              <div class=\"menu-info\">\n";
-  $body .= "                <h4 class=\"control-sidebar-subheading\">Langdon's Birthday</h4>\n";
-  $body .= "                <p>Will be 23 on April 24th</p>\n";
-  $body .= "              </div>\n";
-  $body .= "            </a>\n";
-  $body .= "          </li>\n";
-  $body .= "          <li>\n";
-  $body .= "            <a href=\"javascript:void(0)\">\n";
-  $body .= "              <i class=\"menu-icon fa fa-user bg-yellow\"></i>\n";
-  $body .= "              <div class=\"menu-info\">\n";
-  $body .= "                <h4 class=\"control-sidebar-subheading\">Frodo Updated His Profile</h4>\n";
-  $body .= "                <p>New phone +1(800)555-1234</p>\n";
-  $body .= "              </div>\n";
-  $body .= "            </a>\n";
-  $body .= "          </li>\n";
-  $body .= "          <li>\n";
-  $body .= "            <a href=\"javascript:void(0)\">\n";
-  $body .= "              <i class=\"menu-icon fa fa-envelope-o bg-light-blue\"></i>\n";
-  $body .= "              <div class=\"menu-info\">\n";
-  $body .= "                <h4 class=\"control-sidebar-subheading\">Nora Joined Mailing List</h4>\n";
-  $body .= "                <p>nora@example.com</p>\n";
-  $body .= "              </div>\n";
-  $body .= "            </a>\n";
-  $body .= "          </li>\n";
-  $body .= "          <li>\n";
-  $body .= "            <a href=\"javascript:void(0)\">\n";
-  $body .= "              <i class=\"menu-icon fa fa-file-code-o bg-green\"></i>\n";
-  $body .= "              <div class=\"menu-info\">\n";
-  $body .= "                <h4 class=\"control-sidebar-subheading\">Cron Job 254 Executed</h4>\n";
-  $body .= "                <p>Execution time 5 seconds</p>\n";
-  $body .= "              </div>\n";
-  $body .= "            </a>\n";
-  $body .= "          </li>\n";
-  $body .= "        </ul>\n";
-  $body .= "        <h3 class=\"control-sidebar-heading\">Tasks Progress</h3>\n";
-  $body .= "        <ul class=\"control-sidebar-menu\">\n";
-  $body .= "          <li>\n";
-  $body .= "            <a href=\"javascript:void(0)\">\n";
-  $body .= "              <h4 class=\"control-sidebar-subheading\">\n";
-  $body .= "                Custom Template Design\n";
-  $body .= "                <span class=\"label label-danger pull-right\">70%</span>\n";
-  $body .= "              </h4>\n";
-  $body .= "              <div class=\"progress progress-xxs\">\n";
-  $body .= "                <div class=\"progress-bar progress-bar-danger\" style=\"width: 70%\"></div>\n";
-  $body .= "              </div>\n";
-  $body .= "            </a>\n";
-  $body .= "          </li>\n";
-  $body .= "          <li>\n";
-  $body .= "            <a href=\"javascript:void(0)\">\n";
-  $body .= "              <h4 class=\"control-sidebar-subheading\">\n";
-  $body .= "                Update Resume\n";
-  $body .= "                <span class=\"label label-success pull-right\">95%</span>\n";
-  $body .= "              </h4>\n";
-  $body .= "              <div class=\"progress progress-xxs\">\n";
-  $body .= "                <div class=\"progress-bar progress-bar-success\" style=\"width: 95%\"></div>\n";
-  $body .= "              </div>\n";
-  $body .= "            </a>\n";
-  $body .= "          </li>\n";
-  $body .= "          <li>\n";
-  $body .= "            <a href=\"javascript:void(0)\">\n";
-  $body .= "              <h4 class=\"control-sidebar-subheading\">\n";
-  $body .= "                Laravel Integration\n";
-  $body .= "                <span class=\"label label-warning pull-right\">50%</span>\n";
-  $body .= "              </h4>\n";
-  $body .= "              <div class=\"progress progress-xxs\">\n";
-  $body .= "                <div class=\"progress-bar progress-bar-warning\" style=\"width: 50%\"></div>\n";
-  $body .= "              </div>\n";
-  $body .= "            </a>\n";
-  $body .= "          </li>\n";
-  $body .= "          <li>\n";
-  $body .= "            <a href=\"javascript:void(0)\">\n";
-  $body .= "              <h4 class=\"control-sidebar-subheading\">\n";
-  $body .= "                Back End Framework\n";
-  $body .= "                <span class=\"label label-primary pull-right\">68%</span>\n";
-  $body .= "              </h4>\n";
-  $body .= "              <div class=\"progress progress-xxs\">\n";
-  $body .= "                <div class=\"progress-bar progress-bar-primary\" style=\"width: 68%\"></div>\n";
-  $body .= "              </div>\n";
-  $body .= "            </a>\n";
-  $body .= "          </li>\n";
-  $body .= "        </ul>\n";
-  $body .= "      </div>\n";
-  $body .= "      <div class=\"tab-pane\" id=\"control-sidebar-stats-tab\">Stats Tab Content</div>\n";
-  $body .= "      <div class=\"tab-pane\" id=\"control-sidebar-settings-tab\">\n";
-  $body .= "        <form method=\"post\">\n";
-  $body .= "          <h3 class=\"control-sidebar-heading\">General Settings</h3>\n";
-  $body .= "          <div class=\"form-group\">\n";
-  $body .= "            <label class=\"control-sidebar-subheading\">\n";
-  $body .= "              Report panel usage\n";
-  $body .= "              <input type=\"checkbox\" class=\"pull-right\" checked>\n";
-  $body .= "            </label>\n";
-  $body .= "            <p>\n";
-  $body .= "              Some information about this general settings option\n";
-  $body .= "            </p>\n";
-  $body .= "          </div>\n";
-  $body .= "          <div class=\"form-group\">\n";
-  $body .= "            <label class=\"control-sidebar-subheading\">\n";
-  $body .= "              Allow mail redirect\n";
-  $body .= "              <input type=\"checkbox\" class=\"pull-right\" checked>\n";
-  $body .= "            </label>\n";
-  $body .= "            <p>\n";
-  $body .= "              Other sets of options are available\n";
-  $body .= "            </p>\n";
-  $body .= "          </div>\n";
-  $body .= "          <div class=\"form-group\">\n";
-  $body .= "            <label class=\"control-sidebar-subheading\">\n";
-  $body .= "              Expose author name in posts\n";
-  $body .= "              <input type=\"checkbox\" class=\"pull-right\" checked>\n";
-  $body .= "            </label>\n";
-  $body .= "            <p>\n";
-  $body .= "              Allow the user to show his name in blog posts\n";
-  $body .= "            </p>\n";
-  $body .= "          </div>\n";
-  $body .= "          <h3 class=\"control-sidebar-heading\">Chat Settings</h3>\n";
-  $body .= "          <div class=\"form-group\">\n";
-  $body .= "            <label class=\"control-sidebar-subheading\">\n";
-  $body .= "              Show me as online\n";
-  $body .= "              <input type=\"checkbox\" class=\"pull-right\" checked>\n";
-  $body .= "            </label>\n";
-  $body .= "          </div>\n";
-  $body .= "          <div class=\"form-group\">\n";
-  $body .= "            <label class=\"control-sidebar-subheading\">\n";
-  $body .= "              Turn off notifications\n";
-  $body .= "              <input type=\"checkbox\" class=\"pull-right\">\n";
-  $body .= "            </label>\n";
-  $body .= "          </div>\n";
-  $body .= "          <div class=\"form-group\">\n";
-  $body .= "            <label class=\"control-sidebar-subheading\">\n";
-  $body .= "              Delete chat history\n";
-  $body .= "              <a href=\"javascript:void(0)\" class=\"text-red pull-right\"><i class=\"fa fa-trash-o\"></i></a>\n";
-  $body .= "            </label>\n";
-  $body .= "          </div>\n";
-  $body .= "        </form>\n";
-  $body .= "      </div>\n";
-  $body .= "    </div>\n";
-  $body .= "  </aside>\n";
-  $body .= "  <div class=\"control-sidebar-bg\"></div>\n";
-*/
   $body .= "</div>\n";
 
   /**
@@ -835,11 +359,6 @@ function page_structure ( $content)
   $footer .= "            {\n";
   $footer .= "              'name': 'slimscroll',\n";
   $footer .= "              'src': '/vendors/jquery-slimscroll/jquery.slimscroll" . ( $_in["general"]["debug"] === false ? ".min" : "") . ".js',\n";
-  $footer .= "              'dep': []\n";
-  $footer .= "            },\n";
-  $footer .= "            {\n";
-  $footer .= "              'name': 'fastclick',\n";
-  $footer .= "              'src': '/vendors/fastclick/lib/fastclick" . ( $_in["general"]["debug"] === false ? ".min" : "") . ".js',\n";
   $footer .= "              'dep': []\n";
   $footer .= "            },\n";
   $footer .= "            {\n";
@@ -873,14 +392,9 @@ function page_structure ( $content)
   $footer .= "              'dep': [ 'spin']\n";
   $footer .= "            },\n";
   $footer .= "            {\n";
-  $footer .= "              'name': 'scrollTo',\n";
-  $footer .= "              'src': '/vendors/jquery-scrollTo/jquery.scrollTo" . ( $_in["general"]["debug"] === false ? ".min" : "") . ".js',\n";
+  $footer .= "              'name': 'driver.js',\n";
+  $footer .= "              'src': '/vendors/driver.js/dist/driver" . ( $_in["general"]["debug"] === false ? ".min" : "") . ".js',\n";
   $footer .= "              'dep': []\n";
-  $footer .= "            },\n";
-  $footer .= "            {\n";
-  $footer .= "              'name': 'aSimpleTour',\n";
-  $footer .= "              'src': '/vendors/aSimpleTour/jquery.aSimpleTour" . ( $_in["general"]["debug"] === false ? ".min" : "") . ".js',\n";
-  $footer .= "              'dep': [ 'scrollTo']\n";
   $footer .= "            },\n";
   $footer .= "            {\n";
   $footer .= "              'name': 'AdminLTE',\n";
@@ -914,16 +428,21 @@ function page_structure ( $content)
   $footer .= "               'src': '/vendors/select2-bootstrap-theme/dist/select2-bootstrap" . ( $_in["general"]["debug"] === false ? ".min" : "") . ".css',\n";
   $footer .= "               'dep': [ 'bootstrap', 'select2', 'AdminLTE']\n";
   $footer .= "             },\n";
-  $footer .= "            {\n";
-  $footer .= "              'name': 'pnotify',\n";
-  $footer .= "              'src': '/vendors/pnotify/dist/pnotify" . ( $_in["general"]["debug"] === false ? ".min" : "") . ".css',\n";
-  $footer .= "              'dep': []\n";
-  $footer .= "            },\n";
-  $footer .= "            {\n";
-  $footer .= "              'name': 'ladda',\n";
-  $footer .= "              'src': '/vendors/ladda/dist/ladda-themeless" . ( $_in["general"]["debug"] === false ? ".min" : "") . ".css',\n";
-  $footer .= "              'dep': []\n";
-  $footer .= "            },\n";
+  $footer .= "             {\n";
+  $footer .= "               'name': 'driver.js',\n";
+  $footer .= "               'src': '/vendors/driver.js/dist/driver" . ( $_in["general"]["debug"] === false ? ".min" : "") . ".css',\n";
+  $footer .= "               'dep': []\n";
+  $footer .= "             },\n";
+  $footer .= "             {\n";
+  $footer .= "               'name': 'pnotify',\n";
+  $footer .= "               'src': '/vendors/pnotify/dist/pnotify" . ( $_in["general"]["debug"] === false ? ".min" : "") . ".css',\n";
+  $footer .= "               'dep': []\n";
+  $footer .= "             },\n";
+  $footer .= "             {\n";
+  $footer .= "               'name': 'ladda',\n";
+  $footer .= "               'src': '/vendors/ladda/dist/ladda-themeless" . ( $_in["general"]["debug"] === false ? ".min" : "") . ".css',\n";
+  $footer .= "               'dep': []\n";
+  $footer .= "             },\n";
   $footer .= "             {\n";
   $footer .= "               'name': 'font-awesome',\n";
   $footer .= "               'src': '/vendors/font-awesome/web-fonts-with-css/css/fontawesome-all" . ( $_in["general"]["debug"] === false ? ".min" : "") . ".css',\n";
@@ -1009,14 +528,8 @@ function page_login ( $buffer, $parameters)
   $head .= "  <meta charset=\"" . ( ! empty ( $_in["general"]["charset"]) ? strtolower ( $_in["general"]["charset"]) : "utf-8") . "\">\n";
   $head .= "  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n";
   $head .= "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no\">\n";
-  if ( ! empty ( $_in["general"]["description"]))
-  {
-    $head .= "  <meta name=\"description\" content=\"" . addslashes ( strip_tags ( $_in["general"]["description"])) . "\">\n";
-  }
-  if ( ! empty ( $_in["general"]["author"]))
-  {
-    $head .= "  <meta name=\"author\" content=\"" . addslashes ( strip_tags ( $_in["general"]["author"])) . "\">\n";
-  }
+  $head .= "  <meta name=\"description\" content=\"" . __ ( "VoIP PBX management system.") . "\">\n";
+  $head .= "  <meta name=\"author\" content=\"Ernani José Camargo Azevedo\">\n";
   if ( ! empty ( $_in["general"]["version"]))
   {
     $head .= "  <meta name=\"version\" content=\"" . addslashes ( strip_tags ( $_in["general"]["version"])) . "\">\n";

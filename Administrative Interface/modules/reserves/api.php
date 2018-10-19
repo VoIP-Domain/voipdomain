@@ -27,7 +27,7 @@
  * VoIP Domain reserves api module. This module add the api calls related to
  * reserves.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Reserves
@@ -219,6 +219,14 @@ function reserves_add ( $buffer, $parameters)
   }
 
   /**
+   * Call add pre hook, if exist
+   */
+  if ( framework_has_hook ( "reserves_add_pre"))
+  {
+    $parameters = framework_call ( "reserves_add_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Add new reserve record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Reserves` (`Description`, `Extension`, `Range`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $parameters["extension"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $range["ID"]) . ")"))
@@ -347,6 +355,14 @@ function reserves_edit ( $buffer, $parameters)
   }
 
   /**
+   * Call edit pre hook, if exist
+   */
+  if ( framework_has_hook ( "reserves_edit_pre"))
+  {
+    $parameters = framework_call ( "reserves_edit_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Change reserve record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Reserves` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["extension"]) . ", `Range` = " . $_in["mysql"]["id"]->real_escape_string ( $range["ID"]) . " WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
@@ -427,6 +443,14 @@ function reserves_remove ( $buffer, $parameters)
     exit ();
   }
   $reserve = $result->fetch_assoc ();
+
+  /**
+   * Call remove pre hook, if exist
+   */
+  if ( framework_has_hook ( "reserves_remove_pre"))
+  {
+    $parameters = framework_call ( "reserves_remove_pre", $parameters, false, $parameters);
+  }
 
   /**
    * Remove reserve database record

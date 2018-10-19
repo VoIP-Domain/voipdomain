@@ -26,7 +26,7 @@
 /**
  * VoIP Domain centrals module language file.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Centrals
@@ -77,6 +77,8 @@ i18n_add ( "Error requesting central data!");
 i18n_add ( "Error changing central!");
 i18n_add ( "Central changed sucessfully!");
 i18n_add ( "centrals report");
+i18n_add ( "Filter...");
+i18n_add ( "Services");
 
 /**
  * Add Brazilian Portuguese support
@@ -121,4 +123,6 @@ i18n_add ( "Error requesting central data!", "Erro ao requisitar dados da centra
 i18n_add ( "Error changing central!", "Erro ao alterar central!", "pt_BR");
 i18n_add ( "Central changed sucessfully!", "Central alterada com sucesso!", "pt_BR");
 i18n_add ( "centrals report", "relatório de centrais", "pt_BR");
+i18n_add ( "Filter...", "Filtro...", "pt_BR");
+i18n_add ( "Services", "Serviços", "pt_BR");
 ?>

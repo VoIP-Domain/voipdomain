@@ -27,7 +27,7 @@
  * VoIP Domain blocks filter module. This module add the filter calls related
  * to blocks.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Blocks
@@ -89,7 +89,7 @@ function get_blocks ( $buffer, $parameters)
    */
   if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Blocks`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
   {
-    while ( $group = $result->fetch_assoc ())
+    while ( $data = $result->fetch_assoc ())
     {
       $buffer = array_merge ( ( is_array ( $buffer) ? $buffer : array ()), array ( $data));
     }

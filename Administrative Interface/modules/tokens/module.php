@@ -28,7 +28,7 @@
  * public external calls. Usefull to token tele marketing, spammers and other
  * annoying calls.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Tokens
@@ -146,7 +146,7 @@ function tokens_search_page ( $buffer, $parameters)
               "  columnDefs: [\n" .
               "                { orderable: false, targets: [ 0, 4 ]},\n" .
               "                { searchable: false, targets: [ 0, 2, 4 ]},\n" .
-              "                { data: 'links', render: function ( data, type, full) { return '<span class=\"btn-group\"><a class=\"btn btn-xs btn-info ladda-button\" data-style=\"zoom-in\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "View") . "\" role=\"button\" title=\"\" href=\"/tokens/' + full[0] + '/view\"><i class=\"fa fa-search\"></i></a><a class=\"btn btn-xs btn-warning ladda-button\" data-style=\"zoom-in\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Edit") . "\" role=\"button\" title=\"\" href=\"/tokens/' + full[0] + '/edit\"><i class=\"fa fa-pencil-alt\"></i></a><button class=\"btn btn-xs btn-danger ladda-button\" data-style=\"zoom-in\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Remove") . "\" role=\"button\" title=\"\" data-id=\"' + full[0] + '\" data-description=\"' + full[1] + '\" data-validity=\"' + full[3] + '\"><i class=\"fa fa-times\"></i></button></span>'; }, targets: [ 4 ]},\n" .
+              "                { data: 'links', render: function ( data, type, full) { return '<span class=\"btn-group\"><a class=\"btn btn-xs btn-info\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "View") . "\" role=\"button\" title=\"\" href=\"/tokens/' + full[0] + '/view\"><i class=\"fa fa-search\"></i></a><a class=\"btn btn-xs btn-warning\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Edit") . "\" role=\"button\" title=\"\" href=\"/tokens/' + full[0] + '/edit\"><i class=\"fa fa-pencil-alt\"></i></a><button class=\"btn btn-xs btn-danger\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Remove") . "\" role=\"button\" title=\"\" data-id=\"' + full[0] + '\" data-description=\"' + full[1] + '\" data-validity=\"' + full[3] + '\"><i class=\"fa fa-times\"></i></button></span>'; }, targets: [ 4 ]},\n" .
               "                { visible: false, targets: [ 0, 2 ]}\n" .
               "              ],\n" .
               "  columns: [\n" .
@@ -191,6 +191,7 @@ function tokens_search_page ( $buffer, $parameters)
 /**
  * Function to generate the token add page code.
  *
+ * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
@@ -198,6 +199,8 @@ function tokens_search_page ( $buffer, $parameters)
  */
 function tokens_add_page ( $buffer, $parameters)
 {
+  global $_in;
+
   /**
    * Set page title
    */
@@ -211,14 +214,12 @@ function tokens_add_page ( $buffer, $parameters)
   /**
    * Add page CSS requirements
    */
-  sys_addcss ( array ( "name" => "bootstrap-switch", "src" => "/vendors/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.css", "dep" => array ( "bootstrap")));
   sys_addcss ( array ( "name" => "datetimepicker", "src" => "/vendors/bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css", "dep" => array ( "bootstrap")));
 
   /**
    * Add page JavaScript requirements
    */
   sys_addjs ( array ( "name" => "jquery-mask", "src" => "/vendors/jQuery-Mask-Plugin/dist/jquery.mask.js", "dep" => array ()));
-  sys_addjs ( array ( "name" => "bootstrap-switch", "src" => "/vendors/bootstrap-switch/dist/js/bootstrap-switch.js", "dep" => array ()));
   sys_addjs ( array ( "name" => "moment", "src" => "/vendors/moment/min/moment-with-locales.js", "dep" => array ()));
   sys_addjs ( array ( "name" => "datetimepicker", "src" => "/vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.js", "dep" => array ( "moment", "bootstrap")));
 
@@ -277,6 +278,20 @@ function tokens_add_page ( $buffer, $parameters)
   $output .= "    </div>\n";
   $output .= "  </div>\n";
 
+  // Add token language field
+  $output .= "  <div class=\"form-group\">\n";
+  $output .= "    <label for=\"token_add_language\" class=\"control-label col-xs-2\">" . __ ( "Language") . "</label>\n";
+  $output .= "    <div class=\"col-xs-10\">\n";
+  $output .= "      <select name=\"language\" id=\"token_add_language\" class=\"form-control\" data-placeholder=\"" . __ ( "Token language") . "\">\n";
+  $output .= "        <option value=\"default\" selected>" . __ ( "System default language") . "</option>\n";
+  foreach ( $_in["languages"] as $locale => $language)
+  {
+    $output .= "        <option value=\"" . addslashes ( strip_tags ( $locale)) . "\">" . addslashes ( strip_tags ( $language)) . "</option>\n";
+  }
+  $output .= "      </select>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
   // Form buttons
   $output .= "  <div class=\"form-group\">\n";
   $output .= "    <div class=\"col-xs-2\"></div>\n";
@@ -304,9 +319,13 @@ function tokens_add_page ( $buffer, $parameters)
               "$('#token_add_permissions').select2 (\n" .
               "{\n" .
               "  allowClear: true,\n" .
-              "  data: VoIP.select2 ( '/tokens/permissions/search', 'GET')\n" .
+              "  data: VoIP.select2 ( '/tokens/permissions', 'GET')\n" .
               "});\n" .
               "$('#token_add_validity').mask ( '00/00/0000').datetimepicker ( { locale: '" . __ ( "en-us") . "', useCurrent: false, format: '" . __ ( "MM/DD/YYYY") . "'});\n" .
+              "$('#token_add_language').select2 (\n" .
+              "{\n" .
+              "  allowClear: false\n" .
+              "});\n" .
               "$('button.btn-calendar').on ( 'click', function ( event)\n" .
               "{\n" .
               "  event && event.preventDefault ();\n" .
@@ -357,16 +376,6 @@ function tokens_view_page ( $buffer, $parameters)
   ));
 
   /**
-   * Add page CSS requirements
-   */
-  sys_addcss ( array ( "name" => "bootstrap-switch", "src" => "/vendors/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.css", "dep" => array ( "bootstrap")));
-
-  /**
-   * Add page JavaScript requirements
-   */
-  sys_addjs ( array ( "name" => "bootstrap-switch", "src" => "/vendors/bootstrap-switch/dist/js/bootstrap-switch.js", "dep" => array ()));
-
-  /**
    * Create page code
    */
   $output = "<form class=\"form-horizontal\" id=\"token_view_form\">\n";
@@ -411,6 +420,20 @@ function tokens_view_page ( $buffer, $parameters)
   $output .= "    </div>\n";
   $output .= "  </div>\n";
 
+  // Add token language field
+  $output .= "  <div class=\"form-group\">\n";
+  $output .= "    <label for=\"token_view_language\" class=\"control-label col-xs-2\">" . __ ( "Language") . "</label>\n";
+  $output .= "    <div class=\"col-xs-10\">\n";
+  $output .= "      <select name=\"language\" id=\"token_view_language\" class=\"form-control\" data-placeholder=\"" . __ ( "Token language") . "\"  disabled=\"disabled\">\n";
+  $output .= "        <option value=\"default\" selected>" . __ ( "System default language") . "</option>\n";
+  foreach ( $_in["languages"] as $locale => $language)
+  {
+    $output .= "        <option value=\"" . addslashes ( strip_tags ( $locale)) . "\">" . addslashes ( strip_tags ( $language)) . "</option>\n";
+  }
+  $output .= "      </select>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
   // Form buttons
   $output .= "  <div class=\"form-group\">\n";
   $output .= "    <div class=\"col-xs-2\"></div>\n";
@@ -425,7 +448,7 @@ function tokens_view_page ( $buffer, $parameters)
   /**
    * Add view form JavaScript code
    */
-  sys_addjs ( "$('#token_view_permissions').select2 ();\n" .
+  sys_addjs ( "$('#token_view_permissions,#token_view_language').select2 ();\n" .
               "$('#token_view_form').on ( 'fill', function ( event, data)\n" .
               "{\n" .
               "  $('#token_view_description').val ( data.description);\n" .
@@ -443,6 +466,7 @@ function tokens_view_page ( $buffer, $parameters)
               "  }\n" .
               "  $('#token_view_permissions').val ( ids).trigger ( 'change');\n" .
               "  $('#token_view_validity').val ( data.validity);\n" .
+              "  $('#token_view_language').val ( data.language).trigger ( 'change');\n" .
               "});\n" .
               "setTimeout ( function ()\n" .
               "{\n" .
@@ -484,14 +508,12 @@ function tokens_edit_page ( $buffer, $parameters)
   /**
    * Add page CSS requirements
    */
-  sys_addcss ( array ( "name" => "bootstrap-switch", "src" => "/vendors/bootstrap-switch/dist/css/bootstrap3/bootstrap-switch.css", "dep" => array ( "bootstrap")));
   sys_addcss ( array ( "name" => "datetimepicker", "src" => "/vendors/bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css", "dep" => array ( "bootstrap")));
 
   /**
    * Add page JavaScript requirements
    */
   sys_addjs ( array ( "name" => "jquery-mask", "src" => "/vendors/jQuery-Mask-Plugin/dist/jquery.mask.js", "dep" => array ()));
-  sys_addjs ( array ( "name" => "bootstrap-switch", "src" => "/vendors/bootstrap-switch/dist/js/bootstrap-switch.js", "dep" => array ()));
   sys_addjs ( array ( "name" => "moment", "src" => "/vendors/moment/min/moment-with-locales.js", "dep" => array ()));
   sys_addjs ( array ( "name" => "datetimepicker", "src" => "/vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.js", "dep" => array ( "moment", "bootstrap")));
 
@@ -550,6 +572,20 @@ function tokens_edit_page ( $buffer, $parameters)
   $output .= "    </div>\n";
   $output .= "  </div>\n";
 
+  // Add token language field
+  $output .= "  <div class=\"form-group\">\n";
+  $output .= "    <label for=\"token_edit_language\" class=\"control-label col-xs-2\">" . __ ( "Language") . "</label>\n";
+  $output .= "    <div class=\"col-xs-10\">\n";
+  $output .= "      <select name=\"language\" id=\"token_edit_language\" class=\"form-control\" data-placeholder=\"" . __ ( "Token language") . "\">\n";
+  $output .= "        <option value=\"default\" selected>" . __ ( "System default language") . "</option>\n";
+  foreach ( $_in["languages"] as $locale => $language)
+  {
+    $output .= "        <option value=\"" . addslashes ( strip_tags ( $locale)) . "\">" . addslashes ( strip_tags ( $language)) . "</option>\n";
+  }
+  $output .= "      </select>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
   // Form buttons
   $output .= "  <div class=\"form-group\">\n";
   $output .= "    <div class=\"col-xs-2\"></div>\n";
@@ -577,9 +613,13 @@ function tokens_edit_page ( $buffer, $parameters)
               "$('#token_edit_permissions').select2 (\n" .
               "{\n" .
               "  allowClear: true,\n" .
-              "  data: VoIP.select2 ( '/tokens/permissions/search', 'GET')\n" .
+              "  data: VoIP.select2 ( '/tokens/permissions', 'GET')\n" .
               "});\n" .
               "$('#token_edit_validity').mask ( '00/00/0000').datetimepicker ( { locale: '" . __ ( "en-us") . "', useCurrent: false, format: '" . __ ( "MM/DD/YYYY") . "'});\n" .
+              "$('#token_edit_language').select2 (\n" .
+              "{\n" .
+              "  allowClear: false\n" .
+              "});\n" .
               "$('button.btn-calendar').on ( 'click', function ( event)\n" .
               "{\n" .
               "  event && event.preventDefault ();\n" .
@@ -602,6 +642,7 @@ function tokens_edit_page ( $buffer, $parameters)
               "  }\n" .
               "  $('#token_edit_permissions').val ( ids).trigger ( 'change');\n" .
               "  $('#token_edit_validity').val ( data.validity);\n" .
+              "  $('#token_edit_language').val ( data.language).trigger ( 'change');\n" .
               "  $('#token_edit_description').focus ();\n" .
               "});\n" .
               "setTimeout ( function ()\n" .

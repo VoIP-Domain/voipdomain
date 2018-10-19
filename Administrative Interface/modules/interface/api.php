@@ -27,7 +27,7 @@
  * VoIP Domain main framework interface API module. This module has all basic
  * system API call implementations.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Interface
@@ -124,6 +124,11 @@ function api_do_logout ( $buffer, $parameters)
   global $_in;
 
   /**
+   * Insert audit entry
+   */
+  audit ( "system", "logout", array ( "ID" => $_in["session"]["ID"], "User" => $_in["session"]["User"], "Reason" => "Logged off"));
+
+  /**
    * Remove system cookie and destroy global configuration session informations
    */
   setcookie ( $_in["general"]["cookie"], null, -1, "/");
@@ -215,6 +220,11 @@ function api_do_login ( $buffer, $parameters)
   {
     return array ( "result" => false, "message" => __ ( "Error accessing database server."));
   }
+
+  /**
+   * Insert audit entry
+   */
+  audit ( "system", "login", array ( "ID" => $_in["session"]["ID"], "User" => $_in["session"]["User"], "IP" => $_SERVER["REMOTE_ADDR"]));
 
   /**
    * Start user session. If "remember me" checkbox is checked at login, set the
@@ -456,5 +466,153 @@ function api_read_dashboard ( $page, $parameters)
    * Return structured data
    */
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
+}
+
+/**
+ * API call to get call information
+ */
+framework_add_hook ( "calls_view", "calls_view");
+framework_add_permission ( "calls_view", __ ( "View call informations"));
+framework_add_api_call ( "/calls/:id", "Read", "calls_view", array ( "permissions" => array ( "user", "calls_view")));
+
+/**
+ * Function to generate call informations.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function calls_view ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Sanityze input data
+   */
+  $parameters["id"] = preg_replace ( "/[^0-9-\.]/", "", $paremeters["id"]);
+
+  /**
+   * Check if call exist into database
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `cdr`.*, `Gateways`.`Description` AS `GatewayDescription`, `Servers`.`Name` AS `ServerName`, `CostCenters`.`ID` AS `CostCenterID`, `CostCenters`.`Description` AS `CostCenterDescription` FROM `cdr` LEFT JOIN `Gateways` ON `Gateways`.`ID` = `cdr`.`gateway` LEFT JOIN `Servers` ON `Servers`.`ID` = `cdr`.`server` LEFT JOIN `CostCenters` ON `CostCenters`.`Code` = `cdr`.`accountcode` WHERE `cdr`.`uniqueid` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"]) . "'"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( $result->num_rows != 1)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  $call = $result->fetch_assoc ();
+
+  /**
+   * Format data
+   */
+  $result = array ();
+  $result["result"] = true;
+  $result["date"] = format_db_datetime ( $call["calldate"]);
+  $result["clid"] = $call["clid"];
+  $result["src"] = $call["src"];
+  $result["dst"] = $call["dst"];
+  $result["duration"] = format_secs_to_string ( $call["duration"]);
+  $result["billsec"] = format_secs_to_string ( $call["billsec"]);
+  if ( $call["userfield"] == "DND")
+  {
+    $call["disposition"] = "NO ANSWER";
+  }
+  switch ( $call["disposition"])
+  {
+    case "ANSWERED":
+      $result["disposition"] = __ ( "Answered");
+      if ( $call["lastapp"] == "VoiceMail")
+      {
+        $result["disposition"] .= " (" . __ ( "Voice mail") . ")";
+      }
+      break;
+    case "NO ANSWER":
+      $result["disposition"] = __ ( "Not answered");
+      break;
+    case "BUSY":
+      $result["disposition"] = __ ( "Busy");
+      break;
+    case "FAILED":
+      $result["disposition"] = __ ( "Call failed");
+      break;
+    default:
+      $result["disposition"] = __ ( "Unknown") . ": " . $call["disposition"];
+      break;
+  }
+  $result["cc"] = $call["CostCenterID"];
+  $result["ccdesc"] = $call["CostCenterDesc"] . " (" . $call["accountcode"] . ")";
+  $result["userfield"] = $call["userfield"];
+  $result["uniqueid"] = $call["uniqueid"];
+  $result["server"] = $call["server"];
+  $result["serverdesc"] = $call["ServerName"];
+  $result["type"] = $call["calltype"];
+  switch ( $call["calltype"])
+  {
+    case "1":
+      $result["typedesc"] = __ ( "Extension");
+      break;
+    case "2":
+      $result["typedesc"] = __ ( "Landline");
+      break;
+    case "3":
+      $result["typedesc"] = __ ( "Mobile");
+      break;
+    case "4":
+      $result["typedesc"] = __ ( "Interstate");
+      break;
+    case "5":
+      $result["typedesc"] = __ ( "International");
+      break;
+    case "6":
+      $result["typedesc"] = __ ( "Special");
+      break;
+    case "7":
+      $result["typedesc"] = __ ( "Toll free");
+      break;
+    case "8":
+      $result["typedesc"] = __ ( "Services");
+      break;
+    default:
+      $result["typedesc"] = __ ( "Unknown");
+      break;
+  }
+  $result["gw"] = $call["gateway"];
+  $result["gwdesc"] = $call["GatewayDescription"];
+  if ( $call["processed"])
+  {
+    $result["value"] = sprintf ( "%.5f", $call["value"]);
+  } else {
+    $result["value"] = __ ( "N/A");
+  }
+  $result["codec"] = $call["codec"];
+  $result["QOSa"] = $call["QOSa"];
+  $result["QOSb"] = $call["QOSb"];
+  $result["monitor"] = $call["monitor"];
+  $result["userfieldextra"] = $call["userfieldextra"];
+  $result["SIPID"] = $call["SIPID"];
+
+  /**
+   * Check if there's call capture file (if has, process it)
+   */
+  $result["siptrace"] = array ();
+  $files = scandir ( "/var/spool/pcapsipdump/" . date ( "Ymd", format_db_timestamp ( $call["calldate"])) . "/" . date ( "H", format_db_timestamp ( $call["calldate"])) . "/");
+  foreach ( $files as $file)
+  {
+    if ( strpos ( $file, "-" . $call["SIPID"] . ".pcap") !== false)
+    {
+      $result["siptrace"] = filters_call ( "process_sipdump", array ( "filename" => "/var/spool/pcapsipdump/" . date ( "Ymd", format_db_timestamp ( $call["calldate"])) . "/" . date ( "H", format_db_timestamp ( $call["calldate"])) . "/" . $file));
+    }
+  }
+
+  /**
+   * Return structured data
+   */
+  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $result);
 }
 ?>

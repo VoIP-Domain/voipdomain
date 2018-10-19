@@ -627,136 +627,6 @@ DELIMITER ;
 /*!50003 SET collation_connection  = @saved_col_connection */ ;
 
 --
--- Table structure for table `Campaigns`
---
-
-DROP TABLE IF EXISTS `Campaigns`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `Campaigns` (
-  `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `Description` varchar(255) NOT NULL,
-  `State` enum('A','I') NOT NULL DEFAULT 'I',
-  `Queue` int(10) unsigned DEFAULT NULL,
-  PRIMARY KEY (`ID`),
-  CONSTRAINT `Campaigns_ibfk_1` FOREIGN KEY (`Queue`) REFERENCES `Queues` (`ID`) ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `CampaignsInsert` AFTER INSERT ON `Campaigns` FOR EACH ROW INSERT INTO `Cache` (`Table`, `Updated`) VALUES ('Campaigns', NOW()) ON DUPLICATE KEY UPDATE `Updated` = NOW() */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `CampaignsUpdate` AFTER UPDATE ON `Campaigns` FOR EACH ROW INSERT INTO `Cache` (`Table`, `Updated`) VALUES ('Campaigns', NOW()) ON DUPLICATE KEY UPDATE `Updated` = NOW() */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `CampaignsDelete` AFTER DELETE ON `Campaigns` FOR EACH ROW INSERT INTO `Cache` (`Table`, `Updated`) VALUES ('Campaigns', NOW()) ON DUPLICATE KEY UPDATE `Updated` = NOW() */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-
---
--- Table structure for table `CampaignEntries`
---
-
-DROP TABLE IF EXISTS `CampaignEntries`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `CampaignEntries` (
-  `ID` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `Description` varchar(255) NOT NULL,
-  `Grouper` varchar(255) NOT NULL,
-  `Number` varchar(80) NOT NULL,
-  `Campaign` int(10) unsigned NOT NULL,
-  `Tries` int(1) unsigned NOT NULL default 0,
-  `State` enum('W','D','A','F','C','I') NOT NULL,
-  `InsertDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `Log` blob,
-  PRIMARY KEY (`ID`),
-  CONSTRAINT `CampaignEntries_Unique` UNIQUE (`Grouper`,`Number`),
-  CONSTRAINT `CampaignEntries_ibfk_1` FOREIGN KEY (`Campaign`) REFERENCES `Campaigns` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `CampaignEntriesInsert` AFTER INSERT ON `CampaignEntries` FOR EACH ROW INSERT INTO `Cache` (`Table`, `Updated`) VALUES ('CampaignEntries', NOW()) ON DUPLICATE KEY UPDATE `Updated` = NOW() */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `CampaignEntriesUpdate` AFTER UPDATE ON `CampaignEntries` FOR EACH ROW INSERT INTO `Cache` (`Table`, `Updated`) VALUES ('CampaignEntries', NOW()) ON DUPLICATE KEY UPDATE `Updated` = NOW() */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
-/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
-/*!50003 SET @saved_col_connection = @@collation_connection */ ;
-/*!50003 SET character_set_client  = utf8 */ ;
-/*!50003 SET character_set_results = utf8 */ ;
-/*!50003 SET collation_connection  = utf8_general_ci */ ;
-/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
-/*!50003 SET sql_mode              = '' */ ;
-DELIMITER ;;
-/*!50003 CREATE*/ /*!50017 DEFINER=`root`@`localhost`*/ /*!50003 TRIGGER `CampaignEntriesDelete` AFTER DELETE ON `CampaignEntries` FOR EACH ROW INSERT INTO `Cache` (`Table`, `Updated`) VALUES ('CampaignEntries', NOW()) ON DUPLICATE KEY UPDATE `Updated` = NOW() */;;
-DELIMITER ;
-/*!50003 SET sql_mode              = @saved_sql_mode */ ;
-/*!50003 SET character_set_client  = @saved_cs_client */ ;
-/*!50003 SET character_set_results = @saved_cs_results */ ;
-/*!50003 SET collation_connection  = @saved_col_connection */ ;
-
---
 -- Table structure for table `Equipments`
 --
 
@@ -1674,7 +1544,6 @@ CREATE TABLE `Users` (
   `Iterations` int(2) unsigned NOT NULL DEFAULT '40000',
   `Permissions` text,
   `Email` varchar(255) NOT NULL,
-  `AvatarID` char(23) DEFAULT NULL,
   `Since` datetime NOT NULL,
   PRIMARY KEY (`ID`),
   KEY `User` (`User`)
@@ -1687,7 +1556,7 @@ CREATE TABLE `Users` (
 
 LOCK TABLES `Users` WRITE;
 /*!40000 ALTER TABLE `Users` DISABLE KEYS */;
-INSERT INTO `Users` VALUES (1,'Ernani Azevedo','azevedo','37aff0d8cc1129c95c8ba9186014c47596e1fc579d20a71465466498ca62c3e8','6b84ef7b36c37d2e9dc9e5e5f96608c6076b284fabee9842a3a8fd72d4b400e6',40000,'{"administrator":true,"auditor":true}','azevedo@intellinews.com.br','5a3a8da1a97698.44170124','2017-05-11 00:00:00');
+INSERT INTO `Users` VALUES (1,'Ernani Azevedo','azevedo','37aff0d8cc1129c95c8ba9186014c47596e1fc579d20a71465466498ca62c3e8','6b84ef7b36c37d2e9dc9e5e5f96608c6076b284fabee9842a3a8fd72d4b400e6',40000,'{"administrator":true,"auditor":true}','azevedo@intellinews.com.br','2017-05-11 00:00:00');
 /*!40000 ALTER TABLE `Users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!50003 SET @saved_cs_client      = @@character_set_client */ ;

@@ -1,0 +1,6 @@
+  jquery-qrcode
+--=============--
+
+URL: https://larsjung.de/jquery-qrcode/
+Version: 0.14.0
+License: MIT

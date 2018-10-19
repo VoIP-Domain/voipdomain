@@ -26,7 +26,7 @@
  * VoIP Domain main JavaScript framework control script. This script implements
  * all JavaScript code needed to interface to work.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Core
@@ -53,6 +53,7 @@ var VoIP = ( function ()
   var user = '';
   var name = '';
   var uid = '';
+  var token = '';
 
   // About this library:
   this.about = {
@@ -83,6 +84,10 @@ var VoIP = ( function ()
     if ( 'uid' in variables)
     {
       uid = variables.uid;
+    }
+    if ( 'token' in variables)
+    {
+      token = variables.token;
     }
   };
   this.getUID = function ()
@@ -406,6 +411,16 @@ var VoIP = ( function ()
       path = '/' + path;
     }
     var result = null;
+    var myheaders =
+    {
+      'X-INFramework': 'api',
+      'X-HTTP-Method-Override': route,
+      'Accept': 'application/json'
+    }
+    if ( token)
+    {
+      myheaders['X-VD-Token'] = token;
+    }
     $.ajax (
     {
       type: 'POST',
@@ -413,12 +428,7 @@ var VoIP = ( function ()
       data: JSON.stringify ( data),
       async: false,
       cache: false,
-      headers:
-      {
-        'X-INFramework': 'api',
-        'X-HTTP-Method-Override': route,
-        'Accept': 'application/json'
-      },
+      headers: myheaders,
       contentType: 'application/json; charset=utf-8',
       dataType: 'json',
       success: function ( data, textStatus, jqXHR)

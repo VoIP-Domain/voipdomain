@@ -2,6 +2,6 @@
 --==========--
 
 URL: https://datatables.net/
-Version: 1.10.16
+Version: 1.10.18
 License: MIT
 Notes: Added accent neutrilise function from dataTables plugin repository at js/accent-neutralise.js: https://github.com/DataTables/Plugins/blob/master/filtering/type-based/accent-neutralise.js

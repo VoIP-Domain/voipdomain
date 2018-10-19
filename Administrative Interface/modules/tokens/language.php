@@ -26,7 +26,7 @@
 /**
  * VoIP Domain tokens module language file.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Tokens
@@ -76,6 +76,11 @@ i18n_add ( "The token validity is required.");
 i18n_add ( "The provided token is already in use.");
 i18n_add ( "Edit tokens");
 i18n_add ( "Remove tokens");
+i18n_add ( "Invalid permission.");
+i18n_add ( "Language");
+i18n_add ( "System default language");
+i18n_add ( "The select language are invalid.");
+i18n_add ( "Token language");
 
 /**
  * Add Brazilian Portuguese support
@@ -119,4 +124,9 @@ i18n_add ( "The token validity is required.", "A validade do token é obrigatór
 i18n_add ( "The provided token is already in use.", "O token informado já está em uso.", "pt_BR");
 i18n_add ( "Edit tokens", "Editar tokens", "pt_BR");
 i18n_add ( "Remove tokens", "Remover tokens", "pt_BR");
+i18n_add ( "Invalid permission.", "Permissão inválida.", "pt_BR");
+i18n_add ( "Language", "Idioma", "pt_BR");
+i18n_add ( "System default language", "Idioma padrão do sistema", "pt_BR");
+i18n_add ( "The select language are invalid.", "O idioma selecionado é inválido.", "pt_BR");
+i18n_add ( "Token language", "Idioma do token", "pt_BR");
 ?>

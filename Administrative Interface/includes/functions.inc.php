@@ -26,7 +26,7 @@
 /**
  * Generic functions to VoIP Domain framework.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Core
@@ -1545,7 +1545,7 @@ function notify_server ( $serverid, $event, $data = array ())
                                CURLOPT_URL => $_in["general"]["pushpub"] . "?id=" . urlencode ( $server["ID"]),
                                CURLOPT_RETURNTRANSFER => true,
                                CURLOPT_POST => true,
-                               CURLOPT_POSTFIELDS => serialize ( array ( "event" => @openssl_encrypt ( serialize ( array_merge ( ( is_array ( $data) ? $data : array ( $data)), array ( "event" => $event, "id" => $eventid))), "AES-256-CBC", $server["Password"], OPENSSL_RAW_DATA)))
+                               CURLOPT_POSTFIELDS => serialize ( array ( "event" => @openssl_encrypt ( serialize ( array ( "event" => $event, "id" => $eventid, "data" => is_array ( $data) ? $data : array ( $data))), "AES-256-CBC", $server["Password"], OPENSSL_RAW_DATA)))
                       ));
     @curl_exec ( $ch);
     curl_close ( $ch);
@@ -1558,13 +1558,13 @@ function notify_server ( $serverid, $event, $data = array ())
 }
 
 /**
- * Função para cálculo de distância entre dois pontos geográficos (longitude/latitude).
+ * Function to calculate the distance between two geographic points (longitude/latitude).
  *
- * @param $lat1 float Latitude do primeiro ponto.
- * @param $lon1 float Longitude do primeiro ponto.
- * @param $lat2 float Latitude do segundo ponto.
- * @param $lon2 float Longitude do segundo ponto.
- * @param $unit[optional] string Unidade de retorno (padrão "milhas"), sendo "M" para milhas, "K" para kilometros e "N" para milhas náuticas.
+ * @param $lat1 float Latitude of origin point.
+ * @param $lon1 float Longitude of origin point.
+ * @param $lat2 float Latitude of destination point.
+ * @param $lon2 float Longitude of destination point.
+ * @param $unit[optional] string Return unity (default "miles"), as "M" for miles, "K" for kilometers and "N" for nautic miles.
  * @return float
  */
 function distance ( $lat1, $lon1, $lat2, $lon2, $unit = "m")
@@ -1586,11 +1586,11 @@ function distance ( $lat1, $lon1, $lat2, $lon2, $unit = "m")
 }
 
 /**
- * Função para converter ponto geográfico de graus, minutos e segundos para forma decimal.
+ * Function to convert degree's geographic points to decimal format.
  *
- * @param $deg int Graus.
- * @param $min int Minutos.
- * @param $sec int Segundos.
+ * @param $deg int Degrees.
+ * @param $min int Minutes.
+ * @param $sec int Seconds.
  * @return float
  */
 function DMStoDEC ( $deg, $min, $sec)
@@ -1599,7 +1599,7 @@ function DMStoDEC ( $deg, $min, $sec)
 }
 
 /**
- * Função para converter ponto geográfico da forma decimal para graus, minutos e segundos.
+ * Function to convert geographic coordenates from decimal format to degree's.
  *
  * @param $dec float Longitude/Latitude.
  * @return array ( $deg, $min, $sec)
@@ -1618,11 +1618,11 @@ function DECtoDMS ( $dec)
 }
 
 /**
- * Função para comparar dois arrays. Se iguais, retorna true, caso contrário retorna false.
+ * Function to compare two arrays. If equals, return true, otherwise return false.
  *
- * @param $array1 array Primeiro array.
- * @param $array2 array Segundo array.
- * @param $strict[optional] boolean Compara também o tipo da variável.
+ * @param $array1 array First array.
+ * @param $array2 array Second array.
+ * @param $strict[optional] boolean Use strict compare (compare variable type too).
  * @return boolean
  */
 function array_compare ( $array1, $array2, $strict = false)
@@ -1877,18 +1877,8 @@ function tone2polycom ( $tones)
  */
 function isJSON ( $json)
 {
-  $re = '/(?(DEFINE)';
-  $re .= '(?<json>(?>\s*(?&object)\s*|\s*(?&array)\s*))';
-  $re .= '(?<object>(?>\{\s*(?>(?&pair)(?>\s*,\s*(?&pair))*)?\s*\}))';
-  $re .= '(?<pair>(?>(?&STRING)\s*:\s*(?&value)))';
-  $re .= '(?<array>(?>\[\s*(?>(?&value)(?>\s*,\s*(?&value))*)?\s*\]))';
-  $re .= '(?<value>(?>true|false|null|(?&STRING)|(?&NUMBER)|(?&object)|(?&array)))';
-  $re .= '(?<STRING>(?>"(?>\\\\(?>["\\\\\/bfnrt]|u[a-fA-F0-9]{4})|[^"\\\\\0-\x1F\x7F]+)*"))';
-  $re .= '(?<NUMBER>(?>-?(?>0|[1-9][0-9]*)(?>\.[0-9]+)?(?>[eE][+-]?[0-9]+)?))';
-  $re .= ')';
-  $re .= '\A(?&json)\z/x';
-
-  return preg_match ( $re, $json);
+  json_decode ( $json);
+  return ( json_last_error () == JSON_ERROR_NONE) && ( substr ( $json, 0, 1) == "{");
 }
 
 /**

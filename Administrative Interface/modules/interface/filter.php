@@ -27,7 +27,7 @@
  * VoIP Domain main framework interface filter module. This module add the
  * generic system filter calls.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Interface

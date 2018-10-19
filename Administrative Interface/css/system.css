@@ -25,7 +25,7 @@
 /**
  * VoIP Domain Cascade Style Sheet (CSS) framework file.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Core
@@ -54,7 +54,9 @@
   background-color: #f0ad4e;
 }
 
-// Sidebar menu division
+/**
+ * Sidebar menu division
+ */
 hr.sidebar-menu {
   margin-top: 2px !important;
   margin-bottom: 2px !important;
@@ -69,6 +71,13 @@ hr.sidebar-menu {
 
 body.skin-blue hr.sidebar-menu {
   border-color: #666666;
+}
+
+/**
+ * Top dropdown element
+ */
+li.user-menu {
+  margin-top: 2px !important;
 }
 
 /**
@@ -90,7 +99,7 @@ body.skin-blue hr.sidebar-menu {
 }
 .circleStatsItem i
 {
-  font-size: 30px;
+  font-size: 28px;
   margin-top: 0;
   position: absolute;
   text-align: center;
@@ -316,6 +325,10 @@ body.skin-blue hr.sidebar-menu {
 {
   z-index: 9999;
 }
+.dt-vtop
+{
+  vertical-align: top !important;
+}
 
 /**
  * Bootstrap corrections
@@ -358,6 +371,10 @@ body.skin-blue hr.sidebar-menu {
 .select2-container--bootstrap .select2-selection--single .select2-selection__rendered
 {
   margin-top: 0;
+}
+.select2-results__option[aria-selected=true]
+{
+  display: none;
 }
 
 /**
@@ -413,6 +430,10 @@ body.skin-blue hr.sidebar-menu {
 .week-picker .bootstrap-datetimepicker-widget table tbody tr td.active:last-child
 {
   border-radius: 0px 4px 4px 0px;
+}
+.week-picker .bootstrap-datetimepicker-widget
+{
+  z-index: 1002;
 }
 .week-picker
 {

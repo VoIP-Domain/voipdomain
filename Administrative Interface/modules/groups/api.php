@@ -27,7 +27,7 @@
  * VoIP Domain groups api module. This module add the api calls related to
  * groups.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Groups
@@ -64,7 +64,7 @@ function groups_search ( $buffer, $parameters)
    * Search groups
    */
   $data = array ();
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Groups` " . ( ! empty ( $parameters["q"]) ? "WHERE `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["q"]) . "%' " : "") . "ORDER BY `Description`, `Code`"))
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Groups` " . ( ! empty ( $parameters["q"]) ? "WHERE `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["q"]) . "%' " : "") . "ORDER BY `Description`"))
   {
     while ( $group = $result->fetch_assoc ())
     {
@@ -124,7 +124,7 @@ function groups_fetch ( $buffer, $parameters)
     {
       $total += $allocation;
     }
-    $data[] = array ( $result["ID"], $result["Description"], $result["Code"], $result["CostCenter"], $total);
+    $data[] = array ( $result["ID"], $result["Description"], $result["CostCenter"], $total);
   }
 
   /**
@@ -184,7 +184,6 @@ function groups_view ( $buffer, $parameters)
   $data = array ();
   $data["result"] = true;
   $data["description"] = $group["Description"];
-  $data["code"] = $group["Code"];
   $data["costcenter"] = $group["CostCenter"];
   $data["costcenterdescription"] = $group["CostCenterDescription"] . " (" . $group["CostCenterCode"] . ")";
 
@@ -225,34 +224,12 @@ function groups_add ( $buffer, $parameters)
     $data["result"] = false;
     $data["description"] = __ ( "The group description is required.");
   }
-  $parameters["code"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["code"])));
-  if ( empty ( $parameters["code"]))
-  {
-    $data["result"] = false;
-    $data["code"] = __ ( "The group code is required.");
-  }
+  $parameters["code"] = strtolower ( preg_replace ( "/[^a-zA-Z0-9]+/", "", $parameters["description"]));
   $parameters["costcenter"] = (int) $parameters["costcenter"];
   if ( empty ( $parameters["costcenter"]))
   {
     $data["result"] = false;
     $data["costcenter"] = __ ( "The cost center is required.");
-  }
-
-  /**
-   * Check if code was in use
-   */
-  if ( ! array_key_exists ( "code", $data))
-  {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Groups` WHERE `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["code"]) . "'"))
-    {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
-    }
-    if ( $result->num_rows != 0)
-    {
-      $data["result"] = false;
-      $data["code"] = __ ( "The informed code is already in use.");
-    }
   }
 
   /**
@@ -290,14 +267,33 @@ function groups_add ( $buffer, $parameters)
   }
 
   /**
+   * Call add pre hook, if exist
+   */
+  if ( framework_has_hook ( "groups_add_pre"))
+  {
+    $parameters = framework_call ( "groups_add_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Add new group record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Groups` (`Description`, `Code`, `CostCenter`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["code"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $parameters["costcenter"]) . ")"))
   {
+die ( "INSERT INTO `Groups` (`Description`, `Code`, `CostCenter`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["code"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $parameters["costcenter"]) . ")");
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   $parameters["id"] = $_in["mysql"]["id"]->insert_id;
+
+  /**
+   * Update `Code` to add ID
+   */
+  $parameters["code"] .= "_" . $parameters["id"];
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Groups` SET `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["code"]) . "' WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
 
   /**
    * Call add post hook, if exist
@@ -368,34 +364,12 @@ function groups_edit ( $buffer, $parameters)
     $data["result"] = false;
     $data["description"] = __ ( "The group description is required.");
   }
-  $parameters["code"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["code"])));
-  if ( empty ( $parameters["code"]))
-  {
-    $data["result"] = false;
-    $data["code"] = __ ( "The group code is required.");
-  }
+  $parameters["code"] = strtolower ( preg_replace ( "/[^a-zA-Z0-9]+/", "", $parameters["description"])) . "_" . $parameters["id"];
   $parameters["costcenter"] = (int) $parameters["costcenter"];
   if ( empty ( $parameters["costcenter"]))
   {
     $data["result"] = false;
     $data["costcenter"] = __ ( "The cost center is required.");
-  }
-
-  /**
-   * Check if code was in use
-   */
-  if ( ! array_key_exists ( "code", $data))
-  {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Groups` WHERE `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["code"]) . "' AND `ID` != " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
-    {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
-    }
-    if ( $result->num_rows != 0)
-    {
-      $data["result"] = false;
-      $data["code"] = __ ( "The informed code is already in use.");
-    }
   }
 
   /**
@@ -445,6 +419,14 @@ function groups_edit ( $buffer, $parameters)
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
     return $data;
+  }
+
+  /**
+   * Call edit pre hook, if exist
+   */
+  if ( framework_has_hook ( "groups_edit_pre"))
+  {
+    $parameters = framework_call ( "groups_edit_pre", $parameters, false, $parameters);
   }
 
   /**
@@ -559,6 +541,14 @@ function groups_remove ( $buffer, $parameters)
   }
 
   /**
+   * Call remove pre hook, if exist
+   */
+  if ( framework_has_hook ( "groups_remove_pre"))
+  {
+    $parameters = framework_call ( "groups_remove_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Remove group database record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Groups` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
@@ -602,12 +592,71 @@ function groups_remove ( $buffer, $parameters)
 }
 
 /**
- * API call to intercept new server
+ * API call to generate extension call's report
  */
-framework_add_hook ( "servers_add_post", "groups_servers_add_post");
+framework_add_hook ( "groups_report", "groups_report");
+framework_add_permission ( "groups_report", __ ( "Groups use report"));
+framework_add_api_call ( "/groups/:id/report", "Read", "groups_report", array ( "permissions" => array ( "user", "groups_report")));
 
 /**
- * Function to notify new server to include all groups.
+ * Function to generate report data.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param mixed $buffer Buffer from plugin system if processed by other function
+ *                      before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function groups_report ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Sanityze input data
+   */
+  $parameters["start"] = format_form_datetime ( empty ( $parameters["start"]) ? date ( __ ( "m/d/Y") . " 00:00", strtotime ( "29 days ago")) : urldecode ( $parameters["start"]));
+  $parameters["end"] = format_form_datetime ( empty ( $parameters["end"]) ? date ( __ ( "m/d/Y") . " 23:59", time ()) : urldecode ( $parameters["end"]));
+  $parameters["id"] = (int) $parameters["id"];
+
+  /**
+   * Get group extensions information
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`Extension` SEPARATOR ',') AS `Extensions` FROM `Extensions` WHERE `Group` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  $extensions = $result->fetch_assoc ()["Extensions"];
+
+  /**
+   * Get call records from database
+   */
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE (`src` IN (" . $_in["mysql"]["id"]->real_escape_string ( $extensions) . ") OR `dst` IN (" . $_in["mysql"]["id"]->real_escape_string ( $extensions) . ")) AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["end"]) . "'"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+
+  /**
+   * Process each record
+   */
+  $output = array ();
+  while ( $data = $records->fetch_assoc ())
+  {
+    $output[] = filters_call ( "process_call", $data);
+  }
+
+  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $output);
+}
+
+/**
+ * API call to intercept new server and server reinstall
+ */
+framework_add_hook ( "servers_add_post", "groups_server_reconfig");
+framework_add_hook ( "servers_reinstall_config", "groups_server_reconfig");
+
+/**
+ * Function to notify server to include all groups.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -615,12 +664,12 @@ framework_add_hook ( "servers_add_post", "groups_servers_add_post");
  * @param array $parameters Optional parameters to the function
  * @return string Output of the generated page
  */
-function groups_servers_add_post ( $buffer, $parameters)
+function groups_server_reconfig ( $buffer, $parameters)
 {
   global $_in;
 
   /**
-   * Fetch all groups and send to new server
+   * Fetch all groups and send to server
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Groups`"))
   {

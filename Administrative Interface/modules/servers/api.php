@@ -27,7 +27,7 @@
  * VoIP Domain servers api module. This module add the api calls related to
  * servers.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Servers
@@ -435,12 +435,20 @@ function servers_add ( $buffer, $parameters)
   /**
    * Create a random password for server criptography
    */
-  $password = randomPassword ( 12);
+  $parameters["password"] = randomPassword ( 12);
+
+  /**
+   * Call add pre hook, if exist
+   */
+  if ( framework_has_hook ( "servers_add_pre"))
+  {
+    $parameters = framework_call ( "servers_add_pre", $parameters, false, $parameters);
+  }
 
   /**
    * Add new server record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Servers` (`Name`, `Address`, `Domain`, `Country`, `AreaCode`, `Password`, `NGGW`, `DefaultGW`, `BlockedGW`, `TransfStart`, `TransfEnd`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["address"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["domain"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $parameters["country"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $parameters["areacode"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $password) . "', " . $_in["mysql"]["id"]->real_escape_string ( $parameters["nggw"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $gateways)) . "', '" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $blockeds)) . "', " . ( $parameters["window"] == "on" ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["start"]) . ":00'" : "NULL") . ", " . ( $parameters["window"] == "on" ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["finish"]) . ":59'" : "NULL") . ")"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Servers` (`Name`, `Address`, `Domain`, `Country`, `AreaCode`, `Password`, `NGGW`, `DefaultGW`, `BlockedGW`, `TransfStart`, `TransfEnd`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["address"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["domain"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $parameters["country"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $parameters["areacode"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["password"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $parameters["nggw"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $gateways)) . "', '" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $blockeds)) . "', " . ( $parameters["window"] == "on" ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["start"]) . ":00'" : "NULL") . ", " . ( $parameters["window"] == "on" ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["finish"]) . ":59'" : "NULL") . ")"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -468,7 +476,7 @@ function servers_add ( $buffer, $parameters)
   /**
    * Insert audit registry
    */
-  $audit = array ( "ID" => $parameters["id"], "Name" => $parameters["name"], "Address" => $parameters["address"], "Domain" => $parameters["domain"], "Country" => $parameters["country"], "AreaCode" => $parameters["areacode"], "Password" => $password, "NGGW" => $parameters["nggw"], "Gateways" => $gateways, "Blockeds" => $blockeds, "Window" => ( $parameters["window"] == "on"), "Start" => $parameters["start"], "Finish" => $parameters["finish"]);
+  $audit = array ( "ID" => $parameters["id"], "Name" => $parameters["name"], "Address" => $parameters["address"], "Domain" => $parameters["domain"], "Country" => $parameters["country"], "AreaCode" => $parameters["areacode"], "Password" => $parameters["password"], "NGGW" => $parameters["nggw"], "Gateways" => $gateways, "Blockeds" => $blockeds, "Window" => ( $parameters["window"] == "on"), "Start" => $parameters["start"], "Finish" => $parameters["finish"]);
   if ( framework_has_hook ( "servers_add_audit"))
   {
     $audit = framework_call ( "servers_add_audit", $parameters, false, $audit);
@@ -692,6 +700,14 @@ function servers_edit ( $buffer, $parameters)
   }
 
   /**
+   * Call edit pre hook, if exist
+   */
+  if ( framework_has_hook ( "servers_edit_pre"))
+  {
+    $parameters = framework_call ( "servers_edit_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Change server record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Servers` SET `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "', `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["address"]) . "', `Domain` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["domain"]) . "', `Country` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["country"]) . ", `AreaCode` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["areacode"]) . ", `NGGW` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["nggw"]) . ", `DefaultGW` = '" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $gateways)) . "', `BlockedGW` = '" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $blockeds)) . "', `TransfStart` = " . ( $parameters["window"] == "on" ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["start"]) . ":00'" : "NULL") . ", `TransfEnd` = " . ( $parameters["window"] == "on" ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["finish"]) . ":59'" : "NULL") . " WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $server["ID"])))
@@ -835,6 +851,14 @@ function servers_remove ( $buffer, $parameters)
   }
 
   /**
+   * Call remove pre hook, if exist
+   */
+  if ( framework_has_hook ( "servers_remove_pre"))
+  {
+    $parameters = framework_call ( "servers_remove_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Remove server database record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
@@ -870,6 +894,88 @@ function servers_remove ( $buffer, $parameters)
     $audit = framework_call ( "servers_remove_audit", $parameters, false, $audit);
   }
   audit ( "server", "remove", $audit);
+
+  /**
+   * Retorn OK to user
+   */
+  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), array ( "result" => true));
+}
+
+/**
+ * API call to reinstall a server
+ */
+framework_add_hook ( "servers_reinstall", "servers_reinstall");
+framework_add_permission ( "servers_reinstall", __ ( "Reinstall servers"));
+framework_add_api_call ( "/servers/:id/reinstall", "Create", "servers_reinstall", array ( "permissions" => array ( "user", "servers_reinstall")));
+
+/**
+ * Function to reinstall an existing server.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function servers_reinstall ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Check basic parameters
+   */
+  $data = array ();
+  $data["result"] = true;
+  $parameters["id"] = (int) $parameters["id"];
+
+  /**
+   * Check if server exists
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( $result->num_rows != 1)
+  {
+    $data["result"] = false;
+    $data["server"] = __ ( "The informed server ID was not found.");
+  }
+
+  /**
+   * Call reinstall sanitize hook, if exist
+   */
+  if ( framework_has_hook ( "servers_reinstall_sanitize"))
+  {
+    $data = framework_call ( "servers_reinstall_sanitize", $parameters, false, $data);
+  }
+
+  /**
+   * Return error data if some error ocurred
+   */
+  if ( $data["result"] == false)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+    return $data;
+  }
+
+  /**
+   * Call server reinstall hook, if exist
+   */
+  if ( framework_has_hook ( "servers_reinstall_config"))
+  {
+    framework_call ( "servers_reinstall_config", $parameters);
+  }
+
+  /**
+   * Insert audit registry
+   */
+  $audit = array ( "ID" => $parameters["id"]);
+  if ( framework_has_hook ( "servers_reinstall_audit"))
+  {
+    $audit = framework_call ( "servers_reinstall_audit", $parameters, false, $audit);
+  }
+  audit ( "server", "reinstall", $audit);
 
   /**
    * Retorn OK to user

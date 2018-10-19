@@ -2,5 +2,5 @@
 --==================--
 
 URL: https://blueimp.github.io/jQuery-File-Upload/
-Version: 9.21.0
+Version: 9.22.0
 License: MIT

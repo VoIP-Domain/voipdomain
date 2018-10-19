@@ -26,7 +26,7 @@
 /**
  * VoIP Domain users module language file.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Users
@@ -79,6 +79,10 @@ i18n_add ( "users visualization");
 i18n_add ( "User visualization");
 i18n_add ( "Error requesting user data!");
 i18n_add ( "users edition");
+i18n_add ( "User language");
+i18n_add ( "System default language");
+i18n_add ( "Language");
+i18n_add ( "The select language are invalid.");
 
 /**
  * Add Brazilian Portuguese support
@@ -125,4 +129,8 @@ i18n_add ( "users visualization", "visualização de usuários", "pt_BR");
 i18n_add ( "User visualization", "Visualização de usuário", "pt_BR");
 i18n_add ( "Error requesting user data!", "Erro ao requisitar dados do usuário!", "pt_BR");
 i18n_add ( "users edition", "edição de usuários", "pt_BR");
+i18n_add ( "User language", "Idioma do usuário", "pt_BR");
+i18n_add ( "System default language", "Idioma padrão do sistema", "pt_BR");
+i18n_add ( "Language", "Idioma", "pt_BR");
+i18n_add ( "The select language are invalid.", "O idioma selecionado é inválido.", "pt_BR");
 ?>

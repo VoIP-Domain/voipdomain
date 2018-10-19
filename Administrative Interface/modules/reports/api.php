@@ -27,7 +27,7 @@
  * VoIP Domain reports api module. This module add the api calls related to
  * reports.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Reports
@@ -60,7 +60,7 @@ function reports_heat ( $buffer, $parameters)
    */
   $parameters["type"] = (int) $parameters["type"];
   $parameters["start"] = substr ( $parameters["start"], 6, 4) . "-" . substr ( $parameters["start"], 3, 2) . "-" . substr ( $parameters["start"], 0, 2);
-  $parameters["finish"] = substr ( $parameters["finish"], 6, 4) . "-" . substr ( $parameters["finish"], 3, 2) . "-" . substr ( $parameters["finish"], 0, 2);
+  $parameters["end"] = substr ( $parameters["end"], 6, 4) . "-" . substr ( $parameters["end"], 3, 2) . "-" . substr ( $parameters["end"], 0, 2);
 
   /**
    * Create filter based on call type
@@ -96,20 +96,20 @@ function reports_heat ( $buffer, $parameters)
   /**
    * Request call count from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT SUBSTR(`calldate`, 1, 13) AS `Data`, COUNT(*) AS `Total` FROM `cdr` WHERE `calldate` != '0000-00-00 00:00:00' AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["start"]) . " 00:00:00' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["finish"]) . " 23:59:59'" . $filter . " GROUP BY `Data` ORDER BY `Data`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT SUBSTR(`calldate`, 1, 13) AS `Data`, COUNT(*) AS `Total` FROM `cdr` WHERE `calldate` != '0000-00-00 00:00:00' AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["start"]) . " 00:00:00' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["end"]) . " 23:59:59'" . $filter . " GROUP BY `Data` ORDER BY `Data`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
 
   /**
-   * Prepare data to D3
+   * Prepare data to TUI Chart
    */
   $matrix = array ();
   $daykey = array ();
   for ( $day = 1; $day <= 7; $day++)
   {
-    $daykey[date ( "Y-m-d", mktime ( 0, 0, 0, substr ( $parameters["start"], 3, 2), substr ( $parameters["start"], 0, 2) + $day - 1, substr ( $parameters["start"], 6, 4)))] = $day;
+    $daykey[date ( "Y-m-d", mktime ( 0, 0, 0, substr ( $parameters["start"], 5, 2), substr ( $parameters["start"], 8, 2) + $day - 1, substr ( $parameters["start"], 0, 4)))] = $day;
     $matrix[$day] = array ();
     for ( $hour = 0; $hour <= 23; $hour++)
     {
@@ -118,15 +118,12 @@ function reports_heat ( $buffer, $parameters)
   }
   while ( $record = $result->fetch_assoc ())
   {
-    $matrix[$daykey[substr ( $record["Data"], 0, 10)]][(int) substr ( $record["Data"], 11, 2)] = $record["Total"];
+    $matrix[$daykey[substr ( $record["Data"], 0, 10)]][(int) substr ( $record["Data"], 11, 2)] = (int) $record["Total"];
   }
   $data = array ();
-  for ( $day = 1; $day <= 7; $day++)
+  for ( $day = 7; $day >= 1; $day--)
   {
-    for ( $hour = 0; $hour <= 23; $hour++)
-    {
-      $data[] = array ( "day" => $day, "hour" => $hour, "value" => (int) $matrix[$day][$hour]);
-    }
+    $data[] = $matrix[$day];
   }
 
   /**
@@ -710,7 +707,7 @@ function gateway_received_report ( $buffer, $parameters)
  * API call to generate system received call's report
  */
 framework_add_hook ( "system_received_report", "system_received_report");
-framework_add_permission ( "system_received_report", __ ( "System received calls report"));
+framework_add_permission ( "system_received_report", __ ( "All received calls report"));
 framework_add_api_call ( "/reports/received/all", "Read", "system_received_report", array ( "permissions" => array ( "user", "system_received_report")));
 
 /**
@@ -945,7 +942,7 @@ function gateway_made_report ( $buffer, $parameters)
  * API call to generate system made call's report
  */
 framework_add_hook ( "system_made_report", "system_made_report");
-framework_add_permission ( "system_made_report", __ ( "System made calls report"));
+framework_add_permission ( "system_made_report", __ ( "All made calls report"));
 framework_add_api_call ( "/reports/made/all", "Read", "system_made_report", array ( "permissions" => array ( "user", "system_made_report")));
 
 /**
@@ -1002,6 +999,465 @@ function system_made_report ( $buffer, $parameters)
   while ( $data = $records->fetch_assoc ())
   {
     $output[] = filters_call ( "process_call", $data);
+  }
+
+  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $output);
+}
+
+/**
+ * API call to generate consolidated extensions call's report
+ */
+framework_add_hook ( "consolidated_extension_report", "consolidated_extension_report");
+framework_add_permission ( "consolidated_extension_report", __ ( "Consolidated extensions calls report"));
+framework_add_api_call ( "/reports/consolidated/extensions", "Read", "consolidated_extension_report", array ( "permissions" => array ( "user", "consolidated_extension_report")));
+
+/**
+ * Function to generate consolidated extensions calls report data.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param mixed $buffer Buffer from plugin system if processed by other function
+ *                      before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function consolidated_extension_report ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Sanityze input data
+   */
+  $data = array ();
+  if ( empty ( $parameters["month"]))
+  {
+    $base = time ();
+  } else {
+    $base = mktime ( 0, 0, 0, substr ( $parameters["month"], 0, strpos ( $parameters["month"], "/")), 1, substr ( $parameters["month"], strpos ( $parameters["month"], "/") + 1));
+  }
+  $data["start"] = date ( "Y-m-01", $base) . " 00:00";
+  $data["end"] = date ( "Y-m-t", $base) . " 23:59";
+
+  /**
+   * Get all extensions
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Name`, `Extension` FROM `Extensions`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( $result->num_rows == 0)
+  {
+    return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $output);
+  }
+  $matrix = array ();
+  while ( $extension = $result->fetch_assoc ())
+  {
+    $matrix[$extension["Extension"]] = array ( "ID" => $extension["ID"], "Extension" => $extension["Extension"], "Name" => $extension["Name"], "Local" => array ( "Calls" => 0, "Duration" => 0), "Mobile" => array ( "Calls" => 0, "Duration" => 0), "Interstate" => array ( "Calls" => 0, "Duration" => 0), "International" => array ( "Calls" => 0, "Duration" => 0), "Others" => array ( "Calls" => 0, "Duration" => 0));
+  }
+
+  /**
+   * Get local call informations from database
+   */
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT `src`, COUNT(*) AS `Calls`, SUM(`billsec`) AS `Duration` FROM `cdr` WHERE `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $data["start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $data["end"]) . "' AND `calltype` = '2' GROUP BY `src`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $call = $records->fetch_assoc ())
+  {
+    if ( array_key_exists ( $call["src"], $matrix))
+    {
+      $matrix[$call["src"]]["Local"]["Calls"] = $call["Calls"];
+      $matrix[$call["src"]]["Local"]["Duration"] = $call["Duration"];
+    }
+  }
+
+  /**
+   * Get mobile call informations from database
+   */
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT `src`, COUNT(*) AS `Calls`, SUM(`billsec`) AS `Duration` FROM `cdr` WHERE `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $data["start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $data["end"]) . "' AND `calltype` = '3' GROUP BY `src`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $call = $records->fetch_assoc ())
+  {
+    if ( array_key_exists ( $call["src"], $matrix))
+    {
+      $matrix[$call["src"]]["Mobile"]["Calls"] = $call["Calls"];
+      $matrix[$call["src"]]["Mobile"]["Duration"] = $call["Duration"];
+    }
+  }
+
+  /**
+   * Get interstate call informations from database
+   */
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT `src`, COUNT(*) AS `Calls`, SUM(`billsec`) AS `Duration` FROM `cdr` WHERE `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $data["start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $data["end"]) . "' AND `calltype` = '4' GROUP BY `src`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $call = $records->fetch_assoc ())
+  {
+    if ( array_key_exists ( $call["src"], $matrix))
+    {
+      $matrix[$call["src"]]["Interstate"]["Calls"] = $call["Calls"];
+      $matrix[$call["src"]]["Interstate"]["Duration"] = $call["Duration"];
+    }
+  }
+
+  /**
+   * Get international call informations from database
+   */
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT `src`, COUNT(*) AS `Calls`, SUM(`billsec`) AS `Duration` FROM `cdr` WHERE `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $data["start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $data["end"]) . "' AND `calltype` = '5' GROUP BY `src`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $call = $records->fetch_assoc ())
+  {
+    if ( array_key_exists ( $call["src"], $matrix))
+    {
+      $matrix[$call["src"]]["International"]["Calls"] = $call["Calls"];
+      $matrix[$call["src"]]["International"]["Duration"] = $call["Duration"];
+    }
+  }
+
+  /**
+   * Get all other call informations from database
+   */
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT `src`, COUNT(*) AS `Calls`, SUM(`billsec`) AS `Duration` FROM `cdr` WHERE `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $data["start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $data["end"]) . "' AND `calltype` != '2' AND `calltype` != '3' AND `calltype` != '4' AND `calltype` != '5' GROUP BY `src`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $call = $records->fetch_assoc ())
+  {
+    if ( array_key_exists ( $call["src"], $matrix))
+    {
+      $matrix[$call["src"]]["Others"]["Calls"] = $call["Calls"];
+      $matrix[$call["src"]]["Others"]["Duration"] = $call["Duration"];
+    }
+  }
+
+  /**
+   * Create output report
+   */
+  $output = array ();
+  foreach ( $matrix as $id => $data)
+  {
+    $output[] = array ( $data["ID"], $data["Extension"], $data["Name"], $data["Local"]["Calls"], $data["Local"]["Duration"], $data["Mobile"]["Calls"], $data["Mobile"]["Duration"], $data["Interstate"]["Calls"], $data["Interstate"]["Duration"], $data["International"]["Calls"], $data["International"]["Duration"], $data["Others"]["Calls"], $data["Others"]["Duration"]);
+  }
+
+  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $output);
+}
+
+/**
+ * API call to generate consolidated groups call's report
+ */
+framework_add_hook ( "consolidated_group_report", "consolidated_group_report");
+framework_add_permission ( "consolidated_group_report", __ ( "Consolidated groups calls report"));
+framework_add_api_call ( "/reports/consolidated/groups", "Read", "consolidated_group_report", array ( "permissions" => array ( "user", "consolidated_group_report")));
+
+/**
+ * Function to generate consolidated groups calls report data.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param mixed $buffer Buffer from plugin system if processed by other function
+ *                      before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function consolidated_group_report ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Sanityze input data
+   */
+  $data = array ();
+  if ( empty ( $parameters["month"]))
+  {
+    $base = time ();
+  } else {
+    $base = mktime ( 0, 0, 0, substr ( $parameters["month"], 0, strpos ( $parameters["month"], "/")), 1, substr ( $parameters["month"], strpos ( $parameters["month"], "/") + 1));
+  }
+  $data["start"] = date ( "Y-m-01", $base) . " 00:00";
+  $data["end"] = date ( "Y-m-t", $base) . " 23:59";
+
+  /**
+   * Get all groups
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Groups`.`ID`, `Groups`.`Description`, GROUP_CONCAT(`Extensions`.`Extension` SEPARATOR ',') AS `Extensions` FROM `Groups` LEFT JOIN `Extensions` ON `Extensions`.`Group` = `Groups`.`ID` GROUP BY `Groups`.`ID`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( $result->num_rows == 0)
+  {
+    return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $output);
+  }
+  $matrix = array ();
+  while ( $group = $result->fetch_assoc ())
+  {
+    $matrix[$group["ID"]] = array ( "ID" => $group["ID"], "Extensions" => $group["Extensions"], "Description" => $group["Description"], "Local" => array ( "Calls" => 0, "Duration" => 0), "Mobile" => array ( "Calls" => 0, "Duration" => 0), "Interstate" => array ( "Calls" => 0, "Duration" => 0), "International" => array ( "Calls" => 0, "Duration" => 0), "Others" => array ( "Calls" => 0, "Duration" => 0));
+  }
+
+  /**
+   * Get local call informations from database
+   */
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT `src`, COUNT(*) AS `Calls`, SUM(`billsec`) AS `Duration` FROM `cdr` WHERE `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $data["start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $data["end"]) . "' AND `calltype` = '2' GROUP BY `src`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $call = $records->fetch_assoc ())
+  {
+    foreach ( $matrix as $id => $content)
+    {
+      if ( $call["src"] && preg_match ( "/(^|,)" . $call["src"] . "($|,)/", $content["Extensions"]))
+      {
+        $matrix[$id]["Local"]["Calls"] += $call["Calls"];
+        $matrix[$id]["Local"]["Duration"] += $call["Duration"];
+      }
+    }
+  }
+
+  /**
+   * Get mobile call informations from database
+   */
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT `src`, COUNT(*) AS `Calls`, SUM(`billsec`) AS `Duration` FROM `cdr` WHERE `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $data["start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $data["end"]) . "' AND `calltype` = '3' GROUP BY `src`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $call = $records->fetch_assoc ())
+  {
+    foreach ( $matrix as $id => $content)
+    {
+      if ( $call["src"] && preg_match ( "/(^|,)" . $call["src"] . "($|,)/", $content["Extensions"]))
+      {
+        $matrix[$id]["Mobile"]["Calls"] += $call["Calls"];
+        $matrix[$id]["Mobile"]["Duration"] += $call["Duration"];
+      }
+    }
+  }
+
+  /**
+   * Get interstate call informations from database
+   */
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT `src`, COUNT(*) AS `Calls`, SUM(`billsec`) AS `Duration` FROM `cdr` WHERE `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $data["start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $data["end"]) . "' AND `calltype` = '4' GROUP BY `src`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $call = $records->fetch_assoc ())
+  {
+    foreach ( $matrix as $id => $content)
+    {
+      if ( $call["src"] && preg_match ( "/(^|,)" . $call["src"] . "($|,)/", $content["Extensions"]))
+      {
+        $matrix[$id]["Interstate"]["Calls"] += $call["Calls"];
+        $matrix[$id]["Interstate"]["Duration"] += $call["Duration"];
+      }
+    }
+  }
+
+  /**
+   * Get international call informations from database
+   */
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT `src`, COUNT(*) AS `Calls`, SUM(`billsec`) AS `Duration` FROM `cdr` WHERE `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $data["start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $data["end"]) . "' AND `calltype` = '5' GROUP BY `src`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $call = $records->fetch_assoc ())
+  {
+    foreach ( $matrix as $id => $content)
+    {
+      if ( $call["src"] && preg_match ( "/(^|,)" . $call["src"] . "($|,)/", $content["Extensions"]))
+      {
+        $matrix[$id]["International"]["Calls"] += $call["Calls"];
+        $matrix[$id]["International"]["Duration"] += $call["Duration"];
+      }
+    }
+  }
+
+  /**
+   * Get all other call informations from database
+   */
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT `src`, COUNT(*) AS `Calls`, SUM(`billsec`) AS `Duration` FROM `cdr` WHERE `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $data["start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $data["end"]) . "' AND `calltype` != '2' AND `calltype` != '3' AND `calltype` != '4' AND `calltype` != '5' GROUP BY `src`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $call = $records->fetch_assoc ())
+  {
+    foreach ( $matrix as $id => $content)
+    {
+      if ( $call["src"] && preg_match ( "/(^|,)" . $call["src"] . "($|,)/", $content["Extensions"]))
+      {
+        $matrix[$id]["Others"]["Calls"] += $call["Calls"];
+        $matrix[$id]["Others"]["Duration"] += $call["Duration"];
+      }
+    }
+  }
+
+  /**
+   * Create output report
+   */
+  $output = array ();
+  foreach ( $matrix as $id => $data)
+  {
+    $output[] = array ( $data["ID"], $data["Description"], $data["Local"]["Calls"], $data["Local"]["Duration"], $data["Mobile"]["Calls"], $data["Mobile"]["Duration"], $data["Interstate"]["Calls"], $data["Interstate"]["Duration"], $data["International"]["Calls"], $data["International"]["Duration"], $data["Others"]["Calls"], $data["Others"]["Duration"]);
+  }
+
+  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $output);
+}
+
+/**
+ * API call to generate consolidated gateways call's report
+ */
+framework_add_hook ( "consolidated_gateway_report", "consolidated_gateway_report");
+framework_add_permission ( "consolidated_gateway_report", __ ( "Consolidated gateways calls report"));
+framework_add_api_call ( "/reports/consolidated/gateways", "Read", "consolidated_gateway_report", array ( "permissions" => array ( "user", "consolidated_gateway_report")));
+
+/**
+ * Function to generate consolidated gateways calls report data.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param mixed $buffer Buffer from plugin system if processed by other function
+ *                      before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function consolidated_gateway_report ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Sanityze input data
+   */
+  $data = array ();
+  if ( empty ( $parameters["month"]))
+  {
+    $base = time ();
+  } else {
+    $base = mktime ( 0, 0, 0, substr ( $parameters["month"], 0, strpos ( $parameters["month"], "/")), 1, substr ( $parameters["month"], strpos ( $parameters["month"], "/") + 1));
+  }
+  $data["start"] = date ( "Y-m-01", $base) . " 00:00";
+  $data["end"] = date ( "Y-m-t", $base) . " 23:59";
+
+  /**
+   * Get all gateways
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Description` FROM `Gateways`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( $result->num_rows == 0)
+  {
+    return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $output);
+  }
+  $matrix = array ();
+  while ( $gateway = $result->fetch_assoc ())
+  {
+    $matrix[$gateway["ID"]] = array ( "ID" => $gateway["ID"], "Description" => $gateway["Description"], "Local" => array ( "Calls" => 0, "Duration" => 0), "Mobile" => array ( "Calls" => 0, "Duration" => 0), "Interstate" => array ( "Calls" => 0, "Duration" => 0), "International" => array ( "Calls" => 0, "Duration" => 0), "Others" => array ( "Calls" => 0, "Duration" => 0));
+  }
+
+  /**
+   * Get local call informations from database
+   */
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT `gateway`, COUNT(*) AS `Calls`, SUM(`billsec`) AS `Duration` FROM `cdr` WHERE `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $data["start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $data["end"]) . "' AND `calltype` = '2' GROUP BY `gateway`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $call = $records->fetch_assoc ())
+  {
+    if ( array_key_exists ( $call["gateway"], $matrix))
+    {
+      $matrix[$call["gateway"]]["Local"]["Calls"] = $call["Calls"];
+      $matrix[$call["gateway"]]["Local"]["Duration"] = $call["Duration"];
+    }
+  }
+
+  /**
+   * Get mobile call informations from database
+   */
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT `gateway`, COUNT(*) AS `Calls`, SUM(`billsec`) AS `Duration` FROM `cdr` WHERE `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $data["start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $data["end"]) . "' AND `calltype` = '3' GROUP BY `gateway`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $call = $records->fetch_assoc ())
+  {
+    if ( array_key_exists ( $call["gateway"], $matrix))
+    {
+      $matrix[$call["gateway"]]["Mobile"]["Calls"] = $call["Calls"];
+      $matrix[$call["gateway"]]["Mobile"]["Duration"] = $call["Duration"];
+    }
+  }
+
+  /**
+   * Get interstate call informations from database
+   */
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT `gateway`, COUNT(*) AS `Calls`, SUM(`billsec`) AS `Duration` FROM `cdr` WHERE `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $data["start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $data["end"]) . "' AND `calltype` = '4' GROUP BY `gateway`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $call = $records->fetch_assoc ())
+  {
+    if ( array_key_exists ( $call["gateway"], $matrix))
+    {
+      $matrix[$call["gateway"]]["Interstate"]["Calls"] = $call["Calls"];
+      $matrix[$call["gateway"]]["Interstate"]["Duration"] = $call["Duration"];
+    }
+  }
+
+  /**
+   * Get international call informations from database
+   */
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT `gateway`, COUNT(*) AS `Calls`, SUM(`billsec`) AS `Duration` FROM `cdr` WHERE `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $data["start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $data["end"]) . "' AND `calltype` = '5' GROUP BY `gateway`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $call = $records->fetch_assoc ())
+  {
+    if ( array_key_exists ( $call["gateway"], $matrix))
+    {
+      $matrix[$call["gateway"]]["International"]["Calls"] = $call["Calls"];
+      $matrix[$call["gateway"]]["International"]["Duration"] = $call["Duration"];
+    }
+  }
+
+  /**
+   * Get all other call informations from database
+   */
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT `gateway`, COUNT(*) AS `Calls`, SUM(`billsec`) AS `Duration` FROM `cdr` WHERE `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $data["start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $data["end"]) . "' AND `calltype` != '2' AND `calltype` != '3' AND `calltype` != '4' AND `calltype` != '5' GROUP BY `gateway`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $call = $records->fetch_assoc ())
+  {
+    if ( array_key_exists ( $call["gateway"], $matrix))
+    {
+      $matrix[$call["gateway"]]["Others"]["Calls"] = $call["Calls"];
+      $matrix[$call["gateway"]]["Others"]["Duration"] = $call["Duration"];
+    }
+  }
+
+  /**
+   * Create output report
+   */
+  $output = array ();
+  foreach ( $matrix as $id => $data)
+  {
+    $output[] = array ( $data["ID"], $data["Description"], $data["Local"]["Calls"], $data["Local"]["Duration"], $data["Mobile"]["Calls"], $data["Mobile"]["Duration"], $data["Interstate"]["Calls"], $data["Interstate"]["Duration"], $data["International"]["Calls"], $data["International"]["Duration"], $data["Others"]["Calls"], $data["Others"]["Duration"]);
   }
 
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $output);

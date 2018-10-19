@@ -27,7 +27,7 @@
  * VoIP Domain debug module. This is an internal debug module, and should NEVER
  * be loaded at production environment.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Debug

@@ -27,7 +27,7 @@
  * VoIP Domain queues api module. This module add the api calls related to
  * queues.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Queues
@@ -276,6 +276,14 @@ function queues_add ( $buffer, $parameters)
   }
 
   /**
+   * Call add pre hook, if exist
+   */
+  if ( framework_has_hook ( "queues_add_pre"))
+  {
+    $parameters = framework_call ( "queues_add_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Add new queue record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Queues` (`Extension`, `Description`, `Range`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $parameters["extension"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $range["ID"]) . ")"))
@@ -427,6 +435,14 @@ function queues_edit ( $buffer, $parameters)
   }
 
   /**
+   * Call edit pre hook, if exist
+   */
+  if ( framework_has_hook ( "queues_edit_pre"))
+  {
+    $parameters = framework_call ( "queues_edit_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Change queue record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Queues` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["extension"]) . ", `Range` = " . $_in["mysql"]["id"]->real_escape_string ( $range["ID"]) . " WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
@@ -546,6 +562,14 @@ function queues_remove ( $buffer, $parameters)
   }
 
   /**
+   * Call remove pre hook, if exist
+   */
+  if ( framework_has_hook ( "queues_remove_pre"))
+  {
+    $parameters = framework_call ( "queues_remove_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Remove queue database record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
@@ -615,6 +639,7 @@ function queues_login ( $buffer, $parameters)
   $data["result"] = true;
   $parameters["id"] = (int) $parameters["id"];
   $parameters["extension"] = (int) $parameters["extension"];
+  $parameters["agent"] = (int) $parameters["agent"];
 
   /**
    * Check if queue exists
@@ -642,12 +667,31 @@ function queues_login ( $buffer, $parameters)
   }
 
   /**
-   * Check if password match
+   * Check for agent if provided
    */
-  if ( ! array_key_exists ( "extension", $data) && $extension[0]["Record"]["Password"] != $parameters["password"])
+  if ( $parameters["agent"])
   {
-    $data["result"] = false;
-    $data["extension"] = __ ( "The extension password didn't match.");
+    $agent = filters_call ( "get_agents", array ( "code" => $parameters["agent"]));
+    if ( sizeof ( $agent) != 1)
+    {
+      $data["result"] = false;
+      $data["agent"] = __ ( "The provided agent doesn't exist.");
+    } else {
+      if ( $agent[0]["Password"] != $parameters["password"])
+      {
+        $data["result"] = false;
+        $data["agent"] = __ ( "The provided agent password didn't match.");
+      }
+    }
+  } else {
+    /**
+     * Check if password match (if not using agent)
+     */
+    if ( ! array_key_exists ( "extension", $data) && $extension[0]["Record"]["Password"] != $parameters["password"])
+    {
+      $data["result"] = false;
+      $data["extension"] = __ ( "The extension password didn't match.");
+    }
   }
 
   /**
@@ -685,9 +729,13 @@ function queues_login ( $buffer, $parameters)
   }
 
   /**
-   * Notify server about change
+   * Notify server about login
    */
   $notify = array ( "Queue" => $queue["Extension"], "Extension" => $parameters["extension"]);
+  if ( $parameters["agent"])
+  {
+    $notify["Agent"] = $parameters["agent"];
+  }
   if ( framework_has_hook ( "queues_login_notify"))
   {
     $notify = framework_call ( "queues_login_notify", $parameters, false, $notify);
@@ -698,6 +746,10 @@ function queues_login ( $buffer, $parameters)
    * Insert audit registry
    */
   $audit = array ( "Queue" => $parameters["id"], "Extension" => $parameters["extension"]);
+  if ( $parameters["agent"])
+  {
+    $audit["Agent"] = $parameters["agent"];
+  }
   if ( framework_has_hook ( "queues_login_audit"))
   {
     $audit = framework_call ( "queues_login_audit", $parameters, false, $audit);
@@ -737,6 +789,7 @@ function queues_pause ( $buffer, $parameters)
   $data["result"] = true;
   $parameters["id"] = (int) $parameters["id"];
   $parameters["extension"] = (int) $parameters["extension"];
+  $parameters["agent"] = (int) $parameters["agent"];
 
   /**
    * Check if queue exists
@@ -764,12 +817,31 @@ function queues_pause ( $buffer, $parameters)
   }
 
   /**
-   * Check if password match
+   * Check for agent if provided
    */
-  if ( ! array_key_exists ( "extension", $data) && $extension[0]["Record"]["Password"] != $parameters["password"])
+  if ( $parameters["agent"])
   {
-    $data["result"] = false;
-    $data["password"] = __ ( "The extension password didn't match.");
+    $agent = filters_call ( "get_agents", array ( "code" => $parameters["agent"]));
+    if ( sizeof ( $agent) != 1)
+    {
+      $data["result"] = false;
+      $data["agent"] = __ ( "The provided agent doesn't exist.");
+    } else {
+      if ( $agent[0]["Password"] != $parameters["password"])
+      {
+        $data["result"] = false;
+        $data["agent"] = __ ( "The provided agent password didn't match.");
+      }
+    }
+  } else {
+    /**
+     * Check if password match (if not using agent)
+     */
+    if ( ! array_key_exists ( "extension", $data) && $extension[0]["Record"]["Password"] != $parameters["password"])
+    {
+      $data["result"] = false;
+      $data["extension"] = __ ( "The extension password didn't match.");
+    }
   }
 
   /**
@@ -801,6 +873,10 @@ function queues_pause ( $buffer, $parameters)
    * Notify server about change
    */
   $notify = array ( "Queue" => $queue["Extension"], "Extension" => $parameters["extension"]);
+  if ( $parameters["agent"])
+  {
+    $notify["Agent"] = $parameters["agent"];
+  }
   if ( framework_has_hook ( "queues_pause_notify"))
   {
     $notify = framework_call ( "queues_pause_notify", $parameters, false, $notify);
@@ -811,6 +887,10 @@ function queues_pause ( $buffer, $parameters)
    * Insert audit registry
    */
   $audit = array ( "Queue" => $parameters["id"], "Extension" => $parameters["extension"]);
+  if ( $parameters["agent"])
+  {
+    $audit["Agent"] = $parameters["agent"];
+  }
   if ( framework_has_hook ( "queues_pause_audit"))
   {
     $audit = framework_call ( "queues_pause_audit", $parameters, false, $audit);
@@ -850,6 +930,7 @@ function queues_unpause ( $buffer, $parameters)
   $data["result"] = true;
   $parameters["id"] = (int) $parameters["id"];
   $parameters["extension"] = (int) $parameters["extension"];
+  $parameters["agent"] = (int) $parameters["agent"];
 
   /**
    * Check if queue exists
@@ -877,12 +958,31 @@ function queues_unpause ( $buffer, $parameters)
   }
 
   /**
-   * Check if password match
+   * Check for agent if provided
    */
-  if ( ! array_key_exists ( "extension", $data) && $extension[0]["Record"]["Password"] != $parameters["password"])
+  if ( $parameters["agent"])
   {
-    $data["result"] = false;
-    $data["password"] = __ ( "The extension password didn't match.");
+    $agent = filters_call ( "get_agents", array ( "code" => $parameters["agent"]));
+    if ( sizeof ( $agent) != 1)
+    {
+      $data["result"] = false;
+      $data["agent"] = __ ( "The provided agent doesn't exist.");
+    } else {
+      if ( $agent[0]["Password"] != $parameters["password"])
+      {
+        $data["result"] = false;
+        $data["agent"] = __ ( "The provided agent password didn't match.");
+      }
+    }
+  } else {
+    /**
+     * Check if password match (if not using agent)
+     */
+    if ( ! array_key_exists ( "extension", $data) && $extension[0]["Record"]["Password"] != $parameters["password"])
+    {
+      $data["result"] = false;
+      $data["extension"] = __ ( "The extension password didn't match.");
+    }
   }
 
   /**
@@ -914,6 +1014,10 @@ function queues_unpause ( $buffer, $parameters)
    * Notify server about change
    */
   $notify = array ( "Queue" => $queue["Extension"], "Extension" => $parameters["extension"]);
+  if ( $parameters["agent"])
+  {
+    $notify["Agent"] = $parameters["agent"];
+  }
   if ( framework_has_hook ( "queues_unpause_notify"))
   {
     $notify = framework_call ( "queues_unpause_notify", $parameters, false, $notify);
@@ -924,6 +1028,10 @@ function queues_unpause ( $buffer, $parameters)
    * Insert audit registry
    */
   $audit = array ( "Queue" => $parameters["id"], "Extension" => $parameters["extension"]);
+  if ( $parameters["agent"])
+  {
+    $audit["Agent"] = $parameters["agent"];
+  }
   if ( framework_has_hook ( "queues_unpause_audit"))
   {
     $audit = framework_call ( "queues_unpause_audit", $parameters, false, $audit);
@@ -963,6 +1071,7 @@ function queues_logout ( $buffer, $parameters)
   $data["result"] = true;
   $parameters["id"] = (int) $parameters["id"];
   $parameters["extension"] = (int) $parameters["extension"];
+  $parameters["agent"] = (int) $parameters["agent"];
 
   /**
    * Check if queue exists
@@ -990,12 +1099,31 @@ function queues_logout ( $buffer, $parameters)
   }
 
   /**
-   * Check if password match
+   * Check for agent if provided
    */
-  if ( ! array_key_exists ( "extension", $data) && $extension[0]["Record"]["Password"] != $parameters["password"])
+  if ( $parameters["agent"])
   {
-    $data["result"] = false;
-    $data["password"] = __ ( "The extension password didn't match.");
+    $agent = filters_call ( "get_agents", array ( "code" => $parameters["agent"]));
+    if ( sizeof ( $agent) != 1)
+    {
+      $data["result"] = false;
+      $data["agent"] = __ ( "The provided agent doesn't exist.");
+    } else {
+      if ( $agent[0]["Password"] != $parameters["password"])
+      {
+        $data["result"] = false;
+        $data["agent"] = __ ( "The provided agent password didn't match.");
+      }
+    }
+  } else {
+    /**
+     * Check if password match (if not using agent)
+     */
+    if ( ! array_key_exists ( "extension", $data) && $extension[0]["Record"]["Password"] != $parameters["password"])
+    {
+      $data["result"] = false;
+      $data["extension"] = __ ( "The extension password didn't match.");
+    }
   }
 
   /**
@@ -1027,6 +1155,10 @@ function queues_logout ( $buffer, $parameters)
    * Notify server about change
    */
   $notify = array ( "Queue" => $queue["Extension"], "Extension" => $parameters["extension"]);
+  if ( $parameters["agent"])
+  {
+    $notify["Agent"] = $parameters["agent"];
+  }
   if ( framework_has_hook ( "queues_logout_notify"))
   {
     $notify = framework_call ( "queues_logout_notify", $parameters, false, $notify);
@@ -1037,6 +1169,10 @@ function queues_logout ( $buffer, $parameters)
    * Insert audit registry
    */
   $audit = array ( "Queue" => $parameters["id"], "Extension" => $parameters["extension"]);
+  if ( $parameters["agent"])
+  {
+    $audit["Agent"] = $parameters["agent"];
+  }
   if ( framework_has_hook ( "queues_logout_audit"))
   {
     $audit = framework_call ( "queues_logout_audit", $parameters, false, $audit);
@@ -1047,5 +1183,48 @@ function queues_logout ( $buffer, $parameters)
    * Retorn OK to user
    */
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), array ( "result" => true));
+}
+
+/**
+ * API call to intercept new server and server reinstall
+ */
+framework_add_hook ( "servers_add_post", "queues_server_reconfig");
+framework_add_hook ( "servers_reinstall_config", "queues_server_reconfig");
+
+/**
+ * Function to notify server to include all queues.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function queues_server_reconfig ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Fetch all queues and send to server
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Queues`.`Description`, `Queues`.`Extension` FROM `Queues` LEFT JOIN `Ranges` ON `Queues`.`Range` = `Ranges`.`ID` WHERE `Ranges`.`Server` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["id"])))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $queue = $result->fetch_assoc ())
+  {
+    $notify = array ( "Description" => $queue["Description"], "Extension" => $queue["Extension"]);
+    if ( framework_has_hook ( "queues_add_notify"))
+    {
+      $notify = framework_call ( "queues_add_notify", $parameters, false, $notify);
+    }
+    notify_server ( $parameters["id"], "createqueue", $notify);
+  }
+
+  /**
+   * Return buffer
+   */
+  return $buffer;
 }
 ?>

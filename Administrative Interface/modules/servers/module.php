@@ -27,7 +27,7 @@
  * VoIP Domain servers module. This module manage servers. You can have one or
  * more servers managed by the system.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Servers
@@ -119,6 +119,25 @@ function servers_search_page ( $buffer, $parameters)
   $output .= "</table>\n";
 
   /**
+   * Add server reinstall modal code
+   */
+  $output .= "<div id=\"server_reinstall\" class=\"modal fade\" role=\"dialog\" aria-labelledby=\"server_reinstall\" aria-hidden=\"true\">\n";
+  $output .= "  <div class=\"modal-dialog\">\n";
+  $output .= "    <div class=\"modal-content\">\n";
+  $output .= "      <div class=\"modal-header\">\n";
+  $output .= "        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">×</button>\n";
+  $output .= "        <h3 class=\"modal-title\">" . __ ( "Reinstall server") . "</h3>\n";
+  $output .= "      </div>\n";
+  $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are sure you want to reinstall the server %s (%s)?"), "<span id=\"server_reinstall_name\"></span>", "<span id=\"server_reinstall_address\"></span>") . "</p><input type=\"hidden\" id=\"server_reinstall_id\" value=\"\"></div>\n";
+  $output .= "      <div class=\"modal-footer\">\n";
+  $output .= "        <button class=\"btn\" data-dismiss=\"modal\">" . __ ( "Cancel") . "</button>\n";
+  $output .= "        <button class=\"btn btn-success reinstall ladda-button\" data-style=\"expand-left\">" . __ ( "Reinstall") . "</button>\n";
+  $output .= "      </div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+  $output .= "</div>\n";
+
+  /**
    * Add server remove modal code
    */
   $output .= "<div id=\"server_delete\" class=\"modal fade\" role=\"dialog\" aria-labelledby=\"server_delete\" aria-hidden=\"true\">\n";
@@ -146,7 +165,7 @@ function servers_search_page ( $buffer, $parameters)
               "  columnDefs: [\n" .
               "                { orderable: false, targets: [ 0, 5 ]},\n" .
               "                { searchable: false, targets: [ 0, 5 ]},\n" .
-              "                { data: 'links', render: function ( data, type, full) { return '<span class=\"btn-group\"><a class=\"btn btn-xs btn-info ladda-button\" data-style=\"zoom-in\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "View") . "\" role=\"button\" title=\"\" href=\"/servers/' + full[0] + '/view\"><i class=\"fa fa-search\"></i></a><a class=\"btn btn-xs btn-warning ladda-button\" data-style=\"zoom-in\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Edit") . "\" role=\"button\" title=\"\" href=\"/servers/' + full[0] + '/edit\"><i class=\"fa fa-pencil-alt\"></i></a><button class=\"btn btn-xs btn-danger ladda-button\" data-style=\"zoom-in\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Remove") . "\" role=\"button\" title=\"\" data-id=\"' + full[0] + '\" data-name=\"' + full[1] + '\" data-address=\"' + full[2] + '\"' + ( full[4] != 0 ? ' disabled=\"disabled\"' : '') + '><i class=\"fa fa-times\"></i></button></span>'; }, targets: [ 5 ]},\n" .
+              "                { data: 'links', render: function ( data, type, full) { return '<span class=\"btn-group\"><a class=\"btn btn-xs btn-info\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "View") . "\" role=\"button\" title=\"\" href=\"/servers/' + full[0] + '/view\"><i class=\"fa fa-search\"></i></a><a class=\"btn btn-xs btn-warning\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Edit") . "\" role=\"button\" title=\"\" href=\"/servers/' + full[0] + '/edit\"><i class=\"fa fa-pencil-alt\"></i></a><button class=\"btn btn-xs btn-success\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Reinstall") . "\" role=\"button\" title=\"\" data-id=\"' + full[0] + '\" data-name=\"' + full[1] + '\" data-address=\"' + full[2] + '\"><i class=\"fa fa-recycle\"></i></button><button class=\"btn btn-xs btn-danger\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Remove") . "\" role=\"button\" title=\"\" data-id=\"' + full[0] + '\" data-name=\"' + full[1] + '\" data-address=\"' + full[2] + '\"' + ( full[4] != 0 ? ' disabled=\"disabled\"' : '') + '><i class=\"fa fa-times\"></i></button></span>'; }, targets: [ 5 ]},\n" .
               "                { visible: false, targets: [ 0 ]}\n" .
               "              ],\n" .
               "  columns: [\n" .
@@ -182,6 +201,30 @@ function servers_search_page ( $buffer, $parameters)
               "    $('#server_delete_id').data ( 'dtrow').remove ().draw ();\n" .
               "  } else {\n" .
               "    new PNotify ( { title: '" . __ ( "Server remove") . "', text: '" . __ ( "Error removing server!") . "', type: 'error'});\n" .
+              "  }\n" .
+              "  l.stop ();\n" .
+              "});\n" .
+              "$('#datatables').on ( 'click', 'button.btn-success', function ( e)\n" .
+              "{\n" .
+              "  e && e.preventDefault ();\n" .
+              "  $('#server_reinstall_id').data ( 'dtrow', $('#datatables').data ( 'dt').rows ( { filter: 'applied'}).row ( $(this).parents ( 'tr').get ( 0)));\n" .
+              "  $('#server_reinstall button.reinstall').prop ( 'disabled', false);\n" .
+              "  $('#server_reinstall_id').val ( $(this).data ( 'id'));\n" .
+              "  $('#server_reinstall_name').html ( $(this).data ( 'name'));\n" .
+              "  $('#server_reinstall_address').html ( $(this).data ( 'address'));\n" .
+              "  $('#server_reinstall').modal ( 'show');\n" .
+              "});\n" .
+              "$('#server_reinstall button.reinstall').on ( 'click', function ( event)\n" .
+              "{\n" .
+              "  var l = Ladda.create ( this);\n" .
+              "  l.start ();\n" .
+              "  var server = VoIP.rest ( '/servers/' + $('#server_reinstall_id').val () + '/reinstall', 'POST');\n" .
+              "  if ( server.API.status == 'ok')\n" .
+              "  {\n" .
+              "    $('#server_reinstall').modal ( 'hide');\n" .
+              "    new PNotify ( { title: '" . __ ( "Server reinstall") . "', text: '" . __ ( "Server reinstalled sucessfully!") . "', type: 'success'});\n" .
+              "  } else {\n" .
+              "    new PNotify ( { title: '" . __ ( "Server reinstall") . "', text: '" . __ ( "Error reinstalling server!") . "', type: 'error'});\n" .
               "  }\n" .
               "  l.stop ();\n" .
               "});\n");

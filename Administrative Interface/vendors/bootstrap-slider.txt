@@ -2,5 +2,5 @@
 --================--
 
 URL: https://github.com/seiyria/bootstrap-slider
-Version: 10.0.2
+Version: 10.2.0
 License: MIT

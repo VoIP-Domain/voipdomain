@@ -1,0 +1,6 @@
+  Toast UI - Chart
+--================--
+
+URL: http://ui.toast.com/tui-chart/
+Version: 3.2.1
+License: MIT

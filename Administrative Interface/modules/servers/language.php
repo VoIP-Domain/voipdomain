@@ -26,7 +26,7 @@
 /**
  * VoIP Domain servers module language file.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Servers
@@ -98,6 +98,14 @@ i18n_add ( "The finish hour is required.when transfer window are enabled.");
 i18n_add ( "The selected non geographic calls gateway is invalid.");
 i18n_add ( "Edit servers");
 i18n_add ( "Remove servers");
+i18n_add ( "Error reinstalling server!");
+i18n_add ( "Reinstall");
+i18n_add ( "Reinstall servers");
+i18n_add ( "Server reinstall");
+i18n_add ( "Server reinstalled sucessfully!");
+i18n_add ( "The informed server ID was not found.");
+i18n_add ( "Are sure you want to reinstall the server %s (%s)?");
+i18n_add ( "Reinstall server");
 
 /**
  * Add Brazilian Portuguese support
@@ -162,4 +170,12 @@ i18n_add ( "The finish hour is required.when transfer window are enabled.", "A h
 i18n_add ( "The selected non geographic calls gateway is invalid.", "O gateway para ligações não geográficas selecionado é inválido.", "pt_BR");
 i18n_add ( "Edit servers", "Editar servidores", "pt_BR");
 i18n_add ( "Remove servers", "Remover servidores", "pt_BR");
+i18n_add ( "Error reinstalling server!", "Erro reinstalando o servidor!", "pt_BR");
+i18n_add ( "Reinstall", "Reinstalar", "pt_BR");
+i18n_add ( "Reinstall servers", "Reinstalar servidores", "pt_BR");
+i18n_add ( "Server reinstall", "Reinstalação de servidor", "pt_BR");
+i18n_add ( "Server reinstalled sucessfully!", "Servidor reinstalado com sucesso!", "pt_BR");
+i18n_add ( "The informed server ID was not found.", "O servidor informado não foi encontrado.", "pt_BR");
+i18n_add ( "Are sure you want to reinstall the server %s (%s)?", "Você tem certeza que deseja reinstalar o servidor %s (%s)?", "pt_BR");
+i18n_add ( "Reinstall server", "Reinstalar servidor", "pt_BR");
 ?>

@@ -26,7 +26,7 @@
 /**
  * VoIP Domain extensions module language file.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Extensions
@@ -99,7 +99,6 @@ i18n_add ( "Transhipment extensions");
 i18n_add ( "Type");
 i18n_add ( "Equipment type");
 i18n_add ( "MAC address");
-i18n_add ( "BLF");
 i18n_add ( "Cost center");
 i18n_add ( "Extension cost center");
 i18n_add ( "Monitor");
@@ -118,6 +117,16 @@ i18n_add ( "Extension view");
 i18n_add ( "Error viewing extension!");
 i18n_add ( "extensions edition");
 i18n_add ( "Filter...");
+i18n_add ( "Username / Password");
+i18n_add ( "Duration ([[DD:]HH:]MM:SS)");
+i18n_add ( "Error retrieving extension account!");
+i18n_add ( "Extension QR Code");
+i18n_add ( "Grandstream extension QR Code");
+i18n_add ( "Hints");
+i18n_add ( "Hints extensions");
+i18n_add ( "One or more informed hint are invalid.");
+i18n_add ( "Services");
+i18n_add ( "View extensions accounts informations");
 
 /**
  * Add Brazilian Portuguese support
@@ -184,7 +193,6 @@ i18n_add ( "Transhipment extensions", "Ramais de transbordo", "pt_BR");
 i18n_add ( "Type", "Tipo", "pt_BR");
 i18n_add ( "Equipment type", "Tipo de equipamento", "pt_BR");
 i18n_add ( "MAC address", "Endereço MAC", "pt_BR");
-i18n_add ( "BLF", "BLF", "pt_BR");
 i18n_add ( "Cost center", "Centro de custo", "pt_BR");
 i18n_add ( "Extension cost center", "Centro de custo do ramal", "pt_BR");
 i18n_add ( "Monitor", "Monitorar", "pt_BR");
@@ -203,4 +211,14 @@ i18n_add ( "Extension view", "Visualização de ramal", "pt_BR");
 i18n_add ( "Error viewing extension!", "Erro ao visualizar ramal!", "pt_BR");
 i18n_add ( "extensions edition", "edição de ramais", "pt_BR");
 i18n_add ( "Filter...", "Filtro...", "pt_BR");
+i18n_add ( "Username / Password", "Usuário / Senha", "pt_BR");
+i18n_add ( "Duration ([[DD:]HH:]MM:SS)", "Duração ([[DD:]HH:]MM:SS)", "pt_BR");
+i18n_add ( "Error retrieving extension account!", "Erro ao requisitar conta do ramal!", "pt_BR");
+i18n_add ( "Extension QR Code", "QR Code do ramal", "pt_BR");
+i18n_add ( "Grandstream extension QR Code", "QR Code Grandstream do ramal", "pt_BR");
+i18n_add ( "Hints", "BLFs", "pt_BR");
+i18n_add ( "Hints extensions", "Ramais BLFs", "pt_BR");
+i18n_add ( "One or more informed hint are invalid.", "Um ou mais ramal de BLF é inválido.", "pt_BR");
+i18n_add ( "Services", "Serviços", "pt_BR");
+i18n_add ( "View extensions accounts informations", "Visualizar informações de contas de ramais", "pt_BR");
 ?>
