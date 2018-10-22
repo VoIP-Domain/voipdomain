@@ -54,7 +54,16 @@ require_once ( dirname ( __FILE__) . "/plugins.inc.php");
  * web server configuration. Your configuration would contain passwords and
  * other sensitive configurations.
  */
-$_in = parse_ini_file ( "/etc/voipdomain/voipdomain.conf", true);
+if ( ! $_in = parse_ini_file ( "/etc/voipdomain/voipdomain.conf", true))
+{
+  header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+  trigger_error ( "VoIPDomain startup: Cannot parse configuration file \"/etc/voipdomain/voipdomain.conf\".", E_USER_ERROR);
+  if ( array_key_exists ( "HTTP_X_INFRAMEWORK", $_SERVER) && $_in["general"]["debug"] === true)
+  {
+    echo json_encode ( array ( "result" => false, "message" => "Cannot parse configuration file \"/etc/voipdomain/voipdomain.conf\".", "error" => 503));
+  }
+  exit ( 1);
+}
 
 /**
  * Initialize page variables
@@ -143,6 +152,7 @@ if ( ini_get ( "magic_quotes_gpc"))
 if ( ! is_array ( $_in["mysql"]))
 {
   header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+  trigger_error ( "VoIPDomain startup: Cannot find the \"mysql\" section into configuration file.", E_USER_ERROR);
   if ( array_key_exists ( "HTTP_X_INFRAMEWORK", $_SERVER) && $_in["general"]["debug"] === true)
   {
     echo json_encode ( array ( "result" => false, "message" => "Cannot find the \"mysql\" section into configuration file.", "error" => 503));
@@ -157,6 +167,7 @@ $_in["mysql"]["id"] = @new mysqli ( $_in["mysql"]["hostname"] . ( ! empty ( $_in
 if ( $_in["mysql"]["id"]->connect_errno)
 {
   header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+  trigger_error ( "VoIPDomain startup: Cannot connect to database.", E_USER_ERROR);
   if ( array_key_exists ( "HTTP_X_INFRAMEWORK", $_SERVER) && $_in["general"]["debug"] === true)
   {
     echo json_encode ( array ( "result" => false, "message" => "Cannot connect to MySQL server.", "error" => 503));
