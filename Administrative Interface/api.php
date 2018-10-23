@@ -63,7 +63,7 @@ require_once ( "modules/interface/filter.php");
  */
 foreach ( glob ( "modules/*") as $module)
 {
-  if ( $module == "modules/interface")
+  if ( $module == "modules/interface" || ! is_dir ( $module))
   {
     continue;
   }

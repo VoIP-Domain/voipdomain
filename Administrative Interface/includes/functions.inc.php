@@ -2054,16 +2054,21 @@ function __ ( $text, $strip = true, $slashes = true)
 {
   global $_in;
 
-  if ( array_key_exists ( $_in["general"]["language"] . ( $_in["module"] != "" ? "-" . $_in["module"] : ""), $_in["i18n"][$text]))
+  if ( array_key_exists ( $text, $_in["i18n"]))
   {
-    $return = $_in["i18n"][$text][$_in["general"]["language"] . ( $_in["module"] != "" ? "-" . $_in["module"] : "")];
-  } else {
-    if ( array_key_exists ( $_in["general"]["language"], $_in["i18n"][$text]))
+    if ( array_key_exists ( $_in["general"]["language"] . ( $_in["module"] != "" ? "-" . $_in["module"] : ""), $_in["i18n"][$text]))
     {
-      $return = $_in["i18n"][$text][$_in["general"]["language"]];
+      $return = $_in["i18n"][$text][$_in["general"]["language"] . ( $_in["module"] != "" ? "-" . $_in["module"] : "")];
     } else {
-      $return = $text;
+      if ( array_key_exists ( $_in["general"]["language"], $_in["i18n"][$text]))
+      {
+        $return = $_in["i18n"][$text][$_in["general"]["language"]];
+      } else {
+        $return = $text;
+      }
     }
+  } else {
+    $return = $text;
   }
   if ( $strip)
   {

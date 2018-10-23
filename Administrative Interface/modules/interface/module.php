@@ -167,9 +167,9 @@ function page_structure ( $content)
   {
     $head .= "  <meta name=\"version\" content=\"" . addslashes ( strip_tags ( $_in["general"]["version"])) . "\">\n";
   }
-  if ( ! empty ( $_in["general"]["favicon"]))
+  if ( ! empty ( $_in["general"]["favicon"]) && is_readable ( $_SERVER["DOCUMENT_ROOT"] . $_in["general"]["favicon"]))
   {
-    $head .= "  <link rel=\"icon\" type=\"" . mime_content_type ( strip_tags ( dirname ( __FILE__) . $_in["general"]["favicon"])) . "\" href=\"" . addslashes ( strip_tags ( ( substr ( $_in["general"]["favicon"], 0, 1) != "/" ? "/" : "") . $_in["general"]["favicon"])) . "\">\n";
+    $head .= "  <link rel=\"icon\" type=\"" . mime_content_type ( $_SERVER["DOCUMENT_ROOT"] . $_in["general"]["favicon"]) . "\" href=\"" . addslashes ( strip_tags ( ( substr ( $_in["general"]["favicon"], 0, 1) != "/" ? "/" : "") . $_in["general"]["favicon"])) . "\">\n";
   }
   $head .= "  <title>" . addslashes ( strip_tags ( $_in["general"]["title"])) . "</title>\n";
   $head .= framework_call ( "template_header_tags");

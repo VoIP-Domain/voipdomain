@@ -116,6 +116,7 @@ if ( ! array_key_exists ( "title", $_in["general"]))
  * Include basic available languages
  */
 $_in["languages"] = array ( "en_US" => "English (United States)", "pt_BR" => "Português (Brasil)");
+$_in["i18n"] = array ();
 
 /**
  * Configure locale and encoding

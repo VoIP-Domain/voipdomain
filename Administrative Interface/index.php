@@ -61,7 +61,7 @@ require_once ( "modules/interface/module.php");
  */
 foreach ( glob ( "modules/*") as $module)
 {
-  if ( $module == "modules/interface")
+  if ( $module == "modules/interface" || ! is_dir ( $module))
   {
     continue;
   }
