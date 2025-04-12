@@ -1,0 +1,6 @@
+  jquery-color
+--============--
+
+URL: https://github.com/jquery/jquery-color/
+Version: 3.0.0
+License: OpenJS Foundation CC0

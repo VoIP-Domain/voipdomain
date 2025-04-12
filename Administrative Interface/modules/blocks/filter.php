@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,14 +24,14 @@
  */
 
 /**
- * VoIP Domain blocks filter module. This module add the filter calls related
+ * VoIP Domain blocks module filters. This module add the filter calls related
  * to blocks.
  *
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Blocks
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -40,6 +40,21 @@
  */
 framework_add_filter ( "page_menu_registers", "blocks_menu");
 framework_add_filter ( "get_blocks", "get_blocks");
+framework_add_filter ( "objects_types", "blocks_object");
+
+/**
+ * Function to add block interface object information.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return array Output of the found data
+ */
+function blocks_object ( $buffer, $parameters)
+{
+  return array_merge ( (array) $buffer, array ( array ( "object" => "block", "path" => "/blocks", "icon" => "ban", "label" => "danger", "text" => array ( "singular" => __ ( "Block"), "plural" => __ ( "Blocks")))));
+}
 
 /**
  * Function to add entry to registers menu.
@@ -71,29 +86,34 @@ function get_blocks ( $buffer, $parameters)
    * Create where clause
    */
   $where = "";
-  if ( array_key_exists ( "id", $parameters))
+  if ( array_key_exists ( "ID", $parameters))
   {
-    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["id"]);
+    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
   }
-  if ( array_key_exists ( "text", $parameters))
+  if ( array_key_exists ( "Text", $parameters))
   {
-    $where .= " AND `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( str_replace ( " ", "%", trim ( strip_tags ( $parameters["text"])))) . "%'";
+    $where .= " AND `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( str_replace ( " ", "%", trim ( strip_tags ( $parameters["Text"])))) . "%'";
   }
-  if ( array_key_exists ( "number", $parameters))
+  if ( array_key_exists ( "Number", $parameters))
   {
-    $where .= " AND `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["number"]) . "'";
+    $where .= " AND `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "'";
   }
 
   /**
    * Check into database if blocks exists
    */
+  $data = array ();
   if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Blocks`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
   {
-    while ( $data = $result->fetch_assoc ())
+    while ( $block = $result->fetch_assoc ())
     {
-      $buffer = array_merge ( ( is_array ( $buffer) ? $buffer : array ()), array ( $data));
+      $data[] = $block;
     }
   }
-  return $buffer;
+
+  /**
+   * Return structured data
+   */
+  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 ?>

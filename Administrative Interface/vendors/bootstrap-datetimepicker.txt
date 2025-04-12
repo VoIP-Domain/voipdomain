@@ -1,7 +1,0 @@
-  Bootstrap 3 Date/Time Picker
---============================--
-
-URL: https://github.com/Eonasdan/bootstrap-datetimepicker
-Version: 4.17.47
-License: MIT
-Modifications: Copied uncompressed JavaScript code from src/js to build/js.

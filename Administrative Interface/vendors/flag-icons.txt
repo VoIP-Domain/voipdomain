@@ -1,0 +1,6 @@
+  flag-icons
+--==========--
+
+URL: https://github.com/lipis/flag-icons
+Version: 6.7.0
+License: MIT

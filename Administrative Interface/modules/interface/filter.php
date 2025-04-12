@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,25 +24,60 @@
  */
 
 /**
- * VoIP Domain main framework interface filter module. This module add the
+ * VoIP Domain main framework interface module filters. This module add the
  * generic system filter calls.
  *
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Interface
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * Add call report processing filter
+ * Add internal interface filters
  */
+framework_add_filter ( "objects_types", "interface_objects");
 framework_add_filter ( "process_call", "process_call");
+
+/**
+ * Function to add interface objects information.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return array Output of the found data
+ */
+function interface_objects ( $buffer, $parameters)
+{
+  return array_merge ( (array) $buffer, array (
+    array ( "object" => "Local_Extension", "path" => "/extensions", "icon" => "phone", "label" => "info", "text" => array ( "singular" => __ ( "Extension"), "plural" => __ ( "Extensions"))),
+    array ( "object" => "Local_Landline", "icon" => "phone", "label" => "success", "text" => array ( "singular" => __ ( "Local phone"), "plural" => __ ( "Local phones"))),
+    array ( "object" => "Interstate_Landline", "icon" => "phone", "label" => "warning", "text" => array ( "singular" => __ ( "Interstate phone"), "plural" => __ ( "Interstate phones"))),
+    array ( "object" => "International_Landline", "icon" => "phone", "label" => "danger", "text" => array ( "singular" => __ ( "International phone"), "plural" => __ ( "International phones"))),
+    array ( "object" => "Local_Mobile", "icon" => "mobile-alt", "label" => "success", "text" => array ( "singular" => __ ( "Local mobile"), "plural" => __ ( "Local mobiles"))),
+    array ( "object" => "Interstate_Mobile", "icon" => "mobile-alt", "label" => "warning", "text" => array ( "singular" => __ ( "Interstate mobile"), "plural" => __ ( "Interstate mobiles"))),
+    array ( "object" => "International_Mobile", "icon" => "mobile-alt", "label" => "danger", "text" => array ( "singular" => __ ( "International mobile"), "plural" => __ ( "International mobiles"))),
+    array ( "object" => "Local_Marine", "icon" => "ship", "label" => "success", "text" => array ( "singular" => __ ( "Local marine"), "plural" => __ ( "Local marines"))),
+    array ( "object" => "Interstate_Marine", "icon" => "ship", "label" => "warning", "text" => array ( "singular" => __ ( "Interstate marine"), "plural" => __ ( "Interstate marines"))),
+    array ( "object" => "International_Marine", "icon" => "ship", "label" => "danger", "text" => array ( "singular" => __ ( "International marine"), "plural" => __ ( "International marines"))),
+    array ( "object" => "Local_Tollfree", "icon" => "piggy-bank", "label" => "success", "text" => array ( "singular" => __ ( "Local toll free"), "plural" => __ ( "Local toll frees"))),
+    array ( "object" => "International_Tollfree", "icon" => "piggy-bank", "label" => "danger", "text" => array ( "singular" => __ ( "International toll free"), "plural" => __ ( "International toll frees"))),
+    array ( "object" => "Local_Special", "icon" => "dollar-sign", "label" => "success", "text" => array ( "singular" => __ ( "Local special"), "plural" => __ ( "Local specials"))),
+    array ( "object" => "International_Special", "icon" => "dollar-sign", "label" => "danger", "text" => array ( "singular" => __ ( "International special"), "plural" => __ ( "International specials"))),
+    array ( "object" => "Local_Satellite", "icon" => "satellite", "label" => "success", "text" => array ( "singular" => __ ( "Local satellite"), "plural" => __ ( "Local satellites"))),
+    array ( "object" => "International_Satellite", "icon" => "satellite", "label" => "danger", "text" => array ( "singular" => __ ( "International satellite"), "plural" => __ ( "International satellites"))),
+    array ( "object" => "Local_Services", "icon" => "concierge-bell", "label" => "success", "text" => array ( "singular" => __ ( "Local service"), "plural" => __ ( "Local services"))),
+    array ( "object" => "International_Services", "icon" => "concierge-bell", "label" => "danger", "text" => array ( "singular" => __ ( "International service"), "plural" => __ ( "International services")))
+  ));
+}
 
 /**
  * Function to process a call CDR record to generate report output.
  *
+ * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
@@ -50,6 +85,57 @@ framework_add_filter ( "process_call", "process_call");
  */
 function process_call ( $buffer, $parameters)
 {
+  global $_in;
+
+  // Start the output array
+  $output = array ();
+
+  // Server that processed the call:
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE ID = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["server"])))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( $result->num_rows != 0)
+  {
+    $data = $result->fetch_assoc ();
+    $output["Server"] = array (
+      "ID" => (int) $data["ID"],
+      "Description" => $data["Description"]
+    );
+  } else {
+    $output["Server"] = array (
+      "ID" => null,
+      "Description" => ""
+    );
+  }
+
+  // Call times (timestamp and ISO8601):
+  $timestamp = format_db_timestamp ( $parameters["calldate"]);
+  $output["CallDates"] = array (
+    "Start" => array (
+      "Timestamp" => $timestamp,
+      "Datetime" => format_db_iso8601 ( $parameters["calldate"])
+    ),
+    "Answered" => array (
+      "Timestamp" => $parameters["billsec"] ? $timestamp + $parameters["duration"] - $parameters["billsec"] : '',
+      "Datetime" => $parameters["billsec"] ? date ( "Y-m-d\TH:i:s\Z", $timestamp + $parameters["duration"] - $parameters["billsec"]) : ''
+    ),
+    "Finished" => array (
+      "Timestamp" => $timestamp + $parameters["duration"],
+      "Datetime" => date ( "Y-m-d\TH:i:s\Z", $timestamp + $parameters["duration"])
+    )
+  );
+
+  // Call flow (input or output):
+  $output["Flow"] = $parameters["srcid"] ? "out" : "in";
+
+  // Call durations (total, ring and bill):
+  $output["Duration"] = (int) $parameters["duration"];
+  $output["RingingTime"] = $parameters["duration"] - $parameters["billsec"];
+  $output["BillingTime"] = (int) $parameters["billsec"];
+
+  // Check for disposition:
   if ( $parameters["userfield"] == "DND")
   {
     $parameters["disposition"] = "NO ANSWER";
@@ -57,177 +143,264 @@ function process_call ( $buffer, $parameters)
   switch ( $parameters["disposition"])
   {
     case "ANSWERED":
-      $result = __ ( "Answered");
+      $result = "Answered";
+      $resultI18N = __ ( "Answered");
       if ( $parameters["lastapp"] == "VoiceMail")
       {
-        $result .= " (" . __ ( "Voice mail") . ")";
+        $result .= " (Voice mail)";
+        $resultI18N .= " (" . __ ( "Voice mail") . ")";
       }
       break;
     case "NO ANSWER":
-      $result = __ ( "Not answered");
+      $result = "Not answered";
+      $resultI18N = __ ( "Not answered");
       break;
     case "BUSY":
-      $result = __ ( "Busy");
+      $result = "Busy";
+      $resultI18N = __ ( "Busy");
       break;
     case "FAILED":
-      $result = __ ( "Call failure");
+      $result = "Call failure";
+      $resultI18N = __ ( "Call failure");
+      break;
+    case "CONGESTION":
+      $result = "Congestion";
+      $resultI18N = __ ( "Congestion");
       break;
     default:
-      $result = __ ( "Unknown") . ": " . strip_tags ( $parameters["disposition"]);
+      $result = "Unknown: " . strip_tags ( $parameters["disposition"]);
+      $resultI18N = __ ( "Unknown") . ": " . strip_tags ( $parameters["disposition"]);
       break;
   }
-  if ( strpos ( $parameters["userfield"], "(") !== false)
-  {
-    $parameters["userfieldextra"] = preg_replace ( "/\)$/", "", substr ( $parameters["userfield"], strpos ( $parameters["userfield"], "(") + 1));
-    $parameters["userfield"] = substr ( $parameters["userfield"], 0, strpos ( $parameters["userfield"], "("));
-  }
-  switch ( $parameters["userfield"])
-  {
-    case "blacklisted":
-      $notes = __ ( "Denied by blacklist!");
-      break;
-    case "passok":
-      $notes = __ ( "Valid password!");
-      break;
-    case "passcache":
-      $notes = __ ( "Cached password!");
-      break;
-    case "passfail":
-      $notes = __ ( "Wrong password!");
-      break;
-    case "nopass":
-      $notes = __ ( "Exception (call without password)");
-      break;
-    case "block":
-      $notes = __ ( "Blocked");
-      break;
-    case "DND":
-      $notes = __ ( "Do not disturb!");
-      break;
-    case "capture":
-      $notes = __ ( "Picked up call");
-      break;
-    case "transhipment":
-      $notes = __ ( "Transhiped");
-      break;
-    case "central":
-      $notes = __ ( "Central");
-      break;
-    case "":
-      $notes = "";
-      break;
-    default:
-      $notes = __ ( "Unknown") . ": " . strip_tags ( $parameters["userfield"]);
-      break;
-  }
-  if ( ! empty ( $parameters["userfieldextra"]))
-  {
-    $notes .= " (" . $parameters["userfieldextra"] . ")";
-  }
-  if ( ! $parameters["extension"] || ( $parameters["src"] == $parameters["extension"] && $parameters["src"] != $parameters["dst"]))
-  {
-    switch ( $parameters["calltype"])
-    {
-      case "1":
-        $type = "extension";
-        break;
-      case "2":
-        $type = "landline";
-        break;
-      case "3":
-        $type = "mobile";
-        break;
-      case "4":
-        $type = "interstate";
-        break;
-      case "5":
-        $type = "international";
-        break;
-      case "6":
-        $type = "special";
-        break;
-      case "7":
-        $type = "tollfree";
-        break;
-      case "8":
-        $type = "services";
-        break;
-      default:
-        $type = "unknown";
-        break;
-    }
-  } else {
-    $type = "inbound";
-  }
+  $output["Result"] = $result;
+  $output["ResultI18N"] = $resultI18N;
+
+  // Call costs:
   if ( $parameters["processed"])
   {
-    $cost = number_format ( $parameters["value"], 2, ",", ".");
+    $cost = (float) $parameters["value"];
+    $costI18N = number_format ( (float) $parameters["value"], 2, __ ( "."), __ ( ","));
   } else {
-    $cost = __ ( "N/A");
+    $cost = NULL;
+    $costI18n = NULL;
   }
-  if ( ! empty ( $parameters["QOSa"]))
+  $output["Value"] = $cost;
+  $output["ValueI18N"] = $costI18N;
+
+  // Which gateway used (if any):
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE ID = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["gateway"])))
   {
-    $quality = number_format ( calculateMOS ( $parameters["QOSa"], $parameters["QOSb"]), 2, ",", ".");
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( $result->num_rows != 0)
+  {
+    $data = $result->fetch_assoc ();
+    $output["Gateway"] = array (
+      "ID" => (int) $data["ID"],
+      "Description" => $data["Description"]
+    );
   } else {
-    $quality = __ ( "N/A");
+    $output["Gateway"] = array (
+      "ID" => null,
+      "Description" => ""
+    );
   }
-  $qualityColor = "green";
-  $qosa = explodeQOS ( $parameters["QOSa"]);
-  $qosb = explodeQOS ( $parameters["QOSb"]);
-  if ( ! empty ( $parameters["QOSa"]) && ! empty ( $parameters["QOSb"]) && $qosa["rxcount"] != 0 && $qosb["rxcount"] != 0)
+
+  // Which cost center (if any):
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE ID = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ccid"])))
   {
-    if ( ( $qosa["lp"] * 100) / $qosa["rxcount"] > 0.5 || ( $qosb["lp"] * 100) / $qosb["rxcount"] > 0.5)
-    {
-      $qualityColor = "red";
-    }
-    if ( $qosa["txjitter"] > 30 || $qosb["txjitter"] > 30)
-    {
-      $qualityColor = "red";
-    }
-    if ( $qosa["rtt"] > 200 || $qosb["rtt"] > 200)
-    {
-      $qualityColor = "red";
-    }
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
   }
-  $output = array ();
-  $output[] = format_db_timestamp ( $parameters["calldate"]);
-  $output[] = format_db_datetime ( $parameters["calldate"]);
-  $output[] = ( $parameters["src"] == $parameters["extension"] && $parameters["src"] != $parameters["dst"] ? "out" : "in");
-  $output[] = array ( "type" => substr ( $parameters["src"], 0, 1) == "+" ? "external" : "internal", "number" => strip_tags ( $parameters["src"]));
-  $output[] = array ( "type" => $type, "number" => strip_tags ( $parameters["dst"]));
-  $output[] = $parameters["billsec"];
-  $output[] = $result;
-  $output[] = $type;
-  $output[] = number_format ( $parameters["value"], 2, __ ( "."), __ ( ","));
-  $output[] = $cost;
-  $output[] = str_replace ( ",", "", str_replace ( "N/D", "000", $quality));
-  $output[] = array ( "qos" => ( ! empty ( $parameters["QOSa"]) && ! empty ( $parameters["QOSb"]) ? array ( "lossrx" => sprintf ( "%.2f", ( $qosa["rxcount"] != 0 ? ( $qosa["lp"] * 100) / $qosa["rxcount"] : 0)), "losstx" => sprintf ( "%.2f", ( $qosb["rxcount"] != 0 ? ( $qosb["lp"] * 100) / $qosb["rxcount"] : 0)), "jitterrx" => sprintf ( "%.2f", $qosa["txjitter"]), "jittertx" => sprintf ( "%.2f", $qosb["txjitter"]), "latencyrx" => sprintf ( "%.2f", $qosa["rtt"]), "latencytx" => sprintf ( "%.2f", $qosb["rtt"])) : array ()), "quality" => $quality, "qualityColor" => $qualityColor);
-  $output[] = $notes . ( ! empty ( $notes) && ! empty ( $parameters["monitor"]) ? "<br />" : "") . ( ! empty ( $parameters["monitor"]) ? "<div class=\"ubaplayer\"></div><ul class=\"ubaplayer-controls\"><li><a class=\"ubaplayer-button\" href=\"/calls/download/" . urlencode ( $parameters["uniqueid"]) . ".mp3\"></a></li></ul>": "");
-  $output[] = "";
-  $class = "";
-  switch ( $parameters["disposition"])
+  if ( $result->num_rows != 0)
   {
-    case "ANSWERED":
-      if ( $parameters["userfield"] == "passfail")
+    $data = $result->fetch_assoc ();
+    $output["CostCenter"] = array (
+      "ID" => (int) $data["ID"],
+      "Description" => $data["Description"],
+      "Code" => $data["Code"]
+    );
+  } else {
+    $output["CostCenter"] = array (
+      "ID" => null,
+      "Description" => "",
+      "Code" => ""
+    );
+  }
+
+  // Call source:
+  if ( empty ( $parameters["sourcetype"]) && $parameters["srcid"])
+  {
+    $parameters["sourcetype"] = VD_CALLTYPE_LOCAL + VD_CALLENDPOINT_EXTENSION;
+  }
+  $type = "Unknown";
+  if ( VD_CALLTYPE_LOCAL & $parameters["sourcetype"])
+  {
+    $type = "Local";
+  }
+  if ( VD_CALLTYPE_INTERSTATE & $parameters["sourcetype"])
+  {
+    $type = "Interstate";
+  }
+  if ( VD_CALLTYPE_INTERNATIONAL & $parameters["sourcetype"])
+  {
+    $type = "International";
+  }
+  $endpoint = "Unknown";
+  if ( VD_CALLENDPOINT_EXTENSION & $parameters["sourcetype"])
+  {
+    $endpoint = "Extension";
+  }
+  if ( VD_CALLENDPOINT_LANDLINE & $parameters["sourcetype"])
+  {
+    $endpoint = "Landline";
+  }
+  if ( VD_CALLENDPOINT_MOBILE & $parameters["sourcetype"])
+  {
+    $endpoint = "Mobile";
+  }
+  if ( VD_CALLENDPOINT_MARINE & $parameters["sourcetype"])
+  {
+    $endpoint = "Marine";
+  }
+  if ( VD_CALLENDPOINT_TOLLFREE & $parameters["sourcetype"])
+  {
+    $endpoint = "Tollfree";
+  }
+  if ( VD_CALLENDPOINT_SPECIAL & $parameters["sourcetype"])
+  {
+    $endpoint = "Special";
+  }
+  if ( VD_CALLENDPOINT_SATELLITE & $parameters["sourcetype"])
+  {
+    $endpoint = "Satellite";
+  }
+  if ( VD_CALLENDPOINT_SERVICES & $parameters["sourcetype"])
+  {
+    $endpoint = "Services";
+  }
+  $output["Source"] = array (
+    "Type" => $type,
+    "TypeI18N" => __ ( $type),
+    "Endpoint" => $endpoint,
+    "EndpointI18N" => __ ( $endpoint),
+    "ExtensionID" => $parameters["srcid"],
+    "Number" => strip_tags ( $parameters["src"])
+  );
+
+  // Call destination:
+  $type = "Unknown";
+  if ( VD_CALLTYPE_LOCAL & $parameters["calltype"])
+  {
+    $type = "Local";
+  }
+  if ( VD_CALLTYPE_INTERSTATE & $parameters["calltype"])
+  {
+    $type = "Interstate";
+  }
+  if ( VD_CALLTYPE_INTERNATIONAL & $parameters["calltype"])
+  {
+    $type = "International";
+  }
+  $endpoint = "Unknown";
+  if ( VD_CALLENDPOINT_EXTENSION & $parameters["sourcetype"])
+  {
+    $endpoint = "Extension";
+  }
+  if ( VD_CALLENDPOINT_LANDLINE & $parameters["sourcetype"])
+  {
+    $endpoint = "Landline";
+  }
+  if ( VD_CALLENDPOINT_MOBILE & $parameters["sourcetype"])
+  {
+    $endpoint = "Mobile";
+  }
+  if ( VD_CALLENDPOINT_MARINE & $parameters["sourcetype"])
+  {
+    $endpoint = "Marine";
+  }
+  if ( VD_CALLENDPOINT_TOLLFREE & $parameters["sourcetype"])
+  {
+    $endpoint = "Tollfree";
+  }
+  if ( VD_CALLENDPOINT_SPECIAL & $parameters["sourcetype"])
+  {
+    $endpoint = "Special";
+  }
+  if ( VD_CALLENDPOINT_SATELLITE & $parameters["sourcetype"])
+  {
+    $endpoint = "Satellite";
+  }
+  if ( VD_CALLENDPOINT_SERVICES & $parameters["sourcetype"])
+  {
+    $endpoint = "Services";
+  }
+  $output["Destination"] = array (
+    "Type" => $type,
+    "TypeI18N" => __ ( $type),
+    "Endpoint" => $endpoint,
+    "EndpointI18N" => __ ( $endpoint),
+    "ExtensionID" => $parameters["dstid"],
+    "Number" => strip_tags ( $parameters["dst"])
+  );
+
+  // Who hungup?
+  $output["WhoHungUp"] = $parameters["WhoHungUp"];
+
+  // Process call quality parameters:
+  if ( ! empty ( $parameters["QOS"]))
+  {
+    $qos = explode_QOS ( $parameters["QOS"]);
+    $mos = calculate_MOS ( $qos);
+    $qualityColor = "green";
+    if ( $qos["rxcount"] != 0 && $qos["txcount"] != 0)
+    {
+      if ( ( $qos["lp"] * 100) / $qos["rxcount"] > 0.5 || ( $qos["rlp"] * 100) / $qos["rxcount"] > 0.5)
       {
-        $class .= " danger";
-      } else {
-        $class .= " success";
+        $qualityColor = "red";
       }
-      break;
-    case "BUSY":
-    case "NO ANSWER":
-      $class .= " warning";
-      break;
-    case "FAILED":
-      $class .= " danger";
-      break;
-    default:
-      break;
+      if ( $qos["txjitter"] > 30 || $qos["rxjitter"] > 30)
+      {
+        $qualityColor = "red";
+      }
+      if ( $qos["rtt"] > 200)
+      {
+        $qualityColor = "red";
+      }
+    }
+  } else {
+    $qos = array ();
+    $mos = null;
+    $qualityColor = "gray";
   }
-  $output[] = substr ( $class, 1);
-  $output[] = $parameters["uniqueid"];
-  $output[] = $parameters["sequence"];
+  $output["Quality"] = array (
+    "QOS" => filter_QOS ( $qos),
+    "MOS" => $mos,
+    "Color" => $qualityColor
+  );
+
+  // Call codec:
+  $native = str_replace ( "(", "", str_replace ( ")", "", $parameters["nativecodec"]));
+  $output["CODEC"] = array (
+    "Native" => defined ( "VD_AUDIO_CODEC_" . strtoupper ( $native)) ? constant ( "VD_AUDIO_CODEC_" . strtoupper ( $native)) : $native,
+    "Read" => defined ( "VD_AUDIO_CODEC_" . strtoupper ( $parameters["readcodec"])) ? constant ( "VD_AUDIO_CODEC_" . strtoupper ( $parameters["readcodec"])) : $parameters["readcodec"],
+    "Write" => defined ( "VD_AUDIO_CODEC_" . strtoupper ( $parameters["writecodec"])) ? constant ( "VD_AUDIO_CODEC_" . strtoupper ( $parameters["writecodec"])) : $parameters["writecodec"]
+  );
+
+  // Call identificators:
+  $output["UniqueID"] = $parameters["uniqueid"];
+  $output["LinkedID"] = $parameters["linkedid"];
+  $output["SIPID"] = $parameters["SIPID"];
+
+  // Call recording availability:
+  $output["Recorded"] = is_readable ( $_in["general"]["storagedir"] . "/recordings/" . basename ( $parameters["SIPID"]) . ".mp3");
+
+  // Call capture availability:
+  $output["Captured"] = is_readable ( $_in["general"]["storagedir"] . "/captures/" . basename ( $parameters["SIPID"]) . ".pcap");
+
+  // Call flags:
+  $output["Flags"] = explode ( "|", $parameters["flags"]);
 
   /**
    * Return processed record
@@ -253,11 +426,11 @@ function process_sipdump ( $buffer, $parameters)
   /**
    * Check if required parameters are given, and if SIP dump file is readable
    */
-  if ( empty ( $parameters["filename"]) || ! is_readable ( $parameters["filename"]))
+  if ( empty ( $parameters["Filename"]) || ! is_readable ( $parameters["Filename"]))
   {
     return $buffer;
   }
-  if ( ! $fp = fopen ( $parameters["filename"], "r"))
+  if ( ! $fp = fopen ( $parameters["Filename"], "r"))
   {
     return $buffer;
   }
@@ -315,7 +488,7 @@ function process_sipdump ( $buffer, $parameters)
     // If it's an UDP packet, process it
     if ( $decoded["Ethernet"]["type"] == 0x0800 && $decoded["IP"]["protocol"] == 0x11)
     {
-      // Check if it's a packet containing SIP informations
+      // Check if it's a packet containing SIP information
       if ( ! preg_match ( "/^SIP\/[0-9]+\.[0-9] /", str_replace ( "\r", "", substr ( $decoded["Data"], 0, strpos ( $decoded["Data"], "\n")))) && ! preg_match ( "/ SIP\/[0-9]+\.[0-9]$/", str_replace ( "\r", "", substr ( $decoded["Data"], 0, strpos ( $decoded["Data"], "\n")))))
       {
         continue;
@@ -403,14 +576,14 @@ function process_sipdump ( $buffer, $parameters)
   foreach ( $flow as $data)
   {
     $diagram .= $part[$data["src"]] . ( $data["content"]["Type"] == "Response" ? "--" : "-") . ">" . $part[$data["dst"]] . ": " . ( $data["content"]["Type"] == "Response" ? $data["content"]["Status-Line"]["Code"] . " " . $data["content"]["Status-Line"]["Result"] : $data["content"]["Request-Line"]["Method"]) . "\n";
-    $diagram .= "=Note left of 1: ";
+    $diagram .= "Note left of 1: ";
     if ( $ts != 0)
     {
       $diagram .= "(+" . sprintf ( "%.06f", (float) ( $data["date"]["timestamp"] . "." . $data["date"]["usec"]) - $ts) . ") ";
     }
     $ts = (float) ( $data["date"]["timestamp"] . "." . $data["date"]["usec"]);
     $diagram .= date ( "h:i:s", $data["date"]["timestamp"]) . "." . sprintf ( "%06d", $data["date"]["usec"]) . "\n";
-    $text .= date ( "d/M/Y h:i:s", $data["date"]["timestamp"]) . "." . sprintf ( "%06d", $data["date"]["usec"]) . " " . $data["src"] . " -> " . $data["dst"] . "\n";
+    $text .= date ( "M/d/Y h:i:s", $data["date"]["timestamp"]) . "." . sprintf ( "%06d", $data["date"]["usec"]) . " " . $data["src"] . " -> " . $data["dst"] . "\n";
     $text .= "--------------------------------------------------------------------------------\n";
     $text .= $data["payload"];
     $text .= "--------------------------------------------------------------------------------\n\n";
@@ -419,7 +592,7 @@ function process_sipdump ( $buffer, $parameters)
   /**
    * Return structured data
    */
-  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), array ( "diagram" => $diagram, "text" => $text, "pcap" => base64_encode ( file_get_contents ( $parameters["filename"]))));
+  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), array ( "diagram" => $diagram, "text" => $text, "pcap" => base64_encode ( file_get_contents ( $parameters["Filename"]))));
 }
 
 /**
@@ -427,7 +600,7 @@ function process_sipdump ( $buffer, $parameters)
  * Reference: https://en.wikipedia.org/wiki/IEEE_802.1Q
  *
  * @param string $packet Binary string with packet content
- * @param array &$decoded Pointer to the packet informations array
+ * @param array &$decoded Pointer to the packet information array
  * @return void
  */
 function process_vlan_packet ( $packet, &$decoded)
@@ -474,7 +647,7 @@ function process_vlan_packet ( $packet, &$decoded)
  * Reference: http://www.tcpipguide.com/free/t_ARPMessageFormat.htm
  *
  * @param string $packet Binary string with packet content
- * @param array &$decoded Pointer to the packet informations array
+ * @param array &$decoded Pointer to the packet information array
  * @return void
  */
 function process_arp_packet ( $packet, &$decoded)
@@ -523,7 +696,7 @@ function process_arp_packet ( $packet, &$decoded)
  * Process IP packet.
  *
  * @param string $packet Binary string with packet content
- * @param array &$decoded Pointer to the packet informations array
+ * @param array &$decoded Pointer to the packet information array
  * @return void
  */
 function process_ip_packet ( $packet, &$decoded)
@@ -588,7 +761,7 @@ function process_ip_packet ( $packet, &$decoded)
  * Process an UDP packet.
  *
  * @param string $packet Binary string with packet content
- * @param array &$decoded Pointer to the packet informations array
+ * @param array &$decoded Pointer to the packet information array
  * @return void
  */
 function print_udp_packet ( $packet, &$decoded)
@@ -610,7 +783,7 @@ function print_udp_packet ( $packet, &$decoded)
  * Process a TCP packet.
  *
  * @param string $packet Binary string with packet content
- * @param array &$decoded Pointer to the packet informations array
+ * @param array &$decoded Pointer to the packet information array
  * @return void
  */
 function print_tcp_packet ( $packet, &$decoded)

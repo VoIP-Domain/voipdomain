@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,16 +32,16 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Extensions
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
  * Set error reporting level
  */
-error_reporting ( E_ERROR);
-ini_set ( "display_errors", "false");
-// error_reporting ( E_ALL); ini_set ( "display_errors", "true");
+error_reporting ( E_ERROR | E_USER_ERROR);
+ini_set ( "display_errors", 0);
+// error_reporting ( E_ALL); ini_set ( "display_errors", 1);
 
 /**
  * Include main configuration parser and functions
@@ -113,7 +113,7 @@ if ( ! is_readable ( "/var/spool/asterisk/monitor/" . $call["monitor"] . ".mp3")
 /**
  * Set page result headers
  */
-audit ( "audio", "request", array ( "UniqueID" => $id));
+audit ( "callrecord", "request", array ( "UniqueID" => $id));
 header ( "Content-Type: audio/mpeg");
 header ( "Content-Disposition: attachment;filename=\"" . $id . ".mp3\"");
 header ( "Content-length: " . filesize ( "/var/spool/asterisk/monitor/" . $call["monitor"] . ".mp3"));

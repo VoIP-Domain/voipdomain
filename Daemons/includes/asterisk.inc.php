@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,11 +26,11 @@
 /**
  * Asterisk manager interface (AMI) connection class.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage AMI Interface
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -39,37 +39,58 @@
  */
 class asterisk
 {
-  private $socket;
+  private $socket = null;
   private $hostname;
   private $port;
   private $username;
   private $password;
-  private $events = false;
+  private $events;
+  private $timeout;
+  private $connect_timeout;
   private $event_buffer = array ();
   private $response_buffer = array ();
   private $actionid = 0;
   private $header = "";
   private $buffer = "";
 
-  function asterisk ( $username = "username", $password = "password", $hostname = "127.0.0.1", $port = "5038", $autologin = true, $authtype = "MD5")
+  /**
+   * Class constructor. You can pass an array with options to change default
+   * values.
+   *
+   * @param $options[optional] array Array with desired options.
+   * @return [mixed] Null if auto_connect off or result of $this->connect () if on.
+   */
+  function asterisk ( $options)
   {
-    if ( $autologin)
+    $this->hostname = array_key_exists ( "hostname", $options) ? $options["hostname"] : "127.0.0.1";
+    $this->port = array_key_exists ( "port", $options) ? (int) $options["port"] : 5038;
+    $this->username = array_key_exists ( "username", $options) ? $options["username"] : "";
+    $this->password = array_key_exists ( "password", $options) ? $options["password"] : "";
+    $this->auth_type = array_key_exists ( "auth_type", $options) ? $options["auth_type"] : "MD5";
+    $this->events = array_key_exists ( "events", $options) ? (boolean) $options["events"] : false;
+    $this->connect_timeout = array_key_exists ( "connect_timeout", $options) ? (int) $options["connect_timeout"] : 60;
+    $this->timeout = array_key_exists ( "timeout", $options) ? (int) $options["timeout"] : 5;
+
+    if ( array_key_exists ( "auto_connect", $options) && $options["auto_connect"])
     {
-      return $this->open ( $username, $password, $hostname, $port, $authtype);
+      return $this->connect ();
+    } else {
+      return;
     }
   }
 
-  function open ( $username = null, $password = null, $hostname = null, $port = null, $authtype = "MD5")
+  /**
+   * Connect to AMI server, authenticate and return the result.
+   *
+   * @result boolean Result of connection attempt.
+   */
+  function connect ()
   {
-    $this->username = $username ? $username : $this->username;
-    $this->password = $password ? $password : $this->password;
-    $this->hostname = $hostname ? $hostname : $this->hostname;
-    $this->port = $port ? $port : $this->port;
     if ( $this->socket)
     {
       $this->close ();
     }
-    if ( ! $this->socket = stream_socket_client ( "tcp://" . $this->hostname . ":" . $this->port))
+    if ( ! $this->socket = stream_socket_client ( "tcp://" . $this->hostname . ":" . $this->port, $errno, $errstr, $this->connect_timeout))
     {
       return false;
     }
@@ -77,7 +98,8 @@ class asterisk
     stream_set_write_buffer ( $this->socket, 65535);
     $this->header = str_replace ( "\n", "", str_replace ( "\r", "", fgets ( $this->socket)));
     stream_set_blocking ( $this->socket, false);
-    if ( $authtype == "MD5")
+    stream_set_timeout ( $this->socket, $this->timeout);
+    if ( $this->auth_type == "MD5")
     {
       $challenge = $this->request (
                      "Challenge",
@@ -111,7 +133,12 @@ class asterisk
     return $response["Response"] == "Success";
   }
 
-  function close ()
+  /**
+   * Disconnect from AMI server.
+   *
+   * @return null
+   */
+  function disconnect ()
   {
     $this->post ( "Logoff");
     stream_socket_shutdown ( $this->socket,  STREAM_SHUT_RDWR);
@@ -119,12 +146,27 @@ class asterisk
     $this->header = "";
   }
 
-  function request ( $action, $params = null)
+  /**
+   * Send a new event to AMI server and wait for response.
+   *
+   * @param $action string Action to be sent.
+   * @param $params[optional] array Array with attributes to be appended to the
+   *                                event.
+   * @param $timeout[optional] integer How many time to wait for a response.
+   * @return [mixed] Event result (false if error or array with content if
+   *                 successfull).
+   */
+  function request ( $action, $params = null, $timeout = -1)
   {
     if ( $id = $this->post ( $action, $params))
     {
       do
       {
+        $this->wait_event ( $timeout);
+        if ( ! $this->checkbuffer ())
+        {
+          return false;
+        }
         $this->read_anything ();
       } while ( ! $this->response_buffer[$id]);
       return $this->response_buffer[$id];
@@ -133,6 +175,15 @@ class asterisk
     }
   }
 
+  /**
+   * Internal class method to send a new event to AMI server. This method didn't
+   * wait for a response.
+   *
+   * @param $action string Action to be sent.
+   * @param $params[optional] array Array with attributes to be appended to the
+   *                                event.
+   * @return [mixed] ID of event if successfull or false on error.
+   */
   private function post ( $action, $params = null)
   {
     if ( ! $this->socket)
@@ -158,12 +209,18 @@ class asterisk
     return false;
   }
 
+  /**
+   * Private class method to read any content from connection socket and process
+   * it adding new received events into events buffer.
+   *
+   * @return null
+   */
   private function read_anything ()
   {
     $this->buffer .= stream_get_contents ( $this->socket);
     if ( strlen ( $this->buffer) == 0)
     {
-      return "";
+      return;
     }
 
     // Process incoming buffer:
@@ -218,7 +275,12 @@ class asterisk
           {
             if ( strpos ( $line, ": ") !== false)
             {
-              $output[substr ( $line, 0, strpos ( $line, ": "))] = substr ( $line, strpos ( $line, ": ") + 2);
+              if ( array_key_exists ( substr ( $line, 0, strpos ( $line, ": ")), $output))
+              {
+                $output[substr ( $line, 0, strpos ( $line, ": "))] = $output[substr ( $line, 0, strpos ( $line, ": "))] . PHP_EOL . substr ( $line, strpos ( $line, ": ") + 2);
+              } else {
+                $output[substr ( $line, 0, strpos ( $line, ": "))] = substr ( $line, strpos ( $line, ": ") + 2);
+              }
             }
           }
         }
@@ -227,11 +289,22 @@ class asterisk
     }
   }
 
+  /**
+   * Method to check if events are enabled at connection.
+   *
+   * @return boolean Status of connection events.
+   */
   function events_status ()
   {
     return $this->events;
   }
 
+  /**
+   * Method to set the status of connection events.
+   *
+   * @param $status boolean New status to be set.
+   * @return boolean Result of event command.
+   */
   function events_set ( $status)
   {
     $this->events = ( $status ? true : false);
@@ -245,11 +318,21 @@ class asterisk
     }
   }
 
+  /**
+   * Method to toggle the status of connection events.
+   *
+   * @return boolean Result of event command.
+   */
   function events_toggle ()
   {
     return $this->events_set ( ! $this->events);
   }
 
+  /**
+   * Check how many events are pending into the events buffer.
+   *
+   * @return int Count of events.
+   */
   function events_check ()
   {
     if ( count ( $this->event_buffer) > 0)
@@ -263,6 +346,11 @@ class asterisk
     return count ( $this->event_buffer);
   }
 
+  /**
+   * Check if there's any content pending to be read at socket connection.
+   *
+   * @return boolean Result of status.
+   */
   function checkbuffer ()
   {
     $pArr = array ( $this->socket);
@@ -279,23 +367,52 @@ class asterisk
     }
   }
 
-  function wait_event ()
+  /**
+   * Method to block code execution and wait for new event.
+   *
+   * @param $timeout[optional] integer How many time to wait for an event.
+   * @return null
+   */
+  function wait_event ( $timeout = -1)
   {
     stream_set_blocking ( $this->socket, true);
+    if ( $timeout != -1)
+    {
+      stream_set_timeout ( $this->socket, $timeout);
+    }
     $this->buffer .= stream_get_contents ( $this->socket, 1);
     stream_set_blocking ( $this->socket, false);
+    if ( $timeout != -1)
+    {
+      stream_set_timeout ( $this->socket, $this->timeout);
+    }
   }
 
+  /**
+   * Shift an event off the events buffer.
+   *
+   * @return array Event data.
+   */
   function events_shift ()
   {
     return array_shift ( $this->event_buffer);
   }
 
+  /**
+   * Pop an event off the events buffer.
+   *
+   * @return array Event data.
+   */
   function events_pop ()
   {
     return array_pop ( $this->event_buffer);
   }
 
+  /**
+   * Get current connection AMI server version.
+   *
+   * @return string AMI server version.
+   */
   function ami_version ()
   {
     return substr ( $this->header, strpos ( $this->header, "/") + 1);

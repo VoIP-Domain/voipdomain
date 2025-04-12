@@ -4,4 +4,4 @@
 URL: https://github.com/sciactive/pnotify
 Version: 3.2.1
 License: Apache 2.0
-Modifications: Added minified css for dist/pnotify.css
+Modifications: Added minified css and js for dist/pnotify.{css,js}

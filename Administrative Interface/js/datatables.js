@@ -6,7 +6,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Core
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -79,6 +79,13 @@ $(document).ready ( function ()
       drawCallback: function ( settings) {},
       mark: true,
       stateSave: true,
+      stateLoadParams: function ( settings, data)
+      {
+        if ( $.urlParam ( 'filter') != null)
+        {
+          data.search.search = $.urlParam ( 'filter');
+        }
+      },
       initComplete: function ( settings, json)
       {
         if ( typeof $.fn.stickyTableHeaders == 'function')
@@ -89,17 +96,17 @@ $(document).ready ( function ()
         {
           $('select[name="datatables_length"]').select2 ( { minimumResultsForSearch: Infinity});
         }
-        $('.dataTables_filter').empty ().html ( '<label><form><div class="input-group hidden-sm"><input type="search" class="form-control" placeholder="Filtro..." aria-control="search"><div class="input-group-btn"><button class="btn btn-default" type="reset"><i class="fas fa-times"></i></button></div></div></form></label>');
+        $('.dataTables_filter').empty ().html ( '<label><form><div class="input-group hidden-sm"><input type="search" class="form-control" placeholder="' + VoIP.i18n.__ ( 'Filter...') + '" aria-control="search"><div class="input-group-btn"><button class="btn btn-default" type="reset" data-toggle="tooltip" data-placement="left" title="' + VoIP.i18n.__ ( 'Clear data') + '"><i class="fas fa-times"></i></button></div></div></form></label>');
         $('.dataTables_filter input[type="search"]').val ( settings.oSavedState.search.search).on ( 'keyup', function () { $('#datatables').data ( 'dt').search ( jQuery.fn.DataTable.ext.type.search.string ( this.value)).draw (); }).closest ( 'form').on ( 'submit', function ( e) { e.preventDefault (); return false; });
         $('.dataTables_filter button[type="reset"]').on ( 'click', function () { $('#datatables').data ( 'dt').search ( '').draw (); });
-        $('.dataTables').find ( '*[data-toggle="tooltip"]').tooltip ();
+        $('.dataTables').find ( '*[data-toggle="tooltip"]').tooltip ( { container: 'body'});
       },
       buttons:
       [
         {
           extend: 'copyHtml5',
           text: '<i class="far fa-copy"></i>',
-          titleAttr: 'Copiar',
+          titleAttr: VoIP.i18n.__ ( 'Copy'),
           footer: true,
           exportOptions:
           {
@@ -109,7 +116,7 @@ $(document).ready ( function ()
         {
           extend: 'pdfHtml5',
           text: '<i class="far fa-file-pdf"></i>',
-          titleAttr: 'PDF',
+          titleAttr: VoIP.i18n.__ ( 'PDF'),
           footer: true,
           exportOptions:
           {
@@ -119,7 +126,7 @@ $(document).ready ( function ()
         {
           extend: 'excelHtml5',
           text: '<i class="far fa-file-excel"></i>',
-          titleAttr: 'Excel',
+          titleAttr: VoIP.i18n.__ ( 'Excel'),
           footer: true,
           exportOptions:
           {
@@ -129,7 +136,7 @@ $(document).ready ( function ()
         {
           extend: 'csvHtml5',
           text: '<i class="far fa-file-alt"></i>',
-          titleAttr: 'CSV',
+          titleAttr: VoIP.i18n.__ ( 'CSV'),
           footer: false,
           exportOptions:
           {
@@ -138,7 +145,7 @@ $(document).ready ( function ()
         },
         {
           text: '<i class="far fa-file-code"></i>',
-          titleAttr: 'JSON',
+          titleAttr: VoIP.i18n.__ ( 'JSON'),
           footer: false,
           action: function ( e, dt, button, config)
                   {
@@ -148,7 +155,7 @@ $(document).ready ( function ()
         {
           extend: 'print',
           text: '<i class="fas fa-print"></i>',
-          titleAttr: 'Imprimir',
+          titleAttr: VoIP.i18n.__ ( 'Print'),
           footer: true,
           exportOptions:
           {
@@ -158,38 +165,38 @@ $(document).ready ( function ()
       ],
       language:
       {
-        sEmptyTable: 'Nenhum registro encontrado',
-        sInfo: 'Exibindo _START_ a _END_ de _TOTAL_ registros',
-        sInfoEmpty: 'Exibindo 0 a 0 de 0 registros',
-        sInfoFiltered: '(filtrado de _MAX_ registros no total)',
+        sEmptyTable: VoIP.i18n.__ ( 'No records found'),
+        sInfo: VoIP.i18n.__ ( 'Showing _START_ to _END_ of _TOTAL_ records'),
+        sInfoEmpty: VoIP.i18n.__ ( 'Showing 0 to 0 of 0 records'),
+        sInfoFiltered: '(filtered out of _MAX_ total records)',
         sInfoPostFix: '',
-        sInfoThousands: '.',
-        sLengthMenu: '_MENU_ por página',
-        sLoadingRecords: 'Aguarde...',
-        sProcessing: 'Processando...',
-        sZeroRecords: 'Nenhum registro encontrado',
+        sInfoThousands: VoIP.i18n.__ ( '.'),
+        sLengthMenu: '_MENU_<span class="hidden-xs"> ' + VoIP.i18n.__ ( 'per page') + '</span>',
+        sLoadingRecords: VoIP.i18n.__ ( 'Wait...'),
+        sProcessing: VoIP.i18n.__ ( 'Processing...'),
+        sZeroRecords: VoIP.i18n.__ ( 'No records found'),
         sSearch: '',
-        sSearchPlaceholder: 'Filtro',
+        sSearchPlaceholder: VoIP.i18n.__ ( 'Filter'),
         oPaginate:
         {
-          sNext: 'Seguinte',
-          sPrevious: 'Anterior',
-          sFirst: 'Primeiro',
-          sLast: 'Último'
+          sNext: VoIP.i18n.__ ( 'Next'),
+          sPrevious: VoIP.i18n.__ ( 'Previous'),
+          sFirst: VoIP.i18n.__ ( 'First'),
+          sLast: VoIP.i18n.__ ( 'Last')
         },
         oAria:
         {
-          sSortAscending: ': Ordenar colunas de forma ascendente',
-          sSortDescending: ': Ordenar colunas de forma descendente'
+          sSortAscending: ': ' + VoIP.i18n.__ ( 'Sort columns ascending'),
+          sSortDescending: ': ' + VoIP.i18n.__ ( 'Sort columns descending')
         },
         buttons:
         {
-          copyTitle: 'Adicionado para área de tranferência',
-          copyKeys: 'Pressione <i>Ctrl</i> ou <i>\u2318</i> + <i>C</i> para copiar os dados da tabela para a área de transferência.<br />Para cancelar, clique sobre esta mensagem ou pressione a tecla ESC.',
+          copyTitle: VoIP.i18n.__ ( 'Added to clipboard'),
+          copyKeys: VoIP.i18n.__ ( 'Press <i>Ctrl</i> or </i>\u2318</i> + <i>C</i> to copy table to clipboard.<br />To cancel, click on this message or press ESC key.'),
           copySuccess:
           {
-            _: 'Total de %d registros',
-            1: 'Total de 1 registro'
+            _: VoIP.i18n.__ ( 'Total of %d records'),
+            1: VoIP.i18n.__ ( 'Total of 1 record')
           }
         }
       }

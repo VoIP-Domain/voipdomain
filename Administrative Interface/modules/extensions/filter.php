@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,14 +24,14 @@
  */
 
 /**
- * VoIP Domain extensions filter module. This module add the filter calls related
- * to extensions.
+ * VoIP Domain extensions module filters. This module add the filter calls
+ * related to extensions.
  *
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Extensions
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -40,9 +40,6 @@
  */
 framework_add_filter ( "page_menu_registers", "extensions_menu", IN_HOOK_INSERT_FIRST);
 framework_add_filter ( "get_extensions", "get_extensions");
-framework_add_filter ( "get_allocations", "get_extensions");
-framework_add_filter ( "count_extensions", "count_extensions");
-framework_add_filter ( "count_allocations", "count_extensions");
 
 /**
  * Function to add entry to registers menu.
@@ -58,8 +55,7 @@ function extensions_menu ( $buffer, $parameters)
 }
 
 /**
- * Function to get extensions filtered by ID, number, description or range.
- * Function to check for an extension based on number or name.
+ * Function to get extensions filtered by ID, number, description or type.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -75,95 +71,34 @@ function get_extensions ( $buffer, $parameters)
    * Create where clause
    */
   $where = "";
-  if ( array_key_exists ( "id", $parameters) && $parameters["called_filter"] == "get_extensions")
+  if ( array_key_exists ( "ID", $parameters))
   {
-    $where .= " AND `Extensions`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["id"]);
+    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
   }
-  if ( array_key_exists ( "number", $parameters))
+  if ( array_key_exists ( "Number", $parameters))
   {
-    $where .= " AND `Extensions`.`Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["number"]);
+    $where .= " AND `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "'";
   }
-  if ( array_key_exists ( "text", $parameters))
+  if ( array_key_exists ( "Type", $parameters))
   {
-    $where .= " AND ( `Extensions`.`Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( str_replace ( " ", "%", trim ( strip_tags ( $parameters["text"])))) . "%' OR `Extensions`.`NameFon` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( fonetiza ( str_replace ( " ", "%", trim ( strip_tags ( $parameters["text"]))))) . "%')";
+    $where .= " AND `Type` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "'";
   }
-  if ( array_key_exists ( "range", $parameters))
+  if ( array_key_exists ( "Text", $parameters))
   {
-    $where .= " AND `Extensions`.`Range` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["range"]);
-  }
-  if ( array_key_exists ( "group", $parameters) && $parameters["called_filter"] == "get_extensions")
-  {
-    $where .= " AND `Extensions`.`Group` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["group"]);
-  }
-  if ( array_key_exists ( "costcenter", $parameters) && $parameters["called_filter"] == "get_extensions")
-  {
-    $where .= " AND `Extensions`.`CostCenter` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["costcenter"]);
+    $where .= " AND `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( str_replace ( " ", "%", trim ( strip_tags ( $parameters["Text"])))) . "%'";
   }
 
   /**
-   * Check into database if extension exists
+   * Check into database if extensions exists
    */
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.*, `Groups`.`Description` AS `GroupName`, `Servers`.`Name` AS `ServerName`, `Ranges`.`Description` AS `RangeName`, `Ranges`.`Server` FROM `Extensions` LEFT JOIN `Groups` ON `Extensions`.`Group` = `Groups`.`ID` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` LEFT JOIN `Servers` ON `Ranges`.`Server` = `Servers`.`ID`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
+  $data = array ();
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
   {
     while ( $extension = $result->fetch_assoc ())
     {
-      $data = array ();
-      $data["Type"] = "Extension";
-      $data["Extension"] = $extension["Extension"];
-      $data["ViewPath"] = "/extensions/" . $extension["ID"] . "/view";
-      $data["Record"] = $extension;
-      $buffer = array_merge ( ( is_array ( $buffer) ? $buffer : array ()), array ( $data));
+      $data[] = $extension;
     }
   }
-  return $buffer;
-}
-
-/**
- * Function to count how many extensions are allocated.
- *
- * @global array $_in Framework global configuration variable
- * @param string $buffer Buffer from plugin system if processed by other function
- *                       before
- * @param array $parameters Optional parameters to the function
- * @return array Output of the found data
- */
-function count_extensions ( $buffer, $parameters)
-{
-  global $_in;
-
-  /**
-   * Create where clause
-   */
-  $where = "";
-  if ( array_key_exists ( "number", $parameters))
-  {
-    $where .= " AND `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["number"]);
-  }
-  if ( array_key_exists ( "text", $parameters))
-  {
-    $where .= " AND ( `Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( str_replace ( " ", "%", trim ( strip_tags ( $parameters["text"])))) . "%' OR `NameFon` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( fonetiza ( str_replace ( " ", "%", trim ( strip_tags ( $parameters["text"]))))) . "%')";
-  }
-  if ( array_key_exists ( "range", $parameters))
-  {
-    $where .= " AND `Range` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["range"]);
-  }
-  if ( array_key_exists ( "group", $parameters) && $parameters["called_filter"] == "count_extensions")
-  {
-    $where .= " AND `Group` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["group"]);
-  }
-  if ( array_key_exists ( "costcenter", $parameters) && $parameters["called_filter"] == "count_extensions")
-  {
-    $where .= " AND `CostCenter` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["costcenter"]);
-  }
-
-  /**
-   * Count allocated extensions
-   */
-  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Extensions`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
-  {
-    return $buffer;
-  }
-  $data = array ( "Extensions" => intval ( $count->fetch_assoc ()["Total"]));
 
   /**
    * Return structured data

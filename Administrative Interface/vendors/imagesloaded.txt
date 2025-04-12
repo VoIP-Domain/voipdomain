@@ -1,0 +1,6 @@
+  imagesloaded
+--============--
+
+URL: https://github.com/desandro/imagesloaded
+Version: 5.0.0
+License: MIT

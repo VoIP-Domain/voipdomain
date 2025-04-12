@@ -2,5 +2,8 @@
 --=======--
 
 URL: https://datatables.net/extensions/buttons/
-Version: 1.5.2
+Version: 2.4.1
 License: MIT
+Modifications: Compiled SASS to CSS.
+               Added minified CSS and JS files.
+               Added patch to use Bootstrap tooltips at buttons.

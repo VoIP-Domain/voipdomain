@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,13 +30,14 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Notifications
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
  * Add basic language structure (english)
  */
+i18n_add ( "Search notifications");
 i18n_add ( "Notifications");
 i18n_add ( "Notification");
 i18n_add ( "notifications search");
@@ -44,7 +45,13 @@ i18n_add ( "Event");
 i18n_add ( "Method");
 i18n_add ( "URL");
 i18n_add ( "Data type");
+i18n_add ( "Filters");
+i18n_add ( "Mapping");
+i18n_add ( "Value");
+i18n_add ( "Variable");
+i18n_add ( "Header");
 i18n_add ( "Headers");
+i18n_add ( "Header variable");
 i18n_add ( "Relax SSL?");
 i18n_add ( "Validity");
 i18n_add ( "Remove notifications");
@@ -69,8 +76,7 @@ i18n_add ( "notifications edition");
 i18n_add ( "Notification edition");
 i18n_add ( "Error changing notification!");
 i18n_add ( "Notification changed sucessfully!");
-i18n_add ( "Request notifications list");
-i18n_add ( "View notification informations");
+i18n_add ( "View notification information");
 i18n_add ( "Add notifications");
 i18n_add ( "N/A");
 i18n_add ( "The data type is required.");
@@ -110,10 +116,15 @@ i18n_add ( "Event fired when an agent remove pause on a call queue.");
 i18n_add ( "Agent logged out");
 i18n_add ( "Event fired when an agent log off from a call queue.");
 i18n_add ( "Fire new notification event");
+i18n_add ( "Select field");
+i18n_add ( "Remove header");
+i18n_add ( "Add header");
+i18n_add ( "Show calendar");
 
 /**
  * Add Brazilian Portuguese support
  */
+i18n_add ( "Search notifications", "Pesquisar notificações", "pt_BR");
 i18n_add ( "Notifications", "Notificações", "pt_BR");
 i18n_add ( "Notification", "Notificação", "pt_BR");
 i18n_add ( "notifications search", "pesquisa de notificações", "pt_BR");
@@ -121,7 +132,13 @@ i18n_add ( "Event", "Evento", "pt_BR");
 i18n_add ( "Method", "Método", "pt_BR");
 i18n_add ( "URL", "URL", "pt_BR");
 i18n_add ( "Data type", "Tipo de dados", "pt_BR");
+i18n_add ( "Filters", "Filtros", "pt_BR");
+i18n_add ( "Header", "Cabeçalho", "pt_BR");
 i18n_add ( "Headers", "Cabeçalhos", "pt_BR");
+i18n_add ( "Header variable", "Variável do cabeçalho", "pt_BR");
+i18n_add ( "Mapping", "Mapeamento", "pt_BR");
+i18n_add ( "Value", "Valor", "pt_BR");
+i18n_add ( "Variable", "Variável", "pt_BR");
 i18n_add ( "Relax SSL?", "Relaxar SSL?", "pt_BR");
 i18n_add ( "Validity", "Validade", "pt_BR");
 i18n_add ( "Remove notifications", "Remover notificações", "pt_BR");
@@ -146,8 +163,7 @@ i18n_add ( "notifications edition", "edição de notificações", "pt_BR");
 i18n_add ( "Notification edition", "Edição de notificação", "pt_BR");
 i18n_add ( "Error changing notification!", "Erro ao alterar notificação!", "pt_BR");
 i18n_add ( "Notification changed sucessfully!", "Notificação alterada com sucesso!", "pt_BR");
-i18n_add ( "Request notifications list", "Requisitar listagem de notificações", "pt_BR");
-i18n_add ( "View notification informations", "Visualizar informações de notificações", "pt_BR");
+i18n_add ( "View notification information", "Visualizar informações de notificações", "pt_BR");
 i18n_add ( "Add notifications", "Adicionar notificações", "pt_BR");
 i18n_add ( "N/A", "N/D", "pt_BR");
 i18n_add ( "The description is required.", "A descrição é obrigatória.", "pt_BR");
@@ -187,4 +203,8 @@ i18n_add ( "Event fired when an agent remove pause on a call queue.", "Evento di
 i18n_add ( "Agent logged out", "Agente saiu", "pt_BR");
 i18n_add ( "Event fired when an agent log off from a call queue.", "Evento disparado quando um agente sai de uma fila.", "pt_BR");
 i18n_add ( "Fire new notification event", "Disparar nova notificação de evento", "pt_BR");
+i18n_add ( "Select field", "Selecione o campo", "pt_BR");
+i18n_add ( "Remove header", "Remover cabeçalho", "pt_BR");
+i18n_add ( "Add header", "Adicionar cabeçalho", "pt_BR");
+i18n_add ( "Show calendar", "Exibir calendário", "pt_BR");
 ?>

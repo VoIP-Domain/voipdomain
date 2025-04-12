@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,26 +24,120 @@
  */
 
 /**
- * VoIP Domain ranges api module. This module add the api calls related to
+ * VoIP Domain ranges module API. This module add the API calls related to
  * ranges.
  *
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Ranges
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call to search ranges (datatables compatible response)
+ * API call to search ranges
  */
-framework_add_hook ( "ranges_search", "ranges_search");
-framework_add_permission ( "ranges_search", __ ( "Ranges search (datatables standard)"));
-framework_add_api_call ( "/ranges/search", "Read", "ranges_search", array ( "permissions" => array ( "user", "ranges_search")));
+framework_add_hook (
+  "ranges_search",
+  "ranges_search",
+  IN_HOOK_NULL,
+  array (
+    "requests" => array (
+      "type" => "object",
+      "properties" => array (
+        "Filter" => array (
+          "type" => "string",
+          "description" => __ ( "Filter search with this string. If not provided, return all ranges."),
+          "example" => __ ( "filter")
+        ),
+        "Fields" => array (
+          "type" => "string",
+          "description" => __ ( "A comma delimited list of fields that should be returned."),
+          "default" => "ID,Description,Start,Finish,Server,Extensions",
+          "example" => "Description,Start,Finish"
+        )
+      )
+    ),
+    "response" => array (
+      200 => array (
+        "description" => __ ( "An array containing the system ranges."),
+        "schema" => array (
+          "type" => "array",
+          "xml" => array (
+            "name" => "responses",
+            "wrapped" => true
+          ),
+          "items" => array (
+            "type" => "object",
+            "xml" => array (
+              "name" => "range"
+            ),
+            "properties" => array (
+              "ID" => array (
+                "type" => "integer",
+                "description" => __ ( "The internal unique identification number of the ranges."),
+                "example" => 1
+              ),
+              "Description" => array (
+                "type" => "string",
+                "description" => __ ( "The description of the range."),
+                "example" => __ ( "Headquarter")
+              ),
+              "Start" => array (
+                "type" => "integer",
+                "description" => __ ( "The start number of range."),
+                "example" => 1000
+              ),
+              "Finish" => array (
+                "type" => "integer",
+                "description" => __ ( "The finish number of range."),
+                "example" => 3999
+              ),
+              "Server" => array (
+                "type" => "string",
+                "description" => __ ( "The name of the server where this range is allocated."),
+                "example" => __ ( "Main server")
+              ),
+              "Extensions" => array (
+                "type" => "integer",
+                "description" => __ ( "The number of extensions using this range."),
+                "example" => 728
+              )
+            )
+          )
+        )
+      ),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "Filter" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "Invalid filter content.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
+framework_add_permission ( "ranges_search", __ ( "Search ranges"));
+framework_add_api_call (
+  "/ranges",
+  "Read",
+  "ranges_search",
+  array (
+    "permissions" => array ( "user", "ranges_search"),
+    "title" => __ ( "Search ranges"),
+    "description" => __ ( "Search for system ranges.")
+  )
+);
 
 /**
- * Function to generate range list to select box.
+ * Function to search ranges.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -56,75 +150,96 @@ function ranges_search ( $buffer, $parameters)
   global $_in;
 
   /**
-   * Check for modifications time
+   * Call start hook if exist
    */
-  check_table_modification ( array ( "Ranges", "Servers"));
-
-  /**
-   * Search ranges
-   */
-  $data = array ();
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT `Ranges`.`ID`, `Ranges`.`Description`, `Servers`.`Name` FROM `Ranges`, `Servers` WHERE `Ranges`.`Server` = `Servers`.`ID` " . ( ! empty ( $parameters["q"]) ? " AND `Ranges`.`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["q"]) . "%'" : "") . " ORDER BY `Description`"))
+  if ( framework_has_hook ( "ranges_search_start"))
   {
-    while ( $range = $result->fetch_assoc ())
-    {
-      $data[] = array ( $range["ID"], $range["Description"] . " (" . $range["Name"] . ")");
-    }
+    $parameters = framework_call ( "ranges_search_start", $parameters);
   }
 
   /**
-   * Return structured data
-   */
-  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
-}
-
-/**
- * API call to fetch ranges listing
- */
-framework_add_hook ( "ranges_fetch", "ranges_fetch");
-framework_add_permission ( "ranges_fetch", __ ( "Request ranges listing"));
-framework_add_api_call ( "/ranges/fetch", "Read", "ranges_fetch", array ( "permissions" => array ( "user", "ranges_fetch")));
-
-/**
- * Function to generate range list.
- *
- * @global array $_in Framework global configuration variable
- * @param string $buffer Buffer from plugin system if processed by other function
- *                       before
- * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
- */
-function ranges_fetch ( $buffer, $parameters)
-{
-  global $_in;
-
-  /**
    * Check for modifications time
    */
   check_table_modification ( array ( "Ranges", "Servers"));
 
   /**
+   * Validate received parameters
+   */
+  $data = array ();
+
+  /**
+   * Call validate hook if exist
+   */
+  if ( framework_has_hook ( "ranges_search_validate"))
+  {
+    $data = framework_call ( "ranges_search_validate", $parameters);
+  }
+
+  /**
+   * Return error data if some error occurred
+   */
+  if ( sizeof ( $data) != 0)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+    return $data;
+  }
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "ranges_search_sanitize"))
+  {
+    $parameters = framework_call ( "ranges_search_sanitize", $parameters, false, $parameters);
+  }
+
+  /**
+   * Call pre hook if exist
+   */
+  if ( framework_has_hook ( "ranges_search_pre"))
+  {
+    $parameters = framework_call ( "ranges_search_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Search ranges
    */
-  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `Ranges`.*, `Servers`.`Name` FROM `Ranges` LEFT JOIN `Servers` ON `Ranges`.`Server` = `Servers`.`ID`"))
+  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `Ranges`.`ID`, `Ranges`.`Description`, `Ranges`.`Start`, `Ranges`.`Finish`, `Servers`.`Description` AS `Server` FROM `Ranges` LEFT JOIN `Servers` ON `Ranges`.`Server` = `Servers`.`ID`" . ( ! empty ( $parameters["Filter"]) ? " WHERE `Ranges`.`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " ORDER BY `Description`, `Start`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
 
   /**
-   * Create table structure
+   * Create result structure
    */
   $data = array ();
+  $fields = api_filter_fields ( $parameters["Fields"], "ID,Description,Start,Finish,Server,Extensions", "ID,Description,Start,Finish,Server,Extensions");
   while ( $result = $results->fetch_assoc ())
   {
-    $allocations = filters_call ( "count_allocations", array ( "range" => $result["ID"]));
-    $total = 0;
-    foreach ( $allocations as $allocation)
+    if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Extensions` WHERE `Range` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $result["ID"])))
     {
-      $total += $allocation;
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
     }
-    $data[] = array ( $result["ID"], $result["Description"], $result["Name"], $result["Start"], $result["Finish"], $total);
+    $result["Extensions"] = intval ( $count->fetch_assoc ()["Total"]);
+    $count->free ();
+    $data[] = api_filter_entry ( $fields, $result);
+  }
+
+  /**
+   * Call post hook if exist
+   */
+  if ( framework_has_hook ( "ranges_search_post"))
+  {
+    $data = framework_call ( "ranges_search_post", $parameters, false, $data);
+  }
+
+  /**
+   * Execute finish hook if exist
+   */
+  if ( framework_has_hook ( "ranges_search_finish"))
+  {
+    framework_call ( "ranges_search_finish", $parameters);
   }
 
   /**
@@ -136,12 +251,88 @@ function ranges_fetch ( $buffer, $parameters)
 /**
  * API call to get range information
  */
-framework_add_hook ( "ranges_view", "ranges_view");
-framework_add_permission ( "ranges_view", __ ( "View ranges informations"));
-framework_add_api_call ( "/ranges/:id", "Read", "ranges_view", array ( "permissions" => array ( "user", "ranges_view")));
+framework_add_hook (
+  "ranges_view",
+  "ranges_view",
+  IN_HOOK_NULL,
+  array (
+    "response" => array (
+      200 => array (
+        "description" => __ ( "An object containing information about the system range."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "ID" => array (
+              "type" => "integer",
+              "description" => __ ( "The internal unique identification number of the range."),
+              "example" => 1
+            ),
+            "Description" => array (
+              "type" => "string",
+              "description" => __ ( "The description of the range."),
+              "example" => __ ( "Headquarter")
+            ),
+            "Server" => array (
+              "type" => "integer",
+              "description" => __ ( "The system server unique identifier where this range is allocated to."),
+              "example" => 2
+            ),
+            "ServerDescription" => array (
+              "type" => "string",
+              "description" => __ ( "The system server name where this range is allocated to."),
+              "example" => __ ( "Main server")
+            ),
+            "Start" => array (
+              "type" => "integer",
+              "description" => __ ( "The start allocation number for this range."),
+              "example" => 1000
+            ),
+            "Finish" => array (
+              "type" => "integer",
+              "description" => __ ( "The finish allocation number for this range."),
+              "example" => 1000
+            )
+          )
+        )
+      ),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "ID" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "Invalid range ID.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
+framework_add_permission ( "ranges_view", __ ( "View ranges information"));
+framework_add_api_call (
+  "/ranges/:ID",
+  "Read",
+  "ranges_view",
+  array (
+    "permissions" => array ( "user", "ranges_view"),
+    "title" => __ ( "View ranges"),
+    "description" => __ ( "Get a system range information."),
+    "parameters" => array (
+      array (
+        "name" => "ID",
+        "type" => "integer",
+        "description" => __ ( "The system range internal system unique identifier."),
+        "example" => 1
+      )
+    )
+  )
+);
 
 /**
- * Function to generate range informations.
+ * Function to generate range information.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -154,26 +345,76 @@ function ranges_view ( $buffer, $parameters)
   global $_in;
 
   /**
+   * Call start hook if exist
+   */
+  if ( framework_has_hook ( "ranges_view_start"))
+  {
+    $parameters = framework_call ( "ranges_view_start", $parameters);
+  }
+
+  /**
    * Check for modifications time
    */
   check_table_modification ( array ( "Ranges", "Servers"));
 
   /**
-   * Check basic parameters
+   * Validate received parameters
    */
-  $parameters["id"] = (int) $parameters["id"];
+  $data = array ();
+  if ( ! array_key_exists ( "ID", $parameters) || ! is_numeric ( $parameters["ID"]))
+  {
+    $data["ID"] = __ ( "Invalid range ID.");
+  }
+
+  /**
+   * Call validate hook if exist
+   */
+  if ( framework_has_hook ( "ranges_view_validate"))
+  {
+    $data = framework_call ( "ranges_view_validate", $parameters);
+  }
+
+  /**
+   * Return error data if some error occurred
+   */
+  if ( sizeof ( $data) != 0)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+    return $data;
+  }
+
+  /**
+   * Sanitize parameters
+   */
+  $parameters["ID"] = (int) $parameters["ID"];
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "ranges_view_sanitize"))
+  {
+    $parameters = framework_call ( "ranges_view_sanitize", $parameters, false, $parameters);
+  }
+
+  /**
+   * Call pre hook if exist
+   */
+  if ( framework_has_hook ( "ranges_view_pre"))
+  {
+    $parameters = framework_call ( "ranges_view_pre", $parameters, false, $parameters);
+  }
 
   /**
    * Search ranges
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Ranges`.*, `Servers`.`Name` FROM `Ranges` LEFT JOIN `Servers` ON `Ranges`.`Server` = `Servers`.`ID` WHERE `Ranges`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Ranges`.*, `Servers`.`Description` AS `ServerDescription` FROM `Ranges` LEFT JOIN `Servers` ON `Ranges`.`Server` = `Servers`.`ID` WHERE `Ranges`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   if ( $result->num_rows != 1)
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 400 Bad Request");
     exit ();
   }
   $range = $result->fetch_assoc ();
@@ -181,13 +422,23 @@ function ranges_view ( $buffer, $parameters)
   /**
    * Format data
    */
-  $data = array ();
-  $data["result"] = true;
-  $data["description"] = $range["Description"];
-  $data["server"] = $range["Server"];
-  $data["servername"] = $range["Name"];
-  $data["start"] = $range["Start"];
-  $data["finish"] = $range["Finish"];
+  $data = api_filter_entry ( array ( "ID", "Description", "Server", "ServerDescription", "Start", "Finish"), $range);
+
+  /**
+   * Call post hook if exist
+   */
+  if ( framework_has_hook ( "ranges_view_post"))
+  {
+    $data = framework_call ( "ranges_view_post", $parameters, false, $data);
+  }
+
+  /**
+   * Execute finish hook if exist
+   */
+  if ( framework_has_hook ( "ranges_view_finish"))
+  {
+    framework_call ( "ranges_view_finish", $parameters);
+  }
 
   /**
    * Return structured data
@@ -198,9 +449,87 @@ function ranges_view ( $buffer, $parameters)
 /**
  * API call to add a new range
  */
-framework_add_hook ( "ranges_add", "ranges_add");
+framework_add_hook (
+  "ranges_add",
+  "ranges_add",
+  IN_HOOK_NULL,
+  array (
+    "requests" => array (
+      "type" => "object",
+      "required" => true,
+      "properties" => array (
+        "Description" => array (
+          "type" => "string",
+          "description" => __ ( "The description of the range."),
+          "required" => true,
+          "example" => __ ( "Headquarter")
+        ),
+        "Server" => array (
+          "type" => "integer",
+          "description" => __ ( "The system server unique identifier where the range will be allocated."),
+          "required" => true,
+          "example" => 1
+        ),
+        "Start" => array (
+          "type" => "integer",
+          "description" => __ ( "The start allocation number of the range."),
+          "required" => true,
+          "example" => 1000
+        ),
+        "Finish" => array (
+          "type" => "integer",
+          "description" => __ ( "The finish allocation number of the range."),
+          "required" => true,
+          "example" => 1999
+        )
+      )
+    ),
+    "response" => array (
+      201 => array (
+        "description" => __ ( "New system range was added sucessfully.")
+      ),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "Description" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The range description is required.")
+            ),
+            "Server" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The server is required.")
+            ),
+            "Start" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The range start is greater than finish.")
+            ),
+            "Finish" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The finish is invalid.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
 framework_add_permission ( "ranges_add", __ ( "Add ranges"));
-framework_add_api_call ( "/ranges", "Create", "ranges_add", array ( "permissions" => array ( "user", "ranges_add")));
+framework_add_api_call (
+  "/ranges",
+  "Create",
+  "ranges_add",
+  array (
+    "permissions" => array ( "user", "ranges_add"),
+    "title" => __ ( "Add ranges"),
+    "description" => __ ( "Add a new system range.")
+  )
+);
 
 /**
  * Function to add a new range.
@@ -216,54 +545,52 @@ function ranges_add ( $buffer, $parameters)
   global $_in;
 
   /**
-   * Check basic parameters
+   * Call start hook if exist
+   */
+  if ( framework_has_hook ( "blocks_add_start"))
+  {
+    $parameters = framework_call ( "blocks_add_start", $parameters);
+  }
+
+  /**
+   * Validate received parameters
    */
   $data = array ();
-  $data["result"] = true;
-  $parameters["description"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["description"])));
-  if ( empty ( $parameters["description"]))
+  $parameters["Description"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["Description"])));
+  if ( empty ( $parameters["Description"]))
   {
-    $data["result"] = false;
-    $data["description"] = __ ( "The range description is required.");
+    $data["Description"] = __ ( "The range description is required.");
   }
-  $parameters["server"] = (int) $parameters["server"];
-  if ( empty ( $parameters["server"]))
+  if ( empty ( $parameters["Server"]))
   {
-    $data["result"] = false;
-    $data["server"] = __ ( "The server is required.");
+    $data["Server"] = __ ( "The server is required.");
   }
-  if ( $parameters["start"] != (int) $parameters["start"])
+  if ( $parameters["Start"] != (int) $parameters["Start"])
   {
-    $data["result"] = false;
-    $data["start"] = __ ( "The start is invalid.");
+    $data["Start"] = __ ( "The start is invalid.");
   }
-  $parameters["start"] = (int) $parameters["start"];
-  if ( $parameters["finish"] != (int) $parameters["finish"])
+  if ( $parameters["Finish"] != (int) $parameters["Finish"])
   {
-    $data["result"] = false;
-    $data["finish"] = __ ( "The finish is invalid.");
+    $data["Finish"] = __ ( "The finish is invalid.");
   }
-  $parameters["finish"] = (int) $parameters["finish"];
-  if ( ! array_key_exists ( "start", $data) && ! array_key_exists ( "finish", $data) && $parameters["start"] > $parameters["finish"])
+  if ( ! array_key_exists ( "Start", $data) && ! array_key_exists ( "Finish", $data) && $parameters["Start"] > $parameters["Finish"])
   {
-    $data["result"] = false;
-    $data["start"] = __ ( "The range start is greater than finish.");
+    $data["Start"] = __ ( "The range start is greater than finish.");
   }
 
   /**
    * Search server
    */
-  if ( ! array_key_exists ( "server", $data))
+  if ( ! array_key_exists ( "Server", $data))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["server"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Server"])))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
     }
     if ( $result->num_rows == 0)
     {
-      $data["result"] = false;
-      $data["server"] = __ ( "The selected server is invalid.");
+      $data["Server"] = __ ( "The selected server is invalid.");
     }
     $server = $result->fetch_assoc ();
   }
@@ -271,98 +598,197 @@ function ranges_add ( $buffer, $parameters)
   /**
    * Check if range didn't overlap other ranges
    */
-  if ( ! array_key_exists ( "start", $data) && ! array_key_exists ( "finish", $data))
+  if ( ! array_key_exists ( "Start", $data) && ! array_key_exists ( "Finish", $data))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE " . $_in["mysql"]["id"]->real_escape_string ( $parameters["finish"]) . " >= `Start` AND `Finish` >= " . $_in["mysql"]["id"]->real_escape_string ( $parameters["start"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Finish"]) . " >= `Start` AND `Finish` >= " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Start"])))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
     }
     if ( $result->num_rows != 0)
     {
-      $data["result"] = false;
-      $data["start"] = __ ( "Values override existing range.");
+      $data["Start"] = __ ( "Values override existing range.");
     }
   }
 
   /**
-   * Call add sanitize hook, if exist
+   * Call validate hook if exist
    */
-  if ( framework_has_hook ( "ranges_add_sanitize"))
+  if ( framework_has_hook ( "blocks_add_validate"))
   {
-    $data = framework_call ( "ranges_add_sanitize", $parameters, false, $data);
+    $data = framework_call ( "blocks_add_validate", $parameters, false, $data);
   }
 
   /**
-   * Return error data if some error ocurred
+   * Return error data if some error occurred
    */
-  if ( $data["result"] == false)
+  if ( sizeof ( $data) != 0)
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
     return $data;
   }
 
   /**
-   * Call add pre hook, if exist
+   * Sanitize parameters
    */
-  if ( framework_has_hook ( "ranges_add_pre"))
+  $parameters["Server"] = (int) $parameters["Server"];
+  $parameters["Start"] = (int) $parameters["Start"];
+  $parameters["Finish"] = (int) $parameters["Finish"];
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "blocks_add_sanitize"))
   {
-    $parameters = framework_call ( "ranges_add_pre", $parameters, false, $parameters);
+    $parameters = framework_call ( "blocks_add_sanitize", $parameters, false, $parameters);
+  }
+
+  /**
+   * Call pre hook if exist
+   */
+  if ( framework_has_hook ( "blocks_add_pre"))
+  {
+    $parameters = framework_call ( "blocks_add_pre", $parameters, false, $parameters);
   }
 
   /**
    * Add new range record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Ranges` (`Description`, `Server`, `Start`, `Finish`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $parameters["server"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $parameters["start"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $parameters["finish"]) . ")"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Ranges` (`Description`, `Server`, `Start`, `Finish`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Server"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Finish"]) . ")"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  $parameters["id"] = $_in["mysql"]["id"]->insert_id;
+  $parameters["ID"] = $_in["mysql"]["id"]->insert_id;
 
   /**
-   * Call add post hook, if exist
+   * Call post hook if exist
    */
-  if ( framework_has_hook ( "ranges_add_post"))
+  if ( framework_has_hook ( "blocks_add_post"))
   {
-    framework_call ( "ranges_add_post", $parameters);
+    framework_call ( "blocks_add_post", $parameters);
   }
 
   /**
    * Add new range at Asterisk servers
    */
-  $notify = array ( "ID" => $parameters["id"], "Server" => $parameters["server"], "Start" => $parameters["start"], "Finish" => $parameters["finish"]);
+  $notify = array ( "ID" => $parameters["ID"], "Server" => $parameters["Server"], "Start" => $parameters["Start"], "Finish" => $parameters["Finish"]);
   if ( framework_has_hook ( "ranges_add_notify"))
   {
     $notify = framework_call ( "ranges_add_notify", $parameters, false, $notify);
   }
-  notify_server ( 0, "createrange", $notify);
+  notify_server ( 0, "range_add", $notify);
 
   /**
-   * Insert audit registry
+   * Execute finish hook if exist
    */
-  $audit = array ( "ID" => $parameters["id"], "Description" => $parameters["description"], "Server" => $parameters["server"], "Start" => $parameters["start"], "Finish" => $parameters["finish"]);
-  if ( framework_has_hook ( "ranges_add_audit"))
+  if ( framework_has_hook ( "blocks_add_finish"))
   {
-    $audit = framework_call ( "ranges_add_audit", $parameters, false, $audit);
+    framework_call ( "blocks_add_finish", $parameters, false);
   }
-  audit ( "range", "add", $audit);
 
   /**
    * Return OK to user
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . $_in["general"]["baseurl"] . "ranges/" . $parameters["id"] . "/view");
+  header ( "Location: " . $_in["api"]["baseurl"] . "/ranges/" . $parameters["ID"]);
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 
 /**
  * API call to edit an existing range
  */
-framework_add_hook ( "ranges_edit", "ranges_edit");
+framework_add_hook (
+  "ranges_edit",
+  "ranges_edit",
+  IN_HOOK_NULL,
+  array (
+    "requests" => array (
+      "type" => "object",
+      "required" => true,
+      "properties" => array (
+        "Description" => array (
+          "type" => "string",
+          "description" => __ ( "The description of the range."),
+          "required" => true,
+          "example" => __ ( "Headquarter")
+        ),
+        "Server" => array (
+          "type" => "integer",
+          "description" => __ ( "The system server unique identifier where the range will be allocated."),
+          "required" => true,
+          "example" => 1
+        ),
+        "Start" => array (
+          "type" => "integer",
+          "description" => __ ( "The start allocation number of the range."),
+          "required" => true,
+          "example" => 1000
+        ),
+        "Finish" => array (
+          "type" => "integer",
+          "description" => __ ( "The finish allocation number of the range."),
+          "required" => true,
+          "example" => 1999
+        )
+      )
+    ),
+    "response" => array (
+      200 => array (
+        "description" => __ ( "The system range was sucessfully updated.")
+      ),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "Description" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The range description is required.")
+            ),
+            "Server" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The server is required.")
+            ),
+            "Start" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The range start is greater than finish.")
+            ),
+            "Finish" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The finish is invalid.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
 framework_add_permission ( "ranges_edit", __ ( "Edit ranges"));
-framework_add_api_call ( "/ranges/:id", "Modify", "ranges_edit", array ( "permissions" => array ( "user", "ranges_edit")));
-framework_add_api_call ( "/ranges/:id", "Edit", "ranges_edit", array ( "permissions" => array ( "user", "ranges_edit")));
+framework_add_api_call (
+  "/ranges/:ID",
+  "Modify",
+  "ranges_edit",
+  array (
+    "permissions" => array ( "user", "ranges_edit"),
+    "title" => __ ( "Edit ranges"),
+    "description" => __ ( "Change a system range information.")
+  )
+);
+framework_add_api_call (
+  "/ranges/:ID",
+  "Edit",
+  "ranges_edit",
+  array (
+    "permissions" => array ( "user", "ranges_edit"),
+    "title" => __ ( "Edit ranges"),
+    "description" => __ ( "Change a system range information.")
+  )
+);
 
 /**
  * Function to edit an existing range.
@@ -378,55 +804,52 @@ function ranges_edit ( $buffer, $parameters)
   global $_in;
 
   /**
-   * Check basic parameters
+   * Call start hook if exist
+   */
+  if ( framework_has_hook ( "ranges_edit_start"))
+  {
+    $parameters = framework_call ( "ranges_edit_start", $parameters);
+  }
+
+  /**
+   * Validate received parameters
    */
   $data = array ();
-  $data["result"] = true;
-  $parameters["id"] = (int) $parameters["id"];
-  $parameters["description"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["description"])));
-  if ( empty ( $parameters["description"]))
+  $parameters["Description"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["Description"])));
+  if ( empty ( $parameters["Description"]))
   {
-    $data["result"] = false;
-    $data["description"] = __ ( "The range description is required.");
+    $data["Description"] = __ ( "The range description is required.");
   }
-  $parameters["server"] = (int) $parameters["server"];
-  if ( empty ( $parameters["server"]))
+  if ( empty ( $parameters["Server"]))
   {
-    $data["result"] = false;
-    $data["server"] = __ ( "The server is required.");
+    $data["Server"] = __ ( "The server is required.");
   }
-  if ( $parameters["start"] != (int) $parameters["start"])
+  if ( $parameters["Start"] != (int) $parameters["Start"])
   {
-    $data["result"] = false;
-    $data["start"] = __ ( "The start is invalid.");
+    $data["Start"] = __ ( "The start is invalid.");
   }
-  $parameters["start"] = (int) $parameters["start"];
-  if ( $parameters["finish"] != (int) $parameters["finish"])
+  if ( $parameters["Finish"] != (int) $parameters["Finish"])
   {
-    $data["result"] = false;
-    $data["finish"] = __ ( "The finish is invalid.");
+    $data["Finish"] = __ ( "The finish is invalid.");
   }
-  $parameters["finish"] = (int) $parameters["finish"];
-  if ( ! array_key_exists ( "start", $data) && ! array_key_exists ( "finish", $data) && $parameters["start"] > $parameters["finish"])
+  if ( ! array_key_exists ( "Start", $data) && ! array_key_exists ( "Finish", $data) && $parameters["Start"] > $parameters["Finish"])
   {
-    $data["result"] = false;
-    $data["start"] = __ ( "The range start is greater than finish.");
+    $data["Start"] = __ ( "The range start is greater than finish.");
   }
 
   /**
    * Search server
    */
-  if ( ! array_key_exists ( "server", $data))
+  if ( ! array_key_exists ( "Server", $data))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["server"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Server"])))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
     }
-    if ( $result->num_rows == 0)
+    if ( $result->num_rows != 1)
     {
-      $data["result"] = false;
-      $data["server"] = __ ( "The selected server is invalid.");
+      $data["Server"] = __ ( "The selected server is invalid.");
     }
     $server = $result->fetch_assoc ();
   }
@@ -434,54 +857,69 @@ function ranges_edit ( $buffer, $parameters)
   /**
    * Check if range exist (could be removed by other user meanwhile)
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  if ( $result->num_rows == 0)
+  if ( $result->num_rows != 1)
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 400 Bad Request");
     exit ();
   }
-  $range = $result->fetch_assoc ();
+  $parameters["ORIGINAL"] = $result->fetch_assoc ();
 
   /**
    * Check if range didn't overlap other ranges
    */
-  if ( ! array_key_exists ( "start", $data) && ! array_key_exists ( "finish", $data))
+  if ( ! array_key_exists ( "Start", $data) && ! array_key_exists ( "Finish", $data))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE " . $_in["mysql"]["id"]->real_escape_string ( $parameters["finish"]) . " >= `Start` AND `Finish` >= " . $_in["mysql"]["id"]->real_escape_string ( $parameters["start"]) . " AND `ID` != " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Finish"]) . " >= `Start` AND `Finish` >= " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Start"]) . " AND `ID` != " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
     }
     if ( $result->num_rows != 0)
     {
-      $data["result"] = false;
-      $data["start"] = __ ( "Values override existing range.");
+      $data["Start"] = __ ( "Values override existing range.");
     }
   }
 
   /**
-   * Call edit sanitize hook, if exist
+   * Call validate hook if exist
    */
-  if ( framework_has_hook ( "ranges_edit_sanitize"))
+  if ( framework_has_hook ( "ranges_edit_validate"))
   {
-    $data = framework_call ( "ranges_edit_sanitize", $parameters, false, $data);
+    $data = framework_call ( "ranges_edit_validate", $parameters, false, $data);
   }
 
   /**
-   * Return error data if some error ocurred
+   * Return error data if some error occurred
    */
-  if ( $data["result"] == false)
+  if ( sizeof ( $data) != 0)
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
     return $data;
   }
 
   /**
-   * Call edit pre hook, if exist
+   * Sanitize parameters
+   */
+  $parameters["ID"] = (int) $parameters["ID"];
+  $parameters["Server"] = (int) $parameters["Server"];
+  $parameters["Start"] = (int) $parameters["Start"];
+  $parameters["Finish"] = (int) $parameters["Finish"];
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "ranges_edit_sanitize"))
+  {
+    $parameters = framework_call ( "ranges_edit_sanitize", $parameters, false, $parameters);
+  }
+
+  /**
+   * Call pre hook if exist
    */
   if ( framework_has_hook ( "ranges_edit_pre"))
   {
@@ -491,14 +929,14 @@ function ranges_edit ( $buffer, $parameters)
   /**
    * Change range record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Ranges` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', `Server` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["server"]) . ", `Start` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["start"]) . ", `Finish` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["finish"]) . " WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Ranges` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Server` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Server"]) . ", `Start` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . ", `Finish` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Finish"]) . " WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
 
   /**
-   * Call edit post hook, if exist
+   * Call post hook if exist
    */
   if ( framework_has_hook ( "ranges_edit_post"))
   {
@@ -508,50 +946,31 @@ function ranges_edit ( $buffer, $parameters)
   /**
    * Notify servers about change
    */
-  if ( $range["Server"] != $parameters["server"] || $range["Start"] != $parameters["start"] || $range["Finish"] != $parameters["finish"])
+  if ( $parameters["ORIGINAL"]["Server"] != $parameters["Server"] || $parameters["ORIGINAL"]["Start"] != $parameters["Start"] || $parameters["ORIGINAL"]["Finish"] != $parameters["Finish"])
   {
-    $notify = array ( "ID" => $parameters["id"], "Server" => $parameters["server"], "Start" => $parameters["start"], "Finish" => $parameters["finish"]);
+    $notify = array ( "ID" => $parameters["ID"], "Server" => $parameters["Server"], "Start" => $parameters["Start"], "Finish" => $parameters["Finish"]);
     if ( framework_has_hook ( "ranges_edit_notify"))
     {
       $notify = framework_call ( "ranges_edit_notify", $parameters, false, $notify);
     }
-    notify_server ( 0, "changerange", $notify);
+    notify_server ( 0, "range_change", $notify);
   }
 
   /**
-   * Call range server change hooker if needed
+   * Call range server change hook if needed
    */
-  if ( $range["Server"] != $parameters["server"] && framework_has_hook ( "ranges_server_changed"))
+  if ( $parameters["ORIGINAL"]["Server"] != $parameters["Server"] && framework_has_hook ( "ranges_server_changed"))
   {
-    framework_call ( "ranges_server_changed", array ( "ID" => $range["ID"], "Old" => $range["Server"], "New" => $parameters["server"]));
+    framework_call ( "ranges_server_changed", array ( "ID" => $parameters["ORIGINAL"]["ID"], "Old" => $parameters["ORIGINAL"]["Server"], "New" => $parameters["Server"]));
   }
 
   /**
-   * Insert audit registry
+   * Execute finish hook if exist
    */
-  $audit = array ();
-  $audit["ID"] = $parameters["id"];
-  if ( $range["Description"] != $parameters["description"])
+  if ( framework_has_hook ( "ranges_edit_finish"))
   {
-    $audit["Description"] = array ( "Old" => $range["Description"], "New" => $parameters["description"]);
+    framework_call ( "ranges_edit_finish", $parameters, false);
   }
-  if ( $range["Server"] != $parameters["server"])
-  {
-    $audit["Server"] = array ( "Old" => $range["Server"], "New" => $parameters["server"]);
-  }
-  if ( $range["Start"] != $parameters["start"])
-  {
-    $audit["Start"] = array ( "Old" => $range["Start"], "New" => $parameters["start"]);
-  }
-  if ( $range["Finish"] != $parameters["finish"])
-  {
-    $audit["Finish"] = array ( "Old" => $range["Finish"], "New" => $parameters["finish"]);
-  }
-  if ( framework_has_hook ( "ranges_edit_audit"))
-  {
-    $audit = framework_call ( "ranges_edit_audit", $parameters, false, $audit);
-  }
-  audit ( "range", "edit", $audit);
 
   /**
    * Return OK to user
@@ -562,9 +981,42 @@ function ranges_edit ( $buffer, $parameters)
 /**
  * API call to remove a range
  */
-framework_add_hook ( "ranges_remove", "ranges_remove");
+framework_add_hook (
+  "ranges_remove",
+  "ranges_remove",
+  IN_HOOK_NULL,
+  array (
+    "response" => array (
+      204 => array (
+        "description" => __ ( "The system range was removed.")
+      ),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "ID" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "Invalid range ID.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
 framework_add_permission ( "ranges_remove", __ ( "Remove ranges"));
-framework_add_api_call ( "/ranges/:id", "Delete", "ranges_remove", array ( "permissions" => array ( "user", "ranges_remove")));
+framework_add_api_call (
+  "/ranges/:ID",
+  "Delete",
+  "ranges_remove",
+  array (
+    "permissions" => array ( "user", "ranges_remove"),
+    "title" => __ ( "Remove ranges"),
+    "description" => __ ( "Remove a system range.")
+  )
+);
 
 /**
  * Function to remove an existing range.
@@ -580,34 +1032,77 @@ function ranges_remove ( $buffer, $parameters)
   global $_in;
 
   /**
-   * Check basic parameters
+   * Call start hook if exist
    */
-  $parameters["id"] = (int) $parameters["id"];
+  if ( framework_has_hook ( "ranges_remove_start"))
+  {
+    $parameters = framework_call ( "ranges_remove_start", $parameters);
+  }
+
+  /**
+   * Validate received parameters
+   */
+  $data = array ();
+  if ( ! array_key_exists ( "ID", $parameters) || ! is_numeric ( $parameters["ID"]))
+  {
+    $data["ID"] = __ ( "Invalid range ID.");
+  }
+
+  /**
+   * Call validate hook if exist
+   */
+  if ( framework_has_hook ( "ranges_remove_validate"))
+  {
+    $data = framework_call ( "ranges_remove_validate", $parameters, false, $data);
+  }
+
+  /**
+   * Return error data if some error occurred
+   */
+  if ( sizeof ( $data) != 0)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+    return $data;
+  }
+
+  /**
+   * Sanitize parameters
+   */
+  $parameters["ID"] = (int) $parameters["ID"];
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "ranges_remove_sanitize"))
+  {
+    $parameters = framework_call ( "ranges_remove_sanitize", $parameters, false, $parameters);
+  }
 
   /**
    * Check if range exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   if ( $result->num_rows != 1)
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 400 Bad Request");
     exit ();
   }
-  $range = $result->fetch_assoc ();
+  $parameters["ORIGINAL"] = $result->fetch_assoc ();
 
   /**
    * Check if range has any allocated number
    */
-  $allocations = filters_call ( "count_allocations", array ( "range" => $range["ID"]));
-  $total = 0;
-  foreach ( $allocations as $allocation)
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Extensions` WHERE `Range` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
   {
-    $total += $allocation;
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
   }
+  $total = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
   if ( $total != 0)
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
@@ -615,7 +1110,7 @@ function ranges_remove ( $buffer, $parameters)
   }
 
   /**
-   * Call remove pre hook, if exist
+   * Call pre hook if exist
    */
   if ( framework_has_hook ( "ranges_remove_pre"))
   {
@@ -625,14 +1120,14 @@ function ranges_remove ( $buffer, $parameters)
   /**
    * Remove range database record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Ranges` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Ranges` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
 
   /**
-   * Call remove post hook, if exist
+   * Call post hook if exist
    */
   if ( framework_has_hook ( "ranges_remove_post"))
   {
@@ -642,34 +1137,32 @@ function ranges_remove ( $buffer, $parameters)
   /**
    * Notify servers about change
    */
-  $notify = array ( "ID" => $parameters["id"]);
+  $notify = array ( "ID" => $parameters["ID"]);
   if ( framework_has_hook ( "ranges_remove_notify"))
   {
     $notify = framework_call ( "ranges_remove_notify", $parameters, false, $notify);
   }
-  notify_server ( 0, "removerange", $notify);
+  notify_server ( 0, "range_remove", $notify);
 
   /**
-   * Insert audit registry
+   * Execute finish hook if exist
    */
-  $audit = $range;
-  if ( framework_has_hook ( "ranges_remove_audit"))
+  if ( framework_has_hook ( "ranges_remove_finish"))
   {
-    $audit = framework_call ( "ranges_remove_audit", $parameters, false, $audit);
+    framework_call ( "ranges_remove_finish", $parameters, false);
   }
-  audit ( "range", "remove", $audit);
 
   /**
-   * Retorn OK to user
+   * Return OK to user
    */
-  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), array ( "result" => true));
+  return $buffer;
 }
 
 /**
- * API call to intercept new server and server reinstall
+ * API call to intercept new server and server rebuild
  */
 framework_add_hook ( "servers_add_post", "ranges_server_reconfig");
-framework_add_hook ( "servers_reinstall_config", "ranges_server_reconfig");
+framework_add_hook ( "servers_rebuild_config", "ranges_server_reconfig");
 
 /**
  * Function to notify server to include all ranges.
@@ -687,7 +1180,7 @@ function ranges_server_reconfig ( $buffer, $parameters)
   /**
    * Fetch all ranges and send to server
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Server` != " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -699,7 +1192,7 @@ function ranges_server_reconfig ( $buffer, $parameters)
     {
       $notify = framework_call ( "ranges_add_notify", $parameters, false, $notify);
     }
-    notify_server ( $parameters["id"], "createrange", $notify);
+    notify_server ( (int) $parameters["ID"], "range_add", $notify);
   }
 
   /**

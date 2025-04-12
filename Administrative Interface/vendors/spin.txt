@@ -2,6 +2,6 @@
 --=======--
 
 URL: http://spin.js.org/
-Version: 2.3.2
+Version: 4.1.1
 License: MIT
-Modifications: Added compiled and minified version of spin.js
+Modifications: Added minified version of files and added ES6 module loader

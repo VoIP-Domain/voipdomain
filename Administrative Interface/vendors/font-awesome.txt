@@ -2,5 +2,5 @@
 --============--
 
 URL: http://fontawesome.io/
-Version: 5.0.13
+Version: 5.15.4
 License: SIL OFL 1.1 & MIT

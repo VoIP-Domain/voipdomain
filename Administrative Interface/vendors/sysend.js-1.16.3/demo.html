@@ -1,0 +1,130 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Sysend demo</title>
+    <script src="sysend.js"></script>
+    <style>
+     pre {
+         margin: 0;
+     }
+    </style>
+    <script>
+     window.onload = function() {
+         function log(element) {
+             return function (msg) {
+                 element.innerHTML += msg + '\n';
+             };
+         }
+         function count(c) {
+             windows.innerHTML = c;
+         }
+         function id(uuid) {
+             return '{id: ' + uuid + '}';
+         }
+         var message = log(document.querySelector('#message'));
+         var track = log(document.querySelector('#track'));
+         sysend.on('foo', function(obj) {
+             message('just get event "foo" with message: ' + obj.message);
+             console.log(obj.message);
+         });
+         sysend.on('notification', function(obj) {
+             if (typeof obj == 'undefined') {
+                 message('just got empty notification');
+             }
+         });
+         sysend.track('update', list => {
+           target.innerHTML = '';
+           list.forEach(function({ id: uuid }) {
+             var option = document.createElement('option');
+             option.innerHTML = uuid;
+             option.value = uuid;
+             target.appendChild(option);
+           });
+         });
+         var a = document.getElementById('a');
+         var b = document.getElementById('b');
+         var c = document.getElementById('c');
+         var ls = document.getElementById('ls');
+         ls.onchange = function() {
+             sysend.useLocalStorage(ls.checked);
+         };
+         var input = document.querySelector('#msg');
+         a.onclick = function() {
+             sysend.broadcast('foo', {message: input.value});
+         };
+         b.onclick = function() {
+             sysend.broadcast('notification');
+         };
+         c.onclick = function() {
+             var targed_id = target.value;
+             if (targed_id) {
+                 track('send: ' + msg2.value);
+                 sysend.post(targed_id, msg2.value);
+             }
+         };
+         sysend.proxy(
+             'file:///',
+             'https://jcubic.pl',
+             'https://terminal.jcubic.pl'
+         );
+         sysend.track('open', function(data) {
+             var target_type = data.primary ? 'primary' : 'secondary';
+             track('open: ' + id(data.id) + ' [' + target_type + ']');
+             count(data.count);
+             if (sysend.isPrimary() && data.count > 1) {
+                 track('send: Welcome');
+                 sysend.post(data.id, 'Welcome');
+             }
+         });
+         sysend.track('message', function(data) {
+             track('message: ' + data.data + ' from ' + data.origin);
+         });
+         sysend.track('message', function once(data) {
+             // one time welcome message reply to primary
+             if (!sysend.isPrimary()) {
+                 track('send: Thanks');
+                 sysend.post(data.origin, 'Thanks for the message');
+             }
+             sysend.untrack('message', once);
+         });
+         sysend.track('close', function(data) {
+             count(data.count);
+             if (data.count === 1) {
+                 track('close: ' + id(data.id) + ', last - become primary');
+             } else if (data.primary) {
+                 track('close: ' + id(data.id) + ', primary was closed');
+             } else {
+                 track('close: ' + id(data.id));
+             }
+         });
+         sysend.track('primary', function() {
+             track('track: become primary');
+         });
+         sysend.track('secondary', function() {
+             track('track: secondary');
+         });
+     };
+    </script>
+</head>
+<body>
+    <h1>sysend.js demo</h1>
+    <h2>Open this page in two different tabs</h2>
+    <input id="msg" />
+    <button id="a">object {message}</button>
+    <button id="b">empty</button>
+    <div>
+      <label for="ls">Use LocalStorage</label>
+      <input type="checkbox" id="ls" />
+    </div>
+    <br/>
+    <pre id="message"></pre>
+    <h2>Window/tabs tracking</h2>
+    <pre>count: <span id="windows"></span></pre>
+    <pre id="track"></pre>
+    <h2>Send to window</h2>
+    <select id="target"></select>
+    <input id="msg2" />
+    <button id="c">send</button>
+</body>
+</html>

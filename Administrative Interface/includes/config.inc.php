@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,13 +28,13 @@
  * framework configuration, check for mandatory configuration, set defaults if
  * needed and connect to the database server. This file also contains the
  * framework functions needed to control JavaScript and CSS dependencies, page
- * informations, and more.
+ * information, and more.
  *
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Core
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -49,21 +49,43 @@ require_once ( dirname ( __FILE__) . "/functions.inc.php");
 require_once ( dirname ( __FILE__) . "/plugins.inc.php");
 
 /**
- * Parse configuration file. You should put your configuration file OUTSIDE
- * the web server files path, or you must block access to this file at the
- * web server configuration. Your configuration would contain passwords and
- * other sensitive configurations.
+ * Check for required PHP modules
  */
-if ( ! $_in = parse_ini_file ( "/etc/voipdomain/voipdomain.conf", true))
+foreach ( array ( "mbstring", "mysqli", "gearman", "json") as $module)
 {
-  header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-  trigger_error ( "VoIPDomain startup: Cannot parse configuration file \"/etc/voipdomain/voipdomain.conf\".", E_USER_ERROR);
-  if ( array_key_exists ( "HTTP_X_INFRAMEWORK", $_SERVER) && $_in["general"]["debug"] === true)
+  if ( ! extension_loaded ( $module))
   {
-    echo json_encode ( array ( "result" => false, "message" => "Cannot parse configuration file \"/etc/voipdomain/voipdomain.conf\".", "error" => 503));
+    error_5xx ( 503, "Required PHP module \"" . $module . "\" not found!");
   }
-  exit ( 1);
 }
+
+/**
+ * Check for the configuration file. If not found, the system will be in
+ * installation mode, otherwise parse it and continue.
+ */
+if ( ! file_exists ( "/etc/voipdomain/webinterface.conf"))
+{
+  $_in = array ();
+  $_in["mode"] = "install";
+  $_in["general"] = array ();
+} else {
+  /**
+   * Parse configuration file. You should put your configuration file OUTSIDE
+   * the web server files path, or you must block access to this file at the
+   * web server configuration. Your configuration would contain passwords and
+   * other sensitive configurations.
+   */
+  if ( ! $_in = parse_ini_file ( "/etc/voipdomain/webinterface.conf", true))
+  {
+    error_5xx ( 503, "Cannot parse configuration file \"/etc/voipdomain/webinterface.conf\".");
+  }
+  $_in["mode"] = "normal";
+}
+
+/**
+ * Set VoIP Domain version
+ */
+$_in["version"] = "1.0";
 
 /**
  * Initialize page variables
@@ -74,23 +96,8 @@ $_in["page"]["path"] = array ();
 $_in["page"]["i18n"] = array ();
 
 /**
- * Include all modules configuration files
- */
-foreach ( glob ( dirname ( __FILE__) . "/../modules/*/config.php") as $filename)
-{
-  require_once ( $filename);
-}
-
-/**
  * Check for mandatory basic configurations (if didn't exist, set default)
  */
-if ( ! array_key_exists ( "version", $_in["general"]))
-{
-  $_in["version"] = "1.0";
-} else {
-  $_in["version"] = $_in["general"]["version"];
-  unset ( $_in["general"]["version"]);
-}
 if ( ! array_key_exists ( "charset", $_in["general"]))
 {
   $_in["general"]["charset"] = "UTF-8";
@@ -115,7 +122,7 @@ if ( ! array_key_exists ( "title", $_in["general"]))
 /**
  * Include basic available languages
  */
-$_in["languages"] = array ( "en_US" => "English (United States)", "pt_BR" => "Português (Brasil)");
+$_in["languages"] = array ( "en_US" => "English (United States)", "pt_BR" => "Portuguese (Brazil)");
 $_in["i18n"] = array ();
 
 /**
@@ -148,35 +155,6 @@ if ( ini_get ( "magic_quotes_gpc"))
 }
 
 /**
- * Validate MySQL configuration section
- */
-if ( ! is_array ( $_in["mysql"]))
-{
-  header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-  trigger_error ( "VoIPDomain startup: Cannot find the \"mysql\" section into configuration file.", E_USER_ERROR);
-  if ( array_key_exists ( "HTTP_X_INFRAMEWORK", $_SERVER) && $_in["general"]["debug"] === true)
-  {
-    echo json_encode ( array ( "result" => false, "message" => "Cannot find the \"mysql\" section into configuration file.", "error" => 503));
-  }
-  exit ( 1);
-}
-
-/**
- * Connect to database server
- */
-$_in["mysql"]["id"] = @new mysqli ( $_in["mysql"]["hostname"] . ( ! empty ( $_in["mysql"]["port"]) ? ":" . $_in["mysql"]["port"] : ""), $_in["mysql"]["username"], $_in["mysql"]["password"], $_in["mysql"]["database"]);
-if ( $_in["mysql"]["id"]->connect_errno)
-{
-  header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-  trigger_error ( "VoIPDomain startup: Cannot connect to database.", E_USER_ERROR);
-  if ( array_key_exists ( "HTTP_X_INFRAMEWORK", $_SERVER) && $_in["general"]["debug"] === true)
-  {
-    echo json_encode ( array ( "result" => false, "message" => "Cannot connect to MySQL server.", "error" => 503));
-  }
-  exit ();
-}
-
-/**
  * Clear authentication variables
  */
 $_in["session"] = array ();
@@ -193,6 +171,125 @@ $_in["page"]["inlinejs"] = "";
  */
 $_in["page"]["css"] = array ();
 $_in["page"]["inlinecss"] = "";
+
+/**
+ * Notify captures variable
+ */
+$_in["notifycapture"] = array ();
+
+/**
+ * System call types constants
+ */
+define ( "VD_CALLTYPE_UNKNOWN", 1);
+define ( "VD_CALLTYPE_LOCAL", 2);
+define ( "VD_CALLTYPE_INTERSTATE", 4);
+define ( "VD_CALLTYPE_INTERNATIONAL", 8);
+
+/**
+ * System call endpoints constants
+ */
+define ( "VD_CALLENDPOINT_UNKNOWN", 16);
+define ( "VD_CALLENDPOINT_EXTENSION", 32);
+define ( "VD_CALLENDPOINT_LANDLINE", 64);
+define ( "VD_CALLENDPOINT_MOBILE", 128);
+define ( "VD_CALLENDPOINT_MARINE", 256);
+define ( "VD_CALLENDPOINT_TOLLFREE", 512);
+define ( "VD_CALLENDPOINT_SPECIAL", 1024);
+define ( "VD_CALLENDPOINT_SATELLITE", 2048);
+define ( "VD_CALLENDPOINT_SERVICES", 4096);
+
+/**
+ * System Equipment types constants
+ */
+define ( "VD_EQUIPMENT_TYPE_IPP", "IP Telephone");
+define ( "VD_EQUIPMENT_TYPE_IPVP", "IP Videophone");
+define ( "VD_EQUIPMENT_TYPE_IPCP", "IP Conference Phone");
+define ( "VD_EQUIPMENT_TYPE_IPM", "IP Mobile Phone");
+define ( "VD_EQUIPMENT_TYPE_ATA", "Analog Telephone Adapter");
+define ( "VD_EQUIPMENT_TYPE_WEBPHONE", "WebRTC Phone");
+
+/**
+ * System audio codecs constants
+ */
+define ( "VD_AUDIO_CODEC_ALAW", "G.711 a-law");
+define ( "VD_AUDIO_CODEC_ULAW", "G.711 µ-law");
+define ( "VD_AUDIO_CODEC_G722", "G.722");
+define ( "VD_AUDIO_CODEC_G723", "G.723.1");
+define ( "VD_AUDIO_CODEC_G726", "G.726 RFC3551");
+define ( "VD_AUDIO_CODEC_EVS", "3GPP EVS");
+define ( "VD_AUDIO_CODEC_SPEEX", "SpeeX");
+define ( "VD_AUDIO_CODEC_SPEEX16", "SpeeX (16 kHz)");
+define ( "VD_AUDIO_CODEC_SPEEX32", "SpeeX (32 kHz)");
+define ( "VD_AUDIO_CODEC_SIREN7", "G.722.1 (Siren7)");
+define ( "VD_AUDIO_CODEC_SIREN14", "G.722.1 Annex C (Siren14)");
+define ( "VD_AUDIO_CODEC_ADPCM", "Dialogic ADPCM");
+define ( "VD_AUDIO_CODEC_SILK8", "SILK Codec (8 kHz)");
+define ( "VD_AUDIO_CODEC_SILK12", "SILK Codec (12 kHz)");
+define ( "VD_AUDIO_CODEC_SILK16", "SILK Codec (16 kHz)");
+define ( "VD_AUDIO_CODEC_SILK24", "SILK Codec (24 kHz)");
+define ( "VD_AUDIO_CODEC_G719", "G.719");
+define ( "VD_AUDIO_CODEC_G729", "G.729");
+define ( "VD_AUDIO_CODEC_G729A", "G.729A");
+define ( "VD_AUDIO_CODEC_SLIN", "16 bit Signed Linear PCM");
+define ( "VD_AUDIO_CODEC_SLIN12", "16 bit Signed Linear PCM (12 kHz)");
+define ( "VD_AUDIO_CODEC_SLIN16", "16 bit Signed Linear PCM (16 kHz)");
+define ( "VD_AUDIO_CODEC_SLIN24", "16 bit Signed Linear PCM (24 kHz)");
+define ( "VD_AUDIO_CODEC_SLIN32", "16 bit Signed Linear PCM (32 kHz)");
+define ( "VD_AUDIO_CODEC_SLIN44", "16 bit Signed Linear PCM (44 kHz)");
+define ( "VD_AUDIO_CODEC_SLIN48", "16 bit Signed Linear PCM (48 kHz)");
+define ( "VD_AUDIO_CODEC_SLIN96", "16 bit Signed Linear PCM (96 kHz)");
+define ( "VD_AUDIO_CODEC_SLIN192", "16 bit Signed Linear PCM (192 kHz)");
+define ( "VD_AUDIO_CODEC_LPC10", "LPC10");
+define ( "VD_AUDIO_CODEC_AMR", "AMR");
+define ( "VD_AUDIO_CODEC_AMRWB", "AMR-WB (WideBand)");
+define ( "VD_AUDIO_CODEC_GSM", "GSM");
+define ( "VD_AUDIO_CODEC_ILBC", "iLBC");
+define ( "VD_AUDIO_CODEC_OPUS", "Opus");
+define ( "VD_AUDIO_CODEC_G726AAL2", "G.726 AAL2");
+
+/**
+ * System video codecs constants
+ */
+define ( "VD_VIDEO_CODEC_H261", "H.261");
+define ( "VD_VIDEO_CODEC_H263", "H.263");
+define ( "VD_VIDEO_CODEC_H263P", "H.263+");
+define ( "VD_VIDEO_CODEC_H264", "H.264");
+define ( "VD_VIDEO_CODEC_H264P", "H.264 (High Profile)");
+define ( "VD_VIDEO_CODEC_H265", "H.265");
+define ( "VD_VIDEO_CODEC_VP8", "VP8");
+define ( "VD_VIDEO_CODEC_VP9", "VP9");
+define ( "VD_VIDEO_CODEC_MPEG4", "MPEG4");
+
+/**
+ * Do the system health check when running in normal mode
+ */
+if ( $_in["mode"] == "normal")
+{
+  /**
+   * Include all modules configuration files
+   */
+  foreach ( glob ( dirname ( __FILE__) . "/../modules/*/config.php") as $filename)
+  {
+    require_once ( $filename);
+  }
+
+  /**
+   * Validate MySQL configuration section
+   */
+  if ( ! is_array ( $_in["mysql"]))
+  {
+    error_5xx ( 503, "Cannot find the \"mysql\" section into configuration file.");
+  }
+
+  /**
+   * Connect to database server
+   */
+  $_in["mysql"]["id"] = @new mysqli ( $_in["mysql"]["hostname"] . ( ! empty ( $_in["mysql"]["port"]) ? ":" . $_in["mysql"]["port"] : ""), $_in["mysql"]["username"], $_in["mysql"]["password"], $_in["mysql"]["database"]);
+  if ( $_in["mysql"]["id"]->connect_errno)
+  {
+    error_5xx ( 503, "Cannot connect to MySQL server.");
+  }
+}
 
 /**
  * Function to clear all CSS from framework.
@@ -391,6 +488,37 @@ function sys_set_path ( $path)
 }
 
 /**
+ * Function to set framework page hash event.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $id The page object ID to trigger
+ * @param string $event The object event name
+ * @return void
+ */
+function sys_set_hashevent ( $id, $event)
+{
+  global $_in;
+
+  $_in["page"]["hashevent"] = array ( "id" => $id, "event" => $event);
+}
+
+/**
+ * Function to set framework page start event.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $id The page object ID to trigger
+ * @param string $event The object event name
+ * @param array $data The data to be passed to event (default is empty)
+ * @return void
+ */
+function sys_set_startevent ( $id, $event, $data = array ())
+{
+  global $_in;
+
+  $_in["page"]["startevent"] = array ( "id" => $id, "event" => $event, "data" => $data);
+}
+
+/**
  * Initialize framework API call variable
  */
 $_api = array ();
@@ -453,10 +581,11 @@ function framework_add_filter ( $filter, $function)
  * @param string $filter Filter to be processed
  * @param array $parameters[optional] Optional parameters to be sent to each
  *                                    filter function
+ * @param array $buffer[optional] Optional initial filter buffer
  * @return boolean|mixed Return false if no function has fired, otherwise return
  *                       the function call result
  */
-function filters_call ( $filter, $parameters = array ())
+function filters_call ( $filter, $parameters = array (), $buffer = array ())
 {
   global $_filters, $_in;
 
@@ -481,13 +610,22 @@ function filters_call ( $filter, $parameters = array ())
    * Process every filter entry
    */
   $oldmodule = $_in["module"];
-  $buffer = array ();
   foreach ( $_filters[$filter] as $module => $function)
   {
     if ( ! function_exists ( $function))
     {
-      framework_error ( "IntelliNews Framework: Registered function \"" . $function . "\" doesn't exist at filter \"" . $filter . "\"");
-      continue;
+      if ( ! is_loaded ( $module, "filter"))
+      {
+        if ( is_readable ( dirname ( __FILE__) . "/../modules/" . $module . "/filter.php"))
+        {
+          require_once ( dirname ( __FILE__) . "/../modules/" . $module . "/filter.php");
+        }
+      }
+      if ( ! function_exists ( $function))
+      {
+        framework_error ( "IntelliNews Framework: Registered function \"" . $function . "\" doesn't exist at filter \"" . $filter . "\"");
+        continue;
+      }
     }
     $_in["module"] = $module;
     $buffer = call_user_func ( $function, $buffer, $parameters);
@@ -593,7 +731,7 @@ function framework_add_permission ( $permission, $description)
   /**
    * Check for reserved permissions
    */
-  if ( in_array ( $permission, array ( "user", "token", "server", "administrator", "auditor")))
+  if ( in_array ( $permission, array ( "user", "token", "server", "administrator", "auditor", "internal")))
   {
     trigger_error ( __FUNCTION__ . "(): Ignoring new permission token using reserved value: " . $permission, E_USER_WARNING);
     return false;
@@ -621,7 +759,7 @@ function framework_add_permission ( $permission, $description)
  *   boolean "unauthenticated"   -> Allow or disallow execution of the path
  *                                  without any permission check (public access
  *                                  to the path)
- *   array "parameters"          -> Parameters to be passed when called the hook
+ *   array "variables"           -> Parameters to be passed when called the hook
  *   string|array "permissions"  -> Check if user has at least one of the
  *                                  provided permission. Special permissions are
  *                                  "user", to allow any interface user request
@@ -631,6 +769,10 @@ function framework_add_permission ( $permission, $description)
  *                                  permission granted to user or token will be
  *                                  accepted. You can use a single permission, a
  *                                  comma separated list or an array list.
+ *   string "title"              -> Title for endpoint documentation
+ *   string "description"        -> Description for endpoint documentation
+ *   array "parameters"          -> If parameters in path, an array with OpenAPI
+ *                                  object for endpoint documentation
  *
  * @global array $_api Framework global API configuration variable
  * @param string $path Path to the API call
@@ -689,8 +831,11 @@ function framework_add_api_call ( $path, $route, $hook, $options = array ())
    */
   $filtered = array ();
   $filtered["hook"] = $hook;
-  $filtered["unauthenticated"] = ( array_key_exists ( "unauthenticated", $options) && $options["unauthenticated"] === true ? true : false);
+  $filtered["title"] = array_key_exists ( "title", $options) ? $options["title"] : "";
+  $filtered["description"] = array_key_exists ( "description", $options) ? $options["description"] : "";
   $filtered["parameters"] = ( array_key_exists ( "parameters", $options) && is_array ( $options["parameters"]) ? $options["parameters"] : array ());
+  $filtered["unauthenticated"] = ( array_key_exists ( "unauthenticated", $options) && $options["unauthenticated"] === true ? true : false);
+  $filtered["variables"] = ( array_key_exists ( "variables", $options) && is_array ( $options["variables"]) ? $options["variables"] : array ());
   $filtered["permissions"] = ( array_key_exists ( "permissions", $options) && ! empty ( $options["permissions"]) ? $options["permissions"] : array ());
   if ( is_string ( $filtered["permissions"]))
   {
@@ -703,6 +848,60 @@ function framework_add_api_call ( $path, $route, $hook, $options = array ())
   $_api[$path][$route] = $filtered;
 
   return true;
+}
+
+/**
+ * Function to generate API search request fields.
+ *
+ * @param string $fields List of fields to be requested.
+ * @param string $default List of default fields.
+ * @param string $permitted List of allowed fields. Fields not listed on this
+ *                          variable will be removed.
+ * @return array Array of fields to be returned.
+ */
+function api_filter_fields ( $fields, $default, $permitted)
+{
+  /**
+   * If fields not specified, use default ones
+   */
+  if ( empty ( $fields))
+  {
+    $fields = explode ( ",", $default);
+  } else {
+    $fields = explode ( ",", $fields);
+  }
+
+  /**
+   * Enable only valid fields
+   */
+  $result = array ();
+  foreach ( $fields as $field)
+  {
+    if ( preg_match ( "/(^|,)" . $field . "($|,)/", $permitted))
+    {
+      $result[] = $field;
+    }
+  }
+
+  return $result;
+}
+
+/**
+ * Function to return API search entry of requested fields.
+ *
+ * @param array $fields List of fields to filter.
+ * @param array $data Data to be filtered.
+ * @return array Array of data filtered.
+ */
+function api_filter_entry ( $fields, $data)
+{
+  $result = array ();
+  foreach ( $fields as $field)
+  {
+    $result[$field] = $data[$field];
+  }
+
+  return $result;
 }
 
 /**
@@ -729,51 +928,84 @@ function api_call ( $path, $route, $parameters = array ())
   /**
    * Remove /api from start of path
    */
-  if ( strpos ( $_in["api"]["baseuri"], "://") !== false)
+  if ( array_key_exists ( "api", $_in) && array_key_exists ( "baseuri", $_in["api"]))
   {
-    $baseuri = substr ( $_in["api"]["baseuri"], strpos ( $_in["api"]["baseuri"], "/", strpos ( $_in["api"]["baseuri"], "://") + 3));
+    if ( strpos ( $_in["api"]["baseuri"], "://") !== false)
+    {
+      $baseuri = substr ( $_in["api"]["baseuri"], strpos ( $_in["api"]["baseuri"], "/", strpos ( $_in["api"]["baseuri"], "://") + 3));
+    } else {
+      $baseuri = $_in["api"]["baseuri"];
+    }
+    if ( substr ( $path, 0, strlen ( $baseuri)) == $baseuri)
+    {
+      $path = substr ( $path, strlen ( $baseuri));
+    }
   } else {
-    $baseuri = $_in["api"]["baseuri"];
-  }
-  if ( substr ( $path, 0, strlen ( $baseuri)) == $baseuri)
-  {
-    $path = substr ( $path, strlen ( $baseuri));
+    if ( $baseuri == "" && substr ( $path, 0, 5) == "/api/")
+    {
+      $path = substr ( $path, 4);
+    }
   }
 
   /**
    * If there's API version before path (v1, v2, etc..), set version variable
    * and remove it from path
    */
-  if ( preg_match ( "/^\/v\d\//", $path, $matches))
+  if ( preg_match ( "/^\/v(\d+(\.\d+)*)\//", $path, $matches))
   {
-    $apiversion = (int) substr ( $matches[0], 2);
+    $api_version = substr ( $matches[1]);
     $path = substr ( $path, strpos ( $path, "/", 1));
   } else {
-    $apiversion = 1;
+    if ( array_key_exists ( "HTTP_X_API_VERSION", $_SERVER) && preg_match ( "/^\d+(\.\d+)*$/", $_SERVER["HTTP_X_API_VERSION"], $matches))
+    {
+      $api_version = $matches[0];
+    } else {
+      $api_version = 1;
+    }
   }
 
   /**
-   * Process every path entry
+   * First, check if requested path has exactly entry (hardcoded path's didn't
+   * collide with variable paths)
    */
-  foreach ( $_api as $entrypath => $entry)
+  $found = false;
+  if ( array_key_exists ( $path, $_api) && array_key_exists ( $route, $_api[$path]))
   {
+    $entrypath = $path;
+    $entry = $_api[$path];
+    $found = true;
+  } else {
     /**
-     * Check if path match
+     * Otherwise, process every path entry to find a match
      */
-    $vars = matchPath ( $entrypath, $path);
-    if ( $vars === false)
+    foreach ( $_api as $entrypath => $entry)
     {
-      continue;
-    }
+      /**
+       * Check if path match
+       */
+      $vars = match_path ( $entrypath, $path, $parameters);
+      if ( $vars === false)
+      {
+        continue;
+      }
 
-    /**
-     * Check if route is available
-     */
-    if ( ! array_key_exists ( $route, $entry))
-    {
-      continue;
+      /**
+       * Check if route is available
+       */
+      if ( ! array_key_exists ( $route, $entry))
+      {
+        continue;
+      }
+      $found = true;
+      break;
     }
+  }
 
+  /**
+   * If path was found, process it
+   */
+  if ( $found)
+  {
     /**
      * Check if path is allowed for non authenticated users, and if user is
      * logged in or not.
@@ -807,7 +1039,7 @@ function api_call ( $path, $route, $parameters = array ())
     /**
      * Call hook
      */
-    return framework_call ( $entry[$route]["hook"], array_merge ( (array) $vars, (array) $entry[$route]["parameters"], (array) $parameters));
+    return framework_call ( $entry[$route]["hook"], array_merge ( (array) $vars, (array) $entry[$route]["variables"], (array) $parameters, array ( "api" => array ( "path" => $path, "route" => $route, "hook" => $entry[$route]["hook"], "parameters" => (array) $parameters, "vars" => (array) $vars, "routevars" => (array) $entry[$route]["variables"]))));
   }
 
   /**
@@ -823,9 +1055,11 @@ function api_call ( $path, $route, $parameters = array ())
  *
  * @param $match string System path to check for needle.
  * @param $needle string The user requested path.
+ * @param $parameters array Array with submitted parameters (for variable
+ *                          substitution).
  * @return boolean|array False if not match, or array containing key/value pair.
  */
-function matchPath ( $match, $needle)
+function match_path ( $match, $needle, $parameters)
 {
   $matches = array ();
   while ( $match != "")
@@ -845,6 +1079,14 @@ function matchPath ( $match, $needle)
         $value = substr ( $needle, 0, strpos ( $needle, "/"));
         $needle = substr ( $needle, strpos ( $needle, "/") + 1);
       }
+      if ( substr ( $value, 0, 1) == "." || substr ( $value, 0, 1) == ";")
+      {
+        $value = substr ( $value, 1);
+      }
+      if ( substr ( $value, strlen ( $value) - 1, 1) == "*")
+      {
+        $value = substr ( $value, 0, strlen ( $value) - 1);
+      }
       // Now, get key:
       if ( strpos ( $match, "/") === false)
       {
@@ -854,7 +1096,13 @@ function matchPath ( $match, $needle)
         $key = substr ( $match, 0, strpos ( $match, "/"));
         $match = substr ( $match, strpos ( $match, "/") + 1);
       }
-      $matches[$key] = $value;
+      // If value start with "_", values will be got from submitted _variable:
+      if ( substr ( $value, 0, 1) == "_")
+      {
+        $matches[$key] = $parameters[substr ( $value, 1)];
+      } else {
+        $matches[$key] = $value;
+      }
     } else {
       if ( $search != substr ( $needle, 0, 1))
       {

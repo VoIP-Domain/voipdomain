@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,14 +24,14 @@
  */
 
 /**
- * VoIP Domain costcenters filter module. This module add the filter calls related
- * to costcenters.
+ * VoIP Domain cost centers module filters. This module add the filter calls
+ * related to cost centers.
  *
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Cost Centers
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -71,29 +71,34 @@ function get_costcenters ( $buffer, $parameters)
    * Create where clause
    */
   $where = "";
-  if ( array_key_exists ( "id", $parameters))
+  if ( array_key_exists ( "ID", $parameters))
   {
-    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["id"]);
+    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
   }
-  if ( array_key_exists ( "code", $parameters))
+  if ( array_key_exists ( "Code", $parameters))
   {
-    $where .= " AND `Code` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["code"]);
+    $where .= " AND `Code` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Code"]);
   }
-  if ( array_key_exists ( "text", $parameters))
+  if ( array_key_exists ( "Text", $parameters))
   {
-    $where .= " AND `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( str_replace ( " ", "%", trim ( strip_tags ( $parameters["text"])))) . "%'";
+    $where .= " AND `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( str_replace ( " ", "%", trim ( strip_tags ( $parameters["Text"])))) . "%'";
   }
 
   /**
    * Check into database if cost centers exists
    */
+  $data = array ();
   if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
   {
-    while ( $group = $result->fetch_assoc ())
+    while ( $costcenter = $result->fetch_assoc ())
     {
-      $buffer = array_merge ( ( is_array ( $buffer) ? $buffer : array ()), array ( $data));
+      $data[] = $costcenter;
     }
   }
-  return $buffer;
+
+  /**
+   * Return structured data
+   */
+  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 ?>

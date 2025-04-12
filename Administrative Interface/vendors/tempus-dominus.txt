@@ -1,0 +1,7 @@
+  Tempus Dominus
+--==============--
+
+URL: https://github.com/Eonasdan/tempus-dominus
+Version: 6.0.1
+License: MIT
+Modifications: Copied uncompressed JavaScript code from src/js to build/js.

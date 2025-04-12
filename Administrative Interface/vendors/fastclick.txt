@@ -1,7 +1,0 @@
-  fastclick
---=========--
-
-URL: https://github.com/ftlabs/fastclick
-Version: 1.0.6
-License: MIT
-Modifications: Added minified version at lib/fastclick.min.js

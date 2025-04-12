@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Reports
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -58,7 +58,7 @@ i18n_add ( "External calls (With cost)");
 i18n_add ( "Mobile calls");
 i18n_add ( "Interstate calls");
 i18n_add ( "International calls");
-i18n_add ( "Error requesting informations!");
+i18n_add ( "Error requesting information!");
 i18n_add ( "extensions listing");
 i18n_add ( "Name");
 i18n_add ( "Group");
@@ -105,10 +105,10 @@ i18n_add ( "Storage");
 i18n_add ( "Server health");
 i18n_add ( "activity listing");
 i18n_add ( "Filter");
-i18n_add ( "Last use");
-i18n_add ( "Never used");
-i18n_add ( "%s call");
-i18n_add ( "%s calls");
+i18n_add ( "Last dialed");
+i18n_add ( "Last received");
+i18n_add ( "Never dialed");
+i18n_add ( "Never received");
 i18n_add ( "call");
 i18n_add ( "calls");
 i18n_add ( "Export to");
@@ -150,19 +150,19 @@ i18n_add ( "Ranges listing");
 i18n_add ( "Activity listing");
 i18n_add ( "Server status");
 i18n_add ( "All durations are billing time in [[DD:]HH:]MM:SS format.");
-i18n_add ( "Local");
 i18n_add ( "Month/Year");
 i18n_add ( "Others");
-i18n_add ( "Calls");
 i18n_add ( "MM/YYYY");
 i18n_add ( "The month/year is required.");
 i18n_add ( "Consolidated");
 i18n_add ( "Consolidated extensions calls report");
 i18n_add ( "Consolidated gateways calls report");
 i18n_add ( "Consolidated groups calls report");
+i18n_add ( "Consolidated servers calls report");
 i18n_add ( "consolidated per extension");
 i18n_add ( "consolidated per gateway");
 i18n_add ( "consolidated per group");
+i18n_add ( "consolidated per server");
 
 /**
  * Add Brazilian Portuguese support
@@ -188,7 +188,7 @@ i18n_add ( "External calls (With cost)", "Ligações externas (Com custo)", "pt_
 i18n_add ( "Mobile calls", "Ligações para celulares", "pt_BR");
 i18n_add ( "Interstate calls", "Ligações interurbanas", "pt_BR");
 i18n_add ( "International calls", "Ligações internacionais", "pt_BR");
-i18n_add ( "Error requesting informations!", "Erro ao requisitar informações!", "pt_BR");
+i18n_add ( "Error requesting information!", "Erro ao requisitar informações!", "pt_BR");
 i18n_add ( "extensions listing", "listagem de ramais", "pt_BR");
 i18n_add ( "Name", "Nome", "pt_BR");
 i18n_add ( "Group", "Grupo", "pt_BR");
@@ -235,10 +235,10 @@ i18n_add ( "Storage", "Armazenamento", "pt_BR");
 i18n_add ( "Server health", "Estado do servidor", "pt_BR");
 i18n_add ( "activity listing", "listagem por atividade", "pt_BR");
 i18n_add ( "Filter", "Filtro", "pt_BR");
-i18n_add ( "Last use", "Último uso", "pt_BR");
-i18n_add ( "Never used", "Nunca utilizado", "pt_BR");
-i18n_add ( "%s call", "%s ligação", "pt_BR");
-i18n_add ( "%s calls", "%s ligações", "pt_BR");
+i18n_add ( "Last dialed", "Última discada", "pt_BR");
+i18n_add ( "Last received", "Última recebida", "pt_BR");
+i18n_add ( "Never dialed", "Nunca discado", "pt_BR");
+i18n_add ( "Never received", "Nunca recebido", "pt_BR");
 i18n_add ( "call", "ligação", "pt_BR");
 i18n_add ( "calls", "ligações", "pt_BR");
 i18n_add ( "Export to", "Exportar para", "pt_BR");
@@ -280,16 +280,16 @@ i18n_add ( "Ranges listing", "Listagem de faixas", "pt_BR");
 i18n_add ( "Activity listing", "Listagem por atividade", "pt_BR");
 i18n_add ( "Server status", "Estado do servidor", "pt_BR");
 i18n_add ( "All durations are billing time in [[DD:]HH:]MM:SS format.", "Todas durações são bilhetagem no formato [[DD:][HH:]MM:SS.", "pt_BR");
-i18n_add ( "Local", "Local", "pt_BR");
 i18n_add ( "Others", "Outros", "pt_BR");
-i18n_add ( "Calls", "Quant.", "pt_BR");
 i18n_add ( "MM/YYYY", "MM/YYYY", "pt_BR");
 i18n_add ( "The month/year is required.", "O mês/ano é obrigatório.", "pt_BR");
 i18n_add ( "Consolidated", "Consolidado", "pt_BR");
 i18n_add ( "Consolidated extensions calls report", "Relatório consolidado de ligações por ramal", "pt_BR");
 i18n_add ( "Consolidated gateways calls report", "Relatório consolidado de ligações por gateway", "pt_BR");
-i18n_add ( "Consolidated groups calls report", "Relatório consolidade de ligações por grupo", "pt_BR");
+i18n_add ( "Consolidated groups calls report", "Relatório consolidado de ligações por grupo", "pt_BR");
+i18n_add ( "Consolidated servers calls report", "Relatório consolidado de ligações por servidor", "pt_BR");
 i18n_add ( "consolidated per extension", "consolidado por ramal", "pt_BR");
 i18n_add ( "consolidated per gateway", "consolidado por gateway", "pt_BR");
 i18n_add ( "consolidated per group", "consolidado por grupo", "pt_BR");
+i18n_add ( "consolidated per server", "consolidado por servidor", "pt_BR");
 ?>

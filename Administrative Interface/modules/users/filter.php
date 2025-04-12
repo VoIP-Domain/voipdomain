@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,21 +24,22 @@
  */
 
 /**
- * VoIP Domain users filter module. This module add the filter calls related to
+ * VoIP Domain users module filters. This module add the filter calls related to
  * users.
  *
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Users
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
  * Add user's filters
  */
-framework_add_filter ( "page_menu_registers", "users_menu");
+framework_add_filter ( "page_menu_configurations", "users_menu");
+framework_add_filter ( "get_users", "get_users");
 
 /**
  * Function to add entry to registers menu.
@@ -51,5 +52,57 @@ framework_add_filter ( "page_menu_registers", "users_menu");
 function users_menu ( $buffer, $parameters)
 {
   return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "user", "href" => "/users", "text" => __ ( "Users"), "permission" => "administrator")));
+}
+
+/**
+ * Function to get users filtered by ID, name, username or email.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return array Output of the found data
+ */
+function get_users ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Create where clause
+   */
+  $where = "";
+  if ( array_key_exists ( "ID", $parameters))
+  {
+    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
+  }
+  if ( array_key_exists ( "Username", $parameters))
+  {
+    $where .= " AND `Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "'";
+  }
+  if ( array_key_exists ( "Email", $parameters))
+  {
+    $where .= " AND `Email` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Email"]) . "'";
+  }
+  if ( array_key_exists ( "Text", $parameters))
+  {
+    $where .= " AND `Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( str_replace ( " ", "%", trim ( strip_tags ( $parameters["Text"])))) . "%'";
+  }
+
+  /**
+   * Check into database if users exists
+   */
+  $data = array ();
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Users`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
+  {
+    while ( $user = $result->fetch_assoc ())
+    {
+      $data[] = $user;
+    }
+  }
+
+  /**
+   * Return structured data
+   */
+  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 ?>

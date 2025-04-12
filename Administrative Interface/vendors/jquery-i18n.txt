@@ -1,6 +1,0 @@
-  jQuery i18n
---===========--
-
-URL: https://github.com/wikimedia/jquery.i18n
-Version: 1.0.4
-License: GPL v2

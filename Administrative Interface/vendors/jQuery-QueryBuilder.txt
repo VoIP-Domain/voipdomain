@@ -1,0 +1,8 @@
+  jQuery-QueryBuilder
+--===================--
+
+URL: https://querybuilder.js.org/
+Version: 2.7.0
+License: MIT
+Modifications: Added minified version of JavaScript and CSS files (at dist/).
+               Fixed new bootstrap 3.4.1 tooltip detection (doesn't use constructor anymore).

@@ -2,5 +2,6 @@
 --========--
 
 URL: http://ionicons.com/
-Version: 2.0.1
+Version: 7.1.2
 License: MIT
+Modifications: Added symbolic link from ionicons.min.css to ionicons.css into docs/css/. We could compile package, but will do only if necessary.

@@ -1,0 +1,4 @@
+/*! Bootstrap integration for DataTables' Responsive
+ * © SpryMedia Ltd - datatables.net/license
+ */
+import jQuery from"jquery";import DataTable from"datatables.net-se";import Responsive from"datatables.net-responsive";let $=jQuery;var _display=DataTable.Responsive.display,_original=_display.modal,_modal=$('<div class="ui modal" role="dialog"><div class="header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button></div><div class="content"/></div>');_display.modal=function(o){return function(a,e,d,l){return $.fn.modal?(e||(o&&o.header&&_modal.find("div.header").empty().append('<h4 class="title">'+o.header(a)+"</h4>"),_modal.find("div.content").empty().append(d()),_modal.parent().hasClass("dimmer")||_modal.appendTo("body"),_modal.modal("show")),!0):_original(a,e,d,l)}};export default DataTable;

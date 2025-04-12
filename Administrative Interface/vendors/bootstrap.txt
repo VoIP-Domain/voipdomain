@@ -2,5 +2,5 @@
 --=========--
 
 URL: http://getbootstrap.com/
-Version: 3.3.7
+Version: 3.4.1
 License: MIT

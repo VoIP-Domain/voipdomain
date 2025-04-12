@@ -2,6 +2,6 @@
 --==============--
 
 URL: http://timeago.yarp.com/
-Version: 1.6.3
+Version: 1.6.7
 License: MIT
 Modifications: Added minified js for jquery.timeago.js

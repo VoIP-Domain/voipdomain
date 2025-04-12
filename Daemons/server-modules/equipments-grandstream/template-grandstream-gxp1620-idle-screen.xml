@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Screen>
+  <SoftkeyBar>
+    <Layout height="13">
+      <DisplayList>
+        <X>0</X>
+        <Y>0</Y>
+      </DisplayList>
+    </Layout>
+    <ButtonShape id="0" width="43" height="13">
+      <DisplayElement>
+        <DisplayBitmap isfile="true">
+          <Bitmap>/app/resource/etc/softkey_button_b.bmp</Bitmap>
+          <X>0</X>
+          <Y>0</Y>
+        </DisplayBitmap>
+      </DisplayElement>
+      <DisplayElement>
+        <DisplayString font="unifont" halign="center" color="White" bgcolor="Black" width="39" height="11">
+          <DisplayStr>$A</DisplayStr>
+          <X>1</X>
+          <Y>1</Y>
+        </DisplayString>
+      </DisplayElement>
+    </ButtonShape>
+  </SoftkeyBar>
+  <IdleScreen>
+    <ShowStatusLine>false</ShowStatusLine>
+    <DisplayElement>
+      <DisplayString font="unifont" width="128" height="11">
+        <DisplayStr>$N</DisplayStr>
+        <X>0</X>
+        <Y>0</Y>
+      </DisplayString>
+    </DisplayElement>
+    <DisplayElement>
+      <DisplayString font="bold" halign="center" width="128" height="10" bgcolor="White">
+        <DisplayStr>{{{timestring}}}</DisplayStr>
+        <X>0</X>
+        <Y>11</Y>
+      </DisplayString>
+    </DisplayElement>
+    <DisplayElement>
+      <DisplayString font="unifont" halign="center" width="128" height="10" bgcolor="White">
+        <DisplayStr>{{{datestring}}}</DisplayStr>
+        <X>0</X>
+        <Y>22</Y>
+      </DisplayString>
+    </DisplayElement>
+    <!-- Network down display -->
+    <DisplayElement>
+      <DisplayString halign="center" width="128" height="22" bgcolor="White">
+        <DisplayStr></DisplayStr>
+        <X>0</X>
+        <Y>10</Y>
+        <displayCondition negate="true">
+          <conditionType>networkUp</conditionType>
+        </displayCondition>
+      </DisplayString>
+      <DisplayString halign="center" width="128" bgcolor="White">
+        <DisplayStr>$+1226</DisplayStr>
+        <X>0</X>
+        <Y>14</Y>
+        <displayCondition negate="true">
+          <conditionType>networkUp</conditionType>
+        </displayCondition>
+      </DisplayString>
+    </DisplayElement>
+    <!-- /Network down display -->
+    <!-- Network starting display -->
+    <DisplayElement>
+      <DisplayString halign="center" width="128" height="22" bgcolor="White">
+        <DisplayStr></DisplayStr>
+        <X>0</X>
+        <Y>10</Y>
+        <displayCondition negate="true">
+          <conditionType>networkStart</conditionType>
+        </displayCondition>
+      </DisplayString>
+      <DisplayString font="unifont" halign="center" width="128" bgcolor="White">
+        <DisplayStr>$+640</DisplayStr>
+        <X>0</X>
+        <Y>14</Y>
+        <displayCondition negate="true">
+          <conditionType>networkStart</conditionType>
+        </displayCondition>
+      </DisplayString>
+    </DisplayElement>
+    <!-- /Network starting display -->
+    <!-- 5V Error display -->
+    <DisplayElement>
+      <DisplayString halign="center" width="128" height="22" bgcolor="White">
+        <DisplayStr>$v</DisplayStr>
+        <X>0</X>
+        <Y>10</Y>
+        <displayCondition>
+          <conditionType>wrongPower</conditionType>
+        </displayCondition>
+      </DisplayString>
+    </DisplayElement>
+    <!-- /5V Error display -->
+    <!-- core dump display -->
+    <DisplayString halign="center" width="128" height="22" bgcolor="White">
+      <DisplayStr>$+1512</DisplayStr>
+      <X>0</X>
+      <Y>10</Y>
+      <displayCondition>
+        <conditionType>crash</conditionType>
+      </displayCondition>
+    </DisplayString>
+    <!-- /core dump display -->
+    <!-- KeypadLock display -->
+    <DisplayElement>
+      <DisplayString halign="center" width="128" height="22" bgcolor="White">
+        <DisplayStr>$k</DisplayStr>
+        <X>0</X>
+        <Y>10</Y>
+        <displayCondition>
+          <conditionType>keypadLock</conditionType>
+        </displayCondition>
+      </DisplayString>
+    </DisplayElement>
+    <!-- /KeypadLock display -->
+    <!-- Forwarded call display -->
+    <DisplayElement>
+      <DisplayString font="unifont" halign="center" width="128" height="22" bgcolor="White">
+        <DisplayStr>$j</DisplayStr>
+        <X>0</X>
+        <Y>10</Y>
+        <displayCondition>
+          <conditionType>hasFowardedCallLog</conditionType>
+        </displayCondition>
+      </DisplayString>
+    </DisplayElement>
+    <!-- /Forwarded call display -->
+    <!-- Missed call display -->
+    <DisplayElement>
+      <DisplayString font="unifont" halign="center" width="128" height="22" bgcolor="White">
+        <DisplayStr></DisplayStr>
+        <X>0</X>
+        <Y>10</Y>
+        <displayCondition>
+          <conditionType>missCall</conditionType>
+        </displayCondition>
+      </DisplayString>
+      <DisplayBitmap isfile="true">
+        <Bitmap>/app/resource/icon/misscall_13.bmp</Bitmap>
+        <X>6</X>
+        <Y>13</Y>
+        <displayCondition>
+          <conditionType>missCall</conditionType>
+        </displayCondition>
+      </DisplayBitmap>
+      <DisplayString font="unifont" width="102" bgcolor="White">
+        <DisplayStr>$c</DisplayStr>
+        <X>25</X>
+        <Y>12</Y>
+        <displayCondition>
+         ￼<conditionType>missCall</conditionType>
+        </displayCondition>
+      </DisplayString>
+    </DisplayElement>
+    <!-- /Missed call display -->
+    <SoftKeys>
+      <!-- Call history button -->
+      <SoftKey action="MissedCalls" label="{{{history}}}" />
+      <!-- LDAP search button -->
+      <SoftKey>
+        <Label>{{{catalog}}}</Label>
+        <Action>
+          <LDAP/>
+        </Action>
+        <displayCondition>
+          <conditionType>LDAPConfigured</conditionType>
+        </displayCondition>
+      </SoftKey>
+      <!-- /LDAP search button -->
+      <!-- Group capture button -->
+      <SoftKey action="Dial" label="{{{capture}}}" commandId="0" commandArgs="*8" />
+      <SoftKey>
+        <Action>
+          <BackSpace/>
+        </Action>
+        <displayCondition>
+          <conditionType>backSpace</conditionType>
+        </displayCondition>
+      </SoftKey>
+      <SoftKey>
+        <Action>
+          <CANCEL/>
+        </Action>
+        <displayCondition>
+          <conditionType>backSpace</conditionType>
+        </displayCondition>
+      </SoftKey>
+      <SoftKey>
+        <Action>
+          <MissedCalls/>
+        </Action>
+        <displayCondition>
+          <conditionType>missCall</conditionType>
+        </displayCondition>
+      </SoftKey>
+      <SoftKey>
+        <Action>
+          <FwdedCalls/>
+        </Action>
+        <displayCondition>
+          <conditionType>hasFowardedCallLog</conditionType>
+        </displayCondition>
+      </SoftKey>
+      <SoftKey>
+        <Action>
+          <CancelFwd/>
+        </Action>
+        <displayCondition>
+          <conditionType>callFwded</conditionType>
+        </displayCondition>
+      </SoftKey>
+    </SoftKeys>
+  </IdleScreen>
+  <!-- Sub-screen that show IP and Account info -->
+  <IdleScreen>
+    <ShowStatusLine>false</ShowStatusLine>
+    <DisplayString>
+      <DisplayStr>$+161: $I</DisplayStr>
+      <X>2</X>
+      <Y>-2</Y>
+    </DisplayString>
+    <SoftKeys>
+      <SoftKey>
+        <Action>
+          <SwitchSCR/>
+        </Action>
+        <displayCondition>
+          <conditionType>SubScreen</conditionType>
+        </displayCondition>
+      </SoftKey>
+    </SoftKeys>
+  </IdleScreen>
+  <!-- /Sub-screen that show IP and Account info -->
+</Screen>

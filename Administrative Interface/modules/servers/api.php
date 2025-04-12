@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,26 +24,157 @@
  */
 
 /**
- * VoIP Domain servers api module. This module add the api calls related to
+ * VoIP Domain servers module API. This module add the API calls related to
  * servers.
  *
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Servers
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
  * API call to search servers
  */
-framework_add_hook ( "servers_search", "servers_search");
-framework_add_permission ( "servers_search", __ ( "Servers search (select list standard)"));
-framework_add_api_call ( "/servers/search", "Read", "servers_search", array ( "permissions" => array ( "user", "servers_search")));
+framework_add_hook (
+  "servers_search",
+  "servers_search",
+  IN_HOOK_NULL,
+  array (
+    "requests" => array (
+      "type" => "object",
+      "properties" => array (
+        "Filter" => array (
+          "type" => "string",
+          "description" => __ ( "Filter search with this string. If not provided, return all servers."),
+          "example" => __ ( "filter")
+        ),
+        "Fields" => array (
+          "type" => "string",
+          "description" => __ ( "A comma delimited list of fields that should be returned."),
+          "default" => "ID,Description,Address,Port,Backups,Extensions",
+          "example" => "Description,Address,Port"
+        )
+      )
+    ),
+    "response" => array (
+      200 => array (
+        "description" => __ ( "An array containing the system servers."),
+        "schema" => array (
+          "type" => "array",
+          "xml" => array (
+            "name" => "responses",
+            "wrapped" => true
+          ),
+          "items" => array (
+            "type" => "object",
+            "xml" => array (
+              "name" => "server"
+            ),
+            "properties" => array (
+              "ID" => array (
+                "type" => "integer",
+                "description" => __ ( "The internal unique identification number of the server."),
+                "example" => 1
+              ),
+              "Description" => array (
+                "type" => "string",
+                "description" => __ ( "The description of the server."),
+                "example" => __ ( "Main server")
+              ),
+              "Address" => array (
+                "type" => "string",
+                "description" => __ ( "The IP address of the server."),
+                "pattern" => "/^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$/",
+                "example" => "192.168.0.1"
+              ),
+              "Port" => array (
+                "type" => "integer",
+                "description" => __ ( "The IP port of the server."),
+                "minimum" => 0,
+                "maximum" => 65535,
+                "example" => 5060
+              ),
+              "Backups" => array (
+                "type" => "array",
+                "xml" => array (
+                  "name" => "Backups",
+                  "wrapped" => true
+                ),
+                "description" => __ ( "An array with backup servers information, if available."),
+                "items" => array (
+                  "type" => "object",
+                  "xml" => array (
+                    "name" => "server"
+                  ),
+                  "properties" => array (
+                    "Server" => array (
+                      "type" => "object",
+                      "properties" => array (
+                        "Description" => array (
+                          "type" => "string",
+                          "description" => __ ( "The description of the backup server."),
+                          "example" => __ ( "Main server backup")
+                        ),
+                        "Address" => array (
+                          "type" => "string",
+                          "description" => __ ( "The IP address of the backup server."),
+                          "pattern" => "/^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$/",
+                          "example" => "192.168.0.2"
+                        ),
+                        "Port" => array (
+                          "type" => "integer",
+                          "description" => __ ( "The IP port of the backup server."),
+                          "minimum" => 0,
+                          "maximum" => 65535,
+                          "example" => 5060
+                        )
+                      )
+                    )
+                  )
+                )
+              ),
+              "Extensions" => array (
+                "type" => "integer",
+                "description" => __ ( "The number of extensions allocated to the server."),
+                "example" => 329
+              )
+            )
+          )
+        )
+      ),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "Filter" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "Invalid filter content.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
+framework_add_permission ( "servers_search", __ ( "Search servers"));
+framework_add_api_call (
+  "/servers",
+  "Read",
+  "servers_search",
+  array (
+    "permissions" => array ( "user", "servers_search"),
+    "title" => __ ( "Search servers"),
+    "description" => __ ( "Search for system servers.")
+  )
+);
 
 /**
- * Function to generate server list to select box.
+ * Function to search servers.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -56,47 +187,12 @@ function servers_search ( $buffer, $parameters)
   global $_in;
 
   /**
-   * Check for modifications time
+   * Call start hook if exist
    */
-  check_table_modification ( "Servers");
-
-  /**
-   * Search servers
-   */
-  $data = array ();
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Name`, `Domain` FROM `Servers` " . ( ! empty ( $parameters["q"]) ? "WHERE `Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["q"]) . "%' OR `Domain` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["q"]) . "%' " : "") . "ORDER BY `Name`"))
+  if ( framework_has_hook ( "servers_search_start"))
   {
-    while ( $server = $result->fetch_assoc ())
-    {
-      $data[] = array ( $server["ID"], $server["Name"] . " (" . $server["Domain"] . ")");
-    }
+    $parameters = framework_call ( "servers_search_start", $parameters);
   }
-
-  /**
-   * Return structured data
-   */
-  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
-}
-
-/**
- * API call to fetch servers listing
- */
-framework_add_hook ( "servers_fetch", "servers_fetch");
-framework_add_permission ( "servers_fetch", __ ( "Request server listing"));
-framework_add_api_call ( "/servers/fetch", "Read", "servers_fetch", array ( "permissions" => array ( "user", "servers_fetch")));
-
-/**
- * Function to generate server list.
- *
- * @global array $_in Framework global configuration variable
- * @param string $buffer Buffer from plugin system if processed by other function
- *                       before
- * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
- */
-function servers_fetch ( $buffer, $parameters)
-{
-  global $_in;
 
   /**
    * Check for modifications time
@@ -104,21 +200,89 @@ function servers_fetch ( $buffer, $parameters)
   check_table_modification ( array ( "Servers", "Ranges", "Extensions"));
 
   /**
+   * Validate received parameters
+   */
+  $data = array ();
+
+  /**
+   * Call validate hook if exist
+   */
+  if ( framework_has_hook ( "servers_search_validate"))
+  {
+    $data = framework_call ( "servers_search_validate", $parameters);
+  }
+
+  /**
+   * Return error data if some error occurred
+   */
+  if ( sizeof ( $data) != 0)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+    return $data;
+  }
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "servers_search_sanitize"))
+  {
+    $parameters = framework_call ( "servers_search_sanitize", $parameters, false, $parameters);
+  }
+
+  /**
+   * Call pre hook if exist
+   */
+  if ( framework_has_hook ( "servers_search_pre"))
+  {
+    $parameters = framework_call ( "servers_search_pre", $parameters, false, $parameters);
+  }
+
+  /**
    * Search servers
    */
-  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `Servers`.*, COUNT(`Extensions`.`Range`) AS `Total` FROM `Servers` LEFT JOIN `Ranges` ON `Ranges`.`Server` = `Servers`.`ID` LEFT JOIN `Extensions` ON `Extensions`.`Range` = `Ranges`.`ID` GROUP BY `Servers`.`ID`"))
+  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `Servers`.`ID`, `Servers`.`Description`, `Servers`.`Address`, `Servers`.`Port`, COUNT(`Extensions`.`Range`) AS `Extensions` FROM `Servers` LEFT JOIN `Ranges` ON `Ranges`.`Server` = `Servers`.`ID` LEFT JOIN `Extensions` ON `Extensions`.`Range` = `Ranges`.`ID`" . ( ! empty ( $parameters["Filter"]) ? " WHERE `Servers`.`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " GROUP BY `Servers`.`ID` ORDER BY `Description`, `Address`, `Port`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
 
   /**
-   * Create table structure
+   * Create result structure
    */
   $data = array ();
+  $fields = api_filter_fields ( $parameters["Fields"], "ID,Description,Address,Port,Extensions", "ID,Description,Address,Port,Backups,Extensions");
   while ( $result = $results->fetch_assoc ())
   {
-    $data[] = array ( $result["ID"], $result["Name"], $result["Address"], $result["Domain"], $result["Total"]);
+    /**
+     * Fetch server backups
+     */
+    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT `Description`, `Address`, `Port` FROM `ServerBackup` WHERE `Server` = " . $_in["mysql"]["id"]->real_escape_string ( $result["ID"])))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    $result["Backups"] = array ();
+    while ( $backup = $result2->fetch_assoc ())
+    {
+      $result["Backups"][] = $backup;
+    }
+    $data[] = api_filter_entry ( $fields, $result);
+  }
+
+  /**
+   * Call post hook if exist
+   */
+  if ( framework_has_hook ( "servers_search_post"))
+  {
+    $data = framework_call ( "servers_search_post", $parameters, false, $data);
+  }
+
+  /**
+   * Execute finish hook if exist
+   */
+  if ( framework_has_hook ( "servers_search_finish"))
+  {
+    framework_call ( "servers_search_finish", $parameters);
   }
 
   /**
@@ -130,12 +294,139 @@ function servers_fetch ( $buffer, $parameters)
 /**
  * API call to get server information
  */
-framework_add_hook ( "servers_view", "servers_view");
-framework_add_permission ( "servers_view", __ ( "View servers informations"));
-framework_add_api_call ( "/servers/:id", "Read", "servers_view", array ( "permissions" => array ( "user", "servers_view")));
+framework_add_hook (
+  "servers_view",
+  "servers_view",
+  IN_HOOK_NULL,
+  array (
+    "response" => array (
+      200 => array (
+        "description" => __ ( "An object containing information about the server."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "Description" => array (
+              "type" => "string",
+              "description" => __ ( "The description of the server."),
+              "example" => __ ( "Main server")
+            ),
+            "Address" => array (
+              "type" => "string",
+              "description" => __ ( "The IP address of the server."),
+              "pattern" => "/^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$/",
+              "example" => "192.168.0.1"
+            ),
+            "Port" => array (
+              "type" => "integer",
+              "description" => __ ( "The IP port of the server."),
+              "minimum" => 0,
+              "maximum" => 65535,
+              "example" => 5060
+            ),
+            "NTP" => array (
+              "type" => "array",
+              "description" => __ ( "An array with NTP servers information, if available."),
+              "items" => array (
+                "type" => "object",
+                "properties" => array (
+                  "Server" => array (
+                    "type" => "string",
+                    "description" => __ ( "The NTP server address of the server."),
+                    "example" => "0.pool.ntp.org"
+                  )
+                )
+              )
+            ),
+            "Backups" => array (
+              "type" => "array",
+              "description" => __ ( "An array with backup servers information, if available."),
+              "items" => array (
+                "type" => "object",
+                "properties" => array (
+                  "Server" => array (
+                    "type" => "object",
+                    "properties" => array (
+                      "Description" => array (
+                        "type" => "string",
+                        "description" => __ ( "The description of the backup server."),
+                        "example" => __ ( "Main server backup")
+                      ),
+                      "Address" => array (
+                        "type" => "string",
+                        "description" => __ ( "The IP address of the backup server."),
+                        "pattern" => "/^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$/",
+                        "example" => "192.168.0.2"
+                      ),
+                      "Port" => array (
+                        "type" => "integer",
+                        "description" => __ ( "The IP port of the backup server."),
+                        "minimum" => 0,
+                        "maximum" => 65535,
+                        "example" => 5060
+                      )
+                    )
+                  )
+                )
+              )
+            ),
+            "Window" => array (
+              "type" => "string",
+              "description" => __ ( "If the audio file transfer has time window limit."),
+              "example" => true
+            ),
+            "Start" => array (
+              "type" => "time",
+              "description" => __ ( "If transfer window are enabled, the start time of the window."),
+              "pattern" => "/^([0-1][0-9]|2[0-3]):([0-5][0-9])$/",
+              "example" => "00:00"
+            ),
+            "Finish" => array (
+              "type" => "time",
+              "description" => __ ( "If transfer window are enabled, the finish time of the window."),
+              "pattern" => "/^([0-1][0-9]|2[0-3]):([0-5][0-9])$/",
+              "example" => "06:00"
+            )
+          )
+        )
+      ),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "ID" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "Invalid server ID.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
+framework_add_permission ( "servers_view", __ ( "View servers information"));
+framework_add_api_call (
+  "/servers/:ID",
+  "Read",
+  "servers_view",
+  array (
+    "permissions" => array ( "user", "servers_view"),
+    "title" => __ ( "View servers"),
+    "description" => __ ( "Get a system server information."),
+    "parameters" => array (
+      array (
+        "name" => "ID",
+        "type" => "integer",
+        "description" => __ ( "The server internal system unique identifier."),
+        "example" => 1
+      )
+    )
+  )
+);
 
 /**
- * Function to generate server informations.
+ * Function to generate server information.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -148,89 +439,119 @@ function servers_view ( $buffer, $parameters)
   global $_in;
 
   /**
+   * Call start hook if exist
+   */
+  if ( framework_has_hook ( "servers_view_start"))
+  {
+    $parameters = framework_call ( "servers_view_start", $parameters);
+  }
+
+  /**
    * Check for modifications time
    */
   check_table_modification ( array ( "Servers", "Countries", "Gateways"));
 
   /**
-   * Check basic parameters
+   * Validate received parameters
    */
-  $parameters["id"] = (int) $parameters["id"];
+  $data = array ();
+  if ( ! array_key_exists ( "ID", $parameters) || ! is_numeric ( $parameters["ID"]))
+  {
+    $data["ID"] = __ ( "Invalid server ID.");
+  }
+
+  /**
+   * Call validate hook if exist
+   */
+  if ( framework_has_hook ( "servers_view_validate"))
+  {
+    $data = framework_call ( "servers_view_validate", $parameters);
+  }
+
+  /**
+   * Return error data if some error occurred
+   */
+  if ( sizeof ( $data) != 0)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+    return $data;
+  }
+
+  /**
+   * Sanitize parameters
+   */
+  $parameters["ID"] = (int) $parameters["ID"];
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "servers_view_sanitize"))
+  {
+    $parameters = framework_call ( "servers_view_sanitize", $parameters, false, $parameters);
+  }
+
+  /**
+   * Call pre hook if exist
+   */
+  if ( framework_has_hook ( "servers_view_pre"))
+  {
+    $parameters = framework_call ( "servers_view_pre", $parameters, false, $parameters);
+  }
 
   /**
    * Search servers
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Servers`.*, `Countries`.`Name` AS `CountryName`, `Gateways`.`Description` AS `NGGWDescription`, `Gateways`.`Type` AS `NGGWType` FROM `Servers` LEFT JOIN `Countries` ON `Servers`.`Country` = `Countries`.`Code` LEFT JOIN `Gateways` ON `Servers`.`NGGW` = `Gateways`.`ID` WHERE `Servers`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   if ( $result->num_rows != 1)
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 400 Bad Request");
     exit ();
   }
   $server = $result->fetch_assoc ();
 
   /**
-   * Get gateways informations
+   * Get server backup servers list
    */
-  $gateways = array ();
-  foreach ( explode ( ",", $server["DefaultGW"]) as $gw)
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Description`, `Address`, `Port` FROM `ServerBackup` WHERE `Server` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $gw)))
-    {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
-    }
-    if ( $result->num_rows == 1)
-    {
-      $gateway = $result->fetch_assoc ();
-      $gateways[$gw] = $gateway["Description"] . " (" . $gateway["Type"] . ")";
-    }
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
   }
-
-  /**
-   * Get blocked gateways informations
-   */
-  $blockeds = array ();
-  if ( ! empty ( $server["BlockedGW"]))
+  $backups = array ();
+  while ( $backup = $result->fetch_assoc ())
   {
-    foreach ( explode ( ",", $server["BlockedGW"]) as $gw)
-    {
-      if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $gw)))
-      {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
-      }
-      if ( $result->num_rows != 1)
-      {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
-      }
-      $gateway = $result->fetch_assoc ();
-      $blockeds[$gw] = $gateway["Description"] . " (" . $gateway["Type"] . ")";
-    }
+    $backups[] = $backup;
   }
 
   /**
    * Format data
    */
-  $data = array ();
-  $data["result"] = true;
-  $data["name"] = $server["Name"];
-  $data["address"] = $server["Address"];
-  $data["domain"] = $server["Domain"];
-  $data["country"] = $server["Country"];
-  $data["countryname"] = $server["CountryName"];
-  $data["areacode"] = $server["AreaCode"];
-  $data["nggw"] = $server["NGGW"];
-  $data["nggwname"] = $server["NGGWDescription"] . " (" . $server["NGGWType"] . ")";
-  $data["blockeds"] = $blockeds;
-  $data["gateways"] = $gateways;
-  $data["window"] = $server["TransfStart"] != NULL;
-  $data["start"] = $server["TransfStart"];
-  $data["finish"] = $server["TransfEnd"];
+  $server["Backups"] = $backups;
+  $server["Window"] = $server["TransfStart"] != NULL;
+  $server["Start"] = $server["TransfStart"];
+  $server["Finish"] = $server["TransfEnd"];
+  $server["NTP"] = json_decode ( $server["NTP"], true);
+  $data = api_filter_entry ( array ( "Description", "Address", "Port", "NTP", "Backups", "Window", "Start", "Finish"), $server);
+
+  /**
+   * Call post hook if exist
+   */
+  if ( framework_has_hook ( "servers_view_post"))
+  {
+    $data = framework_call ( "servers_view_post", $parameters, false, $data);
+  }
+
+  /**
+   * Execute finish hook if exist
+   */
+  if ( framework_has_hook ( "servers_view_finish"))
+  {
+    framework_call ( "servers_view_finish", $parameters);
+  }
 
   /**
    * Return structured data
@@ -241,9 +562,160 @@ function servers_view ( $buffer, $parameters)
 /**
  * API call to add a new server
  */
-framework_add_hook ( "servers_add", "servers_add");
+framework_add_hook (
+  "servers_add",
+  "servers_add",
+  IN_HOOK_NULL,
+  array (
+    "requests" => array (
+      "type" => "object",
+      "required" => true,
+      "properties" => array (
+        "Description" => array (
+          "type" => "string",
+          "description" => __ ( "The description of the system server."),
+          "required" => true,
+          "example" => __ ( "Main server")
+        ),
+        "Address" => array (
+          "type" => "string",
+          "description" => __ ( "The IP address of the server."),
+          "pattern" => "/^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$/",
+          "required" => true,
+          "example" => "192.168.0.1"
+        ),
+        "Port" => array (
+          "type" => "integer",
+          "description" => __ ( "The IP port of the server."),
+          "minimum" => 0,
+          "maximum" => 65535,
+          "required" => true,
+          "example" => 5060
+        ),
+        "NTP" => array (
+          "type" => "array",
+          "description" => __ ( "An array with NTP servers information, if available."),
+          "required" => false,
+          "xml" => array (
+            "name" => "NTP",
+            "wrapped" => true
+          ),
+          "items" => array (
+            "type" => "string",
+            "description" => __ ( "The NTP server address of the server."),
+            "required" => true,
+            "example" => "0.pool.ntp.org",
+            "xml" => array (
+              "name" => "Server"
+            )
+          )
+        ),
+        "Backups" => array (
+          "type" => "array",
+          "description" => __ ( "The list of backup servers for this server."),
+          "required" => false,
+          "items" => array (
+            "type" => "object",
+            "properties" => array (
+              "Reference" => array (
+                "type" => "integer",
+                "description" => __ ( "The reference number to backup server. This is used to report any backup server variable error."),
+                "required" => true
+              ),
+              "Description" => array (
+                "type" => "string",
+                "description" => __ ( "The description of the backup server."),
+                "required" => true,
+                "example" => __ ( "Main server backup")
+              ),
+              "Address" => array (
+                "type" => "string",
+                "description" => __ ( "The IP address of the backup server."),
+                "pattern" => "/^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$/",
+                "required" => true,
+                "example" => "192.168.0.2"
+              ),
+              "Port" => array (
+                "type" => "integer",
+                "description" => __ ( "The IP port of the backup server."),
+                "minimum" => 0,
+                "maximum" => 65535,
+                "required" => true,
+                "example" => 5060
+              )
+            )
+          )
+        ),
+        "Window" => array (
+          "type" => "boolean",
+          "description" => __ ( "If the file transfer from the server are time windowed."),
+          "example" => true
+        ),
+        "Start" => array (
+          "type" => "string",
+          "description" => __ ( "If transfer window are enabled, the start time of the window."),
+          "pattern" => "/^([0-1][0-9]|2[0-3]):([0-5][0-9])$/",
+          "example" => "00:00"
+        ),
+        "Finish" => array (
+          "type" => "string",
+          "description" => __ ( "If transfer window are enabled, the finish time of the window."),
+          "pattern" => "/^([0-1][0-9]|2[0-3]):([0-5][0-9])$/",
+          "example" => "06:00"
+        )
+      )
+    ),
+    "response" => array (
+      201 => array (
+        "description" => __ ( "New system server added sucessfully.")
+      ),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "Description" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The server description is required.")
+            ),
+            "Address" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The server address is invalid.")
+            ),
+            "Port" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The server port is invalid.")
+            ),
+            "Start" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The start hour is required when transfer window are enabled.")
+            ),
+            "Finish" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The finish hour is required when transfer window are enabled.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
 framework_add_permission ( "servers_add", __ ( "Add servers"));
-framework_add_api_call ( "/servers", "Create", "servers_add", array ( "permissions" => array ( "user", "servers_add")));
+framework_add_api_call (
+  "/servers",
+  "Create",
+  "servers_add",
+  array (
+    "permissions" => array ( "user", "servers_add"),
+    "title" => __ ( "Add servers"),
+    "description" => __ ( "Add a new system server.")
+  )
+);
 
 /**
  * Function to add a new server.
@@ -259,186 +731,140 @@ function servers_add ( $buffer, $parameters)
   global $_in;
 
   /**
-   * Check basic parameters
+   * Call start hook if exist
    */
-  $data = array ();
-  $data["result"] = true;
-  $parameters["name"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["name"])));
-  if ( empty ( $parameters["name"]))
+  if ( framework_has_hook ( "servers_add_start"))
   {
-    $data["result"] = false;
-    $data["name"] = __ ( "The server name is required.");
-  }
-  $parameters["address"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["address"])));
-  if ( empty ( $parameters["address"]))
-  {
-    $data["result"] = false;
-    $data["address"] = __ ( "The server address is required.");
-  }
-  if ( ! empty ( $parameters["address"]) && ! preg_match ( "/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/", $parameters["address"]) && gethostbyname ( $parameters["address"]) == $parameters["address"])
-  {
-    $data["result"] = false;
-    $data["address"] = __ ( "The server address is invalid.");
-  }
-  $parameters["domain"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["domain"])));
-  if ( empty ( $parameters["domain"]))
-  {
-    $data["result"] = false;
-    $data["domain"] = __ ( "The server domain is required.");
-  }
-  $parameters["country"] = (int) $parameters["country"];
-  if ( empty ( $parameters["country"]))
-  {
-    $data["result"] = false;
-    $data["country"] = __ ( "The server country is required.");
-  }
-  $parameters["areacode"] = (int) $parameters["areacode"];
-  if ( empty ( $parameters["areacode"]))
-  {
-    $data["result"] = false;
-    $data["areacode"] = __ ( "The server area code is required.");
-  }
-  $parameters["nggw"] = (int) $parameters["nggw"];
-  if ( empty ( $parameters["nggw"]))
-  {
-    $data["result"] = false;
-    $data["nggw"] = __ ( "The server non geographic gateway calls is required.");
-  }
-  if ( ! is_array ( $parameters["blockeds"]))
-  {
-    if ( ! empty ( $parameters["blockeds"]))
-    {
-      $parameters["blockeds"] = array ( $parameters["blockeds"]);
-    } else {
-      $parameters["blockeds"] = array ();
-    }
-  }
-  foreach ( $parameters["blockeds"] as $key => $value)
-  {
-    $parameters["blockeds"][$key] = (int) $value;
-  }
-  if ( ! is_array ( $parameters["gateways"]))
-  {
-    if ( ! empty ( $parameters["gateways"]))
-    {
-      $parameters["gateways"] = array ( $parameters["gateways"]);
-    } else {
-      $parameters["gateways"] = array ();
-    }
-  }
-  foreach ( $parameters["gateways"] as $key => $value)
-  {
-    $parameters["gateways"][$key] = (int) $value;
+    $parameters = framework_call ( "servers_add_start", $parameters);
   }
 
   /**
-   * Check if country exists
+   * Validate received parameters
    */
-  if ( ! array_key_exists ( "country", $data))
+  $data = array ();
+  $parameters["Description"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["Description"])));
+  if ( empty ( $parameters["Description"]))
   {
-    $check = filters_call ( "get_countries", array ( "code" => $parameters["country"]));
-    if ( sizeof ( $check) != 1)
+    $data["Description"] = __ ( "The server description is required.");
+  }
+  $parameters["Address"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["Address"])));
+  if ( empty ( $parameters["Address"]))
+  {
+    $data["Address"] = __ ( "The server address is required.");
+  }
+  if ( ! empty ( $parameters["Address"]) && ! preg_match ( "/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/", $parameters["Address"]) && gethostbyname ( $parameters["Address"]) == $parameters["Address"])
+  {
+    $data["Address"] = __ ( "The server address is invalid.");
+  }
+  if ( (int) $parameters["Port"] < 0 || (int) $parameters["Port"] >= 65535)
+  {
+    $data["Port"] = __ ( "The server port is invalid.");
+  }
+  if ( ! is_array ( $parameters["NTP"]) && ! empty ( $parameters["NTP"]))
+  {
+    $parameters["NTP"] = array ( $parameters["NTP"]);
+  }
+  foreach ( $parameters["NTP"] as $index => $ntp)
+  {
+    $parameters["NTP"][$index] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["NTP"][$index])));
+  }
+
+  /**
+   * If has backup servers, validate each one
+   */
+  $backups = array ();
+  if ( sizeof ( $parameters["Backups"]) != 0)
+  {
+    foreach ( $parameters["Backups"] as $backupserver)
     {
-      $data["result"] = false;
-      $data["country"] = __ ( "The selected country is invalid.");
+      if ( empty ( $backupserver["Description"]) && empty ( $backupserver["Address"]) && empty ( $backupserver["Port"]))
+      {
+        continue;
+      }
+      if ( sizeof ( $backups) > 3)
+      {
+        $data["Backup_Description_" . $backupserver["Reference"]] = __ ( "Backup servers limit exceeded.");
+        continue;
+      }
+      if ( empty ( $backupserver["Description"]) && ( ! empty ( $backupserver["Address"]) || ! empty ( $backupserver["Port"])))
+      {
+        $data["Backup_Description_" . $backupserver["Reference"]] = __ ( "Empty backup server description.");
+      }
+      if ( empty ( $backupserver["Address"]) && ! empty ( $backupserver["Description"]))
+      {
+        $data["Backup_Address_" . $backupserver["Reference"]] = __ ( "The backup server address is required.");
+      }
+      if ( ! empty ( $backupserver["Address"]) && ! preg_match ( "/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/", $backupserver["Address"]) && gethostbyname ( $backupserver["Address"] == $backupserver["Address"]))
+      {
+        $data["Backup_Address_" . $backupserver["Reference"]] = __ ( "The backup server address is invalid.");
+      }
+      $backupserver["Port"] = (int) $backupserver["Port"];
+      if ( $backupserver["Port"] < 0 || $backupserver["Port"] >= 65535)
+      {
+        $data["Backup_Port_" . $backupserver["Reference"]] = __ ( "The backup server port is invalid.");
+      }
+      $backups[] = array ( "Description" => $backupserver["Description"], "Address" => $backupserver["Address"], "Port" => $backupserver["Port"]);
     }
   }
 
   /**
    * Check if transfer window enabled, and time window provided
    */
-  if ( $parameters["window"] == "on" && empty ( $parameters["start"]))
+  if ( $parameters["Window"] && empty ( $parameters["Start"]))
   {
-    $data["result"] = false;
-    $data["start"] = __ ( "The start hour is required.when transfer window are enabled.");
+    $data["Start"] = __ ( "The start hour is required when transfer window are enabled.");
   }
-  if ( $parameters["window"] == "on" && empty ( $parameters["finish"]))
+  if ( $parameters["Window"] == "on" && empty ( $parameters["Finish"]))
   {
-    $data["result"] = false;
-    $data["finish"] = __ ( "The finish hour is required.when transfer window are enabled.");
+    $data["Finish"] = __ ( "The finish hour is required when transfer window are enabled.");
   }
 
   /**
-   * If provided some gateway, check if exists
+   * Check if server IP and port was not in use
    */
-  if ( array_key_exists ( "gateways", $parameters) && sizeof ( $parameters["gateways"]) != 0)
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "' AND `Port` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Port"]) . "'"))
   {
-    $gateways = array ();
-    foreach ( $parameters["gateways"] as $gateway)
-    {
-      if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $gateway)))
-      {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
-      }
-      if ( $result->num_rows == 1)
-      {
-        $gateways[] = $gateway;
-      }
-    }
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( $result->num_rows != 0)
+  {
+    $data["Address"] = __ ( "The address and port is already in use by other server.");
+  }
+
+   /**
+   * Call validate hook if exist
+   */
+  if ( framework_has_hook ( "servers_add_validate"))
+  {
+    $data = framework_call ( "servers_add_validate", $parameters, false, $data);
   }
 
   /**
-   * If provided some blocked gateway, check if exists
+   * Return error data if some error occurred
    */
-  if ( array_key_exists ( "blockeds", $parameters) && sizeof ( $parameters["blockeds"]) != 0)
-  {
-    $blockeds = array ();
-    foreach ( $parameters["blockeds"] as $gateway)
-    {
-      if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $gateway)))
-      {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
-      }
-      if ( $result->num_rows == 1)
-      {
-        $blockeds[] = $gateway;
-      }
-    }
-  }
-
-  /**
-   * If provided a non geographic gateway, check if exist
-   */
-  if ( ! array_key_exists ( "nggw", $data))
-  {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["nggw"])))
-    {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
-    }
-    if ( $result->num_rows != 1)
-    {
-      $data["result"] = false;
-      $data["nggw"] = __ ( "The selected non geographic calls gateway is invalid.");
-    }
-  }
-
-  /**
-   * Call add sanitize hook, if exist
-   */
-  if ( framework_has_hook ( "servers_add_sanitize"))
-  {
-    $data = framework_call ( "servers_add_sanitize", $parameters, false, $data);
-  }
-
-  /**
-   * Return error data if some error ocurred
-   */
-  if ( $data["result"] == false)
+  if ( sizeof ( $data) != 0)
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
     return $data;
   }
 
   /**
-   * Create a random password for server criptography
+   * Sanitize parameters
    */
-  $parameters["password"] = randomPassword ( 12);
+  $parameters["Port"] = (int) $parameters["Port"];
+  $parameters["Window"] = (boolean) $parameters["Window"];
 
   /**
-   * Call add pre hook, if exist
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "servers_add_sanitize"))
+  {
+    $parameters = framework_call ( "servers_add_sanitize", $parameters, false, $parameters);
+  }
+
+  /**
+   * Call pre hook if exist
    */
   if ( framework_has_hook ( "servers_add_pre"))
   {
@@ -446,58 +872,232 @@ function servers_add ( $buffer, $parameters)
   }
 
   /**
+   * Generate system public/private keys
+   */
+  $res = openssl_pkey_new ( array ( "digest_alg" => "sha512", "private_key_bits" => 8192, "private_key_type" => OPENSSL_KEYTYPE_RSA));
+  openssl_pkey_export ( $res, $privKey);
+  $privKey = preg_replace ( "/\n$/m", "", $privKey);
+  $pubKey = openssl_pkey_get_details ( $res);
+  $pubKey = preg_replace ( "/\n$/m", "", $pubKey["key"]);
+  unset ( $res);
+
+  /**
    * Add new server record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Servers` (`Name`, `Address`, `Domain`, `Country`, `AreaCode`, `Password`, `NGGW`, `DefaultGW`, `BlockedGW`, `TransfStart`, `TransfEnd`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["address"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["domain"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $parameters["country"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $parameters["areacode"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["password"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $parameters["nggw"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $gateways)) . "', '" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $blockeds)) . "', " . ( $parameters["window"] == "on" ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["start"]) . ":00'" : "NULL") . ", " . ( $parameters["window"] == "on" ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["finish"]) . ":59'" : "NULL") . ")"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Servers` (`Description`, `Address`, `Port`, `NTP`, `TransfStart`, `TransfEnd`, `PublicKey`, `PrivateKey`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Port"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["NTP"])) . "', " . ( $parameters["Window"] ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . ":00'" : "NULL") . ", " . ( $parameters["Window"] ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Finish"]) . ":59'" : "NULL") . ", '" . $_in["mysql"]["id"]->real_escape_string ( $pubKey) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $privKey) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  $parameters["id"] = $_in["mysql"]["id"]->insert_id;
+  $parameters["ID"] = $_in["mysql"]["id"]->insert_id;
 
   /**
-   * Call add post hook, if exist
+   * Add backup servers
+   */
+  if ( sizeof ( $backups) != 0)
+  {
+    foreach ( $backups as $id => $backupserver)
+    {
+      /**
+       * Generate system public/private keys
+       */
+      $res = openssl_pkey_new ( array ( "digest_alg" => "sha512", "private_key_bits" => 8192, "private_key_type" => OPENSSL_KEYTYPE_RSA));
+      openssl_pkey_export ( $res, $privKey);
+      $privKey = preg_replace ( "/\n$/m", "", $privKey);
+      $pubKey = openssl_pkey_get_details ( $res);
+      $pubKey = preg_replace ( "/\n$/m", "", $pubKey["key"]);
+      unset ( $res);
+
+      if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `ServerBackup` (`Server`, `Description`, `Address`, `Port`, `PublicKey`, `PrivateKey`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $backupserver["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $backupserver["Address"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $backupserver["Port"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $pubKey) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $privKey) . "')"))
+      {
+        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+        exit ();
+      }
+      $backups[$id]["ID"] = $_in["mysql"]["id"]->insert_id;
+    }
+  }
+  $parameters["Backups"] = $backups;
+
+  /**
+   * Call post hook if exist
    */
   if ( framework_has_hook ( "servers_add_post"))
   {
     framework_call ( "servers_add_post", $parameters);
   }
 
+// **TODO**: Revisar:
+
+// Need to create a Password for each other server, and store it at the database. Also, when creating the server configuration (will run a rebuild), need to sent the password for each other server to create the PJSIP authentication file.
+// So, next steps are:
+// 1) Create the password for each server except the created one, for sip trunking between the two servers
+// 2) Add the password for the server on notify (will need to create a loop changing password for each notified server)
+// 3) Add another kind of notification to the created server with the credentials to all other servers... this will create the PJSIP endpoint for each one
+
+// Reference: https://stackoverflow.com/questions/37422603/building-channels-trunks-between-two-asterisk-servers-with-pjsip
+
   /**
    * Add new server at Asterisk servers
    */
-  $notify = array ( "ID" => $parameters["id"], "Name" => $parameters["name"], "Address" => $parameters["address"]);
+  $notifybackup = array ();
+  foreach ( $parameters["Backups"] as $backup)
+  {
+    $notifybackup[] = array ( "Address" => $backup["Address"], "Port" => $backup["Port"]);
+  }
+  $notify = array ( "ID" => $parameters["ID"], "Description" => $parameters["Description"], "Address" => $parameters["Address"], "Port" => $parameters["Port"], "Backups" => $notifybackup);
   if ( framework_has_hook ( "servers_add_notify"))
   {
     $notify = framework_call ( "servers_add_notify", $parameters, false, $notify);
   }
-  notify_server ( 0, "createserver", $notify);
+  notify_server ( $parameters["ID"] * -1, "server_add", $notify);
 
   /**
-   * Insert audit registry
+   * Execute finish hook if exist
    */
-  $audit = array ( "ID" => $parameters["id"], "Name" => $parameters["name"], "Address" => $parameters["address"], "Domain" => $parameters["domain"], "Country" => $parameters["country"], "AreaCode" => $parameters["areacode"], "Password" => $parameters["password"], "NGGW" => $parameters["nggw"], "Gateways" => $gateways, "Blockeds" => $blockeds, "Window" => ( $parameters["window"] == "on"), "Start" => $parameters["start"], "Finish" => $parameters["finish"]);
-  if ( framework_has_hook ( "servers_add_audit"))
+  if ( framework_has_hook ( "servers_add_finish"))
   {
-    $audit = framework_call ( "servers_add_audit", $parameters, false, $audit);
+    framework_call ( "servers_add_finish", $parameters, false);
   }
-  audit ( "server", "add", $audit);
 
   /**
    * Return OK to user
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . $_in["general"]["baseurl"] . "servers/" . $parameters["id"] . "/view");
+  header ( "Location: " . $_in["api"]["baseurl"] . "/servers/" . $parameters["ID"]);
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 
 /**
  * API call to edit an existing server
  */
-framework_add_hook ( "servers_edit", "servers_edit");
+framework_add_hook (
+  "servers_edit",
+  "servers_edit",
+  IN_HOOK_NULL,
+  array (
+    "requests" => array (
+      "type" => "object",
+      "required" => true,
+      "properties" => array (
+        "Description" => array (
+          "type" => "string",
+          "description" => __ ( "The description of the system server."),
+          "required" => true,
+          "example" => __ ( "Main server")
+        ),
+        "Address" => array (
+          "type" => "string",
+          "description" => __ ( "The IP address of the server."),
+          "pattern" => "/^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$/",
+          "required" => true,
+          "example" => "192.168.0.1"
+        ),
+        "Port" => array (
+          "type" => "integer",
+          "description" => __ ( "The IP port of the server."),
+          "minimum" => 0,
+          "maximum" => 65535,
+          "required" => true,
+          "example" => 5060
+        ),
+        "NTP" => array (
+          "type" => "array",
+          "description" => __ ( "An array with NTP servers information, if available."),
+          "required" => false,
+          "xml" => array (
+            "name" => "NTP",
+            "wrapped" => true
+          ),
+          "items" => array (
+            "type" => "string",
+            "description" => __ ( "The NTP server address of the server."),
+            "required" => true,
+            "example" => "0.pool.ntp.org",
+            "xml" => array (
+              "name" => "Server"
+            )
+          )
+        ),
+        "Window" => array (
+          "type" => "boolean",
+          "description" => __ ( "If the file transfer from the server are time windowed."),
+          "example" => true
+        ),
+        "Start" => array (
+          "type" => "string",
+          "description" => __ ( "If transfer window are enabled, the start time of the window."),
+          "pattern" => "/^([0-1][0-9]|2[0-3]):([0-5][0-9])$/",
+          "example" => "00:00"
+        ),
+        "Finish" => array (
+          "type" => "string",
+          "description" => __ ( "If transfer window are enabled, the finish time of the window."),
+          "pattern" => "/^([0-1][0-9]|2[0-3]):([0-5][0-9])$/",
+          "example" => "06:00"
+        )
+      )
+    ),
+    "response" => array (
+      200 => array (
+        "description" => __ ( "The system server was sucessfully updated.")
+      ),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "Description" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The server description is required.")
+            ),
+            "Address" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The server address is invalid.")
+            ),
+            "Port" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The server port is invalid.")
+            ),
+            "Start" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The start hour is required when transfer window are enabled.")
+            ),
+            "Finish" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The finish hour is required when transfer window are enabled.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
 framework_add_permission ( "servers_edit", __ ( "Edit servers"));
-framework_add_api_call ( "/servers/:id", "Modify", "servers_edit", array ( "permissions" => array ( "user", "servers_edit")));
-framework_add_api_call ( "/servers/:id", "Edit", "servers_edit", array ( "permissions" => array ( "user", "servers_edit")));
+framework_add_api_call (
+  "/servers/:ID",
+  "Modify",
+  "servers_edit",
+  array (
+    "permissions" => array ( "user", "servers_edit"),
+    "title" => __ ( "Edit servers"),
+    "description" => __ ( "Change a system server information.")
+  )
+);
+framework_add_api_call (
+  "/servers/:ID",
+  "Edit",
+  "servers_edit",
+  array (
+    "permissions" => array ( "user", "servers_edit"),
+    "title" => __ ( "Edit servers"),
+    "description" => __ ( "Change a system server information.")
+  )
+);
 
 /**
  * Function to edit an existing server.
@@ -513,194 +1113,157 @@ function servers_edit ( $buffer, $parameters)
   global $_in;
 
   /**
-   * Check basic parameters
+   * Call start hook if exist
+   */
+  if ( framework_has_hook ( "servers_edit_start"))
+  {
+    $parameters = framework_call ( "servers_edit_start", $parameters);
+  }
+
+  /**
+   * Validate received parameters
    */
   $data = array ();
-  $data["result"] = true;
-  $parameters["id"] = (int) $parameters["id"];
-  $parameters["name"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["name"])));
-  if ( empty ( $parameters["name"]))
+  $parameters["Description"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["Description"])));
+  if ( empty ( $parameters["Description"]))
   {
-    $data["result"] = false;
-    $data["name"] = __ ( "The server name is required.");
+    $data["Description"] = __ ( "The server description is required.");
   }
-  $parameters["address"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["address"])));
-  if ( empty ( $parameters["address"]))
+  $parameters["Address"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["Address"])));
+  if ( empty ( $parameters["Address"]))
   {
-    $data["result"] = false;
-    $data["address"] = __ ( "The server address is required.");
+    $data["Address"] = __ ( "The server address is required.");
   }
-  if ( ! empty ( $parameters["address"]) && ! preg_match ( "/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/", $parameters["address"]) && gethostbyname ( $parameters["address"]) == $parameters["address"])
+  if ( ! empty ( $parameters["Address"]) && ! preg_match ( "/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/", $parameters["Address"]) && gethostbyname ( $parameters["Address"]) == $parameters["Address"])
   {
-    $data["result"] = false;
-    $data["address"] = __ ( "The server address is invalid.");
+    $data["Address"] = __ ( "The server address is invalid.");
   }
-  $parameters["domain"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["domain"])));
-  if ( empty ( $parameters["domain"]))
+  if ( (int) $parameters["Port"] < 0 || (int) $parameters["Port"] >= 65535)
   {
-    $data["result"] = false;
-    $data["domain"] = __ ( "The server domain is required.");
+    $data["Port"] = __ ( "The server port is invalid.");
   }
-  $parameters["country"] = (int) $parameters["country"];
-  if ( empty ( $parameters["country"]))
+  if ( ! is_array ( $parameters["NTP"]) && ! empty ( $parameters["NTP"]))
   {
-    $data["result"] = false;
-    $data["country"] = __ ( "The server country is required.");
+    $parameters["NTP"] = array ( $parameters["NTP"]);
   }
-  $parameters["areacode"] = (int) $parameters["areacode"];
-  if ( empty ( $parameters["areacode"]))
+  foreach ( $parameters["NTP"] as $index => $ntp)
   {
-    $data["result"] = false;
-    $data["areacode"] = __ ( "The server area code is required.");
-  }
-  $parameters["nggw"] = (int) $parameters["nggw"];
-  if ( empty ( $parameters["nggw"]))
-  {
-    $data["result"] = false;
-    $data["nggw"] = __ ( "The server non geographic gateway calls is required.");
-  }
-  if ( ! is_array ( $parameters["blockeds"]))
-  {
-    if ( ! empty ( $parameters["blockeds"]))
-    {
-      $parameters["blockeds"] = array ( $parameters["blockeds"]);
-    } else {
-      $parameters["blockeds"] = array ();
-    }
-  }
-  foreach ( $parameters["blockeds"] as $key => $value)
-  {
-    $parameters["blockeds"][$key] = (int) $value;
-  }
-  if ( ! is_array ( $parameters["gateways"]))
-  {
-    if ( ! empty ( $parameters["gateways"]))
-    {
-      $parameters["gateways"] = array ( $parameters["gateways"]);
-    } else {
-      $parameters["gateways"] = array ();
-    }
-  }
-  foreach ( $parameters["gateways"] as $key => $value)
-  {
-    $parameters["gateways"][$key] = (int) $value;
+    $parameters["NTP"][$index] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["NTP"][$index])));
   }
 
   /**
    * Check if server exist (could be removed by other user meanwhile)
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  if ( $result->num_rows == 0)
+  if ( $result->num_rows != 1)
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 400 Bad Request");
     exit ();
   }
-  $server = $result->fetch_assoc ();
+  $parameters["ORIGINAL"] = $result->fetch_assoc ();
 
   /**
-   * Check if country exists
+   * If has backup servers, validate each one
    */
-  $check = filters_call ( "get_countries", array ( "code" => $parameters["country"]));
-  if ( sizeof ( $check) != 1)
+  $backups = array ();
+  if ( sizeof ( $parameters["Backups"]) != 0)
   {
-    $data["result"] = false;
-    $data["country"] = __ ( "The selected country is invalid.");
+    foreach ( $parameters["Backups"] as $backupserver)
+    {
+      if ( empty ( $backupserver["Description"]) && empty ( $backupserver["Address"]) && empty ( $backupserver["Port"]))
+      {
+        continue;
+      }
+      if ( sizeof ( $backups) > 3)
+      {
+        $data["Backup_Description_" . $backupserver["Reference"]] = __ ( "Backup servers limit exceeded.");
+        continue;
+      }
+      if ( empty ( $backupserver["Description"]) && ( ! empty ( $backupserver["Address"]) || ! empty ( $backupserver["Port"])))
+      {
+        $data["Backup_Description_" . $backupserver["Reference"]] = __ ( "Empty backup server description.");
+      }
+      if ( empty ( $backupserver["Address"]) && ! empty ( $backupserver["Description"]))
+      {
+        $data["Backup_Address_" . $backupserver["Reference"]] = __ ( "The backup server address is required.");
+      }
+      if ( ! empty ( $backupserver["Address"]) && ! preg_match ( "/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/", $backupserver["Address"]) && gethostbyname ( $backupserver["Address"] == $backupserver["Address"]))
+      {
+        $data["Backup_Address_" . $backupserver["Reference"]] = __ ( "The backup server address is invalid.");
+      }
+      $backupserver["Port"] = (int) $backupserver["Port"];
+      if ( $backupserver["Port"] < 0 || $backupserver["Port"] >= 65535)
+      {
+        $data["Backup_Port_" . $backupserver["Reference"]] = __ ( "The backup server port is invalid.");
+      }
+      $backups[] = array ( "Description" => $backupserver["Description"], "Address" => $backupserver["Address"], "Port" => $backupserver["Port"]);
+    }
   }
+  $backupscopy = $backups;
 
   /**
    * Check if transfer window enabled, and time window provided
    */
-  if ( $parameters["window"] == "on" && ! array_key_exists ( "start", $parameters))
+  if ( $parameters["Window"] && ! array_key_exists ( "Start", $parameters))
   {
-    $data["result"] = false;
-    $data["start"] = __ ( "The start hour is required.when transfer window are enabled.");
+    $data["Start"] = __ ( "The start hour is required.when transfer window are enabled.");
   }
-  if ( $parameters["window"] == "on" && ! array_key_exists ( "finish", $parameters))
+  if ( $parameters["Window"] && ! array_key_exists ( "Finish", $parameters))
   {
-    $data["result"] = false;
-    $data["finish"] = __ ( "The finish hour is required.when transfer window are enabled.");
+    $data["Finish"] = __ ( "The finish hour is required.when transfer window are enabled.");
   }
 
   /**
-   * If provided some gateway, check if exists
+   * Check if server IP and port was not in use
    */
-  if ( array_key_exists ( "gateways", $parameters) && sizeof ( $parameters["gateways"]) != 0)
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "' AND `Port` = '" . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Port"]) . "' AND `ID` != " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
   {
-    $gateways = array ();
-    foreach ( $parameters["gateways"] as $gateway)
-    {
-      if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $gateway)))
-      {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
-      }
-      if ( $result->num_rows == 1)
-      {
-        $gateways[] = $gateway;
-      }
-    }
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( $result->num_rows != 0)
+  {
+    $data["Address"] = __ ( "The address and port is already in use by other server.");
   }
 
   /**
-   * If provided some blocked gateway, check if exists
+   * Call validate hook if exist
    */
-  if ( array_key_exists ( "blockeds", $parameters) && sizeof ( $parameters["blockeds"]) != 0)
+  if ( framework_has_hook ( "servers_edit_validate"))
   {
-    $blockeds = array ();
-    foreach ( $parameters["blockeds"] as $gateway)
-    {
-      if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $gateway)))
-      {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
-      }
-      if ( $result->num_rows == 1)
-      {
-        $blockeds[] = $gateway;
-      }
-    }
+    $data = framework_call ( "servers_edit_validate", $parameters, false, $data);
   }
 
   /**
-   * If provided a non geographic gateway, check if exist
+   * Return error data if some error occurred
    */
-  if ( ! array_key_exists ( "nggw", $data))
-  {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["nggw"])))
-    {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
-    }
-    if ( $result->num_rows != 1)
-    {
-      $data["result"] = false;
-      $data["nggw"] = __ ( "The selected non geographic calls gateway is invalid.");
-    }
-  }
-
-  /**
-   * Call edit sanitize hook, if exist
-   */
-  if ( framework_has_hook ( "servers_edit_sanitize"))
-  {
-    $data = framework_call ( "servers_edit_sanitize", $parameters, false, $data);
-  }
-
-  /**
-   * Return error data if some error ocurred
-   */
-  if ( $data["result"] == false)
+  if ( sizeof ( $data) != 0)
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
     return $data;
   }
 
   /**
-   * Call edit pre hook, if exist
+   * Sanitize parameters
+   */
+  $parameters["ID"] = (int) $parameters["ID"];
+  $parameters["Port"] = (int) $parameters["Port"];
+  $parameters["Window"] = (boolean) $parameters["Window"];
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "servers_edit_sanitize"))
+  {
+    $parameters = framework_call ( "servers_edit_sanitize", $parameters, false, $parameters);
+  }
+
+  /**
+   * Call pre hook if exist
    */
   if ( framework_has_hook ( "servers_edit_pre"))
   {
@@ -710,14 +1273,73 @@ function servers_edit ( $buffer, $parameters)
   /**
    * Change server record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Servers` SET `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "', `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["address"]) . "', `Domain` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["domain"]) . "', `Country` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["country"]) . ", `AreaCode` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["areacode"]) . ", `NGGW` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["nggw"]) . ", `DefaultGW` = '" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $gateways)) . "', `BlockedGW` = '" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $blockeds)) . "', `TransfStart` = " . ( $parameters["window"] == "on" ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["start"]) . ":00'" : "NULL") . ", `TransfEnd` = " . ( $parameters["window"] == "on" ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["finish"]) . ":59'" : "NULL") . " WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $server["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Servers` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "', `Port` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Port"]) . "', `NTP` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["NTP"])) . "', `TransfStart` = " . ( $parameters["Window"] ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . ":00'" : "NULL") . ", `TransfEnd` = " . ( $parameters["Window"] ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Finish"]) . ":59'" : "NULL") . " WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ORIGINAL"]["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
 
   /**
-   * Call edit post hook, if exist
+   * Fetch current server backups
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `ServerBackup` WHERE `Server` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ORIGINAL"]["ID"])))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  $oldbackups = array ();
+  while ( $backup = $result->fetch_assoc ())
+  {
+    $oldbackups[] = $backup;
+  }
+  $oldbackupscopy = $oldbackups;
+
+  /**
+   * Check backup servers
+   */
+  foreach ( $backups as $bindex => $backup)
+  {
+    foreach ( $oldbackups as $oindex => $oldbackup)
+    {
+      if ( $oldbackup["Address"] == $backup["Address"] && $oldbackup["Port"] == $backup["Port"])
+      {
+        unset ( $oldbackups[$oindex]);
+        unset ( $backups[$bindex]);
+        if ( $oldbackup["Description"] != $backup["Description"])
+        {
+          if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `ServerBackup` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Description"]) . "' WHERE `Server` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ORIGINAL"]["ID"]) . " AND `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Address"]) . "' AND `Port` = '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Port"]) . "'"))
+          {
+            header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+            exit ();
+          }
+          break;
+        }
+      }
+    }
+  }
+  foreach ( $oldbackups as $oindex => $oldbackup)
+  {
+    if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ServerBackup` WHERE `Server` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ORIGINAL"]["ID"]) . " AND `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $oldbackup["Address"]) . "' AND `Port` = '" . $_in["mysql"]["id"]->real_escape_string ( $oldbackup["Port"]) . "'"))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+  }
+  foreach ( $backups as $bindex => $backup)
+  {
+    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `ServerBackup` (`Server`, `Description`, `Address`, `Port`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ORIGINAL"]["ID"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Address"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Port"]) . "')"))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+  }
+  $parameters["Backups"] = $backups;
+  $parameters["BackupsCopy"] = $backupscopy;
+  $parameters["OldBackups"] = $oldbackups;
+  $parameters["OldBackupsCopy"] = $oldbackupscopy;
+
+  /**
+   * Call post hook if exist
    */
   if ( framework_has_hook ( "servers_edit_post"))
   {
@@ -727,68 +1349,23 @@ function servers_edit ( $buffer, $parameters)
   /**
    * Notify servers about change (if needed)
    */
-  if ( $server["Address"] != $parameters["address"] || $server["Name"] != $parameters["name"])
+  if ( sizeof ( $backups) != 0 || sizeof ( $oldbackups) != 0 || $parameters["ORIGINAL"]["Address"] != $parameters["Address"] || $parameters["ORIGINAL"]["Port"] != $parameters["Port"] || $parameters["ORIGINAL"]["Description"] != $parameters["Description"])
   {
-    $notify = array ( "ID" => $server["ID"], "Name" => $parameters["name"], "Address" => $parameters["address"]);
-    if ( framework_has_hook ( "servers_edit_notify"))
+    $notify = array ( "ID" => $parameters["ORIGINAL"]["ID"], "Description" => $parameters["Description"], "Address" => $parameters["Address"], "Port" => $parameters["Port"], "Backups" => $backupscopy);
+    if ( framework_has_hook ( "servers_edit_reference_notify"))
     {
       $notify = framework_call ( "servers_edit_notify", $parameters, false, $notify);
     }
-    notify_server ( 0, "changeserver", $notify);
+    notify_server ( $parameters["ORIGINAL"]["ID"] * -1, "server_change", $notify);
   }
-
-// ***TODO***: Aqui tem que verificar o que alterou no servidor, e enviar estas alterações pra ele... isso é complexo, pois se mudar o país, muda muita coisa no dialplan também! mudança de gateways, area code, etc..
 
   /**
-   * Insert audit record
+   * Execute finish hook if exist
    */
-  $audit = array ();
-  $audit["ID"] = $server["ID"];
-  if ( $parameters["name"] == $server["Name"])
+  if ( framework_has_hook ( "servers_edit_finish"))
   {
-    $audit["Name"] = array ( "Original" => $server["Name"], "New" => $parameters["name"]);
+    framework_call ( "servers_edit_finish", $parameters, false);
   }
-  if ( $parameters["address"] != $server["Address"])
-  {
-    $audit["Address"] = array ( "Original" => $server["Address"], "New" => $parameters["address"]);
-  }
-  if ( $parameters["domain"] != $server["Domain"])
-  {
-    $audit["Domain"] = array ( "Original" => $server["Domain"], "New" => $parameters["domain"]);
-  }
-  if ( $parameters["country"] != $server["Country"])
-  {
-    $audit["Country"] = array ( "Original" => $server["Country"], "New" => $parameters["country"]);
-  }
-  if ( $parameters["areacode"] != $server["AreaCode"])
-  {
-    $audit["AreaCode"] = array ( "Original" => $server["AreaCode"], "New" => $parameters["areacode"]);
-  }
-  if ( $parameters["nggw"] != $server["NGGW"])
-  {
-    $audit["NGGW"] = array ( "Original" => $server["NGGW"], "New" => $parameters["nggw"]);
-  }
-  if ( implode ( ",", $gateways) != $server["DefaultGW"])
-  {
-    $audit["DefaultGW"] = array ( "Original" => explode ( ",", $server["DefaultGW"]), "New" => $gateways);
-  }
-  if ( implode ( ",", $blockeds) != $server["BlockedGW"])
-  {
-    $audit["BlockedGW"] = array ( "Original" => explode ( ",", $server["BlockedGW"]), "New" => $blockeds);
-  }
-  if ( ( $parameters["window"] == "on" ? $parameters["start"] . ":00" : "NULL") != $server["TransfStart"])
-  {
-    $audit["TransfStart"] = array ( "Original" => $server["TransfStart"], "New" => ( $parameters["window"] == "on" ? $parameters["start"] . ":00" : "NULL"));
-  }
-  if ( ( $parameters["window"] == "on" ? $parameters["finish"] . ":59" : "NULL") != $server["TransfEnd"])
-  {
-    $audit["TransfEnd"] = array ( "Original" => $server["TransfEnd"], "New" => ( $parameters["window"] == "on" ? $parameters["finish"] . ":59" : "NULL"));
-  }
-  if ( framework_has_hook ( "servers_edit_audit"))
-  {
-    $audit = framework_call ( "servers_edit_audit", $parameters, false, $audit);
-  }
-  audit ( "server", "edit", $audit);
 
   /**
    * Return OK to user
@@ -799,9 +1376,42 @@ function servers_edit ( $buffer, $parameters)
 /**
  * API call to remove a server
  */
-framework_add_hook ( "servers_remove", "servers_remove");
+framework_add_hook (
+  "servers_remove",
+  "servers_remove",
+  IN_HOOK_NULL,
+  array (
+    "response" => array (
+      204 => array (
+        "description" => __ ( "The system server was removed.")
+      ),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "ID" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "Invalid server ID.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
 framework_add_permission ( "servers_remove", __ ( "Remove servers"));
-framework_add_api_call ( "/servers/:id", "Delete", "servers_remove", array ( "permissions" => array ( "user", "servers_remove")));
+framework_add_api_call (
+  "/servers/:ID",
+  "Delete",
+  "servers_remove",
+  array (
+    "permissions" => array ( "user", "servers_remove"),
+    "title" => __ ( "Remove servers"),
+    "description" => __ ( "Remove a server from system.")
+  )
+);
 
 /**
  * Function to remove an existing server.
@@ -817,29 +1427,71 @@ function servers_remove ( $buffer, $parameters)
   global $_in;
 
   /**
-   * Check basic parameters
+   * Call start hook if exist
    */
-  $parameters["id"] = (int) $parameters["id"];
+  if ( framework_has_hook ( "servers_remove_start"))
+  {
+    $parameters = framework_call ( "servers_remove_start", $parameters);
+  }
+
+  /**
+   * Validate received parameters
+   */
+  $data = array ();
+  if ( ! array_key_exists ( "ID", $parameters) || ! is_numeric ( $parameters["ID"]))
+  {
+    $data["ID"] = __ ( "Invalid server ID.");
+  }
+
+  /**
+   * Call validate hook if exist
+   */
+  if ( framework_has_hook ( "servers_remove_validate"))
+  {
+    $data = framework_call ( "servers_remove_validate", $parameters, false, $data);
+  }
+
+  /**
+   * Return error data if some error occurred
+   */
+  if ( sizeof ( $data) != 0)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+    return $data;
+  }
+
+  /**
+   * Sanitize parameters
+   */
+  $parameters["ID"] = (int) $parameters["ID"];
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "servers_remove_sanitize"))
+  {
+    $parameters = framework_call ( "servers_remove_sanitize", $parameters, false, $parameters);
+  }
 
   /**
    * Check if server exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   if ( $result->num_rows != 1)
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 400 Bad Request");
     exit ();
   }
-  $server = $result->fetch_assoc ();
+  $parameters["ORIGINAL"] = $result->fetch_assoc ();
 
   /**
    * Check if server has any active range
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Server` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Server` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -851,7 +1503,7 @@ function servers_remove ( $buffer, $parameters)
   }
 
   /**
-   * Call remove pre hook, if exist
+   * Call pre hook if exist
    */
   if ( framework_has_hook ( "servers_remove_pre"))
   {
@@ -861,14 +1513,14 @@ function servers_remove ( $buffer, $parameters)
   /**
    * Remove server database record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
 
   /**
-   * Call remove post hook, if exist
+   * Call post hook if exist
    */
   if ( framework_has_hook ( "servers_remove_post"))
   {
@@ -878,38 +1530,89 @@ function servers_remove ( $buffer, $parameters)
   /**
    * Notify servers about change
    */
-  $notify = array ( "ID" => $server["ID"]);
+  $notify = array ( "ID" => $parameters["ORIGINAL"]["ID"]);
   if ( framework_has_hook ( "servers_remove_notify"))
   {
     $notify = framework_call ( "servers_remove_notify", $parameters, false, $notify);
   }
-  notify_server ( 0, "removeserver", $notify);
+  notify_server ( 0, "server_remove", $notify);
 
   /**
-   * Insert audit registry
+   * Execute finish hook if exist
    */
-  $audit = $server;
-  if ( framework_has_hook ( "servers_remove_audit"))
+  if ( framework_has_hook ( "servers_remove_finish"))
   {
-    $audit = framework_call ( "servers_remove_audit", $parameters, false, $audit);
+    framework_call ( "servers_remove_finish", $parameters, false);
   }
-  audit ( "server", "remove", $audit);
 
   /**
-   * Retorn OK to user
+   * Return OK to user
    */
-  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), array ( "result" => true));
+  return $buffer;
 }
 
 /**
- * API call to reinstall a server
+ * API call to rebuild a server
  */
-framework_add_hook ( "servers_reinstall", "servers_reinstall");
-framework_add_permission ( "servers_reinstall", __ ( "Reinstall servers"));
-framework_add_api_call ( "/servers/:id/reinstall", "Create", "servers_reinstall", array ( "permissions" => array ( "user", "servers_reinstall")));
+framework_add_hook (
+  "servers_rebuild",
+  "servers_rebuild",
+  IN_HOOK_NULL,
+  array (
+    "requests" => array (
+      "type" => "object",
+      "required" => true,
+      "properties" => array (
+        "Clean" => array (
+          "type" => "boolean",
+          "description" => __ ( "Force the server to wipe current configuration before rebuild configuration files."),
+          "default" => false,
+          "example" => true
+        )
+      )
+    ),
+    "response" => array (
+      200 => array (
+        "description" => __ ( "The system server was sucessfully rebuilded.")
+      ),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "Server" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The informed server ID was not found.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
+framework_add_permission ( "servers_rebuild", __ ( "Reinstall servers"));
+framework_add_api_call (
+  "/servers/:ID/rebuild",
+  "Create",
+  "servers_rebuild",
+  array (
+    "permissions" => array ( "user", "servers_rebuild"),
+    "title" => __ ( "Rebuild servers"),
+    "description" => __ ( "Rebuild server configuration files."),
+    "parameters" => array (
+      array (
+        "name" => "ID",
+        "type" => "integer",
+        "description" => __ ( "The server internal system unique identifier."),
+        "example" => 1
+      )
+    )
+  )
+);
 
 /**
- * Function to reinstall an existing server.
+ * Function to rebuild an existing server.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -917,7 +1620,383 @@ framework_add_api_call ( "/servers/:id/reinstall", "Create", "servers_reinstall"
  * @param array $parameters Optional parameters to the function
  * @return string Output of the generated page
  */
-function servers_reinstall ( $buffer, $parameters)
+function servers_rebuild ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Call start hook if exist
+   */
+  if ( framework_has_hook ( "servers_rebuild_start"))
+  {
+    $parameters = framework_call ( "servers_rebuild_start", $parameters);
+  }
+
+  /**
+   * Validate received parameters
+   */
+  $data = array ();
+
+  /**
+   * Check if server exists
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( $result->num_rows != 1)
+  {
+    $data["Server"] = __ ( "The informed server ID was not found.");
+  }
+
+  /**
+   * Call validate hook if exist
+   */
+  if ( framework_has_hook ( "servers_rebuild_validate"))
+  {
+    $data = framework_call ( "servers_rebuild_validate", $parameters, false, $data);
+  }
+
+  /**
+   * Return error data if some error occurred
+   */
+  if ( sizeof ( $data) != 0)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+    return $data;
+  }
+
+  /**
+   * Sanitize parameters
+   */
+  $parameters["ID"] = (int) $parameters["ID"];
+  $parameters["Clean"] = (boolean) $parameters["Clean"];
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "servers_rebuild_sanitize"))
+  {
+    $parameters = framework_call ( "servers_rebuild_sanitize", $parameters, false, $parameters);
+  }
+
+  /**
+   * Call pre hook if exist
+   */
+  if ( framework_has_hook ( "servers_rebuild_pre"))
+  {
+    $parameters = framework_call ( "servers_rebuild_pre", $parameters, false, $parameters);
+  }
+
+  /**
+   * Start notify capture
+   */
+  notify_capture ( $parameters["ID"], "server_rebuild", array ( "CleanUp" => $parameters["Clean"]));
+
+  /**
+   * Call server rebuild hook, if exist
+   */
+  if ( framework_has_hook ( "servers_rebuild_config"))
+  {
+    framework_call ( "servers_rebuild_config", $parameters);
+  }
+
+  /**
+   * Call post hook if exist
+   */
+  if ( framework_has_hook ( "servers_rebuild_post"))
+  {
+    framework_call ( "servers_rebuild_post", $parameters);
+  }
+
+  /**
+   * Execute finish hook if exist
+   */
+  if ( framework_has_hook ( "servers_rebuild_finish"))
+  {
+    framework_call ( "servers_rebuild_finish", $parameters, false);
+  }
+
+  /**
+   * Return OK to user
+   */
+  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), array ( "result" => true));
+}
+
+/**
+ * API call to generate server call's report
+ */
+framework_add_hook (
+  "servers_report",
+  "servers_report",
+  IN_HOOK_NULL,
+  array (
+    "requests" => array (
+      "type" => "object",
+      "properties" => array (
+        "Start" => array (
+          "type" => "date",
+          "description" => __ ( "The date and time of report start calls."),
+          "required" => true,
+          "example" => "2020-04-01T00:00:00Z"
+        ),
+        "End" => array (
+          "type" => "date",
+          "description" => __ ( "The date and time of report end calls."),
+          "required" => true,
+          "example" => "2020-05-31T23:59:59Z"
+        )
+      )
+    ),
+    "response" => array (
+      200 => array (
+        "description" => __ ( "An array containing the call records made by the required group."),
+        "schema" => array (
+          "type" => "array",
+          "xml" => array (
+            "name" => "responses",
+            "wrapped" => true
+          ),
+          "items" => array (
+            "\$ref" => "#/components/schemas/call"
+          )
+        )
+      ),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "Start" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "Invalid start date.")
+            ),
+            "End" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "Invalid end date.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
+framework_add_permission ( "servers_report", __ ( "Servers use report"));
+framework_add_api_call (
+  "/servers/:ID/report",
+  "Read",
+  "servers_report",
+  array (
+    "permissions" => array ( "user", "servers_report"),
+    "title" => __ ( "Servers report"),
+    "description" => __ ( "Generate a server call's usage report.", true, false),
+    "parameters" => array (
+      array (
+        "name" => "ID",
+        "type" => "integer",
+        "description" => __ ( "The server internal system unique identifier."),
+        "example" => 1
+      )
+    )
+  )
+);
+
+/**
+ * Function to generate report data.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param mixed $buffer Buffer from plugin system if processed by other function
+ *                      before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function servers_report ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Call start hook if exist
+   */
+  if ( framework_has_hook ( "servers_report_start"))
+  {
+    $parameters = framework_call ( "servers_report_start", $parameters);
+  }
+
+  /**
+   * Validate received parameters
+   */
+  $data = array ();
+  if ( empty ( $parameters["Start"]))
+  {
+    $data["Start"] = __ ( "Missing start date.");
+  }
+  $datecheck = format_form_datetime ( $parameters["Start"]);
+  if ( ! array_key_exists ( "Start", $data) && empty ( $datecheck))
+  {
+    $data["Start"] = __ ( "Invalid start date.");
+  }
+  if ( empty ( $parameters["End"]))
+  {
+    $data["End"] = __ ( "Missing end date.");
+  }
+  $datecheck = format_form_datetime ( $parameters["End"]);
+  if ( ! array_key_exists ( "End", $data) && empty ( $datecheck))
+  {
+    $data["End"] = __ ( "Invalid end date.");
+  }
+
+  /**
+   * Call validate hook if exist
+   */
+  if ( framework_has_hook ( "servers_report_validate"))
+  {
+    $data = framework_call ( "servers_report_validate", $parameters);
+  }
+
+  /**
+   * Return error data if some error occurred
+   */
+  if ( sizeof ( $data) != 0)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+    return $data;
+  }
+
+  /**
+   * Sanitize parameters
+   */
+  $parameters["Start"] = format_form_datetime ( $parameters["Start"]);
+  $parameters["End"] = format_form_datetime ( $parameters["End"]);
+  $parameters["ID"] = (int) $parameters["ID"];
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "servers_report_sanitize"))
+  {
+    $parameters = framework_call ( "servers_report_sanitize", $parameters, false, $parameters);
+  }
+
+  /**
+   * Call pre hook if exist
+   */
+  if ( framework_has_hook ( "servers_report_pre"))
+  {
+    $parameters = framework_call ( "servers_report_pre", $parameters, false, $parameters);
+  }
+
+  /**
+   * Get server information
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( $result->num_rows != 1)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 400 Bad Request");
+    exit ();
+  }
+  $server = $result->fetch_assoc ();
+
+  /**
+   * Get call records from database
+   */
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `server` = " . $_in["mysql"]["id"]->real_escape_string ( $server["ID"]) . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+
+  /**
+   * Process each record
+   */
+  $data = array ();
+  while ( $call = $records->fetch_assoc ())
+  {
+    $data[] = filters_call ( "process_call", $call);
+  }
+
+  /**
+   * Call post hook if exist
+   */
+  if ( framework_has_hook ( "servers_report_post"))
+  {
+    $data = framework_call ( "servers_report_post", $parameters, false, $data);
+  }
+
+  /**
+   * Execute finish hook if exist
+   */
+  if ( framework_has_hook ( "servers_report_finish"))
+  {
+    framework_call ( "servers_report_finish", $parameters);
+  }
+
+  /**
+   * Return structured data
+   */
+  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
+}
+
+/**
+ * API call to server install script
+ */
+framework_add_hook (
+  "servers_install_script",
+  "servers_install_script",
+  IN_HOOK_NULL,
+  array (
+    "response" => array (
+      200 => array (
+        "description" => __ ( "An object containing information about the server install script."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "Script" => array (
+              "type" => "string",
+              "description" => __ ( "The BASH script to install the server.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
+framework_add_permission ( "servers_install_script", __ ( "Generate servers install script"));
+framework_add_api_call (
+  "/servers/:ID/install",
+  "Read",
+  "servers_install_script",
+  array (
+    "permissions" => array ( "user", "servers_install_script"),
+    "title" => __ ( "Server install script"),
+    "description" => __ ( "Generate a server installation BASH script."),
+    "parameters" => array (
+      array (
+        "name" => "ID",
+        "type" => "integer",
+        "description" => __ ( "The server internal system unique identifier."),
+        "example" => 1
+      )
+    )
+  )
+);
+
+/**
+ * Function to create an existing server install script.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function servers_install_script ( $buffer, $parameters)
 {
   global $_in;
 
@@ -925,61 +2004,32 @@ function servers_reinstall ( $buffer, $parameters)
    * Check basic parameters
    */
   $data = array ();
-  $data["result"] = true;
-  $parameters["id"] = (int) $parameters["id"];
+  $parameters["ID"] = (int) $parameters["ID"];
 
   /**
    * Check if server exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   if ( $result->num_rows != 1)
   {
-    $data["result"] = false;
-    $data["server"] = __ ( "The informed server ID was not found.");
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 400 Bad Request");
+    exit ();
   }
+  $server = $result->fetch_assoc ();
 
   /**
-   * Call reinstall sanitize hook, if exist
+   * Read install script template and generate code
    */
-  if ( framework_has_hook ( "servers_reinstall_sanitize"))
-  {
-    $data = framework_call ( "servers_reinstall_sanitize", $parameters, false, $data);
-  }
+  $script = file_get_contents ( dirname ( __FILE__) . "/install.sh");
+  $script = str_replace ( "{{{ID}}}", str_replace ( "/", "\/", $server["ID"]), $script);
+  $script = str_replace ( "{{{PUBLICKEY}}}", str_replace ( "/", "\/", $server["PublicKey"]), $script);
+  $script = str_replace ( "{{{PRIVATEKEY}}}", str_replace ( "/", "\/", $server["PrivateKey"]), $script);
+  $script = str_replace ( "{{{URL}}}", str_replace ( "/", "\/", $_in["general"]["baseurl"]), $script);
 
-  /**
-   * Return error data if some error ocurred
-   */
-  if ( $data["result"] == false)
-  {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
-    return $data;
-  }
-
-  /**
-   * Call server reinstall hook, if exist
-   */
-  if ( framework_has_hook ( "servers_reinstall_config"))
-  {
-    framework_call ( "servers_reinstall_config", $parameters);
-  }
-
-  /**
-   * Insert audit registry
-   */
-  $audit = array ( "ID" => $parameters["id"]);
-  if ( framework_has_hook ( "servers_reinstall_audit"))
-  {
-    $audit = framework_call ( "servers_reinstall_audit", $parameters, false, $audit);
-  }
-  audit ( "server", "reinstall", $audit);
-
-  /**
-   * Retorn OK to user
-   */
-  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), array ( "result" => true));
+  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), array ( "script" => base64_encode ( $script)));
 }
 ?>

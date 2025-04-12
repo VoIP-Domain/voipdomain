@@ -1,6 +1,0 @@
-  jQuery aSimpleTour
---==================--
-
-URL: http://alvaroveliz.github.io/aSimpleTour/
-Version: 1.0.7
-License: MIT

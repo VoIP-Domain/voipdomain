@@ -8,7 +8,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,11 +29,11 @@
  * You must execute this daemon at same server where TFTP server is running, and
  * with verbose execution enabled.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage VoIP Hardware Detect Daemon
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -49,7 +49,7 @@ ini_set ( "display_errors", "false");
  */
 if ( ! defined ( "STDIN"))
 {
-  echo "This script must be executed into CLI!\n";
+  echo "This script must be executed from the CLI!\n";
   exit ( 1);
 }
 
@@ -140,7 +140,7 @@ function writeLog ( $msg, $severity = VoIP_LOG_NOTICE)
 /**
  * Altera nome do processo, se possível
  */
-if ( function_exists ( "setproctitle"))
+if ( extension_loaded ( "proctitle"))
 {
   setproctitle ( "VoIP Domain AutoDetect daemon");
 }
@@ -189,7 +189,7 @@ if ( ! @mysql_select_db ( $_sys["mysql"]["database"], $_sys["mysql"]["id"]))
 {
   writeLog ( "Não foi possível selecionar a base de dados!", $VoIP_LOG_FATAL);
 }
-echo chr ( 27) . "[1;37m" . gettext ( "OK") . chr ( 27) . "[1;0m\n";
+echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
 
 /**
  * Popula base de equipamentos
@@ -204,7 +204,7 @@ while ( $equipamento = mysql_fetch_assoc ( $result))
 {
   $equipamentos[$equipamento["Modelo"]] = array ( "ID" => $equipamento["ID"], "Nome" => $equipamento["Nome"]);
 }
-echo chr ( 27) . "[1;37m" . gettext ( "OK") . chr ( 27) . "[1;0m\n";
+echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
 
 /**
  * Abre arquivo de log e fica monitorando
@@ -218,7 +218,7 @@ $position = filesize ( "/var/log/messages");
 fseek ( $fp, $position);
 $fd = inotify_init ();
 $wd = inotify_add_watch ( $fd, "/var/log/messages", IN_MODIFY);
-echo chr ( 27) . "[1;37m" . gettext ( "OK") . chr ( 27) . "[1;0m\n";
+echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
 
 /**
  * Mostra mensagem de início de operação

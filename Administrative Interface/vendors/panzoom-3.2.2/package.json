@@ -1,0 +1,43 @@
+{
+  "name": "jquery.panzoom",
+  "version": "3.2.2",
+  "description": "A jQuery plugin to pan and/or zoom elements using CSS3",
+  "main": "dist/jquery.panzoom.js",
+  "files": [
+    "MIT-License.txt",
+    "dist/jquery.panzoom.js",
+    "dist/jquery.panzoom.min.js"
+  ],
+  "keywords": [
+    "jquery",
+    "panzoom",
+    "pan",
+    "zoom",
+    "draggable",
+    "dragging",
+    "drag"
+  ],
+  "repository": "timmywil/jquery.panzoom",
+  "license": "MIT",
+  "author": {
+    "name": "Timmy Willison",
+    "email": "timmywillisn@gmail.com"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-bowercopy": "^1.2.4",
+    "grunt-compare-size": "^0.4.2",
+    "grunt-contrib-jshint": "^1.0.0",
+    "grunt-contrib-uglify": "^1.0.1",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-jsonlint": "^1.1.0",
+    "grunt-mocha": "^1.0.2",
+    "gzip-js": "~0.3.2",
+    "load-grunt-tasks": "^3.5.0",
+    "lodash": "^4.13.1"
+  },
+  "scripts": {
+    "test": "grunt test",
+    "build": "grunt dev"
+  }
+}

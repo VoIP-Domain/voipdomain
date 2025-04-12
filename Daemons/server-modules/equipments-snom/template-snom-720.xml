@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<settings>
+  <phone-settings e="2">
+    <language perm="">{{{language}}}</language>
+    <setting_server perm="RW">tftp://{{{tftpserver}}}/{mac}.htm</setting_server>
+    <update_server perm="RW">tftp://{{{tftpserver}}}/Snom/720/firmware.xml</update_server>
+    <utc_offset perm="">{{{utcoffset}}}</utc_offset>
+    <ntp_server perm="">{{{ntpserver}}}</ntp_server>
+    <http_user perm="">{{{webusername}}}</http_user>
+    <http_pass perm="">{{{webpassword}}}</http_pass>
+    <http_scheme perm="">off</http_scheme>
+    <timezone perm="">{{{timezone}}}</timezone>
+    <challenge_response perm="">off</challenge_response>
+    <filter_registrar perm="">off</filter_registrar>
+    <admin_mode_password perm="">{{{adminmodepassword}}}</admin_mode_password>
+    <admin_mode_password_confirm perm="">{{{adminmodepassword}}}</admin_mode_password_confirm>
+    <tone_scheme perm="">{{{phonetones}}}</tone_scheme>
+    <alert_internal_ring_text perm="">internal</alert_internal_ring_text>
+    <alert_external_ring_text perm="">external</alert_external_ring_text>
+    <alert_external_ring_sound perm="">Ringer2</alert_external_ring_sound>
+    <display_method perm="">display_name_number</display_method>
+    <date_us_format perm="">{{{dateformat}}}</date_us_format>
+    <time_24_format perm="">{{{timeformat}}}</time_24_format>
+    <update_policy perm="">auto_update</update_policy>
+    <peer_to_peer_cc perm="">off</peer_to_peer_cc>
+    <block_url_dialing perm="">on</block_url_dialing>
+    <attended_transfer_on_ringing perm="">on</attended_transfer_on_ringing>
+    <mwi_dialtone perm="">normal</mwi_dialtone>
+    <ringer_animation perm="">on</ringer_animation>
+    <gui_fkey1 perm="">keyevent F_CALL_LIST</gui_fkey1>
+    <gui_fkey2 perm="">keyevent F_ADR_BOOK</gui_fkey2>
+    <gui_fkey3 perm="">keyevent none</gui_fkey3>
+    <gui_fkey4 perm="">keyevent F_SETTINGS</gui_fkey4>
+    <keyboard_lock_emergency perm="">{{{emergencynumbers}}}</keyboard_lock_emergency>
+    <redirect_ringing perm="">on</redirect_ringing>
+    <always_show_active_call perm="">off</always_show_active_call>
+    <mailbox_active perm="">off</mailbox_active>
+    <enable_keyboard_lock perm="">off</enable_keyboard_lock>
+    <documentation_link perm="">https://service.snom.com/display/wiki/</documentation_link>
+    <ip_frag_enable perm="">off</ip_frag_enable>
+    <advertisement perm="">off</advertisement>
+    <dialnumber_us_format perm="">off</dialnumber_us_format>
+    <sip_reconnect_on_rejected_refer perm=""/>
+    <user_realname idx="1" perm="">{{{displayname}}}</user_realname>
+    <user_name idx="1" perm="">{{{username}}}</user_name>
+    <user_host idx="1" perm="">{{{server1addr}}}:{{{server1port}}}</user_host>
+    <user_pname idx="1" perm="">{{{username}}}</user_pname>
+    <user_pass idx="1" perm="">{{{password}}}</user_pass>
+    <user_dp_str idx="1" perm="">{{{dialplan}}}</user_dp_str>
+    <user_sipusername_as_line idx="1" perm="">on</user_sipusername_as_line>
+    <user_dtmf_info idx="1" perm="">on</user_dtmf_info>
+    <user_server_type idx="1" perm="">asterisk</user_server_type>
+    <codec_priority_list idx="1" perm="">{{{codecconfig}}}</codec_priority_list>
+    <blf_park_pick_up idx="1" perm="">*8</blf_park_pick_up>
+    <blf_directed_call_pickup idx="1" perm="">*8</blf_directed_call_pickup>
+  </phone-settings>
+  <functionKeys e="2">
+{{{functionkey}}}  </functionKeys>
+  <tbook e="2">
+  </tbook>
+</settings>

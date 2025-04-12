@@ -1,0 +1,13 @@
+[Unit]
+Description=VoIP Domain Message Router Service
+After=rc-local.service
+
+[Service]
+ExecStart=/usr/libexec/voipdomain/router/router.php -d
+KillMode=process
+TimeoutStopSec=3
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=basic.target

@@ -1,0 +1,287 @@
+/**   ___ ___       ___ _______     ______                        __
+ *   |   Y   .-----|   |   _   |   |   _  \ .-----.--------.---.-|__.-----.
+ *   |.  |   |  _  |.  |.  1   |   |.  |   \|  _  |        |  _  |  |     |
+ *   |.  |   |_____|.  |.  ____|   |.  |    |_____|__|__|__|___._|__|__|__|
+ *   |:  1   |     |:  |:  |       |:  1    /
+ *    \:.. ./      |::.|::.|       |::.. . /
+ *     `---'       `---`---'       `------'
+ *
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+/**
+ * VoIP Domain authentication page Cascade Style Sheet (CSS) framework file.
+ *
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
+ * @version    1.0
+ * @package    VoIP Domain
+ * @subpackage Core
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
+ */
+
+/* reset */
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,dl,dt,dd,ol,nav ul,nav li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{margin:0;padding:0;border:0;font-size:100%;font:inherit;vertical-align:baseline;}
+article, aside, details, figcaption, figure,footer, header, hgroup, menu, nav, section {display: block;}
+ol,ul{list-style:none;margin:0px;padding:0px;}
+blockquote,q{quotes:none;}
+blockquote:before,blockquote:after,q:before,q:after{content:'';content:none;}
+table{border-collapse:collapse;border-spacing:0;}
+/* start editing from here */
+a{text-decoration:none;}
+.txt-rt{text-align:right;}/* text align right */
+.txt-lt{text-align:left;}/* text align left */
+.txt-center{text-align:center;}/* text align center */
+.float-rt{float:right;}/* float right */
+.float-lt{float:left;}/* float left */
+.clear{clear:both;}/* clear float */
+.pos-relative{position:relative;}/* Position Relative */
+.pos-absolute{position:absolute;}/* Position Absolute */
+.vertical-base{	vertical-align:baseline;}/* vertical align baseline */
+.vertical-top{	vertical-align:top;}/* vertical align top */
+nav.vertical ul li{	display:block;}/* vertical menu */
+nav.horizontal ul li{	display: inline-block;}/* horizontal menu */
+img{max-width:100%;}
+/*end reset*/
+
+body
+{
+  background: url("/img/bg-install.jpg")  no-repeat center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  position: relative;
+  font-family: 'Open Sans', sans-serif;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.install-block
+{
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 5px;
+  width: 32%;
+  margin: 9% auto 4% 35%;
+  position: fixed;
+  display: inline-block;
+}
+.install-top
+{
+  padding-top: 20px;
+}
+.install-top h1, .install-top h2
+{
+  text-align: center;
+  color: #dddddd;
+  margin-bottom: 15px;
+}
+.install-top h1
+{
+  font-size: 32px;
+}
+.install-block h2
+{
+  font-size: 26px;
+}
+.install-block p
+{
+  color: #ffffff;
+  font-size: 18px;
+  text-align: center;
+}
+.install-bottom
+{
+  height: 25px;
+}
+.install-dots
+{
+  text-align: center;
+  position: fixed;
+  width: 100%;
+  bottom: 0px;
+  z-index: -1;
+}
+.dot
+{
+  height: 20px;
+  width: 20px;
+  background-color: #aaaaaa;
+  border-radius: 50%;
+  display: inline-block;
+}
+#page2
+{
+  margin-top: 4% !important;
+}
+
+form
+{
+  padding: 12% 2.5em;
+}
+form li
+{
+  border: 1px solid #B4B2B2;
+  list-style: none;
+  margin-bottom: 25px;
+  width: 100%;
+  background: none;
+  border-radius: 0.3em;
+  -webkit-border-radius: 0.3em;
+  -o-border-radius: 0.3em;
+  -moz-border-radius: 0.3em;
+}
+form li:hover
+{
+  border: 1px solid #40A9DF;
+  box-shadow: 0 0 1em #40A9DF;
+  -webkit-box-shadow: 0 0 1em #40A9DF;
+  -o-box-shadow: 0 0 1em #40A9DF;
+  -moz-box-shadow: 0 0 1em #40A9DF;
+}
+
+.icon
+{
+  background: url("/img/icons.png") no-repeat 0px 0px;
+  height: 30px;
+  width: 14px;
+  display: block;
+  float: left;
+  margin: 7px -21px 0px 12px;
+}
+.server
+{
+  background: url("/img/icons.png") no-repeat -15px 10px;
+}
+.user
+{
+  background: url("/img/icons.png") no-repeat 0px 10px;
+}
+.lock
+{
+  background: url("/img/icons.png") no-repeat -30px 10px;
+}
+
+input[type="text"], input[type="password"]
+{
+  font-family: 'Open Sans', sans-serif;
+  width: 96%;
+  padding: 0.7em 2em 0.7em 1.7em;
+  color: #dddddd !important;
+  font-size: 18px;
+  outline: none;
+  background: none;
+  border: none;
+  font-weight: 600;
+}
+
+button[type="button"]
+{
+  position: relative;
+  margin-left: 100%;
+  left: -70%;
+  font-size: 18px;
+  display: inline-block;
+  font-weight: 600;
+  color: #fff;
+  transition: 0.1s all;
+  -webkit-transition: 0.1s all;
+  -moz-transition: 0.1s all;
+  -o-transition: 0.1s all;
+  cursor: pointer;
+  outline: none;
+  padding: 15px 10px;
+  margin-top: 3px;
+  font-family: 'Open Sans', sans-serif;
+  width: 40%;
+  border: none;
+  border-radius: 0.3em;
+  -webkit-border-radius: 0.3em;
+  -o-border-radius: 0.3em;
+  -moz-border-radius: 0.3em;
+  background: #ffe49e; /* Old browsers */
+  background: -moz-linear-gradient(top,  #ffe49e 0%, #ffb700 3%, #ffad00 35%, #ff9000 97%, #e27f00 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ffe49e), color-stop(3%,#ffb700), color-stop(35%,#ffad00), color-stop(97%,#ff9000), color-stop(100%,#e27f00)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top,  #ffe49e 0%,#ffb700 3%,#ffad00 35%,#ff9000 97%,#e27f00 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top,  #ffe49e 0%,#ffb700 3%,#ffad00 35%,#ff9000 97%,#e27f00 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(top,  #ffe49e 0%,#ffb700 3%,#ffad00 35%,#ff9000 97%,#e27f00 100%); /* IE10+ */
+  background: linear-gradient(to bottom,  #ffe49e 0%,#ffb700 3%,#ffad00 35%,#ff9000 97%,#e27f00 100%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffe49e', endColorstr='#e27f00',GradientType=0 ); /* IE6-9 */
+}
+button[type="button"]:hover
+{
+  background: #e27f00; /* Old browsers */
+  background: -moz-linear-gradient(top,  #e27f00 0%, #ff9000 3%, #ffad00 65%, #ffb700 97%, #ffe49e 100%); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#e27f00), color-stop(3%,#ff9000), color-stop(65%,#ffad00), color-stop(97%,#ffb700), color-stop(100%,#ffe49e)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top,  #e27f00 0%,#ff9000 3%,#ffad00 65%,#ffb700 97%,#ffe49e 100%); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top,  #e27f00 0%,#ff9000 3%,#ffad00 65%,#ffb700 97%,#ffe49e 100%); /* Opera 11.10+ */
+  background: -ms-linear-gradient(top,  #e27f00 0%,#ff9000 3%,#ffad00 65%,#ffb700 97%,#ffe49e 100%); /* IE10+ */
+  background: linear-gradient(to bottom,  #e27f00 0%,#ff9000 3%,#ffad00 65%,#ffb700 97%,#ffe49e 100%); /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e27f00', endColorstr='#ffe49e',GradientType=0 ); /* IE6-9 */
+}
+
+@media (max-width:1024px)
+{
+  .install-block
+  {
+    margin: 8% auto 0;
+    width: 45%;
+  }
+}
+@media (max-width:768px)
+{
+  .install-block
+  {
+    margin: 9% auto 0;
+    width: 57%;
+  }
+}
+@media (max-width:640px)
+{
+  .install-block
+  {
+    margin: 9% auto 0;
+    width: 70%;
+  }
+}
+@media (max-width:480px)
+{
+  .install-block
+  {
+    margin: 9% auto 0;
+    width: 90%;
+  }
+}
+@media (max-width:320px)
+{
+  .install-block
+  {
+    margin: 9% auto 0;
+    width: 95%;
+  }
+  button[type="button"]
+  {
+    float: none;
+    font-size: 15px;
+    padding: 10px 10px;
+    width: 40%;
+    margin-left: 28%;
+  }
+}

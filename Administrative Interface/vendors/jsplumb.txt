@@ -1,0 +1,6 @@
+  jsplumb
+--=======--
+
+URL: https://github.com/jsplumb/jsplumb
+Version: 2.15.6
+License: MIT

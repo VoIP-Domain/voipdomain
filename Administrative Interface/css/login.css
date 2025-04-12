@@ -6,7 +6,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Core
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -68,10 +68,6 @@ body
   font-family: 'Open Sans', sans-serif;
   overflow-x: hidden !important;
   overflow-y: auto !important;
-}
-
-.noselect
-{
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -127,24 +123,24 @@ form li
 {
   background: url("/img/icons.png") no-repeat 0px 0px;
   height: 30px;
-  width: 30px;
+  width: 14px;
   display: block;
   float: left;
-  margin: 7px -11px 0px 0px
+  margin: 7px -21px 0px 12px;
 }
 .user
 {
-  background: url("/img/icons.png") no-repeat 15px 8px;
+  background: url("/img/icons.png") no-repeat 0px 10px;
 }
 .lock
 {
-  background: url("/img/icons.png") no-repeat -15px 8px;
+  background: url("/img/icons.png") no-repeat -30px 10px;
 }
 
 input[type="text"], input[type="password"]
 {
   font-family: 'Open Sans', sans-serif;
-  width: 60%;
+  width: 96%;
   padding: 0.7em 2em 0.7em 1.7em;
   color: #858282;
   font-size: 18px;
@@ -217,6 +213,36 @@ button[type="submit"]:hover
   color: #ddd;
   position: absolute;
   margin-top: 17px;
+}
+
+a, label
+{
+  position: relative;
+}
+
+label
+{
+  margin-top: 16px;
+  color: #fffff;
+}
+
+a::after, label::after
+{
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -3px;
+  width: 60%;
+  height: 1px;
+  opacity: 0;
+  background-color: #5778F3;
+  transform: translate(-50%, 0);
+  transition: all 0.3s ease-in-out;
+}
+
+a:hover::after, label:hover::after {
+    width: 100%;
+    opacity: 1;
 }
 
 @media (max-width:1024px)

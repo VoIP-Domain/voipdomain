@@ -1,0 +1,12 @@
+[Unit]
+Description=VoIP Domain FastAGI Service
+After=rc-local.service
+
+[Service]
+ExecStart=/usr/libexec/voipdomain/fastagi/fastagi.php -d
+KillMode=process
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=basic.target

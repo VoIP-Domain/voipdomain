@@ -1,0 +1,83 @@
+/**   ___ ___       ___ _______     ______                        __
+ *   |   Y   .-----|   |   _   |   |   _  \ .-----.--------.---.-|__.-----.
+ *   |.  |   |  _  |.  |.  1   |   |.  |   \|  _  |        |  _  |  |     |
+ *   |.  |   |_____|.  |.  ____|   |.  |    |_____|__|__|__|___._|__|__|__|
+ *   |:  1   |     |:  |:  |       |:  1    /
+ *    \:.. ./      |::.|::.|       |::.. . /
+ *     `---'       `---`---'       `------'
+ *
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+  API Documentation
+--=================--
+
+**TODO**: Add an introduction to API.
+
+  Versioning
+--==========--
+
+You can request call to a specific resource version using "X-API-VERSION" HTTP header, or you can prefix the requested path with /vX/, where X is the desired API version.
+
+  Search filters
+--==============--
+
+All search resource accept filter at "q" parameter, as "fields" parameter too, with a comma separated desired fields filter. For example, you can search for extensions like: GET /api/extensions?q=Ernani&fields=ID,Name,Extension
+
+  Response status codes
+--=====================--
+
+When the client raises a request to the server through an API, the client should know the feedback, whether it failed, passed or the request was wrong. HTTP status codes are bunch of standardized codes which has various explanations in various scenarios. The server should always return the right status code.
+
+The VoIP Domain API follow the basic HTTP response status codes, as follow:
+
+  2xx (Success category)
+--======================--
+
+These status codes represent that the requested action was received and successfully processed by the server.
+
+- 200 Ok: The standard HTTP response representing success for GET, PUT or POST.
+- 201 Created: This status code should be returned whenever the new instance is created. This should be a success POST response.
+- 204 No Content: Represents the request is successfully processed, but has not returned any content. This should be a success DELETE response.
+
+  3xx (Redirection category)
+--==========================--
+
+These status codes represent that the request doesn't has response body, and has some redirect or modification response header.
+
+- 304 Not Modified: Indicates that the client has the response already in its cache. And hence there is no need to transfer the same data again.
+
+  4xx (Client error category)
+--===========================--
+
+These status codes represent that the client has raised a faulty request.
+
+- 400 Bad Request: Indicates that the request by the client was not processed, as the server could not understand what the client is asking for.
+- 401 Unauthorized: Indicates that the client is not allowed to access resources, and should re-request with the required credentials.
+- 403 Forbidden: Indicates that the request is valid and the client is authenticated, but the client is not allowed access the page or resource for any reason.
+- 404 Not Found: Indicates that the requested resource is not available now.
+- 410 Gone: Indicates that the requested resource is no longer available which has been intentionally moved.
+
+  5xx (Server error category)
+--===========================--
+
+These status codes represent that the server has raised an error and couldn't complete the client request.
+
+- 500 Internal Server Error: Indicates that the request is valid, but the server is totally confused and the server is asked to serve some unexpected condition.
+- 503 Service Unavailable: Indicates that the server is down or unavailable to receive and process the request. Mostly if the server is undergoing maintenance.
+
+References: https://hackernoon.com/restful-api-designing-guidelines-the-best-practices-60e1d954e7c9
+            https://medium.com/hashmapinc/rest-good-practices-for-api-design-881439796dc9

@@ -1,0 +1,6 @@
+  Snap.svg
+--========--
+
+URL: https://snapsvg.io/
+Version: 0.5.1
+License: Apache 2.0

@@ -1,0 +1,12 @@
+[Unit]
+Description=VoIP Domain AMI Event Listener Service
+After=rc-local.service
+
+[Service]
+ExecStart=/usr/libexec/voipdomain/monitor/monitor.php -d
+KillMode=process
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=basic.target

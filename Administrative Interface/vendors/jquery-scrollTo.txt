@@ -1,6 +1,0 @@
-  jQuery scrollTo
---===============--
-
-URL: http://demos.flesler.com/jquery/scrollTo/
-Version: 2.1.2
-License: MIT

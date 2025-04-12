@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,14 +24,14 @@
  */
 
 /**
- * VoIP Domain agents filter module. This module add the filter calls related
+ * VoIP Domain agents module filters. This module add the filter calls related
  * to agents.
  *
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Agents
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -71,29 +71,34 @@ function get_agents ( $buffer, $parameters)
    * Create where clause
    */
   $where = "";
-  if ( array_key_exists ( "id", $parameters))
+  if ( array_key_exists ( "ID", $parameters))
   {
-    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["id"]);
+    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
   }
-  if ( array_key_exists ( "text", $parameters))
+  if ( array_key_exists ( "Text", $parameters))
   {
-    $where .= " AND `Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( str_replace ( " ", "%", trim ( strip_tags ( $parameters["text"])))) . "%'";
+    $where .= " AND `Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( str_replace ( " ", "%", trim ( strip_tags ( $parameters["Text"])))) . "%'";
   }
-  if ( array_key_exists ( "code", $parameters))
+  if ( array_key_exists ( "Code", $parameters))
   {
-    $where .= " AND `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["code"]) . "'";
+    $where .= " AND `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "'";
   }
 
   /**
    * Check into database if agents exists
    */
+  $data = array ();
   if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Agents`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
   {
-    while ( $data = $result->fetch_assoc ())
+    while ( $agent = $result->fetch_assoc ())
     {
-      $buffer = array_merge ( ( is_array ( $buffer) ? $buffer : array ()), array ( $data));
+      $data[] = $agent;
     }
   }
-  return $buffer;
+
+  /**
+   * Return structured data
+   */
+  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 ?>

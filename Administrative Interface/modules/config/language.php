@@ -1,0 +1,404 @@
+<?php
+/**   ___ ___       ___ _______     ______                        __
+ *   |   Y   .-----|   |   _   |   |   _  \ .-----.--------.---.-|__.-----.
+ *   |.  |   |  _  |.  |.  1   |   |.  |   \|  _  |        |  _  |  |     |
+ *   |.  |   |_____|.  |.  ____|   |.  |    |_____|__|__|__|___._|__|__|__|
+ *   |:  1   |     |:  |:  |       |:  1    /
+ *    \:.. ./      |::.|::.|       |::.. . /
+ *     `---'       `---`---'       `------'
+ *
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+/**
+ * VoIP Domain configuration module language file.
+ *
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
+ * @version    1.0
+ * @package    VoIP Domain
+ * @subpackage Configuration
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
+ */
+
+/**
+ * Add basic language structure (english)
+ */
+i18n_add ( "system permissions");
+i18n_add ( "General");
+i18n_add ( "Edit system permissions");
+i18n_add ( "Error changing permissions!");
+i18n_add ( "Error retrieving permissions!");
+i18n_add ( "Invalid value.");
+i18n_add ( "Language");
+i18n_add ( "Operator");
+i18n_add ( "Operator extension");
+i18n_add ( "Permissions changed sucessfully!");
+i18n_add ( "Permissions configuration");
+i18n_add ( "Plugins");
+i18n_add ( "Select a language");
+i18n_add ( "System permissions");
+i18n_add ( "View system permission information");
+i18n_add ( "The system permissions was sucessfully updated.");
+i18n_add ( "Check");
+i18n_add ( "Check VoIP DNS zone");
+i18n_add ( "Debug information");
+i18n_add ( "DNS checker");
+i18n_add ( "Error checking DNS zone!");
+i18n_add ( "SUCCESS!");
+i18n_add ( "FAIL!");
+i18n_add ( "INCONSISTENCY!");
+i18n_add ( "Name Authority Pointer");
+i18n_add ( "No valid NAPTR data found!");
+i18n_add ( "No valid SIP over TCP server data found!");
+i18n_add ( "No valid SIP over UDP server data found!");
+i18n_add ( "SIP over TCP service");
+i18n_add ( "SIP over UDP service");
+i18n_add ( "VoIP DNS result for domain %s");
+i18n_add ( "VoIP DNS zone checker");
+i18n_add ( "VoIP DNS zone check result");
+i18n_add ( "Zone");
+i18n_add ( "Zone domain name");
+i18n_add ( "Zone must be informed!");
+i18n_add ( "Zone not found.");
+i18n_add ( "Disable");
+i18n_add ( "Disabled");
+i18n_add ( "Enable");
+i18n_add ( "Enabled");
+i18n_add ( "Error opening plugin zip file.");
+i18n_add ( "Error parsing plugin minimum system requirements.");
+i18n_add ( "Error removing plugin!");
+i18n_add ( "Invalid file type.");
+i18n_add ( "Invalid plugin file structure.");
+i18n_add ( "Name");
+i18n_add ( "Plugin configuration file misses own plugin section.");
+i18n_add ( "Plugin configuration file missing.");
+i18n_add ( "Plugin file doesn't have the minimum required files.");
+i18n_add ( "Plugin file not found!");
+i18n_add ( "Plugin removal");
+i18n_add ( "Plugin removed sucessfully!");
+i18n_add ( "plugins");
+i18n_add ( "Search plugins");
+i18n_add ( "Status");
+i18n_add ( "Are sure you want to remove the plugin %s (%s)?");
+i18n_add ( "Invalid plugin extension.");
+i18n_add ( "Add...");
+i18n_add ( "Error toggling plugin!");
+i18n_add ( "File is too large.");
+i18n_add ( "File is too small.");
+i18n_add ( "File type not allowed.");
+i18n_add ( "Import");
+i18n_add ( "Import plugin file");
+i18n_add ( "Invalid plugin file.");
+i18n_add ( "Maximum number of files exceeded.");
+i18n_add ( "Plugin addition");
+i18n_add ( "Plugin already installed.");
+i18n_add ( "Plugin configuration file misses own plugin name.");
+i18n_add ( "Plugin parser error.");
+i18n_add ( "Plugin %s (version %s) sucessfully installed.");
+i18n_add ( "Plugin toggle");
+i18n_add ( "Plugin toggled sucessfully!");
+i18n_add ( "Processing...");
+i18n_add ( "Remove plugins");
+i18n_add ( "Toggle plugins enable/disable");
+i18n_add ( "Unknown error.");
+i18n_add ( "Upload");
+i18n_add ( "Uploaded bytes exceed file size.");
+i18n_add ( "View plugins");
+i18n_add ( "global configurations");
+i18n_add ( "Music on Hold");
+i18n_add ( "Select default music on hold");
+i18n_add ( "An object containing information about the maximum call type permissions on system. Permissions could be `y` to allow, `p` to allow with password or `n` to deny.");
+i18n_add ( "Landline calls system maximum permissions.");
+i18n_add ( "Permission to local landline call.");
+i18n_add ( "Permission to interstate landline call.");
+i18n_add ( "Permission to international landline call.");
+i18n_add ( "Mobile calls system maximum permissions.");
+i18n_add ( "Permission to local mobile call.");
+i18n_add ( "Permission to interstate mobile call.");
+i18n_add ( "Permission to international mobile call.");
+i18n_add ( "Marine calls system maximum permissions.");
+i18n_add ( "Permission to local marine call.");
+i18n_add ( "Permission to interstate marine call.");
+i18n_add ( "Permission to international marine call.");
+i18n_add ( "Toll free calls system maximum permissions.");
+i18n_add ( "Permission to local toll free call.");
+i18n_add ( "Permission to international toll free call.");
+i18n_add ( "Premium rate numbers calls system maximum permissions.");
+i18n_add ( "Permission to local premium rate number call.");
+i18n_add ( "Permission to international premium rate number call.");
+i18n_add ( "Satellite calls system maximum permissions.");
+i18n_add ( "Permission to local satellite call.");
+i18n_add ( "Permission to international satellite call.");
+i18n_add ( "View permissions");
+i18n_add ( "View system permission information.");
+i18n_add ( "Edit permissions");
+i18n_add ( "Change the system maximum permissions.");
+i18n_add ( "The DNS zone to be checked.");
+i18n_add ( "example.com");
+i18n_add ( "The Name Authority Pointer (NAPTR) for VoIP at requested zone.");
+i18n_add ( "DNS entry details.");
+i18n_add ( "Full qualified domain name for entry.");
+i18n_add ( "Class of DNS zone entry.");
+i18n_add ( "The time to live (TTL) in seconds for entry.");
+i18n_add ( "The type of entry.");
+i18n_add ( "The priority of entry.");
+i18n_add ( "The weight of entry.");
+i18n_add ( "The port of entry.");
+i18n_add ( "The target of entry.");
+i18n_add ( "The text extract of entry.");
+i18n_add ( "The UDP SIP service (SRV) for VoIP at requested zone.");
+i18n_add ( "The TCP SIP service (SRV) for VoIP at requested zone.");
+i18n_add ( "The status of add request.");
+i18n_add ( "Check DNS");
+i18n_add ( "Check VoIP DNS zone.");
+i18n_add ( "The plugion file to be installed.");
+i18n_add ( "New system plugin installed sucessfully.");
+i18n_add ( "Import plugin");
+i18n_add ( "Import a plugin file.");
+i18n_add ( "The temporary plugin directory location.");
+i18n_add ( "The name of the plugin.");
+i18n_add ( "The type of file that will be checked. A letter corresponding to the file:<br />`A` = api.php<br />`C` = config.php<br />`F` = filter.php<br />`L` = language.php<br />`M` = webui.php<br />`I` = install.php");
+i18n_add ( "An array containing the plugin file information.");
+i18n_add ( "The status of current view request.");
+i18n_add ( "The installed API hooks array description.");
+i18n_add ( "The installed filters array description.");
+i18n_add ( "The installed plugins array description.");
+i18n_add ( "The installed included files array description.");
+i18n_add ( "Check plugin file");
+i18n_add ( "Internal endpoint to check and validate a plugin file.");
+i18n_add ( "Filter search with this string. If not provided, return all plugins.");
+i18n_add ( "An array containing the system plugins.");
+i18n_add ( "The directory name of the plugin.");
+i18n_add ( "Users avatar");
+i18n_add ( "The version of the plugin.");
+i18n_add ( "The author of the plugin.");
+i18n_add ( "The description of the plugin.");
+i18n_add ( "Add avatar to user profile at system interface.");
+i18n_add ( "The status of the plugin. If true, it's installed and in use.");
+i18n_add ( "An array containing all plugin requirements.");
+i18n_add ( "The required module or plugin.");
+i18n_add ( "Search for system plugins.");
+i18n_add ( "Plugin toggled enabled/disabled sucessfully.");
+i18n_add ( "Toggle plugin status");
+i18n_add ( "Toggle plugin status enabled/disabled.");
+i18n_add ( "The plugin directory name.");
+i18n_add ( "Enable plugin");
+i18n_add ( "Enable a system plugin.");
+i18n_add ( "Disable plugin");
+i18n_add ( "Disable a system plugin.");
+i18n_add ( "An object containing information about the system plugin.");
+i18n_add ( "The license of the plugin.");
+i18n_add ( "View plugin");
+i18n_add ( "View system plugin information.");
+i18n_add ( "The system plugin was removed.");
+i18n_add ( "Remove plugin");
+i18n_add ( "Remove a system plugin.");
+i18n_add ( "The order of entry.");
+i18n_add ( "The preference of entry.");
+i18n_add ( "The flags of entry.");
+i18n_add ( "The service of entry.");
+i18n_add ( "The regex of entry.");
+i18n_add ( "The replacement of entry.");
+i18n_add ( "The DNS check results.");
+i18n_add ( "NTP server");
+i18n_add ( "Remove server");
+i18n_add ( "Add server");
+
+/**
+ * Add Brazilian Portuguese support
+ */
+i18n_add ( "system permissions", "permissões do sistema", "pt_BR");
+i18n_add ( "General", "Geral", "pt_BR");
+i18n_add ( "Edit system permissions", "Editar permissões do sistema", "pt_BR");
+i18n_add ( "Error changing permissions!", "Erro alterando permissões!", "pt_BR");
+i18n_add ( "Error retrieving permissions!", "Erro requisitando permissões!", "pt_BR");
+i18n_add ( "Invalid value.", "Valor inválido.", "pt_BR");
+i18n_add ( "Language", "Idioma", "pt_BR");
+i18n_add ( "Operator", "Telefonista", "pt_BR");
+i18n_add ( "Operator extension", "Ramal do(a) telefonista", "pt_BR");
+i18n_add ( "Permissions changed sucessfully!", "Permissões alteradas com sucesso!", "pt_BR");
+i18n_add ( "Permissions configuration", "Configuração de permissões", "pt_BR");
+i18n_add ( "Plugins", "Plugins", "pt_BR");
+i18n_add ( "Select a language", "Selecionar idioma", "pt_BR");
+i18n_add ( "System permissions", "Permissões do sistema", "pt_BR");
+i18n_add ( "View system permission information", "Visualizar informações de permissões do sistema", "pt_BR");
+i18n_add ( "Check", "Verificar", "pt_BR");
+i18n_add ( "Check VoIP DNS zone", "Verificar zona DNS VoIP", "pt_BR");
+i18n_add ( "Debug information", "Informações para depuração", "pt_BR");
+i18n_add ( "DNS checker", "Verificador de DNS", "pt_BR");
+i18n_add ( "Error checking DNS zone!", "Erro verificando zona DNS!", "pt_BR");
+i18n_add ( "SUCCESS!", "SUCESSO!", "pt_BR");
+i18n_add ( "FAIL!", "FALHA!", "pt_BR");
+i18n_add ( "INCONSISTENCY!", "INCONSISTÊNCIA!", "pt_BR");
+i18n_add ( "Name Authority Pointer", "Name Authority Pointer", "pt_BR");
+i18n_add ( "No valid NAPTR data found!", "Nenhum registro válido de NAPTR encontrado!", "pt_BR");
+i18n_add ( "No valid SIP over TCP server data found!", "Nenhum registro válido de servidor SIP sobre TCP encontrado!", "pt_BR");
+i18n_add ( "No valid SIP over UDP server data found!", "Nenhum registro válido de servidor SIP sobre UDP encontrado!", "pt_BR");
+i18n_add ( "SIP over TCP service", "Serviço de SIP sobre TCP", "pt_BR");
+i18n_add ( "SIP over UDP service", "Serviço de SIP sobre UDP", "pt_BR");
+i18n_add ( "VoIP DNS result for domain %s", "Resultado de DNS VoIP para o domínio %s", "pt_BR");
+i18n_add ( "VoIP DNS zone checker", "Verificador de zona DNS VoIP", "pt_BR");
+i18n_add ( "VoIP DNS zone check result", "Resultado de verificação de zona DNS VoIP", "pt_BR");
+i18n_add ( "Zone", "Zona", "pt_BR");
+i18n_add ( "Zone domain name", "Nome da zona de domínio", "pt_BR");
+i18n_add ( "Zone must be informed!", "Zona deve ser informada!", "pt_BR");
+i18n_add ( "Zone not found.", "Zona não encontrada.", "pt_BR");
+i18n_add ( "Disable", "Desabilitar", "pt_BR");
+i18n_add ( "Disabled", "Desabilitado", "pt_BR");
+i18n_add ( "Enable", "Habilitar", "pt_BR");
+i18n_add ( "Enabled", "Habilitado", "pt_BR");
+i18n_add ( "Error opening plugin zip file.", "Erro abrindo arquivo zip de plugin.", "pt_BR");
+i18n_add ( "Error parsing plugin minimum system requirements.", "Erro analisando requisitos mínimos de sistema para o plugin.", "pt_BR");
+i18n_add ( "Error removing plugin!", "Erro removendo plugin!", "pt_BR");
+i18n_add ( "Invalid file type.", "Tipo de arquivo inválido.", "pt_BR");
+i18n_add ( "Invalid plugin file structure.", "Estrutura de arquivo do plugin inválida.", "pt_BR");
+i18n_add ( "Name", "Nome", "pt_BR");
+i18n_add ( "Plugin configuration file misses own plugin section.", "Arquivo de configurações do plugin não possui sessão do próprio plugin.", "pt_BR");
+i18n_add ( "Plugin configuration file missing.", "Arquivo de configurações do plugin não encontrado.", "pt_BR");
+i18n_add ( "Plugin file doesn't have the minimum required files.", "Arquivo de plugin não possui o mínimo de arquivos necessários.", "pt_BR");
+i18n_add ( "Plugin file not found!", "Arquivo de plugin não encontrado!", "pt_BR");
+i18n_add ( "Plugin removal", "Remoção de plugin", "pt_BR");
+i18n_add ( "Plugin removed sucessfully!", "Plugin removido com sucesso!", "pt_BR");
+i18n_add ( "plugins", "plugins", "pt_BR");
+i18n_add ( "Search plugins", "Pesquisar plugins", "pt_BR");
+i18n_add ( "Status", "Estado", "pt_BR");
+i18n_add ( "Are sure you want to remove the plugin %s (%s)?", "Você tem certeza que deseja remover o plugin %s (%s)?", "pt_BR");
+i18n_add ( "Invalid plugin extension.", "Extensão do plugin inválida.", "pt_BR");
+i18n_add ( "Add...", "Adicionar..", "pt_BR");
+i18n_add ( "Error toggling plugin!", "Erro ao habilitar/desabilitar plugin!", "pt_BR");
+i18n_add ( "File is too large.", "Arquivo é muito grande.", "pt_BR");
+i18n_add ( "File is too small.", "Arquivo é muito pequeno.", "pt_BR");
+i18n_add ( "File type not allowed.", "Tipo de arquivo não permitido.", "pt_BR");
+i18n_add ( "Import", "Importar", "pt_BR");
+i18n_add ( "Import plugin file", "Importar arquivo de plugin", "pt_BR");
+i18n_add ( "Invalid plugin file.", "Arquivo de plugin inválido.", "pt_BR");
+i18n_add ( "Maximum number of files exceeded.", "Número máximo de arquivos excedido.", "pt_BR");
+i18n_add ( "Plugin addition", "Adição de plugin", "pt_BR");
+i18n_add ( "Plugin already installed.", "Plugin já instalado.", "pt_BR");
+i18n_add ( "Plugin configuration file misses own plugin name.", "Arquivo de configurações do plugin não possui nome do próprio plugin.", "pt_BR");
+i18n_add ( "Plugin parser error.", "Erro de sintaxe no plugin.", "pt_BR");
+i18n_add ( "Plugin %s (version %s) sucessfully installed.", "Plugin %s (versão %s) instalado com sucesso.", "pt_BR");
+i18n_add ( "Plugin toggle", "Habilitar/desabilitar plugin", "pt_BR");
+i18n_add ( "Plugin toggled sucessfully!", "Plugin habilitado/desabilitado com sucesso!", "pt_BR");
+i18n_add ( "Processing...", "Processando...", "pt_BR");
+i18n_add ( "Remove plugins", "Remover plugins", "pt_BR");
+i18n_add ( "Toggle plugins enable/disable", "Habilitar/desabilitar plugins", "pt_BR");
+i18n_add ( "Unknown error.", "Erro desconhecido.", "pt_BR");
+i18n_add ( "Upload", "Enviar", "pt_BR");
+i18n_add ( "Uploaded bytes exceed file size.", "Bytes enviados excedem o tamanho do arquivo.", "pt_BR");
+i18n_add ( "View plugins", "Visualizar plugins", "pt_BR");
+i18n_add ( "global configurations", "configurações globais", "pt_BR");;
+i18n_add ( "Music on Hold", "Música em Espera", "pt_BR");
+i18n_add ( "Select default music on hold", "Selecione a música em espera padrão", "pt_BR");
+i18n_add ( "An object containing information about the maximum call type permissions on system. Permissions could be `y` to allow, `p` to allow with password or `n` to deny.", "Um objeto contendo informações sobre o limite de permissões de chamadas do sistema. Permissões podem ser 'y' para permitir, 'p' para permitir utilizando senha ou 'n' para negar.", "pt_BR");
+i18n_add ( "Landline calls system maximum permissions.", "Permissionamento máximo do sistema para chamadas fixas.", "pt_BR");
+i18n_add ( "Permission to local landline call.", "Permissão para chamadas fixas locais.", "pt_BR");
+i18n_add ( "Permission to interstate landline call.", "Permissão para chamadas fixas interurbanas.", "pt_BR");
+i18n_add ( "Permission to international landline call.", "Permissão para chamadas fixas internacionais.", "pt_BR");
+i18n_add ( "Mobile calls system maximum permissions.", "Permissionamento máximo do sistema para chamadas móveis.", "pt_BR");
+i18n_add ( "Permission to local mobile call.", "Permissão para chamadas móveis locais.", "pt_BR");
+i18n_add ( "Permission to interstate mobile call.", "Permissão para chamadas móveis interurbanas.", "pt_BR");
+i18n_add ( "Permission to international mobile call.", "Permissão para chamadas móveis internacionais.", "pt_BR");
+i18n_add ( "Marine calls system maximum permissions.", "Permissionamento máximo do sistema para chamadas marítimas.", "pt_BR");
+i18n_add ( "Permission to local marine call.", "Permissão para chamadas marítima local.", "pt_BR");
+i18n_add ( "Permission to interstate marine call.", "Permissão para chamadas marítima interurbana.", "pt_BR");
+i18n_add ( "Permission to international marine call.", "Permissão para chamadas marítima internacional.", "pt_BR");
+i18n_add ( "Toll free calls system maximum permissions.", "Permissionamento máximo do sistema para chamadas gratuítas.", "pt_BR");
+i18n_add ( "Permission to local toll free call.", "Permissão para chamadas gratuítas locais.", "pt_BR");
+i18n_add ( "Permission to international toll free call.", "Permissão para chamadas gratuítas internacionais.", "pt_BR");
+i18n_add ( "Premium rate numbers calls system maximum permissions.", "Permissionamento máximo do sistema para chamadas com tarifação especial.", "pt_BR");
+i18n_add ( "Permission to local premium rate number call.", "Permissão para chamadas com tarifação especial locais.", "pt_BR");
+i18n_add ( "Permission to international premium rate number call.", "Permissão para chamadas com tarifação especial internacionais.", "pt_BR");
+i18n_add ( "Satellite calls system maximum permissions.", "Permissionamento máximo do sistema para chamadas via satélite.", "pt_BR");
+i18n_add ( "Permission to local satellite call.", "Permissão para chamadas via satélite locais.", "pt_BR");
+i18n_add ( "Permission to international satellite call.", "Permissão para chamadas via satélite internacionais.", "pt_BR");
+i18n_add ( "View permissions", "Visualizar permissões", "pt_BR");
+i18n_add ( "View system permission information.", "Visualizar informações de permissões do sistema.", "pt_BR");
+i18n_add ( "The system permissions was sucessfully updated.", "As permissões do sistema foram atualizadas com sucesso.", "pt_BR");
+i18n_add ( "Edit permissions", "Editar permissões", "pt_BR");
+i18n_add ( "Change the system maximum permissions.", "Alterar as permissões máximas do sistema.", "pt_BR");
+i18n_add ( "The DNS zone to be checked.", "A zona DNS a ser verificada.", "pt_BR");
+i18n_add ( "example.com", "exemplo.com.br", "pt_BR");
+i18n_add ( "The Name Authority Pointer (NAPTR) for VoIP at requested zone.", "O ponteiro de nome autoritário (NAPTR) para VoIP na zona requisitada.", "pt_BR");
+i18n_add ( "DNS entry details.", "Detalhes do registro de DNS.", "pt_BR");
+i18n_add ( "Full qualified domain name for entry.", "Domínio completo qualificado para o registro.", "pt_BR");
+i18n_add ( "Class of DNS zone entry.", "Classe do registro da zona DNS.", "pt_BR");
+i18n_add ( "The time to live (TTL) in seconds for entry.", "O tempo de vida (TTL) em segundos para o registro.", "pt_BR");
+i18n_add ( "The type of entry.", "O tipo do registro.", "pt_BR");
+i18n_add ( "The priority of entry.", "A prioridade do registro.", "pt_BR");
+i18n_add ( "The weight of entry.", "O peso do registro.", "pt_BR");
+i18n_add ( "The port of entry.", "A porta do registro.", "pt_BR");
+i18n_add ( "The target of entry.", "O alvo do registro.", "pt_BR");
+i18n_add ( "The text extract of entry.", "O texto extraído do registro.", "pt_BR");
+i18n_add ( "The UDP SIP service (SRV) for VoIP at requested zone.", "O serviço SIP UDP (SRV) para VoIP na zona requisitada.", "pt_BR");
+i18n_add ( "The TCP SIP service (SRV) for VoIP at requested zone.", "O serviço SIP TCP (SRV) para VoIP na zona requisitada.", "pt_BR");
+i18n_add ( "The status of add request.", "O estado da requisição de adição.", "pt_BR");
+i18n_add ( "Check DNS", "Verificar DNS", "pt_BR");
+i18n_add ( "Check VoIP DNS zone.", "Verificar uma zona DNS VoIP.", "pt_BR");
+i18n_add ( "The plugion file to be installed.", "O arquivo de plugin a ser instalado.", "pt_BR");
+i18n_add ( "New system plugin installed sucessfully.", "Novo plugin do sistema instalado com sucesso.", "pt_BR");
+i18n_add ( "Import plugin", "Importar plugin", "pt_BR");
+i18n_add ( "Import a plugin file.", "Importar um arquivo de plugin.", "pt_BR");
+i18n_add ( "The temporary plugin directory location.", "Localização do diretório temporário de plugin.", "pt_BR");
+i18n_add ( "The name of the plugin.", "O nome do plugin.", "pt_BR");
+i18n_add ( "The type of file that will be checked. A letter corresponding to the file:<br />`A` = api.php<br />`C` = config.php<br />`F` = filter.php<br />`L` = language.php<br />`M` = webui.php<br />`I` = install.php", "O tipo do arquivo que será verificado. Uma letra correspondente ao arquivo:<br />`A` = api.php<br />`C` = config.php<br />`F` = filter.php<br />`L` = language.php<br />`M` = webui.php<br />`I` = install.php", "pt_BR");
+i18n_add ( "An array containing the plugin file information.", "Um array contendo informações do arquivo de plugin.", "pt_BR");
+i18n_add ( "The status of current view request.", "O estado da requisição de visualização atual.", "pt_BR");
+i18n_add ( "The installed API hooks array description.", "Um array descrevendo os ganchos da API instalados.", "pt_BR");
+i18n_add ( "The installed filters array description.", "Um array descrevendo os filtros instalados.", "pt_BR");
+i18n_add ( "The installed plugins array description.", "Um array descrevendo os plugins instalados.", "pt_BR");
+i18n_add ( "The installed included files array description.", "Um array descrevendo os arquivos incluídos.", "pt_BR");
+i18n_add ( "Check plugin file", "Verificar arquivo de plugin", "pt_BR");
+i18n_add ( "Internal endpoint to check and validate a plugin file.", "Recurso interno para verificar e validar um arquivo de plugin.", "pt_BR");
+i18n_add ( "Filter search with this string. If not provided, return all plugins.", "Filtrar a pesquisa com esta string. Se não informado, retorna todos os plugins.", "pt_BR");
+i18n_add ( "An array containing the system plugins.", "Um array contendo os plugins do sistema.", "pt_BR");
+i18n_add ( "The directory name of the plugin.", "O nome do diretório do plugin.", "pt_BR");
+i18n_add ( "Users avatar", "Avatar de usuários", "pt_BR");
+i18n_add ( "The version of the plugin.", "A versão do plugin.", "pt_BR");
+i18n_add ( "The author of the plugin.", "O autor do plugin.", "pt_BR");
+i18n_add ( "The description of the plugin.", "A descrição do plugin.", "pt_BR");
+i18n_add ( "Add avatar to user profile at system interface.", "Adiciona avatar ao perfil de usuários na interface do sistema.", "pt_BR");
+i18n_add ( "The status of the plugin. If true, it's installed and in use.", "O estado do plugin. Se verdadeiro, está instalado e em uso.", "pt_BR");
+i18n_add ( "An array containing all plugin requirements.", "Um array contendo todos os requisitos do plugin.", "pt_BR");
+i18n_add ( "The required module or plugin.", "O módulo ou plugin requerido.", "pt_BR");
+i18n_add ( "Search for system plugins.", "Pesquisar por plugins do sistema.", "pt_BR");
+i18n_add ( "Plugin toggled enabled/disabled sucessfully.", "O plugin foi alternado habilitado/desabilitado com sucesso.", "pt_BR");
+i18n_add ( "Toggle plugin status", "Alternar o estado do plugin", "pt_BR");
+i18n_add ( "Toggle plugin status enabled/disabled.", "Alternar o estado habilitado/desabilitado do plugin.", "pt_BR");
+i18n_add ( "The plugin directory name.", "O nome do diretório do plugin.", "pt_BR");
+i18n_add ( "Enable plugin", "Habilitar plugin", "pt_BR");
+i18n_add ( "Enable a system plugin.", "Habilitar um plugin do sistema.", "pt_BR");
+i18n_add ( "Disable plugin", "Desabilitar plugin", "pt_BR");
+i18n_add ( "Disable a system plugin.", "Desabilitar um plugin do sistema.", "pt_BR");
+i18n_add ( "An object containing information about the system plugin.", "Um objeto contendo informações sobre um plugin do sistema.", "pt_BR");
+i18n_add ( "The license of the plugin.", "A licença do plugin.", "pt_BR");
+i18n_add ( "View plugin", "Visualizar plugin", "pt_BR");
+i18n_add ( "View system plugin information.", "Visualizar informações de plugin do sistema.", "pt_BR");
+i18n_add ( "The system plugin was removed.", "O plugin do sistema foi removido.", "pt_BR");
+i18n_add ( "Remove plugin", "Remover plugin", "pt_BR");
+i18n_add ( "Remove a system plugin.", "Remover um plugin do sistema.", "pt_BR");
+i18n_add ( "The order of entry.", "A ordem do registro.", "pt_BR");
+i18n_add ( "The preference of entry.", "A preferência do registro.", "pt_BR");
+i18n_add ( "The flags of entry.", "As marcações do registro.", "pt_BR");
+i18n_add ( "The service of entry.", "O serviço do registro.", "pt_BR");
+i18n_add ( "The regex of entry.", "A expressão regular do registro.", "pt_BR");
+i18n_add ( "The replacement of entry.", "A substituição do registro.", "pt_BR");
+i18n_add ( "The DNS check results.", "Os resultados da checagem de DNS.", "pt_BR");
+i18n_add ( "NTP server", "Servidor NTP", "pt_BR");
+i18n_add ( "Remove server", "Remover servidor", "pt_BR");
+i18n_add ( "Add server", "Adicionar servidor", "pt_BR");
+?>

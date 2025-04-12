@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,75 +24,116 @@
  */
 
 /**
- * VoIP Domain queues api module. This module add the api calls related to
+ * VoIP Domain queues module API. This module add the API calls related to
  * queues.
  *
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Queues
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call to fetch queues listing
- */
-framework_add_hook ( "queues_fetch", "queues_fetch");
-framework_add_permission ( "queues_fetch", __ ( "Request queue listing"));
-framework_add_api_call ( "/queues/fetch", "Read", "queues_fetch", array ( "permissions" => array ( "user", "queues_fetch")));
-
-/**
- * Function to generate queue list.
- *
- * @global array $_in Framework global configuration variable
- * @param string $buffer Buffer from plugin system if processed by other function
- *                       before
- * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
- */
-function queues_fetch ( $buffer, $parameters)
-{
-  global $_in;
-
-  /**
-   * Check for modifications time
-   */
-  check_table_modification ( "Queues");
-
-  /**
-   * Search queues
-   */
-  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues`"))
-  {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
-  }
-
-  /**
-   * Create table structure
-   */
-  $data = array ();
-  while ( $result = $results->fetch_assoc ())
-  {
-    $data[] = array ( $result["ID"], $result["Extension"], $result["Description"]);
-  }
-
-  /**
-   * Return structured data
-   */
-  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
-}
-
-/**
  * API call to search queues
  */
-framework_add_hook ( "queues_search", "queues_search");
-framework_add_permission ( "queues_search", __ ( "Search queues (select list standard)"));
-framework_add_api_call ( "/queues/search", "Read", "queues_search", array ( "permissions" => array ( "user", "queues_search")));
+framework_add_hook (
+  "queues_search",
+  "queues_search",
+  IN_HOOK_NULL,
+  array (
+    "requests" => array (
+      "type" => "object",
+      "properties" => array (
+        "Filter" => array (
+          "type" => "string",
+          "description" => __ ( "Filter search with this string. If not provided, return all queues."),
+          "example" => __ ( "filter")
+        ),
+        "Fields" => array (
+          "type" => "string",
+          "description" => __ ( "A comma delimited list of fields that should be returned."),
+          "default" => "ID,Description,Name,Strategy,StrategyText",
+          "example" => "Description,Name,Strategy"
+        )
+      )
+    ),
+    "response" => array (
+      200 => array (
+        "description" => __ ( "An array containing the system queues."),
+        "schema" => array (
+          "type" => "array",
+          "xml" => array (
+            "name" => "responses",
+            "wrapped" => true
+          ),
+          "items" => array (
+            "type" => "object",
+            "xml" => array (
+              "name" => "queue"
+            ),
+            "properties" => array (
+              "ID" => array (
+                "type" => "integer",
+                "description" => __ ( "The internal unique identification number of the queue."),
+                "example" => 1
+              ),
+              "Description" => array (
+                "type" => "string",
+                "description" => __ ( "The description of the queue."),
+                "example" => __ ( "Help Desk")
+              ),
+              "Name" => array (
+                "type" => "string",
+                "description" => __ ( "The queue name keywork of the queue."),
+                "example" => __ ( "helpdesk")
+              ),
+              "Strategy" => array (
+                "type" => "string",
+                "enum" => array ( "ringall", "roundrobin", "leastrecent", "fewestcalls", "random", "rrmemory"),
+                "description" => __ ( "The ring strategy of the queue."),
+                "example" => "rrmemory"
+              ),
+              "StrategyText" => array (
+                "type" => "string",
+                "description" => __ ( "The ring strategy description of the queue."),
+                "example" => __ ( "Round Robin Memory")
+              )
+            )
+          )
+        )
+      ),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "Filter" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "Invalid filter content.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
+framework_add_permission ( "queues_search", __ ( "Search queues"));
+framework_add_api_call (
+  "/queues",
+  "Read",
+  "queues_search",
+  array (
+    "permissions" => array ( "user", "queues_search"),
+    "title" => __ ( "Search queues"),
+    "description" => __ ( "Search for system queues.")
+  )
+);
 
 /**
- * Function to generate queue list to select box.
+ * Function to search queues.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -105,20 +146,90 @@ function queues_search ( $buffer, $parameters)
   global $_in;
 
   /**
+   * Call start hook if exist
+   */
+  if ( framework_has_hook ( "queues_search_start"))
+  {
+    $parameters = framework_call ( "queues_search_start", $parameters);
+  }
+
+  /**
    * Check for modifications time
    */
   check_table_modification ( "Queues");
 
   /**
-   * Search queues
+   * Validate received parameters
    */
   $data = array ();
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` " . ( ! empty ( $parameters["q"]) ? "WHERE `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["q"]) . "%' OR `Extension` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["q"]) . "' " : "") . "ORDER BY `Description`"))
+
+  /**
+   * Call validate hook if exist
+   */
+  if ( framework_has_hook ( "queues_search_validate"))
   {
-    while ( $queue = $result->fetch_assoc ())
-    {
-      $data[] = array ( $queue["ID"], $queue["Description"] . " (" . $queue["Extension"] . ")");
-    }
+    $data = framework_call ( "queues_search_validate", $parameters);
+  }
+
+  /**
+   * Return error data if some error occurred
+   */
+  if ( sizeof ( $data) != 0)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+    return $data;
+  }
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "queues_search_sanitize"))
+  {
+    $parameters = framework_call ( "queues_search_sanitize", $parameters, false, $parameters);
+  }
+
+  /**
+   * Call pre hook if exist
+   */
+  if ( framework_has_hook ( "queues_search_pre"))
+  {
+    $parameters = framework_call ( "queues_search_pre", $parameters, false, $parameters);
+  }
+
+  /**
+   * Search queues
+   */
+  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues`" . ( ! empty ( $parameters["Filter"]) ? " WHERE `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " ORDER BY `Name`, `Description`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+
+  /**
+   * Create result structure
+   */
+  $data = array ();
+  $fields = api_filter_fields ( $parameters["Fields"], "ID,Description,Name,Strategy,StrategyText", "ID,Description,Name,Strategy,StrategyText");
+  while ( $result = $results->fetch_assoc ())
+  {
+    $result["StrategyText"] = __ ( $_in["queuestypes"][$result["Strategy"]]);
+    $data[] = api_filter_entry ( $fields, $result);
+  }
+
+  /**
+   * Call post hook if exist
+   */
+  if ( framework_has_hook ( "queues_search_post"))
+  {
+    $data = framework_call ( "queues_search_post", $parameters, false, $data);
+  }
+
+  /**
+   * Execute finish hook if exist
+   */
+  if ( framework_has_hook ( "queues_search_finish"))
+  {
+    framework_call ( "queues_search_finish", $parameters);
   }
 
   /**
@@ -130,12 +241,84 @@ function queues_search ( $buffer, $parameters)
 /**
  * API call to get queue information
  */
-framework_add_hook ( "queues_view", "queues_view");
-framework_add_permission ( "queues_view", __ ( "View queue informations"));
-framework_add_api_call ( "/queues/:id", "Read", "queues_view", array ( "permissions" => array ( "user", "queues_view")));
+framework_add_hook (
+  "queues_view",
+  "queues_view",
+  IN_HOOK_NULL,
+  array (
+    "response" => array (
+      200 => array (
+        "description" => __ ( "An object containing information about the queue."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "Description" => array (
+              "type" => "string",
+              "description" => __ ( "The description of the queue."),
+              "example" => __ ( "Help Desk")
+            ),
+            "Name" => array (
+              "type" => "string",
+              "description" => __ ( "The queue name keywork of the queue."),
+              "example" => __ ( "helpdesk")
+            ),
+            "Strategy" => array (
+              "type" => "string",
+              "enum" => array ( "ringall", "roundrobin", "leastrecent", "fewestcalls", "random", "rrmemory"),
+              "description" => __ ( "The ring strategy of the queue."),
+              "example" => "rrmemory"
+            ),
+            "StrategyText" => array (
+              "type" => "string",
+              "description" => __ ( "The ring strategy description of the queue."),
+              "example" => __ ( "Round Robin Memory")
+            ),
+            "StrategyTextEN" => array (
+              "type" => "string",
+              "description" => __ ( "The ring strategy description of the queue in English."),
+              "example" => __ ( "Round Robin Memory")
+            )
+          )
+        )
+      ),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "ID" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "Invalid queue ID.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
+framework_add_permission ( "queues_view", __ ( "View queue information"));
+framework_add_api_call (
+  "/queues/:ID",
+  "Read",
+  "queues_view",
+  array (
+    "permissions" => array ( "user", "queues_view"),
+    "title" => __ ( "View queues"),
+    "description" => __ ( "Get a queue information."),
+    "parameters" => array (
+      array (
+        "name" => "ID",
+        "type" => "integer",
+        "description" => __ ( "The queue internal system unique identifier."),
+        "example" => 1
+      )
+    )
+  )
+);
 
 /**
- * Function to generate queue informations.
+ * Function to generate queue information.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -148,26 +331,76 @@ function queues_view ( $buffer, $parameters)
   global $_in;
 
   /**
+   * Call start hook if exist
+   */
+  if ( framework_has_hook ( "queues_view_start"))
+  {
+    $parameters = framework_call ( "queues_view_start", $parameters);
+  }
+
+  /**
    * Check for modifications time
    */
   check_table_modification ( "Queues");
 
   /**
-   * Check basic parameters
+   * Validate received parameters
    */
-  $parameters["id"] = (int) $parameters["id"];
+  $data = array ();
+  if ( ! array_key_exists ( "ID", $parameters) || ! is_numeric ( $parameters["ID"]))
+  {
+    $data["ID"] = __ ( "Invalid queue ID.");
+  }
+
+  /**
+   * Call validate hook if exist
+   */
+  if ( framework_has_hook ( "queues_view_validate"))
+  {
+    $data = framework_call ( "queues_view_validate", $parameters);
+  }
+
+  /**
+   * Return error data if some error occurred
+   */
+  if ( sizeof ( $data) != 0)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+    return $data;
+  }
+
+  /**
+   * Sanitize parameters
+   */
+  $parameters["ID"] = (int) $parameters["ID"];
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "queues_view_sanitize"))
+  {
+    $parameters = framework_call ( "queues_view_sanitize", $parameters, false, $parameters);
+  }
+
+  /**
+   * Call pre hook if exist
+   */
+  if ( framework_has_hook ( "queues_view_pre"))
+  {
+    $parameters = framework_call ( "queues_view_pre", $parameters, false, $parameters);
+  }
 
   /**
    * Search queues
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   if ( $result->num_rows != 1)
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 400 Bad Request");
     exit ();
   }
   $queue = $result->fetch_assoc ();
@@ -175,10 +408,25 @@ function queues_view ( $buffer, $parameters)
   /**
    * Format data
    */
-  $data = array ();
-  $data["result"] = true;
-  $data["extension"] = $queue["Extension"];
-  $data["description"] = $queue["Description"];
+  $queue["StrategyTextEN"] = $_in["queuestypes"][$queue["Strategy"]];
+  $queue["StrategyText"] = __ ( $data["StrategyTextEN"]);
+  $data = api_filter_entry ( array ( "Description", "Name", "Strategy", "StrategyTextEN", "StrategyText"), $queue);
+
+  /**
+   * Call post hook if exist
+   */
+  if ( framework_has_hook ( "queues_view_post"))
+  {
+    $data = framework_call ( "queues_view_post", $parameters, false, $data);
+  }
+
+  /**
+   * Execute finish hook if exist
+   */
+  if ( framework_has_hook ( "queues_view_finish"))
+  {
+    framework_call ( "queues_view_finish", $parameters);
+  }
 
   /**
    * Return structured data
@@ -189,9 +437,78 @@ function queues_view ( $buffer, $parameters)
 /**
  * API call to add a new queue
  */
-framework_add_hook ( "queues_add", "queues_add");
+framework_add_hook (
+  "queues_add",
+  "queues_add",
+  IN_HOOK_NULL,
+  array (
+    "requests" => array (
+      "type" => "object",
+      "required" => true,
+      "properties" => array (
+        "Description" => array (
+          "type" => "string",
+          "description" => __ ( "The description of the queue."),
+          "required" => true,
+          "example" => __ ( "Help Desk")
+        ),
+        "Name" => array (
+          "type" => "string",
+          "description" => __ ( "The name keyword of the queue."),
+          "pattern" => "/^[a-z0-9\-\.]$/",
+          "required" => true,
+          "example" => __ ( "helpdesk")
+        ),
+        "Strategy" => array (
+          "type" => "string",
+          "enum" => array ( "ringall", "roundrobin", "leastrecent", "fewestcalls", "random", "rrmemory"),
+          "description" => __ ( "The ring strategy of the queue."),
+          "required" => true,
+          "example" => "rrmemory"
+        )
+      )
+    ),
+    "response" => array (
+      201 => array (
+        "description" => __ ( "New queue added sucessfully.")
+      ),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "Description" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The description is required.")
+            ),
+            "Name" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The name could only contain lower case characters, numbers, hifen and dot.")
+            ),
+            "Strategy" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The selected strategy is invalid.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
 framework_add_permission ( "queues_add", __ ( "Add queues"));
-framework_add_api_call ( "/queues", "Create", "queues_add", array ( "permissions" => array ( "user", "queues_add")));
+framework_add_api_call (
+  "/queues",
+  "Create",
+  "queues_add",
+  array (
+    "permissions" => array ( "user", "queues_add"),
+    "title" => __ ( "Add queues"),
+    "description" => __ ( "Add a new queue.")
+  )
+);
 
 /**
  * Function to add a new queue.
@@ -207,76 +524,82 @@ function queues_add ( $buffer, $parameters)
   global $_in;
 
   /**
-   * Check basic parameters
+   * Call start hook if exist
+   */
+  if ( framework_has_hook ( "queues_add_start"))
+  {
+    $parameters = framework_call ( "queues_add_start", $parameters);
+  }
+
+  /**
+   * Validate received parameters
    */
   $data = array ();
-  $data["result"] = true;
-  $parameters["description"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["description"])));
-  if ( empty ( $parameters["description"]))
+  $parameters["Description"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["Description"])));
+  if ( empty ( $parameters["Description"]))
   {
-    $data["result"] = false;
-    $data["description"] = __ ( "The queue description is required.");
+    $data["Description"] = __ ( "The description is required.");
   }
-  $parameters["extension"] = (int) $parameters["extension"];
-  if ( empty ( $parameters["extension"]))
+  if ( empty ( $parameters["Name"]))
   {
-    $data["result"] = false;
-    $data["extension"] = __ ( "The queue number is required.");
+    $data["Name"] = __ ( "The name is required.");
   }
-
-  /**
-   * Check if extension was in use
-   */
-  $check = filters_call ( "get_extensions", array ( "number" => $parameters["extension"]));
-  if ( sizeof ( $check) != 0)
+  if ( ! array_key_exists ( "Name", $data) && $parameters["Name"] != preg_replace ( "/[^a-z0-9\-\.]/", "", $parameters["Name"]))
   {
-    $data["result"] = false;
-    $data["extension"] = __ ( "Extension already in use.");
+    $data["Name"] = __ ( "The name could only contain lower case characters, numbers, hifen and dot.");
   }
-
-  /**
-   * Get queue range
-   */
-  $range = filters_call ( "search_range", array ( "number" => $parameters["extension"]));
-  if ( sizeof ( $range) == 0)
+  if ( empty ( $parameters["Strategy"]))
   {
-    $data["result"] = false;
-    $data["extension"] = __ ( "Invalid extension.");
+    $data["Strategy"] = __ ( "The strategy is required.");
+  }
+  if ( ! array_key_exists ( "Strategy", $data) && ! array_key_exists ( $parameters["Strategy"], $_in["queuestypes"]))
+  {
+    $data["Strategy"] = __ ( "The selected strategy is invalid.");
   }
 
   /**
    * Check if queue was already added
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "'"))
+  if ( ! array_key_exists ( "Name", $data))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
-  }
-  if ( $result->num_rows != 0)
-  {
-    $data["result"] = false;
-    $data["description"] = __ ( "The provided description was already in use.");
-  }
-
-  /**
-   * Call add sanitize hook, if exist
-   */
-  if ( framework_has_hook ( "queues_add_sanitize"))
-  {
-    $data = framework_call ( "queues_add_sanitize", $parameters, false, $data);
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "'"))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    if ( $result->num_rows != 0)
+    {
+      $data["Name"] = __ ( "The provided name was already in use.");
+    }
   }
 
   /**
-   * Return error data if some error ocurred
+   * Call validate hook if exist
    */
-  if ( $data["result"] == false)
+  if ( framework_has_hook ( "queues_add_validate"))
+  {
+    $data = framework_call ( "queues_add_validate", $parameters, false, $data);
+  }
+
+  /**
+   * Return error data if some error occurred
+   */
+  if ( sizeof ( $data) != 0)
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
     return $data;
   }
 
   /**
-   * Call add pre hook, if exist
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "queues_add_sanitize"))
+  {
+    $parameters = framework_call ( "queues_add_sanitize", $parameters, false, $parameters);
+  }
+
+  /**
+   * Call pre hook if exist
    */
   if ( framework_has_hook ( "queues_add_pre"))
   {
@@ -286,15 +609,15 @@ function queues_add ( $buffer, $parameters)
   /**
    * Add new queue record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Queues` (`Extension`, `Description`, `Range`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $parameters["extension"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $range["ID"]) . ")"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Queues` (`Description`, `Name`, `Strategy`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Strategy"]) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  $parameters["id"] = $_in["mysql"]["id"]->insert_id;
+  $parameters["ID"] = $_in["mysql"]["id"]->insert_id;
 
   /**
-   * Call add post hook, if exist
+   * Call post hook if exist
    */
   if ( framework_has_hook ( "queues_add_post"))
   {
@@ -304,38 +627,114 @@ function queues_add ( $buffer, $parameters)
   /**
    * Add new queue at Asterisk server
    */
-  $notify = array ( "Description" => $parameters["description"], "Extension" => $parameters["extension"]);
+  $notify = array ( "Description" => $parameters["Description"], "Name" => $parameters["Name"], "Strategy" => $parameters["Strategy"]);
   if ( framework_has_hook ( "queues_add_notify"))
   {
     $notify = framework_call ( "queues_add_notify", $parameters, false, $notify);
   }
-  notify_server ( $range["Server"], "createqueue", $notify);
+  notify_server ( 0, "queue_add", $notify);
 
   /**
-   * Insert audit registry
+   * Execute finish hook if exist
    */
-  $audit = array ( "ID" => $parameters["id"], "Extension" => $parameters["extension"], "Description" => $parameters["description"], "Range" => $range["ID"]);
-  if ( framework_has_hook ( "queues_add_audit"))
+  if ( framework_has_hook ( "queues_add_finish"))
   {
-    $audit = framework_call ( "queues_add_audit", $parameters, false, $audit);
+    framework_call ( "queues_add_finish", $parameters, false);
   }
-  audit ( "queue", "add", $audit);
 
   /**
    * Return OK to user
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . $_in["general"]["baseurl"] . "queues/" . $parameters["id"] . "/view");
+  header ( "Location: " . $_in["api"]["baseurl"] . "/queues/" . $parameters["ID"]);
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 
 /**
  * API call to edit an existing queue
  */
-framework_add_hook ( "queues_edit", "queues_edit");
+framework_add_hook (
+  "queues_edit",
+  "queues_edit",
+  IN_HOOK_NULL,
+  array (
+    "requests" => array (
+      "type" => "object",
+      "required" => true,
+      "properties" => array (
+        "Description" => array (
+          "type" => "string",
+          "description" => __ ( "The description of the queue."),
+          "required" => true,
+          "example" => __ ( "Help Desk")
+        ),
+        "Name" => array (
+          "type" => "string",
+          "description" => __ ( "The name keyword of the queue."),
+          "pattern" => "/^[a-z0-9\-\.]$/",
+          "required" => true,
+          "example" => __ ( "helpdesk")
+        ),
+        "Strategy" => array (
+          "type" => "string",
+          "enum" => array ( "ringall", "roundrobin", "leastrecent", "fewestcalls", "random", "rrmemory"),
+          "description" => __ ( "The ring strategy of the queue."),
+          "required" => true,
+          "example" => "rrmemory"
+        )
+      )
+    ),
+    "response" => array (
+      200 => array (
+        "description" => __ ( "The queue was sucessfully updated.")
+      ),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "Description" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The description is required.")
+            ),
+            "Name" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The name could only contain lower case characters, numbers, hifen and dot.")
+            ),
+            "Strategy" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The selected strategy is invalid.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
 framework_add_permission ( "queues_edit", __ ( "Edit queues"));
-framework_add_api_call ( "/queues/:id", "Modify", "queues_edit", array ( "permissions" => array ( "user", "queues_edit")));
-framework_add_api_call ( "/queues/:id", "Edit", "queues_edit", array ( "permissions" => array ( "user", "queues_edit")));
+framework_add_api_call (
+  "/queues/:ID",
+  "Modify",
+  "queues_edit",
+  array (
+    "permissions" => array ( "user", "queues_edit"),
+    "title" => __ ( "Edit queues"),
+    "description" => __ ( "Change a queue information.")
+  )
+);
+framework_add_api_call (
+  "/queues/:ID",
+  "Edit",
+  "queues_edit",
+  array (
+    "permissions" => array ( "user", "queues_edit"),
+    "title" => __ ( "Edit queues"),
+    "description" => __ ( "Change a queue information.")
+  )
+);
 
 /**
  * Function to edit an existing queue.
@@ -351,91 +750,102 @@ function queues_edit ( $buffer, $parameters)
   global $_in;
 
   /**
-   * Check basic parameters
+   * Call start hook if exist
+   */
+  if ( framework_has_hook ( "queues_edit_start"))
+  {
+    $parameters = framework_call ( "queues_edit_start", $parameters);
+  }
+
+  /**
+   * Validate received parameters
    */
   $data = array ();
-  $data["result"] = true;
-  $parameters["description"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["description"])));
-  if ( empty ( $parameters["description"]))
+  $parameters["Description"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["Description"])));
+  if ( empty ( $parameters["Description"]))
   {
-    $data["result"] = false;
-    $data["description"] = __ ( "The queue description is required.");
+    $data["Description"] = __ ( "The queue description is required.");
   }
-  $parameters["extension"] = (int) $parameters["extension"];
-  if ( empty ( $parameters["extension"]))
+  if ( empty ( $parameters["Name"]))
   {
-    $data["result"] = false;
-    $data["extension"] = __ ( "The queue number is required.");
+    $data["Name"] = __ ( "The name is required.");
   }
-
-  /**
-   * Check if extension was in use
-   */
-  $check = filters_call ( "get_extensions", array ( "number" => $parameters["extension"]));
-  if ( sizeof ( $check) != 0 && ! ( $check[0]["Type"] == "Queue" && $check[0]["Record"]["ID"] == $parameters["id"]))
+  if ( ! array_key_exists ( "Name", $data) && $parameters["Name"] != preg_replace ( "/[^a-z0-9\-\.]/", "", $parameters["Name"]))
   {
-    $data["result"] = false;
-    $data["extension"] = __ ( "Extension already in use.");
+    $data["Name"] = __ ( "The name could only contain lower case characters, numbers, hifen and dot.");
   }
-
-  /**
-   * Get queue range
-   */
-  $range = filters_call ( "search_range", array ( "number" => $parameters["extension"]));
-  if ( sizeof ( $range) == 0)
+  if ( empty ( $parameters["Strategy"]))
   {
-    $data["result"] = false;
-    $data["extension"] = __ ( "Invalid extension.");
+    $data["Strategy"] = __ ( "The strategy is required.");
+  }
+  if ( ! array_key_exists ( "Strategy", $data) && ! array_key_exists ( $parameters["Strategy"], $_in["queuestypes"]))
+  {
+    $data["Strategy"] = __ ( "The selected strategy is invalid.");
   }
 
   /**
    * Check if queue was already added
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "' AND `ID` != " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! array_key_exists ( "Name", $data))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
-  }
-  if ( $result->num_rows != 0)
-  {
-    $data["result"] = false;
-    $data["description"] = __ ( "The provided description was already in use.");
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "' AND `ID` != " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    if ( $result->num_rows != 0)
+    {
+      $data["Name"] = __ ( "The provided name was already in use.");
+    }
   }
 
   /**
    * Check if queue exist (could be removed by other user meanwhile)
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  if ( $result->num_rows == 0)
+  if ( $result->num_rows != 1)
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 400 Bad Request");
     exit ();
   }
-  $queue = $result->fetch_assoc ();
+  $parameters["ORIGINAL"] = $result->fetch_assoc ();
 
   /**
-   * Call edit sanitize hook, if exist
+   * Call validate hook if exist
    */
-  if ( framework_has_hook ( "queues_edit_sanitize"))
+  if ( framework_has_hook ( "queues_edit_validate"))
   {
-    $data = framework_call ( "queues_edit_sanitize", $parameters, false, $data);
+    $data = framework_call ( "queues_edit_validate", $parameters, false, $data);
   }
 
   /**
-   * Return error data if some error ocurred
+   * Return error data if some error occurred
    */
-  if ( $data["result"] == false)
+  if ( sizeof ( $data) != 0)
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
     return $data;
   }
 
   /**
-   * Call edit pre hook, if exist
+   * Sanitize parameters
+   */
+  $parameters["ID"] = (int) $parameters["ID"];
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "queues_edit_sanitize"))
+  {
+    $parameters = framework_call ( "queues_edit_sanitize", $parameters, false, $parameters);
+  }
+
+  /**
+   * Call pre hook if exist
    */
   if ( framework_has_hook ( "queues_edit_pre"))
   {
@@ -445,14 +855,14 @@ function queues_edit ( $buffer, $parameters)
   /**
    * Change queue record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Queues` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["description"]) . "', `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["extension"]) . ", `Range` = " . $_in["mysql"]["id"]->real_escape_string ( $range["ID"]) . " WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Queues` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', `Strategy` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Strategy"]) . "' WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
 
   /**
-   * Call edit post hook, if exist
+   * Call post hook if exist
    */
   if ( framework_has_hook ( "queues_edit_post"))
   {
@@ -462,48 +872,20 @@ function queues_edit ( $buffer, $parameters)
   /**
    * Notify server about change
    */
-  $oldrange = filters_call ( "search_range", array ( "number" => $queue["Extension"]));
-  if ( $oldrange["Server"] == $range["Server"])
+  $notify = array ( "OldName" => $parameters["ORIGINAL"]["Name"], "Name" => $parameters["Name"], "Description" => $parameters["Description"], "Strategy" => $parameters["Strategy"]);
+  if ( framework_has_hook ( "queues_edit_notify"))
   {
-    $notify = array ( "Extension" => $queue["Extension"], "NewExtension" => $parameters["extension"], "Description" => $parameters["description"]);
-    if ( framework_has_hook ( "queues_edit_notify"))
-    {
-      $notify = framework_call ( "queues_edit_notify", $parameters, false, $notify);
-    }
-    notify_server ( $range["Server"], "changequeue", $notify);
-  } else {
-    $notify = array ( "Extension" => $queue["Extension"]);
-    if ( framework_has_hook ( "queues_remove_notify"))
-    {
-      $notify = framework_call ( "queues_remove_notify", $parameters, false, $notify);
-    }
-    notify_server ( $oldrange["Server"], "removequeue", $notify);
-    $notify = array ( "Extension" => $parameters["extension"], "Description" => $parameters["description"]);
-    if ( framework_has_hook ( "queues_add_notify"))
-    {
-      $notify = framework_call ( "queues_add_notify", $parameters, false, $notify);
-    }
-    notify_server ( $range["Server"], "createqueue", $notify);
+    $notify = framework_call ( "queues_edit_notify", $parameters, false, $notify);
   }
+  notify_server ( 0, "queue_change", $notify);
 
   /**
-   * Insert audit registry
+   * Execute finish hook if exist
    */
-  $audit = array ();
-  $audit["ID"] = $parameters["id"];
-  if ( $queue["Description"] != $parameters["description"])
+  if ( framework_has_hook ( "queues_edit_finish"))
   {
-    $audit["Description"] = array ( "Old" => $queue["Description"], "New" => $parameters["description"]);
+    framework_call ( "queues_edit_finish", $parameters, false);
   }
-  if ( $queue["Extension"] != $parameters["extension"])
-  {
-    $audit["Extension"] = array ( "Old" => $queue["Extension"], "New" => $parameters["extension"]);
-  }
-  if ( framework_has_hook ( "queues_edit_audit"))
-  {
-    $audit = framework_call ( "queues_edit_audit", $parameters, false, $audit);
-  }
-  audit ( "queue", "edit", $audit);
 
   /**
    * Return OK to user
@@ -514,9 +896,42 @@ function queues_edit ( $buffer, $parameters)
 /**
  * API call to remove a queue
  */
-framework_add_hook ( "queues_remove", "queues_remove");
+framework_add_hook (
+  "queues_remove",
+  "queues_remove",
+  IN_HOOK_NULL,
+  array (
+    "response" => array (
+      204 => array (
+        "description" => __ ( "The queue was removed.")
+      ),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "ID" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "Invalid queue ID.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
 framework_add_permission ( "queues_remove", __ ( "Remove queues"));
-framework_add_api_call ( "/queues/:id", "Delete", "queues_remove", array ( "permissions" => array ( "user", "queues_remove")));
+framework_add_api_call (
+  "/queues/:ID",
+  "Delete",
+  "queues_remove",
+  array (
+    "permissions" => array ( "user", "queues_remove"),
+    "title" => __ ( "Remove queues"),
+    "description" => __ ( "Remove a queue from system.")
+  )
+);
 
 /**
  * Function to remove an existing queue.
@@ -532,37 +947,83 @@ function queues_remove ( $buffer, $parameters)
   global $_in;
 
   /**
-   * Check basic parameters
+   * Call start hook if exist
    */
-  $parameters["id"] = (int) $parameters["id"];
+  if ( framework_has_hook ( "queues_remove_start"))
+  {
+    $parameters = framework_call ( "queues_remove_start", $parameters);
+  }
+
+  /**
+   * Validate received parameters
+   */
+  $data = array ();
+  if ( ! array_key_exists ( "ID", $parameters) || ! is_numeric ( $parameters["ID"]))
+  {
+    $data["ID"] = __ ( "Invalid queue ID.");
+  }
+
+  /**
+   * Call validate hook if exist
+   */
+  if ( framework_has_hook ( "queues_remove_validate"))
+  {
+    $data = framework_call ( "queues_remove_validate", $parameters, false, $data);
+  }
+
+  /**
+   * Return error data if some error occurred
+   */
+  if ( sizeof ( $data) != 0)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+    return $data;
+  }
+
+  /**
+   * Sanitize parameters
+   */
+  $parameters["ID"] = (int) $parameters["ID"];
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "queues_remove_sanitize"))
+  {
+    $parameters = framework_call ( "queues_remove_sanitize", $parameters, false, $parameters);
+  }
 
   /**
    * Check if queue exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   if ( $result->num_rows != 1)
   {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 400 Bad Request");
+    exit ();
+  }
+  $parameters["ORIGINAL"] = $result->fetch_assoc ();
+
+  /**
+   * Check if queue was in use
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `ExtensionQueue` WHERE `Queue` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  $queue = $result->fetch_assoc ();
-
-  /**
-   * Get queue range
-   */
-  $range = filters_call ( "search_range", array ( "number" => $queue["Extension"]));
-  if ( sizeof ( $range) == 0)
+  if ( $result->num_rows != 0)
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
 
   /**
-   * Call remove pre hook, if exist
+   * Call pre hook if exist
    */
   if ( framework_has_hook ( "queues_remove_pre"))
   {
@@ -572,14 +1033,14 @@ function queues_remove ( $buffer, $parameters)
   /**
    * Remove queue database record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
 
   /**
-   * Call remove post hook, if exist
+   * Call post hook if exist
    */
   if ( framework_has_hook ( "queues_remove_post"))
   {
@@ -589,38 +1050,89 @@ function queues_remove ( $buffer, $parameters)
   /**
    * Notify server about change
    */
-  $notify = array ( "Extension" => $queue["Extension"]);
+  $notify = array ( "Name" => $parameters["ORIGINAL"]["Name"]);
   if ( framework_has_hook ( "queues_remove_notify"))
   {
     $notify = framework_call ( "queues_remove_notify", $parameters, false, $notify);
   }
-  notify_server ( $range["Server"], "removequeue", $notify);
+  notify_server ( 0, "queue_remove", $notify);
 
   /**
-   * Insert audit registry
+   * Execute finish hook if exist
    */
-  $audit = $queue;
-  if ( framework_has_hook ( "queues_remove_audit"))
+  if ( framework_has_hook ( "queues_remove_finish"))
   {
-    $audit = framework_call ( "queues_remove_audit", $parameters, false, $audit);
+    framework_call ( "queues_remove_finish", $parameters, false);
   }
-  audit ( "queue", "remove", $audit);
 
   /**
-   * Retorn OK to user
+   * Return OK to user
    */
-  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), array ( "result" => true));
+  return $buffer;
 }
 
 /**
- * API call to log an extension into queue
+ * API call to join a member into queue
  */
-framework_add_hook ( "queues_login", "queues_login");
-framework_add_permission ( "queues_login", __ ( "Add extension to queues"));
-framework_add_api_call ( "/queues/:id/login", "Create", "queues_login", array ( "permissions" => array ( "user", "queues_login")));
+framework_add_hook (
+  "queues_join_member",
+  "queues_join_member",
+  IN_HOOK_NULL,
+  array (
+    "response" => array (
+      200 => array (
+        "description" => __ ( "The agent was sucessfully added to the queue.")
+      ),
+      201 => array (),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "Queue" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The provided queue doesn't exist.")
+            ),
+            "Agent" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The provided agent doesn't exist.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
+framework_add_permission ( "queues_join_member", __ ( "Join member to queues"));
+framework_add_api_call (
+  "/queues/:Queue/join/:Agent",
+  "Create",
+  "queues_join_member",
+  array (
+    "permissions" => array ( "user", "queues_join_member"),
+    "title" => __ ( "Join member to queues"),
+    "description" => __ ( "Join a system agent member to a queue."),
+    "parameters" => array (
+      array (
+        "name" => "Queue",
+        "type" => "integer",
+        "description" => __ ( "The queue internal system unique identifier."),
+        "example" => 1
+      ),
+      array (
+        "name" => "Agent",
+        "type" => "integer",
+        "description" => __ ( "The agent internal system unique identifier."),
+        "example" => 1
+      )
+    )
+  )
+);
 
 /**
- * Function to log an extension into queue.
+ * Function to join a member into queue.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -628,149 +1140,202 @@ framework_add_api_call ( "/queues/:id/login", "Create", "queues_login", array ( 
  * @param array $parameters Optional parameters to the function
  * @return string Output of the generated page
  */
-function queues_login ( $buffer, $parameters)
+function queues_join_member ( $buffer, $parameters)
 {
   global $_in;
 
   /**
-   * Check basic parameters
+   * Call start hook if exist
+   */
+  if ( framework_has_hook ( "queues_join_member_start"))
+  {
+    $parameters = framework_call ( "queues_join_member_start", $parameters);
+  }
+
+  /**
+   * Validate received parameters
    */
   $data = array ();
-  $data["result"] = true;
-  $parameters["id"] = (int) $parameters["id"];
-  $parameters["extension"] = (int) $parameters["extension"];
-  $parameters["agent"] = (int) $parameters["agent"];
 
   /**
    * Check if queue exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Queues`.*, `Ranges`.`Server` FROM `Queues` LEFT JOIN `Ranges` ON `Queues`.`Range` = `Ranges`.`ID` WHERE `Queues`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Queue"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   if ( $result->num_rows != 1)
   {
-    $data["result"] = false;
-    $data["queue"] = __ ( "The provided queue doesn't exist.");
-  }
-  $queue = $result->fetch_assoc ();
-
-  /**
-   * Check if extension exists
-   */
-  $extension = filters_call ( "get_extensions", array ( "number" => $parameters["extension"]));
-  if ( sizeof ( $extension) != 1)
-  {
-    $data["result"] = false;
-    $data["extension"] = __ ( "The provided extension doesn't exist.");
-  }
-
-  /**
-   * Check for agent if provided
-   */
-  if ( $parameters["agent"])
-  {
-    $agent = filters_call ( "get_agents", array ( "code" => $parameters["agent"]));
-    if ( sizeof ( $agent) != 1)
-    {
-      $data["result"] = false;
-      $data["agent"] = __ ( "The provided agent doesn't exist.");
-    } else {
-      if ( $agent[0]["Password"] != $parameters["password"])
-      {
-        $data["result"] = false;
-        $data["agent"] = __ ( "The provided agent password didn't match.");
-      }
-    }
+    $data["Queue"] = __ ( "The provided queue doesn't exist.");
   } else {
-    /**
-     * Check if password match (if not using agent)
-     */
-    if ( ! array_key_exists ( "extension", $data) && $extension[0]["Record"]["Password"] != $parameters["password"])
-    {
-      $data["result"] = false;
-      $data["extension"] = __ ( "The extension password didn't match.");
-    }
+    $queue = $result->fetch_assoc ();
   }
 
   /**
-   * Check if extension is from the same server as queue
+   * Check if agent exists
    */
-  if ( ! array_key_exists ( "extension", $data) && $extension[0]["Record"]["Server"] != $queue["Server"])
+  $agent = filters_call ( "get_agents", array ( "code" => (int) $parameters["Agent"]));
+  if ( sizeof ( $Agent) != 1)
   {
-    $data["result"] = false;
-    $data["extension"] = __ ( "The extension must be at same server where queue is running.");
+    $data["Agent"] = __ ( "The provided agent doesn't exist.");
   }
 
   /**
-   * Call login sanitize hook, if exist
+   * Check if member isn't already logged at queue
    */
-  if ( framework_has_hook ( "queues_login_sanitize"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `QueuesLogged` WHERE `Queue` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Queue"]) . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . (int) $parameters["Agent"]) . "'"))
   {
-    $data = framework_call ( "queues_login_sanitize", $parameters, false, $data);
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( $result->num_rows != 0)
+  {
+    $data["Queue"] = __ ( "The provided agent is already logged at this queue.");
   }
 
   /**
-   * Return error data if some error ocurred
+   * Call validate hook if exist
    */
-  if ( $data["result"] == false)
+  if ( framework_has_hook ( "queues_join_member_validate"))
+  {
+    $data = framework_call ( "queues_join_member_validate", $parameters);
+  }
+
+  /**
+   * Return error data if some error occurred
+   */
+  if ( sizeof ( $data) != 0)
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
     return $data;
   }
 
   /**
-   * Call login post hook, if exist
+   * Sanitize parameters
    */
-  if ( framework_has_hook ( "queues_login_post"))
+  $parameters["Queue"] = (int) $parameters["Queue"];
+  $parameters["Agent"] = (int) $parameters["Agent"];
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "queues_join_member_sanitize"))
   {
-    framework_call ( "queues_login_post", $parameters);
+    $parameters = framework_call ( "queues_join_member_sanitize", $parameters, false, $parameters);
   }
 
   /**
-   * Notify server about login
+   * Call pre hook if exist
    */
-  $notify = array ( "Queue" => $queue["Extension"], "Extension" => $parameters["extension"]);
-  if ( $parameters["agent"])
+  if ( framework_has_hook ( "queues_join_member_pre"))
   {
-    $notify["Agent"] = $parameters["agent"];
+    $parameters = framework_call ( "queues_join_member_pre", $parameters, false, $parameters);
   }
-  if ( framework_has_hook ( "queues_login_notify"))
-  {
-    $notify = framework_call ( "queues_login_notify", $parameters, false, $notify);
-  }
-  notify_server ( $queue["Server"], "joinqueue", $notify);
 
   /**
-   * Insert audit registry
+   * Add database registry
    */
-  $audit = array ( "Queue" => $parameters["id"], "Extension" => $parameters["extension"]);
-  if ( $parameters["agent"])
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `QueueMembers` (`Queue`, `Member`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Queue"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . $parameters["Agent"]) . "')"))
   {
-    $audit["Agent"] = $parameters["agent"];
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
   }
-  if ( framework_has_hook ( "queues_login_audit"))
-  {
-    $audit = framework_call ( "queues_login_audit", $parameters, false, $audit);
-  }
-  audit ( "queue", "login", $audit);
 
   /**
-   * Retorn OK to user
+   * Call post hook if exist
    */
-  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), array ( "result" => true));
+  if ( framework_has_hook ( "queues_join_member_post"))
+  {
+    $data = framework_call ( "queues_join_member_post", $parameters, false, $data);
+  }
+
+  /**
+   * Notify server to join member
+   */
+  $notify = array ( "Queue" => $queue["Name"], "Member" => "Agent/" . $parameters["Agent"]);
+  if ( framework_has_hook ( "queues_join_member_notify"))
+  {
+    $notify = framework_call ( "queues_join_member_notify", $parameters, false, $notify);
+  }
+  notify_server ( 0, "queue_join_member", $notify);
+
+  /**
+   * Execute finish hook if exist
+   */
+  if ( framework_has_hook ( "queues_join_member_finish"))
+  {
+    framework_call ( "queues_join_member_finish", $parameters);
+  }
+
+  /**
+   * Return OK to user
+   */
+  return $buffer;
 }
 
 /**
- * API call to pause a member
+ * API call to member leave from a queue
  */
-framework_add_hook ( "queues_pause", "queues_pause");
-framework_add_permission ( "queues_pause", __ ( "Pause member on a queue"));
-framework_add_api_call ( "/queues/:id/pause", "Create", "queues_pause", array ( "permissions" => array ( "user", "queues_pause")));
+framework_add_hook (
+  "queues_leave_member",
+  "queues_leave_member",
+  IN_HOOK_NULL,
+  array (
+    "response" => array (
+      200 => array (
+        "description" => __ ( "The agent was sucessfully removed from the queue.")
+      ),
+      201 => array (),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "Queue" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The provided queue doesn't exist.")
+            ),
+            "Agent" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The provided agent doesn't exist.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
+framework_add_permission ( "queues_leave_member", __ ( "Member leave from queues"));
+framework_add_api_call (
+  "/queues/:Queue/leave/:Agent",
+  "Create",
+  "queues_leave_member",
+  array (
+    "permissions" => array ( "user", "queues_leave_member"),
+    "title" => __ ( "Remove member from queues"),
+    "description" => __ ( "Remove a system agent member from a queue."),
+    "parameters" => array (
+      array (
+        "name" => "Queue",
+        "type" => "integer",
+        "description" => __ ( "The queue internal system unique identifier."),
+        "example" => 1
+      ),
+      array (
+        "name" => "Agent",
+        "type" => "integer",
+        "description" => __ ( "The agent internal system unique identifier."),
+        "example" => 1
+      )
+    )
+  )
+);
 
 /**
- * Function to pause a member from a queue.
+ * Function to member leave from queue.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -778,140 +1343,202 @@ framework_add_api_call ( "/queues/:id/pause", "Create", "queues_pause", array ( 
  * @param array $parameters Optional parameters to the function
  * @return string Output of the generated page
  */
-function queues_pause ( $buffer, $parameters)
+function queues_leave_member ( $buffer, $parameters)
 {
   global $_in;
 
   /**
-   * Check basic parameters
+   * Call start hook if exist
+   */
+  if ( framework_has_hook ( "queues_leave_member_start"))
+  {
+    $parameters = framework_call ( "queues_leave_member_start", $parameters);
+  }
+
+  /**
+   * Validate received parameters
    */
   $data = array ();
-  $data["result"] = true;
-  $parameters["id"] = (int) $parameters["id"];
-  $parameters["extension"] = (int) $parameters["extension"];
-  $parameters["agent"] = (int) $parameters["agent"];
 
   /**
    * Check if queue exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Queues`.*, `Ranges`.`Server` FROM `Queues` LEFT JOIN `Ranges` ON `Queues`.`Range` = `Ranges`.`ID` WHERE `Queues`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Queue"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   if ( $result->num_rows != 1)
   {
-    $data["result"] = false;
-    $data["queue"] = __ ( "The provided queue doesn't exist.");
-  }
-  $queue = $result->fetch_assoc ();
-
-  /**
-   * Check if extension exists
-   */
-  $extension = filters_call ( "get_extensions", array ( "number" => $parameters["extension"]));
-  if ( sizeof ( $extension) != 1)
-  {
-    $data["result"] = false;
-    $data["extension"] = __ ( "The provided extension doesn't exist.");
-  }
-
-  /**
-   * Check for agent if provided
-   */
-  if ( $parameters["agent"])
-  {
-    $agent = filters_call ( "get_agents", array ( "code" => $parameters["agent"]));
-    if ( sizeof ( $agent) != 1)
-    {
-      $data["result"] = false;
-      $data["agent"] = __ ( "The provided agent doesn't exist.");
-    } else {
-      if ( $agent[0]["Password"] != $parameters["password"])
-      {
-        $data["result"] = false;
-        $data["agent"] = __ ( "The provided agent password didn't match.");
-      }
-    }
+    $data["Queue"] = __ ( "The provided queue doesn't exist.");
   } else {
-    /**
-     * Check if password match (if not using agent)
-     */
-    if ( ! array_key_exists ( "extension", $data) && $extension[0]["Record"]["Password"] != $parameters["password"])
-    {
-      $data["result"] = false;
-      $data["extension"] = __ ( "The extension password didn't match.");
-    }
+    $queue = $result->fetch_assoc ();
   }
 
   /**
-   * Call pause sanitize hook, if exist
+   * Check if agent exists
    */
-  if ( framework_has_hook ( "queues_pause_sanitize"))
+  $agent = filters_call ( "get_agents", array ( "code" => (int) $parameters["Agent"]));
+  if ( sizeof ( $agent) != 1)
   {
-    $data = framework_call ( "queues_pause_sanitize", $parameters, false, $data);
+    $data["Agent"] = __ ( "The provided agent doesn't exist.");
   }
 
   /**
-   * Return error data if some error ocurred
+   * Check if member is logged at queue
    */
-  if ( $data["result"] == false)
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `QueuesLogged` WHERE `Queue` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Queue"]) . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . (int) $parameters["Agent"]) . "'"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( $result->num_rows != 0)
+  {
+    $data["Queue"] = __ ( "The provided agent are not logged at this queue.");
+  }
+
+  /**
+   * Call validate hook if exist
+   */
+  if ( framework_has_hook ( "queues_leave_member_validate"))
+  {
+    $data = framework_call ( "queues_leave_member_validate", $parameters);
+  }
+
+  /**
+   * Return error data if some error occurred
+   */
+  if ( sizeof ( $data) != 0)
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
     return $data;
   }
 
   /**
-   * Call pause post hook, if exist
+   * Sanitize parameters
    */
-  if ( framework_has_hook ( "queues_pause_post"))
+  $parameters["Queue"] = (int) $parameters["Queue"];
+  $parameters["Agent"] = (int) $parameters["Agent"];
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "queues_leave_member_sanitize"))
   {
-    framework_call ( "queues_pause_post", $parameters);
+    $parameters = framework_call ( "queues_leave_member_sanitize", $parameters, false, $parameters);
   }
 
   /**
-   * Notify server about change
+   * Call pre hook if exist
    */
-  $notify = array ( "Queue" => $queue["Extension"], "Extension" => $parameters["extension"]);
-  if ( $parameters["agent"])
+  if ( framework_has_hook ( "queues_leave_member_pre"))
   {
-    $notify["Agent"] = $parameters["agent"];
+    $parameters = framework_call ( "queues_leave_member_pre", $parameters, false, $parameters);
   }
-  if ( framework_has_hook ( "queues_pause_notify"))
-  {
-    $notify = framework_call ( "queues_pause_notify", $parameters, false, $notify);
-  }
-  notify_server ( $queue["Server"], "pausequeue", $notify);
 
   /**
-   * Insert audit registry
+   * Remove database registry
    */
-  $audit = array ( "Queue" => $parameters["id"], "Extension" => $parameters["extension"]);
-  if ( $parameters["agent"])
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `QueueMembers` WHERE `Queue` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Queue"]) . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . $parameters["Agent"]) . "'"))
   {
-    $audit["Agent"] = $parameters["agent"];
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
   }
-  if ( framework_has_hook ( "queues_pause_audit"))
-  {
-    $audit = framework_call ( "queues_pause_audit", $parameters, false, $audit);
-  }
-  audit ( "queue", "pause", $audit);
 
   /**
-   * Retorn OK to user
+   * Call post hook if exist
    */
-  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), array ( "result" => true));
+  if ( framework_has_hook ( "queues_leave_member_post"))
+  {
+    $data = framework_call ( "queues_leave_member_post", $parameters, false, $data);
+  }
+
+  /**
+   * Notify server to member leave
+   */
+  $notify = array ( "Queue" => $queue["Name"], "Member" => "Agent/" . $parameters["Agent"]);
+  if ( framework_has_hook ( "queues_leave_member_notify"))
+  {
+    $notify = framework_call ( "queues_leave_member_notify", $parameters, false, $notify);
+  }
+  notify_server ( 0, "queue_leave_member", $notify);
+
+  /**
+   * Execute finish hook if exist
+   */
+  if ( framework_has_hook ( "queues_leave_member_finish"))
+  {
+    framework_call ( "queues_leave_member_finish", $parameters);
+  }
+
+  /**
+   * Return OK to user
+   */
+  return $buffer;
 }
 
 /**
- * API call to unpause a member
+ * API call to member pause from a queue
  */
-framework_add_hook ( "queues_unpause", "queues_unpause");
-framework_add_permission ( "queues_unpause", __ ( "Unpause member on a queue"));
-framework_add_api_call ( "/queues/:id/unpause", "Create", "queues_unpause", array ( "permissions" => array ( "user", "queues_unpause")));
+framework_add_hook (
+  "queues_pause_member",
+  "queues_pause_member",
+  IN_HOOK_NULL,
+  array (
+    "response" => array (
+      200 => array (
+        "description" => __ ( "The agent was sucessfully paused at the queue.")
+      ),
+      201 => array (),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "Queue" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The provided queue doesn't exist.")
+            ),
+            "Agent" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The provided agent doesn't exist.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
+framework_add_permission ( "queues_pause_member", __ ( "Member pause from queues"));
+framework_add_api_call (
+  "/queues/:Queue/pause/:Agent",
+  "Create",
+  "queues_pause_member",
+  array (
+    "permissions" => array ( "user", "queues_pause_member"),
+    "title" => __ ( "Pause member at queues"),
+    "description" => __ ( "Pause a system agent member at a queue."),
+    "parameters" => array (
+      array (
+        "name" => "Queue",
+        "type" => "integer",
+        "description" => __ ( "The queue internal system unique identifier."),
+        "example" => 1
+      ),
+      array (
+        "name" => "Agent",
+        "type" => "integer",
+        "description" => __ ( "The agent internal system unique identifier."),
+        "example" => 1
+      )
+    )
+  )
+);
 
 /**
- * Function to unpause a member from a queue.
+ * Function to member pause from queue.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -919,140 +1546,193 @@ framework_add_api_call ( "/queues/:id/unpause", "Create", "queues_unpause", arra
  * @param array $parameters Optional parameters to the function
  * @return string Output of the generated page
  */
-function queues_unpause ( $buffer, $parameters)
+function queues_pause_member ( $buffer, $parameters)
 {
   global $_in;
 
   /**
-   * Check basic parameters
+   * Call start hook if exist
+   */
+  if ( framework_has_hook ( "queues_pause_member_start"))
+  {
+    $parameters = framework_call ( "queues_pause_member_start", $parameters);
+  }
+
+  /**
+   * Validate received parameters
    */
   $data = array ();
-  $data["result"] = true;
-  $parameters["id"] = (int) $parameters["id"];
-  $parameters["extension"] = (int) $parameters["extension"];
-  $parameters["agent"] = (int) $parameters["agent"];
 
   /**
    * Check if queue exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Queues`.*, `Ranges`.`Server` FROM `Queues` LEFT JOIN `Ranges` ON `Queues`.`Range` = `Ranges`.`ID` WHERE `Queues`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Queue"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   if ( $result->num_rows != 1)
   {
-    $data["result"] = false;
-    $data["queue"] = __ ( "The provided queue doesn't exist.");
-  }
-  $queue = $result->fetch_assoc ();
-
-  /**
-   * Check if extension exists
-   */
-  $extension = filters_call ( "get_extensions", array ( "number" => $parameters["extension"]));
-  if ( sizeof ( $extension) != 1)
-  {
-    $data["result"] = false;
-    $data["extension"] = __ ( "The provided extension doesn't exist.");
-  }
-
-  /**
-   * Check for agent if provided
-   */
-  if ( $parameters["agent"])
-  {
-    $agent = filters_call ( "get_agents", array ( "code" => $parameters["agent"]));
-    if ( sizeof ( $agent) != 1)
-    {
-      $data["result"] = false;
-      $data["agent"] = __ ( "The provided agent doesn't exist.");
-    } else {
-      if ( $agent[0]["Password"] != $parameters["password"])
-      {
-        $data["result"] = false;
-        $data["agent"] = __ ( "The provided agent password didn't match.");
-      }
-    }
+    $data["Queue"] = __ ( "The provided queue doesn't exist.");
   } else {
-    /**
-     * Check if password match (if not using agent)
-     */
-    if ( ! array_key_exists ( "extension", $data) && $extension[0]["Record"]["Password"] != $parameters["password"])
-    {
-      $data["result"] = false;
-      $data["extension"] = __ ( "The extension password didn't match.");
-    }
+    $queue = $result->fetch_assoc ();
   }
 
   /**
-   * Call unpause sanitize hook, if exist
+   * Check if agent exists
    */
-  if ( framework_has_hook ( "queues_unpause_sanitize"))
+  $agent = filters_call ( "get_agents", array ( "code" => (int) $parameters["Agent"]));
+  if ( sizeof ( $agent) != 1)
   {
-    $data = framework_call ( "queues_unpause_sanitize", $parameters, false, $data);
+    $data["Agent"] = __ ( "The provided agent doesn't exist.");
   }
 
   /**
-   * Return error data if some error ocurred
+   * Check if member is logged at queue
    */
-  if ( $data["result"] == false)
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `QueuesLogged` WHERE `Queue` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Queue"]["ID"]) . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . (int) $parameters["Agent"]) . "'"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( $result->num_rows != 0)
+  {
+    $data["Queue"] = __ ( "The provided agent are not logged at this queue.");
+  }
+
+  /**
+   * Call validate hook if exist
+   */
+  if ( framework_has_hook ( "queues_pause_member_validate"))
+  {
+    $data = framework_call ( "queues_pause_member_validate", $parameters);
+  }
+
+  /**
+   * Return error data if some error occurred
+   */
+  if ( sizeof ( $data) != 0)
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
     return $data;
   }
 
   /**
-   * Call unpause post hook, if exist
+   * Sanitize parameters
    */
-  if ( framework_has_hook ( "queues_unpause_post"))
+  $parameters["Queue"] = (int) $parameters["Queue"];
+  $parameters["Agent"] = (int) $parameters["Agent"];
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "queues_pause_member_sanitize"))
   {
-    framework_call ( "queues_unpause_post", $parameters);
+    $parameters = framework_call ( "queues_pause_member_sanitize", $parameters, false, $parameters);
   }
 
   /**
-   * Notify server about change
+   * Call pre hook if exist
    */
-  $notify = array ( "Queue" => $queue["Extension"], "Extension" => $parameters["extension"]);
-  if ( $parameters["agent"])
+  if ( framework_has_hook ( "queues_pause_member_pre"))
   {
-    $notify["Agent"] = $parameters["agent"];
+    $parameters = framework_call ( "queues_pause_member_pre", $parameters, false, $parameters);
   }
-  if ( framework_has_hook ( "queues_unpause_notify"))
-  {
-    $notify = framework_call ( "queues_unpause_notify", $parameters, false, $notify);
-  }
-  notify_server ( $queue["Server"], "unpausequeue", $notify);
 
   /**
-   * Insert audit registry
+   * Call post hook if exist
    */
-  $audit = array ( "Queue" => $parameters["id"], "Extension" => $parameters["extension"]);
-  if ( $parameters["agent"])
+  if ( framework_has_hook ( "queues_pause_member_post"))
   {
-    $audit["Agent"] = $parameters["agent"];
+    $data = framework_call ( "queues_pause_member_post", $parameters, false, $data);
   }
-  if ( framework_has_hook ( "queues_unpause_audit"))
-  {
-    $audit = framework_call ( "queues_unpause_audit", $parameters, false, $audit);
-  }
-  audit ( "queue", "unpause", $audit);
 
   /**
-   * Retorn OK to user
+   * Notify server to member pause
    */
-  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), array ( "result" => true));
+  $notify = array ( "Queue" => $queue["Name"], "Member" => "Agent/" . $parameters["Agent"]);
+  if ( framework_has_hook ( "queues_pause_member_notify"))
+  {
+    $notify = framework_call ( "queues_pause_member_notify", $parameters, false, $notify);
+  }
+  notify_server ( 0, "queue_pause_member", $notify);
+
+  /**
+   * Execute finish hook if exist
+   */
+  if ( framework_has_hook ( "queues_pause_member_finish"))
+  {
+    framework_call ( "queues_pause_member_finish", $parameters);
+  }
+
+  /**
+   * Return OK to user
+   */
+  return $buffer;
 }
 
 /**
- * API call to logoff a member from a queue
+ * API call to member resume from a queue
  */
-framework_add_hook ( "queues_logout", "queues_logout");
-framework_add_permission ( "queues_logout", __ ( "Logout member from a queue"));
-framework_add_api_call ( "/queues/:id/logout", "Create", "queues_logout", array ( "permissions" => array ( "user", "queues_logout")));
+framework_add_hook (
+  "queues_resume_member",
+  "queues_resume_member",
+  IN_HOOK_NULL,
+  array (
+    "response" => array (
+      200 => array (
+        "description" => __ ( "The agent was sucessfully resumed at the queue.")
+      ),
+      201 => array (),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "Queue" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The provided queue doesn't exist.")
+            ),
+            "Agent" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "The provided agent doesn't exist.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
+framework_add_permission ( "queues_resume_member", __ ( "Member resume from queues"));
+framework_add_api_call (
+  "/queues/:Queue/resume/:Agent",
+  "Create",
+  "queues_resume_member",
+  array (
+    "permissions" => array ( "user", "queues_resume_member"),
+    "title" => __ ( "Resume a paused member at queues"),
+    "description" => __ ( "Resume a paused system agent member at a queue."),
+    "parameters" => array (
+      array (
+        "name" => "Queue",
+        "type" => "integer",
+        "description" => __ ( "The queue internal system unique identifier."),
+        "example" => 1
+      ),
+      array (
+        "name" => "Agent",
+        "type" => "integer",
+        "description" => __ ( "The agent internal system unique identifier."),
+        "example" => 1
+      )
+    )
+  )
+);
 
 /**
- * Function to logoff a member from a queue.
+ * Function to member resume from queue.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -1060,136 +1740,136 @@ framework_add_api_call ( "/queues/:id/logout", "Create", "queues_logout", array 
  * @param array $parameters Optional parameters to the function
  * @return string Output of the generated page
  */
-function queues_logout ( $buffer, $parameters)
+function queues_resume_member ( $buffer, $parameters)
 {
   global $_in;
 
   /**
-   * Check basic parameters
+   * Call start hook if exist
+   */
+  if ( framework_has_hook ( "queues_resume_member_start"))
+  {
+    $parameters = framework_call ( "queues_resume_member_start", $parameters);
+  }
+
+  /**
+   * Validate received parameters
    */
   $data = array ();
-  $data["result"] = true;
-  $parameters["id"] = (int) $parameters["id"];
-  $parameters["extension"] = (int) $parameters["extension"];
-  $parameters["agent"] = (int) $parameters["agent"];
 
   /**
    * Check if queue exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Queues`.*, `Ranges`.`Server` FROM `Queues` LEFT JOIN `Ranges` ON `Queues`.`Range` = `Ranges`.`ID` WHERE `Queues`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["id"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Queue"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   if ( $result->num_rows != 1)
   {
-    $data["result"] = false;
-    $data["queue"] = __ ( "The provided queue doesn't exist.");
-  }
-  $queue = $result->fetch_assoc ();
-
-  /**
-   * Check if extension exists
-   */
-  $extension = filters_call ( "get_extensions", array ( "number" => $parameters["extension"]));
-  if ( sizeof ( $extension) != 1)
-  {
-    $data["result"] = false;
-    $data["extension"] = __ ( "The provided extension doesn't exist.");
-  }
-
-  /**
-   * Check for agent if provided
-   */
-  if ( $parameters["agent"])
-  {
-    $agent = filters_call ( "get_agents", array ( "code" => $parameters["agent"]));
-    if ( sizeof ( $agent) != 1)
-    {
-      $data["result"] = false;
-      $data["agent"] = __ ( "The provided agent doesn't exist.");
-    } else {
-      if ( $agent[0]["Password"] != $parameters["password"])
-      {
-        $data["result"] = false;
-        $data["agent"] = __ ( "The provided agent password didn't match.");
-      }
-    }
+    $data["Queue"] = __ ( "The provided queue doesn't exist.");
   } else {
-    /**
-     * Check if password match (if not using agent)
-     */
-    if ( ! array_key_exists ( "extension", $data) && $extension[0]["Record"]["Password"] != $parameters["password"])
-    {
-      $data["result"] = false;
-      $data["extension"] = __ ( "The extension password didn't match.");
-    }
+    $queue = $result->fetch_assoc ();
   }
 
   /**
-   * Call logout sanitize hook, if exist
+   * Check if agent exists
    */
-  if ( framework_has_hook ( "queues_logout_sanitize"))
+  $agent = filters_call ( "get_agents", array ( "code" => (int) $parameters["Agent"]));
+  if ( sizeof ( $agent) != 1)
   {
-    $data = framework_call ( "queues_logout_sanitize", $parameters, false, $data);
+    $data["Agent"] = __ ( "The provided agent doesn't exist.");
   }
 
   /**
-   * Return error data if some error ocurred
+   * Check if member is logged at queue
    */
-  if ( $data["result"] == false)
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `QueuesLogged` WHERE `Queue` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Queue"]) . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . (int) $parameters["Agent"]) . "'"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( $result->num_rows != 0)
+  {
+    $data["Queue"] = __ ( "The provided agent are not logged at this queue.");
+  }
+
+  /**
+   * Call validate hook if exist
+   */
+  if ( framework_has_hook ( "queues_resume_member_validate"))
+  {
+    $data = framework_call ( "queues_resume_member_validate", $parameters);
+  }
+
+  /**
+   * Return error data if some error occurred
+   */
+  if ( sizeof ( $data) != 0)
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
     return $data;
   }
 
   /**
-   * Call logout post hook, if exist
+   * Sanitize parameters
    */
-  if ( framework_has_hook ( "queues_logout_post"))
+  $parameters["Queue"] = (int) $parameters["Queue"];
+  $parameters["Agent"] = (int) $parameters["Agent"];
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "queues_resume_member_sanitize"))
   {
-    framework_call ( "queues_logout_post", $parameters);
+    $parameters = framework_call ( "queues_resume_member_sanitize", $parameters, false, $parameters);
   }
 
   /**
-   * Notify server about change
+   * Call pre hook if exist
    */
-  $notify = array ( "Queue" => $queue["Extension"], "Extension" => $parameters["extension"]);
-  if ( $parameters["agent"])
+  if ( framework_has_hook ( "queues_resume_member_pre"))
   {
-    $notify["Agent"] = $parameters["agent"];
+    $parameters = framework_call ( "queues_resume_member_pre", $parameters, false, $parameters);
   }
-  if ( framework_has_hook ( "queues_logout_notify"))
-  {
-    $notify = framework_call ( "queues_logout_notify", $parameters, false, $notify);
-  }
-  notify_server ( $queue["Server"], "logoutqueue", $notify);
 
   /**
-   * Insert audit registry
+   * Call post hook if exist
    */
-  $audit = array ( "Queue" => $parameters["id"], "Extension" => $parameters["extension"]);
-  if ( $parameters["agent"])
+  if ( framework_has_hook ( "queues_resume_member_post"))
   {
-    $audit["Agent"] = $parameters["agent"];
+    $data = framework_call ( "queues_resume_member_post", $parameters, false, $data);
   }
-  if ( framework_has_hook ( "queues_logout_audit"))
-  {
-    $audit = framework_call ( "queues_logout_audit", $parameters, false, $audit);
-  }
-  audit ( "queue", "logout", $audit);
 
   /**
-   * Retorn OK to user
+   * Notify server to member resume
    */
-  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), array ( "result" => true));
+  $notify = array ( "Queue" => $queue["Name"], "Member" => "Agent/" . $parameters["Agent"]);
+  if ( framework_has_hook ( "queues_resume_member_notify"))
+  {
+    $notify = framework_call ( "queues_resume_member_notify", $parameters, false, $notify);
+  }
+  notify_server ( 0, "queue_resume_member", $notify);
+
+  /**
+   * Execute finish hook if exist
+   */
+  if ( framework_has_hook ( "queues_resume_member_finish"))
+  {
+    framework_call ( "queues_resume_member_finish", $parameters);
+  }
+
+  /**
+   * Return OK to user
+   */
+  return $buffer;
 }
 
 /**
- * API call to intercept new server and server reinstall
+ * API call to intercept new server and server rebuild
  */
 framework_add_hook ( "servers_add_post", "queues_server_reconfig");
-framework_add_hook ( "servers_reinstall_config", "queues_server_reconfig");
+framework_add_hook ( "servers_rebuild_config", "queues_server_reconfig");
 
 /**
  * Function to notify server to include all queues.
@@ -1207,19 +1887,37 @@ function queues_server_reconfig ( $buffer, $parameters)
   /**
    * Fetch all queues and send to server
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Queues`.`Description`, `Queues`.`Extension` FROM `Queues` LEFT JOIN `Ranges` ON `Queues`.`Range` = `Ranges`.`ID` WHERE `Ranges`.`Server` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["id"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   while ( $queue = $result->fetch_assoc ())
   {
-    $notify = array ( "Description" => $queue["Description"], "Extension" => $queue["Extension"]);
+    $notify = array ( "Description" => $queue["Description"], "Name" => $queue["Name"], "Strategy" => $queue["Strategy"]);
     if ( framework_has_hook ( "queues_add_notify"))
     {
       $notify = framework_call ( "queues_add_notify", $parameters, false, $notify);
     }
-    notify_server ( $parameters["id"], "createqueue", $notify);
+    notify_server ( (int) $parameters["ID"], "queue_add", $notify);
+  }
+
+  /**
+   * Add all logged members at queues
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Queues`.`Name`, `QueueMembers`.`Member` FROM `QueueMembers` LEFT JOIN `Queues` ON `QueueMembers`.`Queue` = `Queues`.`ID`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  while ( $queuemember = $result->fetch_assoc ())
+  {
+    $notify = array ( "Queue" => $queuemember["Name"], "Member" => $queuemember["Member"]);
+    if ( framework_has_hook ( "queues_add_member_notify"))
+    {
+      $notify = framework_call ( "queues_add_member_notify", $parameters, false, $notify);
+    }
+    notify_server ( (int) $parameters["ID"], "queue_add_member", $notify);
   }
 
   /**

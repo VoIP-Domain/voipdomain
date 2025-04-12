@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,11 +30,11 @@
  * interface that's highly based on method calls, even the most internal function
  * and basic interface calls.
  *
- * @author     Ernani José Camargo Azevedo <azevedo@intellinews.com.br>
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
- * @subpackage Plugin system
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved.
+ * @subpackage Core
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -52,18 +52,31 @@ if ( ! array_key_exists ( "hooks", $_plugins) || ! is_array ( $_plugins["hooks"]
 {
   $_plugins["hooks"] = array ();
 }
+if ( ! array_key_exists ( "hooksdocs", $_plugins) || ! is_array ( $_plugins["hooksdocs"]))
+{
+  $_plugins["hooksdocs"] = array ();
+}
 if ( ! array_key_exists ( "buffers", $_plugins) || ! is_array ( $_plugins["buffers"]))
 {
   $_plugins["buffers"] = array ();
+}
+if ( ! array_key_exists ( "map", $_plugins) || ! is_array ( $_plugins["map"]))
+{
+  $_plugins["map"] = array ();
 }
 if ( ! array_key_exists ( "current", $_plugins) || ! $_plugins["current"])
 {
   $_plugins["current"] = array ();
 }
+if ( ! array_key_exists ( "functions", $_plugins) || ! $_plugins["functions"])
+{
+  $_plugins["functions"] = array ();
+}
 
 /**
  * Define variables
  */
+define ( "IN_HOOK_NULL", 0);
 define ( "IN_HOOK_INSERT_FIRST", 1);
 define ( "IN_HOOK_REMOVE_OTHERS", 2);
 define ( "IN_HOOK_REPLACE", 4);
@@ -82,14 +95,16 @@ define ( "IN_HOOK_INSERT_AFTER", 16);
  * plugin could be enabled and disabled easily.
  *
  * @global array $_plugins The main plugin system variable
+ * @global array $_in Framework global configuration variable
  * @param string $hook The name of the hook to add the function
  * @param string $function The name of the function to be called
- * @param int[optional] $options Options. Please refer to defined variables
+ * @param int[optional] $options Options. Please refer to defined constants
+ * @param array[optional] $documentation The documentation array
  * @return void
  */
-function framework_add_hook ( $hook, $function, $options = 0)
+function framework_add_hook ( $hook, $function, $options = 0, $documentation = array ())
 {
-  global $_plugins;
+  global $_plugins, $_in;
 
   if ( array_key_exists ( $hook, $_plugins["hooks"]) && is_array ( $_plugins["hooks"][$hook]) && in_array ( $function, $_plugins["hooks"][$hook]))
   {
@@ -110,6 +125,66 @@ function framework_add_hook ( $hook, $function, $options = 0)
   } else {
     array_push ( $_plugins["hooks"][$hook], $function);
   }
+  if ( array_key_exists ( $function, $_plugins["functions"]))
+  {
+    $var1 = is_array ( $_plugins["functions"][$function]) ? $_plugins["functions"][$function] : array ();
+    $var2 = is_array ( $documentation) ? $documentation : array ();
+    $_plugins["functions"][$function] = array_merge_recursive_distinct ( $var1, $var2);
+  } else {
+    $_plugins["functions"][$function] = is_array ( $documentation) ? $documentation : array ();
+  }
+  $_plugins["map"][$function] = $_in["module"];
+}
+
+/**
+ * Function to add extra documentation to a hook. This is usefull when your hook
+ * call's other hoooks, that's not directly associated to your main hook.
+ *
+ * global array $_plugins The main plugin system variable
+ * @param string $function The name of the function
+ * @param array $documentation The documentation array
+ * @return void
+ */
+function framework_add_function_documentation ( $function, $documentation)
+{
+  global $_plugins;
+
+  if ( array_key_exists ( $function, $_plugins["functions"]))
+  {
+    $var1 = is_array ( $_plugins["functions"][$function]) ? $_plugins["functions"][$function] : array ();
+    $var2 = is_array ( $documentation) ? $documentation : array ();
+    $_plugins["functions"][$function] = array_merge_recursive_distinct_with_sequencial ( $var1, $var2);
+  } else {
+    $_plugins["functions"][$function] = is_array ( $documentation) ? $documentation : array ();
+  }
+}
+
+/**
+ * Function to add documentation component. This is usefull to create
+ * documentation component schemas, pointing complex objects reponses to one
+ * documentation schema.
+ *
+ * global array $_plugins The main plugin system variable
+ * @param string $component The name of the component
+ * @param array $documentation The object documentation array
+ * @return void
+ */
+function framework_add_component_documentation ( $component, $documentation)
+{
+  global $_plugins;
+
+  if ( ! array_key_exists ( "components", $_plugins))
+  {
+    $_plugins["components"] = array ();
+  }
+  if ( array_key_exists ( $component, $_plugins["components"]))
+  {
+    $var1 = is_array ( $_plugins["components"][$component]) ? $_plugins["components"][$component] : array ();
+    $var2 = is_array ( $documentation) ? $documentation : array ();
+    $_plugins["components"][$component] = array_merge_recursive_distinct_with_sequencial ( $var1, $var2);
+  } else {
+    $_plugins["components"][$component] = is_array ( $documentation) ? $documentation : array ();
+  }
 }
 
 /**
@@ -118,18 +193,19 @@ function framework_add_hook ( $hook, $function, $options = 0)
  * add before or add after the referenced function. You could use this function
  * to add a function call at a specific position of the hook, to keep the order
  * you want. Please refer to framework_add_hook function documentation for
- * more informations.
+ * more information.
  *
  * @global array $_plugins The main plugin system variable
+ * @global array $_in Framework global configuration variable
  * @param string $hook The name of the hook to add the function
  * @param string $function The name of the function to be called
  * @param string $reference The name of the function to use as reference
- * @param int $options Options. Please refer to defined variables
+ * @param int[optional] $options Options. Please refer to defined constants
  * @return boolean
  */
 function framework_add_hook_at ( $hook, $function, $reference, $options = IN_HOOK_INSERT_AFTER)
 {
-  global $_plugins;
+  global $_plugins, $_in;
 
   if ( is_array ( $_plugins["hooks"][$hook]) && in_array ( $function, $_plugins["hooks"][$hook]))
   {
@@ -141,6 +217,7 @@ function framework_add_hook_at ( $hook, $function, $reference, $options = IN_HOO
     framework_error ( "IntelliNews Framework: Reference function \"" . $reference . "\" doesn't exist at hook \"" . $hook . "\"");
     return;
   }
+  $_plugins["map"][$function] = $_in["module"];
   if ( $options & IN_HOOK_REPLACE)
   {
     $_plugins["hooks"][$hook][array_search ( $reference, $_plugins["hooks"][$hook], true)] = $function;
@@ -177,22 +254,28 @@ function framework_remove_hook_function ( $hook, $function)
     return false;
   }
   $_plugins["hooks"][$hook] = array_diff ( $_plugins["hooks"][$hook], array ( $function));
+  unset ( $_plugins["map"][$function]);
   return true;
 }
 
 /**
- * Function to check if a function are already registered at a specific hook.
+ * Function to check if a hook exist (optionally, if there's a registered function).
  *
  * @global array $_plugins The main plugin system variable
  * @param string $hook The name of the hook to be checked
- * @param string $function The name of the function to be checked
+ * @param string $function[optional] The name of the function to be checked
  * @return boolean
  */
-function framework_has_hook ( $hook, $function)
+function framework_has_hook ( $hook, $function = "")
 {
   global $_plugins;
 
-  return array ( $function, $_plugins["hooks"][$hook]);
+  if ( $function != "")
+  {
+    return array ( $function, $_plugins["hooks"][$hook]);
+  } else {
+    return array_key_exists ( $hook, $_plugins["hooks"]);
+  }
 }
 
 /**
@@ -209,6 +292,10 @@ function framework_remove_hook ( $hook)
   if ( ! in_array ( $function, $_plugins["hooks"][$hook]))
   {
     return false;
+  }
+  foreach ( $_plugins["hooks"][$hook] as $function)
+  {
+    unset ( $_plugins["map"][$function]);
   }
   unset ( $_plugins["hooks"][$hook]);
   unset ( $_plugins["buffers"][$hook]);
@@ -255,6 +342,7 @@ function framework_clear_buffer ( $hook)
  * content output if third parameter set to true.
  *
  * @global array $_plugins The main plugin system variable
+ * @global array $_in Framework global configuration variable
  * @param string $hook The name of the hook to be called
  * @param array[optional] Array containing the parameters to be passed to the
  *                        called functions of the hook
@@ -264,7 +352,7 @@ function framework_clear_buffer ( $hook)
  */
 function framework_call ( $hook, $parameters = array (), $output = false, $buffer = "")
 {
-  global $_plugins;
+  global $_plugins, $_in;
 
   /**
    * Check if hook exists
@@ -295,13 +383,29 @@ function framework_call ( $hook, $parameters = array (), $output = false, $buffe
   {
     if ( ! function_exists ( $function))
     {
-      framework_error ( "IntelliNews Framework: Registered function \"" . $function . "\" doesn't exist at hook \"" . $hook . "\"");
-      continue;
+      if ( ! is_loaded ( $_plugins["map"][$function], "module"))
+      {
+        if ( is_readable ( dirname ( __FILE__) . "/../modules/" . $_plugins["map"][$function] . "/filter.php"))
+        {
+          require_once ( dirname ( __FILE__) . "/../modules/" . $_plugins["map"][$function] . "/filter.php");
+        }
+        if ( is_readable ( dirname ( __FILE__) . "/../modules/" . $_plugins["map"][$function] . "/module.php"))
+        {
+          require_once ( dirname ( __FILE__) . "/../modules/" . $_plugins["map"][$function] . "/module.php");
+        }
+      }
+      if ( ! function_exists ( $function))
+      {
+        framework_error ( "IntelliNews Framework: Registered function \"" . $function . "\" doesn't exist at hook \"" . $hook . "\"");
+        continue;
+      }
     }
+    $_in["module"] = $_plugins["map"][$function];
     $_plugins["current"][$hook][] = $function;
     $_plugins["buffers"][$hook] = call_user_func ( $function, $_plugins["buffers"][$hook], $parameters);
   }
   unset ( $_plugins["current"][$hook]);
+  $_in["module"] = "";
 
   /**
    * Output returned hook processing content if requested
@@ -314,7 +418,9 @@ function framework_call ( $hook, $parameters = array (), $output = false, $buffe
   /**
    * Return hook processing content
    */
-  return $_plugins["buffers"][$hook];
+  $return = $_plugins["buffers"][$hook];
+  unset ( $_plugins["buffers"][$hook]);
+  return $return;
 }
 
 /**
@@ -328,5 +434,24 @@ function framework_error ( $message, $level = E_USER_NOTICE)
 {
   $caller = @next ( debug_backtrace ());
   trigger_error ( $message . " in <strong>" . $caller["file"] . "</strong> on line <strong>" . $caller["line"] . "</strong> with error handler", $level);
+}
+
+/**
+ * Internal function to check if a module was loaded.
+ *
+ * @param string Module name
+ * @param string Module type
+ * @return boolean
+ */
+function is_loaded ( $module, $type)
+{
+  foreach ( get_included_files () as $included)
+  {
+    if ( strpos ( $included, "/modules/" . $module . "/" . $type . ".php") !== false)
+    {
+      return true;
+    }
+  }
+  return false;
 }
 ?>

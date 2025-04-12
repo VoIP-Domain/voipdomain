@@ -1,6 +1,0 @@
-  D3
---==--
-
-URL: https://d3js.org/
-Version: 5.1.0
-License: BSD

@@ -1,0 +1,43 @@
+{
+  "env": {
+    "browser": true,
+    "es2020": true,
+    "jest/globals": true,
+    "node": true
+  },
+  "extends": ["eslint:recommended", "plugin:jest/recommended"],
+  "globals": {
+    "jQuery": true,
+    "$": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2020
+  },
+  "rules": {
+    "brace-style": ["error", "1tbs"],
+    "camelcase": "error",
+    "comma-spacing": ["error", {
+      "before": false,
+      "after": true
+    }],
+    "consistent-return": "error",
+    "curly": ["error", "all"],
+    "indent": ["error", 2],
+    "keyword-spacing": ["error", {
+      "before": true,
+      "after": true
+    }],
+    "linebreak-style": ["error", "unix"],
+    "max-len": ["error", {
+      "code": 80,
+      "ignoreComments": true,
+      "ignoreRegExpLiterals": true,
+      "ignoreStrings": true
+    }],
+    "quotes": ["error", "single", {
+      "avoidEscape": true
+    }],
+    "semi": ["error", "always"],
+    "space-infix-ops": "error"
+  }
+}

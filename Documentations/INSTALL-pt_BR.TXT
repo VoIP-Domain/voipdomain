@@ -1,0 +1,150 @@
+/**   ___ ___       ___ _______     ______                        __
+ *   |   Y   .-----|   |   _   |   |   _  \ .-----.--------.---.-|__.-----.
+ *   |.  |   |  _  |.  |.  1   |   |.  |   \|  _  |        |  _  |  |     |
+ *   |.  |   |_____|.  |.  ____|   |.  |    |_____|__|__|__|___._|__|__|__|
+ *   |:  1   |     |:  |:  |       |:  1    /
+ *    \:.. ./      |::.|::.|       |::.. . /
+ *     `---'       `---`---'       `------'
+ *
+ * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ *
+ * Este programa é software livre: você pode redistribuí-lo e/ou modificar sob os
+ * termos da Licença Pública Geral GNU, conforme publicada pela Free Software
+ * Foundation, versão 3 da Licença, ou (a seu critério) qualquer versão
+ * posterior.
+ *
+ * Este programa é distribuído na esperança de que seja útil, mas SEM QUALQUER
+ * GARANTIA; sem mesmo a garantia implícita de COMERCIABILIDADE OU ADEQUAÇÃO A UM
+ * DETERMINADO FIM. Veja a licença GNU General Public License mais detalhes.
+ *
+ * Você deve ter recebido uma cópia da Licença Pública Geral GNU junto com este
+ * programa. Se não, veja <https://www.gnu.org/licenses/>.
+ */
+
+  Guia de Instalação
+--==================--
+
+O sistema foi desenvolvido para rodar em RHEL 7. VoIP Domain possui um repositório RPM com todos os pacotes que você necessita, com diversas ferramentas VoIP também. Todos os pacotes possuem seus respectivos src.rpm publicados na mesma URL. Você pode acessar o repositório em http://rhel.voipdomain.io/.
+Se você deseja instalar o VoIP Domain em quaisquer outra distribuição Linux/Unix-Like, você precisará de:
+
+Para a interface web administrativa:
+- Servidor MySQL (ou MariaDB) (mínimo versão 5.0.2, mas testado apenas com o MariaDB 5.5);
+- PHP 5.4.16 ou superior com suporte a MySQLi;
+- PHP-FPM;
+- NGiNX;
+- NGiNX push stream module.
+
+Para os servidores Asterisk:
+- Servidor MySQL (ou MariaDB) (testado apenas com o MariaDB 5.5, mas utiliza apenas comandos muito básicos de SQL);
+- PHP 5.4.16 ou superior com suporte a MySQLi;
+- PHP PECL proctitle (opcional);
+- Asterisk 11 ou superior (o repositório tem a série 15, recomendado).
+
+Você pode ter um ou mais servidores Asterisk na sua rede. É recomendado caso você tenha infra estruturas fisicamente distantes, utilizar um servidor em cada local, para que sua rede VoIP seja resiliente, porque os servidores Asterisk do VoIP Domain podem trabalhar sem comunicação na rede interna.
+
+A interface web administrativa pode ser instalada em uma máquina virtual, gerenciando um ou mais servidores Asterisk remotos. Você também pode instalar a interface administrativa no mesmo servidor que executa o serviço Asterisk. Neste caso, apenas combine os requerimentos mínimos de software.
+
+
+  Interface Web Administrativa
+--============================--
+
+Para instalar a interface web administrativa, você deve instalar a aplicação para o raiz do servidor web (normalmente /usr/share/voipdomain), criar os arquivos de configuração no diretório do sistema (/etc), instalar a estrutura básica de banco de dados e os arquivos de inicialização do sistema. Para isto, você deve realizar os seguintes passos:
+
+1) Instalar os pacotes necessários. Se você estiver utilizando RHEL, adicione o repositório do VoIP Domain (veja como adicionar o repositório mais abaixo), e utilize:
+   yum install -y php-cli php-mysql php-cgi php-gd php-pear php-mbstring mariadb-server nginx nginx-push-stream-module
+2) Instale a aplicação em /usr/share/voipdomain;
+3) Configurar a entrada do PHP-FPM, copiando docs/php-fpm.d/voipcentral.conf para /etc/php-fpm.d/;
+4) Configurar o servidor NGiNX. Você pode utilizar a estrutura disponível em docs/nginx;
+5) Coloque o seu certificado SSL em /etc/nginx/ssl (ou crie um auto assinado, veja como mais abaixo);
+6) Criar o diretório de configuração /etc/voipdomain. Copiar os arquivos de configuração de docs/etc/voipdomain;
+7) Criar a base de dados no MariaDB e conceder permissões;
+8) Importar a estrutura básica do banco de dados vd, utilizando: mysql -u root -p vd < docs/voipdomain.sqldump
+9) Se você estiver utilizando o plugin ANATEL, crie a base de dados ANATEL e importe a estrutura e os dados;
+10) Configure a inicialização dos arquivos de sistema:
+  for service in php-fpm nginx mariadb asterisk; do systemctl enable ${service}.service; systemctl start ${service}.service; done
+
+
+  Repositório RHEL VoIP Domain
+--============================--
+
+Para habilitar o repositório de pacotes RHEL do VoIP Domain em seu servidor RHEL, crie o arquivo de repositório colando os seguintes comandos:
+
+cat > /etc/yum.repos.d/VoIPDomain.repo << __EOF__
+[VoIPDomain-$basearch]
+name=VoIPDomain-$releasever - $basearch
+baseurl=http://rhel.voipdomain.io/$releasever/$basearch/
+gpgcheck=1
+gpgkey=http://rhel.voipdomain.io/azevedo@voipdomain.io.key
+
+[VoIPDomain-noarch]
+name=VoIPDomain-$releasever - noarch
+baseurl=http://rhel.voipdomain.io/$releasever/noarch/
+gpgcheck=1
+gpgkey=http://rhel.voipdomain.io/azevedo@voipdomain.io.key
+__EOF__
+
+Este comando irá criar o arquivo de repositório em /etc/yum.repos.d/VoIPDomain.repo. Você também necessita importar a chave de assinatura do repositório VoIP Domain, para garantir que os pacotes são assinados por um administrador autorizado do VoIP Domain. Utilize o seguinte comando para importar a chave:
+
+rpm --import - 1>/dev/null 2>&1 << __EOF__
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+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
+BdDNe/o=
+=AYsh
+-----END PGP PUBLIC KEY BLOCK-----
+__EOF__
+
+
+  Criando um Certificado Auto Assinado
+--====================================--
+
+Utilize os seguintes comandos para criar o seu certificado SSL auto assinado:
+
+openssl req -new -x509 -sha256 -newkey rsa:2048 -days 365 -nodes -out SEU.FQDN.pem -keyout SEU.FQDN.key
+openssl req -new -sha256 -key SEU.FQDN.key -out SEU.FQDN.csr
+chmod 600 SEU.FQDN.key

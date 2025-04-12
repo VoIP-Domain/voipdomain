@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,14 +24,14 @@
  */
 
 /**
- * VoIP Domain ranges filter module. This module add the filter calls related
- * to ranges.
+ * VoIP Domain ranges module filters. This module add the filter calls related to
+ * ranges.
  *
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Ranges
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -39,6 +39,7 @@
  * Add range's filters
  */
 framework_add_filter ( "page_menu_registers", "ranges_menu");
+framework_add_filter ( "get_ranges", "get_ranges");
 framework_add_filter ( "search_range", "search_range");
 
 /**
@@ -52,6 +53,54 @@ framework_add_filter ( "search_range", "search_range");
 function ranges_menu ( $buffer, $parameters)
 {
   return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "cloud", "href" => "/ranges", "text" => __ ( "Ranges"))));
+}
+
+/**
+ * Function to get ranges filtered by ID, description or server.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return array Output of the found data
+ */
+function get_ranges ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Create where clause
+   */
+  $where = "";
+  if ( array_key_exists ( "ID", $parameters))
+  {
+    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
+  }
+  if ( array_key_exists ( "Server", $parameters))
+  {
+    $where .= " AND `Server` = '" . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Server"]) . "'";
+  }
+  if ( array_key_exists ( "Text", $parameters))
+  {
+    $where .= " AND `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( str_replace ( " ", "%", trim ( strip_tags ( $parameters["Text"])))) . "%'";
+  }
+
+  /**
+   * Check into database if ranges exists
+   */
+  $data = array ();
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
+  {
+    while ( $range = $result->fetch_assoc ())
+    {
+      $data[] = $range;
+    }
+  }
+
+  /**
+   * Return structured data
+   */
+  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 
 /**
@@ -70,11 +119,12 @@ function search_range ( $buffer, $parameters)
   /**
    * Check into database if range exists
    */
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Start` <= " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["number"]) . " AND `Finish` >= " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["number"])))
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT `Ranges`.*, `Servers`.`NTP` FROM `Ranges` LEFT JOIN `Servers` ON `Ranges`.`Server` = `Servers`.`ID` WHERE `Ranges`.`Start` <= " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Number"]) . " AND `Ranges`.`Finish` >= " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Number"])))
   {
     if ( $result->num_rows != 0)
     {
       $data = $result->fetch_assoc ();
+      $data["NTP"] = json_decode ( $data["NTP"], true);
     } else {
       $data = array ();
     }

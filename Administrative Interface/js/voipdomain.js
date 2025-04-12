@@ -6,7 +6,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,16 +30,21 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Core
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
+/**
+ * VoIP Domain object
+ */
 var VoIP = ( function ()
 {
   // Private variables:
   var modules = {};
+  var objects = {};
   var paths = {};
-  var lastpath = {};
+  var lastpath = '';
+  var lastpage = '';
   var events =
   {
     'session_timeout': function ( data)
@@ -53,7 +58,10 @@ var VoIP = ( function ()
   var user = '';
   var name = '';
   var uid = '';
+  var nonce = '';
   var token = '';
+  var defaultcurrency = '';
+  var i18ndata = {};
 
   // About this library:
   this.about = {
@@ -85,9 +93,17 @@ var VoIP = ( function ()
     {
       uid = variables.uid;
     }
+    if ( 'nonce' in variables)
+    {
+      nonce = variables.nonce;
+    }
     if ( 'token' in variables)
     {
       token = variables.token;
+    }
+    if ( 'defaultcurrency' in variables)
+    {
+      defaultcurrency = variables.defaultcurrency;
     }
   };
   this.getUID = function ()
@@ -102,6 +118,77 @@ var VoIP = ( function ()
   {
     return name;
   }
+  this.getTitle = function ()
+  {
+    return title;
+  }
+  this.getToken = function ()
+  {
+    return token;
+  }
+  this.getNonce = function ()
+  {
+    return nonce;
+  }
+  this.getCurrency = function ()
+  {
+    return defaultcurrency;
+  }
+
+  /**
+   * Interface specific functions
+   */
+  this.interface = {
+    addObject: function ( object)
+               {
+                 objects[object['object']] = { 'icon': object['icon'], 'label': object['label'], 'text': object['text'], 'type': object['type'], 'path': object['path']};
+               },
+    objIcon: function ( object)
+             {
+               return typeof ( objects[object]) == 'object' ? objects[object].icon : 'exclamation-circle';
+             },
+    objLabel: function ( object)
+              {
+                return typeof ( objects[object]) == 'object' ? objects[object].label : 'default';
+              },
+    objText: function ( object)
+             {
+               return typeof ( objects[object]) == 'object' ? objects[object].text : '';
+             },
+    objType: function ( object)
+             {
+               return typeof ( objects[object]) == 'object' ? objects[object].type : '';
+             },
+    objPath: function ( object)
+             {
+               return typeof ( objects[object]) == 'object' ? objects[object].path : '';
+             },
+    objTextSingular: function ( object)
+             {
+               return typeof ( objects[object]) == 'object' ? objects[object].text.singular : '';
+             },
+    objTextPlural: function ( object)
+             {
+               return typeof ( objects[object]) == 'object' ? objects[object].text.plural : '';
+             },
+    objList: function ( filter, removeFilter = false)
+             {
+               var result = new Array ();
+               for ( var object in objects)
+               {
+                 if ( arguments.length == 0 || ( arguments.length >= 1 && object.search ( filter) != -1))
+                 {
+                   if ( removeFilter)
+                   {
+                     result.push ( { id: object.substr ( filter.length), text: objects[object].text.singular});
+                   } else {
+                     result.push ( { id: object, text: objects[object].text.singular});
+                   }
+                 }
+               }
+               return result;
+             }
+  };
 
   /**
    * Module manipulation functions
@@ -119,92 +206,166 @@ var VoIP = ( function ()
             {
               return modules;
             },
-    fire: function ( module, parameters)
+    fire: function ( module, parameters, onfinish)
           {
-            // Remove any StickyTableHaders
-            if ( typeof ( $.fn.stickyTableHeaders) == 'function')
-            {
-              $('table').each ( function ()
-              {
-                $(this).stickyTableHeaders ( 'destroy');
-              });
-            }
-
-            // Remove any visible tooltip
-            $('div.tooltip[id^="tooltip"]').remove ();
-
-            // Close any open select2 container
-            if ( typeof ( $.fn.select2) == 'function')
-            {
-              $('select.select2-hidden-accessible').select2 ( 'close');
-            }
-
-            // Close any open bootstrap modal
-            $('.modal').modal ( 'hide');
-
-            // Remove any datatable table
-            if ( typeof ( $.fn.dataTable) == 'function')
-            {
-              $('table:not([data-dt=""]').each ( function ()
-              {
-                try
-                {
-                  $(this).data ( 'dt').destroy ( true);
-                } catch ( e) {}
-              });
-            }
-
-            // Stop any ladda spin
-            if ( typeof ( $.ladda) == 'function')
-            {
-              $.ladda ( 'stopAll');
-            }
-
-            // Change page content
-            $('section.content-header').fadeOut ( 'fast', function ()
-            {
-              $('#page_title').html ( modules[module].title);
-              $('#page_subtitle').html ( ( 'subtitle' in modules[module] ? ' - ' + modules[module].subtitle : ''));
-              var breadcrumb = '<li' + ( modules[module].breadcrumb.length == 0 ? ' class="active"' : '><a href="/"') + '><i class="fa fa-dashboard"></i> Início' + ( modules[module].breadcrumb.length == 0 ? '' : '</a>') + '</li>';
-              for ( var x in modules[module].breadcrumb)
-              {
-                if ( 'link' in modules[module].breadcrumb[x])
-                {
-                  breadcrumb += '<li><a href="' + modules[module].breadcrumb[x].link + '">' + modules[module].breadcrumb[x].title + '</a></li>';
-                } else {
-                  breadcrumb += '<li class="active">' + modules[module].breadcrumb[x].title + '</li>';
-                }
-              }
-              $('#page_breadcrumb').html ( breadcrumb);
-            }).fadeIn ( 'fast');
-
-            // Add page content
-            $('#content').html ( modules[module].content);
+            console.log ( 'Firing module ' + module + ' with parameters: ' + JSON.stringify ( parameters));
 
             // Export parameters
             VoIP.parameters = parameters;
 
-            // If there's custom JavaScript code, add it
-            if ( 'inlinejs' in modules[module])
+            // If module is a function, just execute JavaScript code
+            if ( modules[module].type === 'function' && 'inlinejs' in modules[module])
             {
-              $('<script type="text/javascript">').text ( modules[module].inlinejs).appendTo ( 'body');
+              $('<script type="text/javascript" nonce="' + VoIP.getNonce () + '">').text ( '//# sourceURL=/modules/' + module + '.js\n\n' + modules[module].inlinejs).appendTo ( 'body');
+
+              // If onfinish function provided, execute it:
+              if ( typeof ( onfinish) === 'function')
+              {
+                onfinish ( module, parameters);
+              }
+              return;
             }
 
-            // Active any tooltip if exists
-            setTimeout ( function () { $('#content [data-toggle="tooltip"]').tooltip (); }, 0);
-
-            // Change to tab if specified at URL hash
-            if ( location.hash && $('.nav-tabs a[href="' + location.hash + '"]').length != 0)
+            // If not same page, rebuild content
+            if ( ( lastpage.indexOf ( '#') != -1 ? lastpage.substring ( 0, lastpage.indexOf ( '#')) : lastpage) != ( location.href.indexOf ( '#') != -1 ? location.href.substring ( 0, location.href.indexOf ( '#')) : location.href))
             {
-              $('.nav-tabs a[href="' + location.hash + '"]').tab ( 'show');
+              // Reset menu
+              $('ul.sidebar-menu').find ( '.menu-open').removeClass ( 'menu-open').find ( 'ul').css ( 'display', '');
+              $('ul.sidebar-menu').find ( 'li.active').removeClass ( 'active');
+
+              // Make current menu entry as active
+              var element = $('ul.sidebar-menu a').filter ( function ()
+              {
+                return this.href == ( location.href.indexOf ( '#') != -1 ? location.href.substring ( 0, location.href.indexOf ( '#')) : location.href) && $(this).attr ( 'href');
+              }).parent ( 'li').addClass ( 'active');
+              if ( $(element).length == 1)
+              {
+                while ( ! $(element).hasClass ( 'sidebar-menu'))
+                {
+                  element = $(element).parent ();
+                  if ( $(element).is ( 'ul') && $(element).hasClass ( 'treeview-menu'))
+                  {
+                    $(element).css ( 'display', 'block').parent ().addClass ( 'menu-open');
+                  }
+                }
+              }
+
+              // Remove any StickyTableHaders
+              if ( typeof ( $.fn.stickyTableHeaders) == 'function')
+              {
+                $('table').each ( function ()
+                {
+                  $(this).stickyTableHeaders ( 'destroy');
+                });
+              }
+
+              // Remove any visible tooltip
+              $('div.tooltip[id^="tooltip"]').remove ();
+
+              // Close any open select2 container
+              if ( typeof ( $.fn.select2) == 'function')
+              {
+                $('select.select2-hidden-accessible').select2 ( 'close');
+              }
+
+              // Close any open bootstrap modal
+              $('.modal').modal ( 'hide');
+
+              // Remove any datatable table
+              if ( typeof ( $.fn.dataTable) == 'function')
+              {
+                $('table:not([data-dt=""]').each ( function ()
+                {
+                  try
+                  {
+                    $(this).data ( 'dt').destroy ( true);
+                  } catch ( e) {}
+                });
+              }
+
+              // Stop any ladda spin
+              if ( typeof ( $.ladda) == 'function')
+              {
+                $.ladda ( 'stopAll');
+              }
+
+              // Change page content
+              $('section.content-header').fadeOut ( 'fast', function ()
+              {
+                $('#page_title').html ( modules[module].title);
+                $('#page_subtitle').html ( ( 'subtitle' in modules[module] ? ' - ' + modules[module].subtitle : ''));
+                var breadcrumb = '<li' + ( modules[module].breadcrumb.length == 0 ? ' class="active"' : '><a href="/"') + '><i class="fa fa-home"></i>' + ( modules[module].breadcrumb.length == 0 ? '' : '</a>') + '</li>';
+                for ( var x in modules[module].breadcrumb)
+                {
+                  if ( 'link' in modules[module].breadcrumb[x])
+                  {
+                    breadcrumb += '<li><a href="' + modules[module].breadcrumb[x].link + '">' + modules[module].breadcrumb[x].title + '</a></li>';
+                  } else {
+                    breadcrumb += '<li class="active">' + modules[module].breadcrumb[x].title + '</li>';
+                  }
+                }
+                $('#page_breadcrumb').html ( breadcrumb);
+              }).fadeIn ( 'fast');
+
+              // Add page content
+              $('#content').html ( modules[module].content);
+
+              // If there's custom JavaScript code, add it
+              if ( 'inlinejs' in modules[module])
+              {
+                $('<script type="text/javascript" nonce="' + VoIP.getNonce () + '">').text ( '//# sourceURL=/modules/' + module + '.js\n\n' + modules[module].inlinejs).appendTo ( 'body');
+              }
+
+              // Active any tooltip if exists
+              setTimeout ( function () { $('#content [data-toggle="tooltip"]').tooltip ( { container: 'body'}); }, 0);
+            }
+
+            // If URL hash exist, process it:
+            hasheventfired = false;
+            if ( location.hash)
+            {
+              // Decode URL hash
+              try
+              {
+                hashdata = JSON.parse ( atob ( location.hash.substr ( 1)));
+              } catch ( e) {
+                hashdata = {};
+              }
+
+              // Check if tab is specified to be shown
+              if ( hashdata.Tab && $('.nav-tabs a[href="' + hashdata.Tab + '"]').length != 0)
+              {
+                $('.nav-tabs a[href="' + hashdata.Tab + '"]').tab ( 'show');
+                delete ( hashdata.Tab);
+              }
+
+              // If module has hashevent, execute it
+              if ( hashdata && 'hashevent' in modules[module] && $._data ( $('#' + modules[module].hashevent.id)[0], 'events') && modules[module].hashevent.event in $._data ( $('#' + modules[module].hashevent.id)[0], 'events') && $._data ( $('#' + modules[module].hashevent.id)[0], 'events')[modules[module].hashevent.event].length > 0)
+              {
+                $('#' + modules[module].hashevent.id).trigger ( modules[module].hashevent.event, hashdata);
+                hasheventfired = true;
+              }
+            }
+
+            // Execute page start event if hash event wasn't fired:
+            if ( ! hasheventfired && 'startevent' in modules[module] && $._data ( $('#' + modules[module].startevent.id)[0], 'events') && modules[module].startevent.event in $._data ( $('#' + modules[module].startevent.id)[0], 'events') && $._data ( $('#' + modules[module].startevent.id)[0], 'events')[modules[module].startevent.event].length > 0)
+            {
+              $('#' + modules[module].startevent.id).trigger ( modules[module].startevent.event, modules[module].startevent.data);
             }
 
 //            // Refresh any time with timeago if exists
 //            $('#content time.timeago').timeago ();
 
-            console.log ( 'Firing module ' + module + ' with parameters: ' + JSON.stringify ( parameters));
+            // If onfinish function provided, execute it:
+            if ( typeof ( onfinish) === 'function')
+            {
+              onfinish ( module, parameters);
+            }
+
+            // Set lastpage to current page
+            lastpage = location.href;
           },
-    load: function ( path, callonload, pushonload)
+    load: function ( path, callonload, pushonload, onfinish)
           {
             callonload = ( typeof ( callonload) === 'undefined' ? false : callonload);
             pushonload = ( typeof ( pushonload) === 'undefined' ? true : pushonload);
@@ -221,9 +382,15 @@ var VoIP = ( function ()
             // Show load bar
             $('.percentage').css ( 'width', 0).css ( 'display', 'block').animate ( { width: '10%'}, 50);
 
+            // If URL has parameters, remove it to request
+            var url = ( path.indexOf ( '?') != -1 ? path.substring ( 0, path.indexOf ( '?')) : path);
+
+            // If URL has hashtag, remove it to request
+            url = ( url.indexOf ( '#') != -1 ? url.substring ( 0, url.indexOf ( '#')) : url);
+
             $.ajax (
             {
-              url: ( path.indexOf ( '#') != -1 ? path.substring ( 0, path.indexOf ( '#')) : path),
+              url: url,
               headers:
               {
                 'X-INFramework': 'page'
@@ -231,62 +398,63 @@ var VoIP = ( function ()
               async: true,
               cache: false,
               error: function ( jqXHR, textStatus, errorThrown)
-              {
-                console.log ( 'Error loading page: ' + jqXHR.status + ' ' + jqXHR.statusText);
-                console.log ( 'Received data: ' + jqXHR.responseText);
-              },
+                     {
+                       console.log ( 'Error loading page: ' + jqXHR.status + ' ' + jqXHR.statusText);
+                       console.log ( 'Received data: ' + jqXHR.responseText);
+                     },
               success: function ( data, textStatus, jqXHR)
-              {
-                if ( typeof ( data) == 'object' && 'event' in data)
-                {
-                  if ( data.event == 'session_timeout')
-                  {
-                    if ( location.pathname == ( VoIP.lastpath.indexOf ( '#') != -1 ? VoIP.lastpath.substring ( 0, VoIP.lastpath.indexOf ( '#')) : VoIP.lastpath))
-                    {
-                      location.reload ();
-                    } else {
-                      location.href = VoIP.lastpath;
-                    }
-                  } else {
-                    event.call ( data);
-                  }
-                  return;
-                }
-                if ( typeof ( data) != 'object' || ! ( 'index' in data))
-                {
-                  console.log ( 'Error loading page. Returned data: ' + JSON.stringify ( data));
-                  return;
-                }
-                paths[data.index] = data.hook;
-                modules[data.hook] = data;
-
-                // If there's custom CSS, add it
-                if ( 'inlinecss' in data)
-                {
-                  $('<style type="text/css">').text ( data.inlinecss).appendTo ( 'head');
-                }
-
-                // Load data using jquery.loader
-                $.loader (
-                {
-                  js: data.js,
-                  css: data.css,
-                  onrefresh: function ( loaded, total, percentage)
+                       {
+                         if ( typeof ( data) == 'object' && 'event' in data)
+                         {
+                           if ( data.event == 'session_timeout')
+                           {
+                             if ( location.pathname == ( VoIP.lastpath.indexOf ( '#') != -1 ? VoIP.lastpath.substring ( 0, VoIP.lastpath.indexOf ( '#')) : VoIP.lastpath))
                              {
-                               $('.percentage').animate ( { width: percentage + '%'}, 50);
-                             },
-                  onfinish: function ()
-                            {
-                              // Hide percentage load bar
-                              $('.percentage').fadeOut ( 'slow');
+                               location.reload ();
+                             } else {
+                               location.href = VoIP.lastpath;
+                             }
+                           } else {
+                             event.call ( data);
+                           }
+                           return;
+                         }
+                         if ( typeof ( data) != 'object' || ! ( 'index' in data))
+                         {
+                           console.log ( 'Error loading page. Returned data: ' + JSON.stringify ( data));
+                           return;
+                         }
+                         paths[data.index] = data.hook;
+                         modules[data.hook] = data;
 
-                              if ( callonload)
-                              {
-                                VoIP.path.call ( path, pushonload);
-                              }
-                            }
-                });
-              }
+                         // If there's custom CSS, add it
+                         if ( 'inlinecss' in data)
+                         {
+                           $('<style type="text/css" nonce="' + VoIP.getNonce () + '">').text ( data.inlinecss).appendTo ( 'head');
+                         }
+
+                         // Load data using jquery.loader
+                         $.loader (
+                         {
+                           js: data.js,
+                           css: data.css,
+                           nonce: VoIP.getNonce (),
+                           onrefresh: function ( loaded, total, percentage)
+                                      {
+                                        $('.percentage').animate ( { width: percentage + '%'}, 50);
+                                      },
+                           onfinish: function ()
+                                     {
+                                       // Hide percentage load bar
+                                       $('.percentage').fadeOut ( 'slow');
+
+                                       if ( callonload)
+                                       {
+                                         VoIP.path.call ( path, pushonload, onfinish);
+                                       }
+                                     }
+                         });
+                       }
             });
           }
   };
@@ -315,6 +483,24 @@ var VoIP = ( function ()
   };
 
   /**
+   * Internationalization functions
+   */
+  this.i18n = {
+    add: function ( string1, string2)
+         {
+           i18ndata[string1] = string2;
+         },
+    __: function ( string)
+        {
+          if ( i18ndata.hasOwnProperty ( string))
+          {
+            return i18ndata[string];
+          }
+          return string;
+        }
+  };
+
+  /**
    * Path call functions
    */
   this.path = {
@@ -330,16 +516,19 @@ var VoIP = ( function ()
             {
               return paths;
             },
-    call: function ( path, push)
+    call: function ( path, push, onfinish)
           {
             push = ( typeof ( push) === 'undefined' ? true : push);
             searchpath = ( path.indexOf ( '#') != -1 ? path.substring ( 0, path.indexOf ( '#')) : path);
+            searchpath = ( searchpath.indexOf ( '?') != -1 ? searchpath.substring ( 0, searchpath.indexOf ( '?')) : searchpath);
 
             // If request is logout, destroy session and redirect
             if ( path == '/logout')
             {
-              VoIP.rest ( '/sys/session', 'DELETE');
-              location.href = '/';
+              VoIP.rest ( '/session', 'DELETE').always ( function ()
+              {
+                location.href = '/';
+              });
               return;
             }
 
@@ -356,61 +545,388 @@ var VoIP = ( function ()
                 {
                   history.pushState ( null, null, path);
                 }
-                module.fire ( paths[key], match);
+                module.fire ( paths[key], match, onfinish);
                 return;
               }
             }
 
             // Ok, we don't have the path and module. Try to fetch it from server:
-            module.load ( path, true, push);
+            module.load ( path, true, push, onfinish);
           }
   };
 
   /**
-   * REST API dataTables wrapper
+   * REST API search dataTables/select2 format wrapper
    */
-  this.dataTables = function ( path, route, data)
+  this.APIsearch = function ( parameters)
   {
-    var data = rest ( path, route, data);
+    /**
+     * Default options
+     */
+    var options = {
+      path: '',
+      route: 'GET',
+      fields: '',
+      filters: {},
+      formatID: 'ID',
+      formatText: '',
+      indexedFilter: true,
+      localFormatText: function ( e)
+                       {
+                         return e;
+                       },
+      filter: function ( results, fields)
+              {
+                var result = new Array ();
+                for ( var x = 0; x < results.length; x++)
+                {
+                  var entry = new Array ();
+                  for ( var y = 0; y < fields.length; y++)
+                  {
+                    if ( fields[y] == 'NULL')
+                    {
+                      if ( options.indexedFilter)
+                      {
+                        entry[fields[y]] = '';
+                      } else {
+                        entry.push ( '');
+                      }
+                    } else {
+                      if ( options.indexedFilter)
+                      {
+                        entry[fields[y]] = results[x][fields[y]];
+                      } else {
+                        entry.push ( results[x][fields[y]]);
+                      }
+                    }
+                  }
+                  result.push ( entry);
+                }
+                return result;
+              },
+      data: {}
+    };
+
+    /**
+     * Override options with client options
+     */
+    if ( typeof ( parameters.path) == 'string')
+    {
+      options.path = parameters.path;
+    }
+    if ( typeof ( parameters.route) == 'string')
+    {
+      options.route = parameters.route;
+    }
+    if ( typeof ( parameters.fields) == 'string')
+    {
+      options.fields = parameters.fields;
+    }
+    if ( typeof ( parameters.localFormatText) == 'function')
+    {
+      options.localFormatText = parameters.localFormatText;
+    }
+    if ( typeof ( parameters.formatID) == 'string')
+    {
+      options.formatID = parameters.formatID;
+    }
+    if ( typeof ( parameters.formatText) == 'string')
+    {
+      options.formatText = parameters.formatText;
+    }
+    if ( typeof ( parameters.data) == 'object')
+    {
+      options.data = parameters.data;
+    }
+    if ( typeof ( parameters.indexedFilter) == 'boolean')
+    {
+      options.indexedFilter = parameters.indexedFilter;
+    }
+    if ( typeof ( parameters.filter) == 'function')
+    {
+      options.filter = parameters.filter;
+    }
+    if ( typeof ( parameters.filters) == 'object')
+    {
+      options.filters = parameters.filters;
+    }
+
+    /**
+     * Add fields to request
+     */
+    options.data.Fields = options.fields;
+
+    /**
+     * Request search from API
+     */
+    var data = rest ( options.path, options.route, options.data, false);
+
+    /**
+     * Process the result
+     */
     if ( typeof ( data.result) == 'object' && data.API.status == 'ok')
     {
-      return data.result;
+      if ( data.result.length == 0)
+      {
+        return data.result;
+      }
+      if ( options.formatText != '')
+      {
+        var fields = Object.keys ( data.result[0]);
+        var result = new Array ();
+        for ( var x = 0; x < data.result.length; x++)
+        {
+          var text = options.formatText;
+          for ( var y = 0; y < fields.length; y++)
+          {
+            text = text.replace ( '%' + fields[y] + '%', data.result[x][fields[y]]);
+          }
+          result.push ( { id: data.result[x][options.formatID], text: options.localFormatText ( text)});
+        }
+        return result;
+      } else {
+        for ( var field in options.filters)
+        {
+          if ( ! options.filters.hasOwnProperty ( field))
+          {
+            continue;
+          }
+          if ( typeof ( options.filters[field]) == 'function')
+          {
+            options.filters[field] ( data.result);
+          } else {
+            switch ( options.filters[field])
+            {
+              case 'datetime':
+                for ( var x = 0; x < data.result.length; x++)
+                {
+                  data.result[x][field] = moment ( data.result[x][field]).isValid () ? moment ( data.result[x][field]).format ( 'L LTS') : '';
+                }
+                break;
+              case 'date':
+                for ( var x = 0; x < data.result.length; x++)
+                {
+                  data.result[x][field] = moment ( data.result[x][field]).isValid () ? moment ( data.result[x][field]).format ( 'L') : '';
+                }
+                break;
+              case 'time':
+                for ( var x = 0; x < data.result.length; x++)
+                {
+                  data.result[x][field] = moment ( data.result[x][field]).isValid () ? moment ( data.result[x][field]).format ( 'LTS') : '';
+                }
+                break;
+            }
+          }
+        }
+        return options.filter ( data.result, options.fields.split ( ','));
+      }
     } else {
-      console.log ( 'VoIP API dataTables wrapper request error. Status: ' + data.API.statusCode + ' ' + data.API.statusText);
-      return [];
+      console.log ( 'VoIP API search dataTables/select2 wrapper request error. Status: ' + data.API.statusCode + ' ' + data.API.statusText);
+      return new Array ();
     }
   }
 
   /**
-   * REST API select2 wrapper
+   * API search dataTables/select2 format wrapper and updater
    */
-  this.select2 = function ( path, route, data)
+  this.dataTablesUpdate = function ( parameters, dt)
   {
-    var data = rest ( path, route, data);
-    if ( typeof ( data.result) == 'object' && data.API.status == 'ok')
+    /**
+     * Set DataTables processing mode
+     */
+    dt.processing ( true);
+
+    /**
+     * Default options
+     */
+    var options = {
+      path: '',
+      route: 'GET',
+      fields: '',
+      filters: {},
+      formatID: 'ID',
+      formatText: '',
+      indexedFilter: true,
+      localFormatText: function ( e)
+                       {
+                         return e;
+                       },
+      filter: function ( results, fields)
+              {
+                var result = new Array ();
+                for ( var x = 0; x < results.length; x++)
+                {
+                  var entry = new Array ();
+                  for ( var y = 0; y < fields.length; y++)
+                  {
+                    if ( fields[y] == 'NULL')
+                    {
+                      if ( options.indexedFilter)
+                      {
+                        entry[fields[y]] = '';
+                      } else {
+                        entry.push ( '');
+                      }
+                    } else {
+                      if ( options.indexedFilter)
+                      {
+                        entry[fields[y]] = results[x][fields[y]];
+                      } else {
+                        entry.push ( results[x][fields[y]]);
+                      }
+                    }
+                  }
+                  result.push ( entry);
+                }
+                return result;
+              },
+      data: {}
+    };
+
+    /**
+     * Override options with client options
+     */
+    if ( typeof ( parameters.path) == 'string')
     {
-      var ret = [];
-      for ( var x in data.result)
-      {
-        ret.push ( { id: data.result[x][0], text: data.result[x][1]});
-      }
-      return ret;
-    } else {
-      console.log ( 'VoIP API select2 wrapper request error. Status: ' + data.API.statusCode + ' ' + data.API.statusText);
-      return [];
+      options.path = parameters.path;
     }
+    if ( typeof ( parameters.route) == 'string')
+    {
+      options.route = parameters.route;
+    }
+    if ( typeof ( parameters.fields) == 'string')
+    {
+      options.fields = parameters.fields;
+    }
+    if ( typeof ( parameters.localFormatText) == 'function')
+    {
+      options.localFormatText = parameters.localFormatText;
+    }
+    if ( typeof ( parameters.formatID) == 'string')
+    {
+      options.formatID = parameters.formatID;
+    }
+    if ( typeof ( parameters.formatText) == 'string')
+    {
+      options.formatText = parameters.formatText;
+    }
+    if ( typeof ( parameters.data) == 'object')
+    {
+      options.data = parameters.data;
+    }
+    if ( typeof ( parameters.indexedFilter) == 'boolean')
+    {
+      options.indexedFilter = parameters.indexedFilter;
+    }
+    if ( typeof ( parameters.filter) == 'function')
+    {
+      options.filter = parameters.filter;
+    }
+    if ( typeof ( parameters.filters) == 'object')
+    {
+      options.filters = parameters.filters;
+    }
+
+    /**
+     * Add fields to request
+     */
+    options.data.Fields = options.fields;
+
+    /**
+     * Request search from API
+     */
+    VoIP.rest ( options.path, options.route, options.data).done ( function ( data, textStatus, jqXHR)
+    {
+      if ( data.length == 0)
+      {
+        dt.clear ();
+        dt.rows.add ( data);
+        dt.draw ();
+        dt.responsive.recalc ();
+        dt.processing ( false);
+        return;
+      }
+      if ( options.formatText != '')
+      {
+        var fields = Object.keys ( data[0]);
+        var result = new Array ();
+        for ( var x = 0; x < data.length; x++)
+        {
+          var text = options.formatText;
+          for ( var y = 0; y < fields.length; y++)
+          {
+            text = text.replace ( '%' + fields[y] + '%', data[x][fields[y]]);
+          }
+          result.push ( { id: data[x][options.formatID], text: options.localFormatText ( text)});
+        }
+        dt.clear ();
+        dt.rows.add ( result);
+        dt.draw ();
+        dt.responsive.recalc ();
+        dt.processing ( false);
+        return;
+      } else {
+        for ( var field in options.filters)
+        {
+          if ( ! options.filters.hasOwnProperty ( field))
+          {
+            continue;
+          }
+          if ( typeof ( options.filters[field]) == 'function')
+          {
+            options.filters[field] ( data);
+          } else {
+            switch ( options.filters[field])
+            {
+              case 'datetime':
+                for ( var x = 0; x < data.length; x++)
+                {
+                  data[x][field] = moment ( data[x][field]).isValid () ? moment ( data[x][field]).format ( 'L LTS') : '';
+                }
+                break;
+              case 'date':
+                for ( var x = 0; x < data.length; x++)
+                {
+                  data[x][field] = moment ( data[x][field]).isValid () ? moment ( data[x][field]).format ( 'L') : '';
+                }
+                break;
+              case 'time':
+                for ( var x = 0; x < data.length; x++)
+                {
+                  data[x][field] = moment ( data[x][field]).isValid () ? moment ( data[x][field]).format ( 'LTS') : '';
+                }
+                break;
+            }
+          }
+        }
+        dt.clear ();
+        dt.rows.add ( options.filter ( data, options.fields.split ( ',')));
+        dt.draw ();
+        dt.responsive.recalc ();
+        dt.processing ( false);
+        return;
+      }
+    }).fail ( function ( jqXHR, textStatus, errorThrown)
+    {
+      console.log ( 'VoIP API search dataTables/select2 wrapper request error. Status: ' + jqXHR.status + ' ' + textStatus);
+      dt.clear ();
+      dt.draw ();
+      dt.responsive.recalc ();
+      dt.processing ( false);
+    });
   }
 
   /**
    * REST API connections
    */
-  this.rest = function ( path, route, data)
+  this.rest = function ( path, route, data = undefined, async = true)
   {
     if ( path.substring ( 0, 1) != '/')
     {
       path = '/' + path;
     }
     var result = null;
+    var sentHeaders = null;
     var myheaders =
     {
       'X-INFramework': 'api',
@@ -421,29 +937,98 @@ var VoIP = ( function ()
     {
       myheaders['X-VD-Token'] = token;
     }
-    $.ajax (
+
+    /**
+     * Non-asynchronous call (block browser processing)
+     */
+    if ( async === false)
     {
-      type: 'POST',
-      url: apiurl + path,
-      data: JSON.stringify ( data),
-      async: false,
-      cache: false,
-      headers: myheaders,
-      contentType: 'application/json; charset=utf-8',
-      dataType: 'json',
-      success: function ( data, textStatus, jqXHR)
+      $.ajax (
+      {
+        type: 'POST',
+        url: apiurl + path,
+        data: JSON.stringify ( data),
+        async: false,
+        cache: false,
+        headers: myheaders,
+        contentType: 'application/json; charset=utf-8',
+        dataType: 'json',
+        beforeSend: function ( jqXHR, settings)
+                    {
+                      sentHeaders = settings.headers;
+                    },
+        success: function ( data, textStatus, jqXHR)
+                 {
+                   result = {
+                     result: data,
+                     API: {
+                       status: 'ok',
+                       content: jqXHR.responseText,
+                       statusCode: jqXHR.statusCode ().status,
+                       statusText: jqXHR.statusCode ().statusText,
+                       headers: jqXHR.getAllResponseHeaders ()
+                     }
+                   };
+                 },
+        error: function ( jqXHR, textStatus, errorThrown)
                {
+                 try
+                 {
+                   var jsonresult = JSON.parse ( jqXHR.responseText);
+                 } catch ( e) {
+                   var jsonresult = [];
+                 }
+                 if ( 'event' in jsonresult)
+                 {
+                   if ( jsonresult.event == 'session_timeout')
+                   {
+                     if ( location.pathname == ( VoIP.lastpath.indexOf ( '#') != -1 ? VoIP.lastpath.substring ( 0, VoIP.lastpath.indexOf ( '#')) : VoIP.lastpath))
+                     {
+                       location.reload ();
+                     } else {
+                       location.href = VoIP.lastpath;
+                     }
+                   } else {
+                     event.call ( jsonresult.event);
+                   }
+                 }
                  result = {
-                   result: data,
+                   result: jsonresult,
                    API: {
-                     status: 'ok',
+                     status: 'error',
                      content: jqXHR.responseText,
                      statusCode: jqXHR.statusCode ().status,
                      statusText: jqXHR.statusCode ().statusText,
                      headers: jqXHR.getAllResponseHeaders ()
                    }
                  };
-               },
+                 if ( jqXHR.statusCode ().status >= 500 && jqXHR.statusCode ().status <= 599 && typeof document.dump_vd_debug === 'function')
+                 {
+                   document.dump_vd_debug ( { endpoint: path, route: route, data: data, sentHeaders: sentHeaders, result: result});
+                 }
+               }
+      });
+
+      return result;
+    }
+
+    /**
+     * Asynchronous call
+     */
+    return $.ajax (
+    {
+      type: 'POST',
+      url: apiurl + path,
+      data: JSON.stringify ( data),
+      async: true,
+      cache: false,
+      headers: myheaders,
+      contentType: 'application/json; charset=utf-8',
+      dataType: 'json',
+      beforeSend: function ( jqXHR, settings)
+                  {
+                    sentHeaders = settings.headers;
+                  },
       error: function ( jqXHR, textStatus, errorThrown)
              {
                try
@@ -466,20 +1051,12 @@ var VoIP = ( function ()
                    event.call ( jsonresult.event);
                  }
                }
-               result = {
-                 result: jsonresult,
-                 API: {
-                   status: 'error',
-                   content: jqXHR.responseText,
-                   statusCode: jqXHR.statusCode ().status,
-                   statusText: jqXHR.statusCode ().statusText,
-                   headers: jqXHR.getAllResponseHeaders ()
-                 }
-               };
+               if ( jqXHR.statusCode ().status >= 500 && jqXHR.statusCode ().status <= 599 && typeof document.dump_vd_debug === 'function')
+               {
+                 document.dump_vd_debug ( { endpoint: path, route: route, data: data, sentHeaders: sentHeaders, result: { result: jsonresult, API: { status: 'error', content: jqXHR.responseText, statusCode: jqXHR.statusCode ().status, statusText: jqXHR.statusCode ().statusText, headers: jqXHR.getAllResponseHeaders ()}}});
+               }
              }
     });
-
-    return result;
   }
 
   /**
@@ -535,57 +1112,6 @@ var VoIP = ( function ()
   return this;
 }) ();
 
-function format_secs_to_string ( time)
-{
-  // If more than a day, add it
-  result = '';
-  if ( time >= 86400)
-  {
-    if ( Math.floor ( time / 86400) < 10)
-    {
-      result += '0';
-    }
-    result += Math.floor ( time / 86400) + ':';
-    time = time % 86400;
-
-    // Add hour
-    if ( Math.floor ( time / 3600) < 10)
-    {
-      result += '0';
-    }
-    result += Math.floor ( time / 3600) + ':';
-    time = time % 3600;
-  } else {
-    // If more than a hour, add it
-    if ( time >= 3600)
-    {
-      if ( Math.floor ( time / 3600) < 10)
-      {
-        result += '0';
-      }
-      result += Math.floor ( time / 3600) + ':';
-      time = time % 3600;
-    }
-  }
-
-  // Add minute
-  if ( Math.floor ( time / 60) < 10)
-  {
-    result += '0';
-  }
-  result += Math.floor ( time / 60) + ':';
-  time = time % 60;
-
-  // Add seconds
-  if ( time < 10)
-  {
-    result += '0';
-  }
-  result += time;
-
-  return result;
-}
-
 /**
  * VoIPDomain jQuery function extensions
  */
@@ -637,9 +1163,27 @@ function format_secs_to_string ( time)
           {
             tabs = true;
           }
-          for ( var index in opts.errors)
+          var errors = opts.errors;
+          var flatted = false;
+          while ( ! flatted)
           {
-            if ( ! opts.errors.hasOwnProperty ( index) || index == 'result')
+            flatted = true;
+            for ( let index in errors)
+            {
+              if ( typeof ( errors[index]) === 'object')
+              {
+                for ( let subindex in errors[index])
+                {
+                  errors[index + '_' + subindex] = errors[index][subindex];
+                }
+                delete errors[index];
+                flatted = false;
+              }
+            }
+          }
+          for ( var index in errors)
+          {
+            if ( ! errors.hasOwnProperty ( index))
             {
               continue;
             }
@@ -648,50 +1192,198 @@ function format_secs_to_string ( time)
               if ( tabs && tab == '')
               {
                 tab = $(that).find ( '[name="' + index + '"]').closest ( 'div.tab-pane').attr ( 'id');
+                if ( $('#' + tab).parent ().closest ( 'div.tab-pane').length)
+                {
+                  $(that).find ( 'a[href="#' + $('#' + tab).parent ().closest ( 'div.tab-pane').attr ( 'id') + '"]').tab ( 'show');
+                }
+                $(that).find ( 'a[href="#' + tab + '"]').tab ( 'show');
               }
-              $(that).find ( '[name="' + index + '"]').alerts ( 'add', $.extend ( {}, opts, { message: opts.errors[index]}));
+              $(that).find ( '[name="' + index + '"]').alerts ( 'add', $.extend ( {}, opts, { message: errors[index]}));
             }
-          }
-          if ( tabs && tab != '')
-          {
-            $(that).find ( 'a[href="#' + tab + '"]').tab ( 'show');
           }
           break;
         case 'form':
-          $(that).on ( 'submit', function ( event)
+          // Enforce button to trigger form submit:
+          if ( typeof ( opts.form.button) == 'object')
+          {
+            $(opts.form.button).on ( 'click', function ( event)
+            {
+              $(that).trigger ( 'submit', { type: 'default'});
+              event && event.preventDefault ();
+            });
+            $(opts.form.button).parent ().find ( '.dropdown-item').each ( function ()
+            {
+              $(this).on ( 'click', function ( event)
+              {
+                var type = 'unknown';
+                if ( $(this).hasClass ( 'add-new'))
+                {
+                  type = 'new';
+                }
+                if ( $(this).hasClass ( 'add-duplicate'))
+                {
+                  type = 'duplicate';
+                }
+                $(that).trigger ( 'submit', { type: type});
+                event && event.preventDefault ();
+              });
+            });
+          }
+          // Set form focus if provided:
+          if ( typeof ( opts.form.focus) == 'object')
+          {
+            $(opts.form.focus).focus ();
+          }
+          // Form submit action:
+          $(that).on ( 'submit', function ( event, eventopts)
           {
             event && event.preventDefault ();
+            $(that).find ( '.open').removeClass ( 'open');
             $(that).alerts ( 'clearAll');
+            if ( typeof ( opts.form.onsubmit) == 'function')
+            {
+              if ( ! opts.form.onsubmit ( event, opts))
+              {
+                return false;
+              }
+            }
+
+            // If button exist, disable it:
             if ( typeof ( opts.form.button) == 'object')
             {
               $(opts.form.button).attr ( 'disabled', 'disabled');
-              var l = Ladda.create ( $(opts.form.button)[0]);
-              l.start ();
+              // Also disable dropdown, if exist:
+              if ( $(opts.form.button).parent ().find ( '.dropdown-toggle').length != 0)
+              {
+                $(opts.form.button).parent ().find ( '.dropdown-toggle').attr ( 'disabled', 'disabled');
+              }
+              // Start ladda spin if configured:
+              if ( $(opts.form.button).hasClass ( 'ladda-button'))
+              {
+                var l = Ladda.create ( $(opts.form.button)[0]);
+                l.start ();
+              }
             }
-            var data = VoIP.rest ( opts.form.URL, opts.form.method, $(that).serializeObject ());
-            if ( typeof ( data.result) != 'object')
+
+            // Trigger formFilter events:
+            $(that).data ( 'formData', $(that).serializeObject ());
+            $(that).trigger ( 'formFilter');
+            var formData = $(that).data ( 'formData');
+
+            // Filter fields:
+            for ( var field in opts.form.filters)
             {
-              new PNotify ( { title: opts.form.title, text: opts.form.fail, type: 'error'});
-              if ( typeof ( opts.form.onfail) == 'function')
+              if ( ! opts.form.filters.hasOwnProperty ( field) || ! formData[field])
               {
-                opts.form.onfail ();
+                continue;
               }
-            } else {
-              if ( data.result.result === true)
+              if ( typeof ( opts.form.filters[field]) == 'function')
               {
-                new PNotify ( { title: opts.form.title, text: opts.form.success, type: 'success'});
-                if ( typeof ( opts.form.onsuccess) == 'function')
-                {
-                  opts.form.onsuccess ();
-                }
+                formData[field] = opts.form.filters[field] ( formData[field]);
               } else {
-                $(that).alerts ( 'check', { errors: data.result});
+                switch ( opts.form.filters[field])
+                {
+                  case 'datetime':
+                    formData[field] = moment ( formData[field], 'L LTS').isValid () ? moment ( formData[field], 'L LTS').utc ().format () : '';
+                    break;
+                  case 'date':
+                    formData[field] = moment ( formData[field], 'L').isValid () ? moment ( formData[field], 'L').utc ().format ( 'L') : '';
+                    break;
+                  case 'time':
+                    formData[field] = moment ( formData[field], 'LTS').isValid () ? moment ( formData[field], 'LTS').utc ().format ( 'LTS') : '';
+                    break;
+                }
               }
+            }
+
+            // Send form data and validate it:
+            if ( typeof ( opts.form.onvalidate) != 'function' || ( typeof ( opts.form.onvalidate) == 'function' && opts.form.onvalidate ( formData)))
+            {
+              VoIP.rest ( opts.form.URL, opts.form.method, formData).done ( function ( data, textStatus, jqXHR)
+              {
+                if ( jqXHR.status == 200 || jqXHR.status == 201 || jqXHR.status == 204)
+                {
+                  if ( opts.form.success)
+                  {
+                    new PNotify ( { title: opts.form.title, text: opts.form.success, type: 'success'});
+                  }
+                  var type = eventopts && eventopts.type ? eventopts.type : 'default';
+                  switch ( eventopts.type)
+                  {
+                    case 'new':
+                      $(that).trigger ( 'reset');
+                      if ( typeof ( opts.form.focus) == 'object')
+                      {
+                        $(opts.form.focus).focus ();
+                      }
+                      break;
+                    case 'duplicate':
+                      if ( typeof ( opts.form.focus) == 'object')
+                      {
+                        $(opts.form.focus).focus ();
+                      }
+                      break;
+                    default:
+                      if ( typeof ( opts.form.onsuccess) == 'function')
+                      {
+                        opts.form.onsuccess ( data);
+                      }
+                      break;
+                  }
+                } else {
+                  $(that).alerts ( 'check', { errors: data});
+                }
+              }).fail ( function ( jqXHR, textStatus, errorThrown)
+              {
+                if ( opts.form.fail)
+                {
+                  new PNotify ( { title: opts.form.title, text: opts.form.fail, type: 'error'});
+                }
+                if ( typeof ( opts.form.onfail) == 'function')
+                {
+                  opts.form.onfail ( data);
+                }
+                try
+                {
+                  var jsonresult = JSON.parse ( jqXHR.responseText);
+                } catch ( e) {
+                  var jsonresult = null;
+                }
+                if ( jsonresult)
+                {
+                  $(that).alerts ( 'check', { errors: jsonresult});
+                }
+              }).always ( function ( data, textStatus, jqXHR)
+              {
+                if ( typeof ( opts.form.button) == 'object')
+                {
+                  $(opts.form.button).removeAttr ( 'disabled');
+                  // Also enable dropdown, if exist:
+                  if ( $(opts.form.button).parent ().find ( '.dropdown-toggle').length != 0)
+                  {
+                    $(opts.form.button).parent ().find ( '.dropdown-toggle').removeAttr ( 'disabled');
+                  }
+                  // Stop ladda spin if configured:
+                  if ( $(opts.form.button).hasClass ( 'ladda-button'))
+                  {
+                    l.stop ();
+                  }
+                }
+              });
             }
             if ( typeof ( opts.form.button) == 'object')
             {
-              l.stop ();
               $(opts.form.button).removeAttr ( 'disabled');
+              // Also enable dropdown, if exist:
+              if ( $(opts.form.button).parent ().find ( '.dropdown-toggle').length != 0)
+              {
+                $(opts.form.button).parent ().find ( '.dropdown-toggle').removeAttr ( 'disabled');
+              }
+              // Stop ladda spin if configured:
+              if ( $(opts.form.button).hasClass ( 'ladda-button'))
+              {
+                l.stop ();
+              }
             }
           });
           break;
@@ -706,7 +1398,10 @@ function format_secs_to_string ( time)
     placement: 'auto top',
     trigger: 'manual',
     timeout: 5000,
-    class: 'alert-danger'
+    class: 'alert-danger',
+    formFilter: '',
+    fail: '',
+    success: ''
   };
 
   /**
@@ -733,6 +1428,19 @@ function format_secs_to_string ( time)
   };
 
   /**
+   * jQuery function to retrieve current page parameters
+   */
+  $.urlParam = function ( parameter)
+  {
+    var results = new RegExp ( '[\?&]' + parameter + '=([^&#]*)').exec ( location.href);
+    if ( results == null)
+    {
+       return null;
+    }
+    return decodeURI ( results[1]) || 0;
+  }
+
+  /**
    * jQuery function to work with form data into URL hash
    */
   $.hashForm = function ( action, options)
@@ -742,7 +1450,12 @@ function format_secs_to_string ( time)
       case 'check':
         if ( location.hash != '')
         {
-          var data = JSON.parse ( '{"' + decodeURI ( location.hash.substring ( 1)).replace ( /"/g, '\\"').replace ( /&/g, '","').replace ( /=/g,'":"') + '"}');
+          try
+          {
+            var data = JSON.parse ( atob ( location.hash.substr ( 1)));
+          } catch ( e) {
+            var data = {};
+          }
           var filled = false;
           for ( var key in data)
           {
@@ -767,9 +1480,16 @@ function format_secs_to_string ( time)
         }
         break;
       case 'set':
-        if ( location.hash != $(options.form).serialize ())
+        hashdata = btoa ( JSON.stringify ( options.data));
+        if ( location.hash != '#' + hashdata)
         {
-          history.replaceState ( null, null, ( location.hash ? location.href.substring ( 0, location.href.indexOf ( '#')) : location.href) + '#' + $(options.form).serialize ());
+          history.pushState ( null, null, ( location.hash ? location.href.substring ( 0, location.href.indexOf ( '#')) : location.href) + '#' + hashdata);
+        }
+        break;
+      case 'destroy':
+        if ( location.hash)
+        {
+          history.pushState ( null, null, ( location.hash ? location.href.substring ( 0, location.href.indexOf ( '#')) : location.href));
         }
         break;
     }
@@ -777,14 +1497,127 @@ function format_secs_to_string ( time)
   };
 } ( jQuery));
 
+/**
+ * VoIP Domain document ready procedures
+ */
 $(document).ready ( function ()
 {
   /**
+   * Active menu tree
+   */
+  $('ul.sidebar-menu').tree ();
+
+  /**
+   * Create live tab click action
+   */
+  $('#content').on ( 'click', '.nav-tabs a', function ( e)
+  {
+    e.preventDefault ();
+    $(this).tab ( 'show');
+  });
+
+  /**
+   * On menu click, remove active class from other elements and active clicked entry
+   */
+  $('section.sidebar').on ( 'click', 'ul.sidebar-menu a:not([href=""])', function ( e)
+  {
+    $('section.sidebar ul.sidebar-menu').find ( '.active').each ( function ()
+    {
+      $(this).removeClass ( 'active');
+    });
+    $(this).parent ( 'li').addClass ( 'active');
+  });
+
+  /**
+   * On label click, check if field has select2 enabled, if has, open it
+   */
+  $(document).on ( 'click', 'label', function ( e)
+  {
+    if ( typeof ( $.fn.select2) == 'function' && $('#' + $(this).attr ( 'for')).not ( '.noauto').hasClass ( 'select2-hidden-accessible'))
+    {
+      $('#' + $(this).attr ( 'for')).focus ();
+      e && e.preventDefault ();
+    }
+    if ( typeof ( $.fn.bootstrapToggle) == 'function' && $('#' + $(this).attr ( 'for')).not ( '.noauto').is ( ':checkbox'))
+    {
+      $('#' + $(this).attr ( 'for')).bootstrapToggle ( 'toggle');
+      e && e.preventDefault ();
+    }
+  });
+
+  /**
+   * Bootstrap fixes
+   */
+
+  // Remove bootstrap modal enforce focus function, because it conflicts with select2 plugin:
+  $.fn.modal.Constructor.prototype.enforceFocus = function () {};
+
+  // Disable click on disabled bootstrap tabs:
+  $(document).on ( 'show.bs.tab', function ( e)
+  {
+    if ( $(e.target).parent ().hasClass ( 'disabled'))
+    {
+      e && e.preventDefault ();
+      return false;
+    }
+  });
+
+  /**
+   * PNotify customization
+   */
+  if ( typeof PNotify == 'function')
+  {
+    PNotify.prototype.options.styling = 'bootstrap3';
+    PNotify.prototype.options.animate_speed = 'slow';
+  }
+
+  /**
+   * jQuery Select2 customization
+   */
+  if ( typeof $.fn.select2 == 'function')
+  {
+    $.fn.select2.defaults.set ( 'theme', 'bootstrap');
+    $.fn.select2.defaults.set ( 'width', '100%');
+  }
+
+  /**
+   * jQuery Select2 fixes
+   */
+
+  // Select2 focus menu open fix (source: https://stackoverflow.com/questions/20989458/select2-open-dropdown-on-focus)
+  $(document).on ( 'focus', '.select2-selection.select2-selection--single', function ( e)
+  {
+    $(this).closest ( '.select2-container').siblings ( 'select:enabled').select2 ( 'open');
+  }).on ( 'select2:closing', function ( e)
+  {
+    $(e.target).data ( 'select2').$selection.one ( 'focus focusin', function ( e)
+    {
+      e.stopPropagation ();
+    });
+  });
+
+  // Add automatic refresh on select2 fields when a tab is displayed (avoid positioning and size bug):
+  $('#content a.nav-tablink').on ( 'shown.bs.tab', function ( e)
+  {
+    $($(this).attr ( 'href')).find ( 'select.select2-hidden-accessible').each ( function ()
+    {
+      $(this).trigger ( 'change.select2');
+    });
+  });
+  $(document).on ( 'shown.bs.modal', function ( e)
+  {
+    $(this).find ( 'div[role="tabpanel"].active').find ( 'select.select2-hidden-accessible').each ( function ()
+    {
+      $(this).trigger ( 'change.select2');
+    });
+  });
+
+  /**
    * Fix content when changing tab's (when element modified while hidden, normally get's bugged)
    */
-  $('#content').on ( 'shown.bs.tab', function ( event)
+  $('#content').on ( 'shown.bs.tab', function ( e)
   {
-    $($(event.target).attr ( 'href')).find ( 'input,select,textarea').each ( function ()
+    $($(e.target).attr ( 'href')).find ( 'input,select,textarea').each ( function ()
     {
       if ( typeof ( $.fn.select2) == 'function' && typeof ( $(this).data ( 'select2')) == 'object')
       {
@@ -798,15 +1631,19 @@ $(document).ready ( function ()
   });
 
   /**
-   * Dynamic page loading
+   * System fast search
    */
-  var location = window.history.location || window.location;
+  $('#fastsearch').on ( 'submit', function ( e)
+  {
+    e && e.preventDefault ();
+    VoIP.path.call ( '/fastsearch/' + encodeURIComponent ( $('#fastsearch input[name="q"]').val ()), true);
+  });
 
   // Bind function on link click
   $(document).on ( 'click', 'a', function ( e)
   {
     // If it's hash link or empty, return false;
-    if ( this.href.charAt ( location.href.length) == '#' || $(this).attr ( 'href') == '#' || $(this).attr ( 'href') == '' || this.href == location.href)
+    if ( this.href.charAt ( location.href.length) == '#' || $(this).attr ( 'href') == '#' || $(this).attr ( 'href') == '' || this.href == location.href || $(this).hasClass ( 'player'))
     {
       e && e.preventDefault ();
       return false;
@@ -824,22 +1661,73 @@ $(document).ready ( function ()
     }
 
     // Load requested link page
-    VoIP.path.call ( this.href.substring ( href.length), true);
+    VoIP.path.call ( this.href.substring ( href.length), $(this).data ( 'nohistory') ? false : true);
 
     return false;
   });
+
+  /**
+   * Dynamic page loading
+   */
+  var location = window.history.location || window.location;
 
   $(window).on ( 'popstate', function ( e)
   {
     // Load requested link page
     VoIP.path.call ( location.href.replace ( /^.*\/\/[^\/]+/, ''), false);
   });
-
-  /**
-   * Process current page when ready
-   */
-  //VoIP.path.call ( location.href.replace ( /^.*\/\/[^\/]+/, ''), false);
 });
+
+function format_secs_to_string ( time)
+{
+  // If more than a day, add it
+  result = '';
+  if ( time >= 86400)
+  {
+    if ( Math.floor ( time / 86400) < 10)
+    {
+      result += '0';
+    }
+    result += Math.floor ( time / 86400) + ':';
+    time = time % 86400;
+
+    // Add hour
+    if ( Math.floor ( time / 3600) < 10)
+    {
+      result += '0';
+    }
+    result += Math.floor ( time / 3600) + ':';
+    time = time % 3600;
+  } else {
+    // If more than a hour, add it
+    if ( time >= 3600)
+    {
+      if ( Math.floor ( time / 3600) < 10)
+      {
+        result += '0';
+      }
+      result += Math.floor ( time / 3600) + ':';
+      time = time % 3600;
+    }
+  }
+
+  // Add minute
+  if ( Math.floor ( time / 60) < 10)
+  {
+    result += '0';
+  }
+  result += Math.floor ( time / 60) + ':';
+  time = time % 60;
+
+  // Add seconds
+  if ( time < 10)
+  {
+    result += '0';
+  }
+  result += time;
+
+  return result;
+}
 
 /**
  * sprintf() JS implementation
@@ -1040,3 +1928,142 @@ function sprintf () {
     return false
   }
 }
+
+/**
+ * number_format() JS implementation
+ * Source from: http://locutus.io/php/strings/number_format/
+ */
+function number_format ( number, decimals, decPoint, thousandsSep)
+{
+  // eslint-disable-line camelcase
+  //  discuss at: http://locutus.io/php/number_format/
+  // original by: Jonas Raoni Soares Silva (http://www.jsfromhell.com)
+  // improved by: Kevin van Zonneveld (http://kvz.io)
+  // improved by: davook
+  // improved by: Brett Zamir (http://brett-zamir.me)
+  // improved by: Brett Zamir (http://brett-zamir.me)
+  // improved by: Theriault (https://github.com/Theriault)
+  // improved by: Kevin van Zonneveld (http://kvz.io)
+  // bugfixed by: Michael White (http://getsprink.com)
+  // bugfixed by: Benjamin Lupton
+  // bugfixed by: Allan Jensen (http://www.winternet.no)
+  // bugfixed by: Howard Yeend
+  // bugfixed by: Diogo Resende
+  // bugfixed by: Rival
+  // bugfixed by: Brett Zamir (http://brett-zamir.me)
+  //  revised by: Jonas Raoni Soares Silva (http://www.jsfromhell.com)
+  //  revised by: Luke Smith (http://lucassmith.name)
+  //    input by: Kheang Hok Chin (http://www.distantia.ca/)
+  //    input by: Jay Klehr
+  //    input by: Amir Habibi (http://www.residence-mixte.com/)
+  //    input by: Amirouche
+  //   example 1: number_format(1234.56)
+  //   returns 1: '1,235'
+  //   example 2: number_format(1234.56, 2, ',', ' ')
+  //   returns 2: '1 234,56'
+  //   example 3: number_format(1234.5678, 2, '.', '')
+  //   returns 3: '1234.57'
+  //   example 4: number_format(67, 2, ',', '.')
+  //   returns 4: '67,00'
+  //   example 5: number_format(1000)
+  //   returns 5: '1,000'
+  //   example 6: number_format(67.311, 2)
+  //   returns 6: '67.31'
+  //   example 7: number_format(1000.55, 1)
+  //   returns 7: '1,000.6'
+  //   example 8: number_format(67000, 5, ',', '.')
+  //   returns 8: '67.000,00000'
+  //   example 9: number_format(0.9, 0)
+  //   returns 9: '1'
+  //  example 10: number_format('1.20', 2)
+  //  returns 10: '1.20'
+  //  example 11: number_format('1.20', 4)
+  //  returns 11: '1.2000'
+  //  example 12: number_format('1.2000', 3)
+  //  returns 12: '1.200'
+  //  example 13: number_format('1 000,50', 2, '.', ' ')
+  //  returns 13: '100 050.00'
+  //  example 14: number_format(1e-8, 8, '.', '')
+  //  returns 14: '0.00000001'
+
+  number = ( number + '').replace ( /[^0-9+\-Ee.]/g, '');
+  var n = ! isFinite ( +number) ? 0 : +number;
+  var prec = ! isFinite ( +decimals) ? 0 : Math.abs ( decimals);
+  var sep = ( typeof thousandsSep === 'undefined') ? ',' : thousandsSep;
+  var dec = ( typeof decPoint === 'undefined') ? '.' : decPoint;
+  var s = '';
+
+  var toFixedFix = function ( n, prec)
+  {
+    var k = Math.pow ( 10, prec);
+    return '' + ( Math.round ( n * k) / k).toFixed ( prec);
+  }
+
+  // @todo: for IE parseFloat(0.55).toFixed(0) = 0;
+  s = ( prec ? toFixedFix ( n, prec) : '' + Math.round ( n)).split ( '.');
+  if ( s[0].length > 3)
+  {
+    s[0] = s[0].replace ( /\B(?=(?:\d{3})+(?!\d))/g, sep);
+  }
+  if ( ( s[1] || '').length < prec)
+  {
+    s[1] = s[1] || '';
+    s[1] += new Array ( prec - s[1].length + 1).join ( '0');
+  }
+
+  return s.join ( dec);
+}
+
+function Uint8ArrayToHexString ( ui8array)
+{
+  var hexstring = '', h;
+  for ( var i = 0; i < ui8array.length; i++)
+  {
+    h = ui8array[i].toString ( 16);
+    if ( h.length == 1)
+    {
+      h = '0' + h;
+    }
+    hexstring += h;
+  }
+  var p = Math.pow ( 2, Math.ceil ( Math.log2 ( hexstring.length)));
+  hexstring = hexstring.padStart ( p, '0');
+  return hexstring;
+}
+
+/**
+ * Delay for a number of milliseconds
+ */
+function sleep ( delay)
+{
+  var start = new Date ().getTime ();
+  while ( new Date ().getTime () < start + delay);
+}
+
+/**
+ * Force a browser DOM redraw
+ */
+function forceRedraw ( element, timeout = 20)
+{
+  if ( ! element)
+  {
+    return;
+  }
+
+  var n = document.createTextNode ( ' ');
+  var disp = element.style.display;
+
+  element.appendChild ( n);
+  element.style.display = 'none';
+
+  setTimeout ( function ()
+  {
+    element.style.display = disp;
+    n.parentNode.removeChild ( n);
+  }, timeout);
+}
+
+/**
+ * Print console system banner
+ */
+console.log ( '%c VoIP Domain \n%c v0.1 - Alpha version ', 'background: #000000; color: #00a0df; font-size: 24px; font-family: Monospace; padding-top: 5px; padding-bottom: 5px; text-align: center; display: block;', 'background: #00a0df; color: #ffffff; font-size: 12px; padding-top: 5px; padding-bottom: 5px; display: block; position: relative; text-align: center;');

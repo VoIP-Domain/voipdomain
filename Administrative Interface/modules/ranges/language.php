@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,16 +30,15 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Ranges
- * @copyright  2016-2018 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
  * Add basic language structure (english)
  */
-i18n_add ( "Ranges search (datatables standard)");
-i18n_add ( "Request ranges listing");
-i18n_add ( "View ranges informations");
+i18n_add ( "Search ranges");
+i18n_add ( "View ranges information");
 i18n_add ( "Add ranges");
 i18n_add ( "The range description is required.");
 i18n_add ( "The server is required.");
@@ -52,9 +51,7 @@ i18n_add ( "Edit ranges");
 i18n_add ( "Remove ranges");
 i18n_add ( "Ranges");
 i18n_add ( "ranges searching");
-i18n_add ( "Server");
 i18n_add ( "In use");
-i18n_add ( "Range removal");
 i18n_add ( "Are sure you want to remove the range %s (from %s to %s)?");
 i18n_add ( "Range removal");
 i18n_add ( "Range sucessfully removed!");
@@ -75,14 +72,41 @@ i18n_add ( "Range edition");
 i18n_add ( "Error requesting range data!");
 i18n_add ( "Error changing range!");
 i18n_add ( "Range changed sucessfully!");
-i18n_add ( "Finish");
+i18n_add ( "Filter search with this string. If not provided, return all ranges.");
+i18n_add ( "An array containing the system ranges.");
+i18n_add ( "The internal unique identification number of the ranges.");
+i18n_add ( "The description of the range.");
+i18n_add ( "Headquarter");
+i18n_add ( "The start number of range.");
+i18n_add ( "The finish number of range.");
+i18n_add ( "The name of the server where this range is allocated.");
+i18n_add ( "Main server");
+i18n_add ( "The number of extensions using this range.");
+i18n_add ( "Search for system ranges.");
+i18n_add ( "An object containing information about the system range.");
+i18n_add ( "The internal unique identification number of the range.");
+i18n_add ( "The system server unique identifier where this range is allocated to.");
+i18n_add ( "The system server name where this range is allocated to.");
+i18n_add ( "The start allocation number for this range.");
+i18n_add ( "The finish allocation number for this range.");
+i18n_add ( "View ranges");
+i18n_add ( "Get a system range information.");
+i18n_add ( "The system range internal system unique identifier.");
+i18n_add ( "The system server unique identifier where the range will be allocated.");
+i18n_add ( "The start allocation number of the range.");
+i18n_add ( "The finish allocation number of the range.");
+i18n_add ( "New system range was added sucessfully.");
+i18n_add ( "Add a new system range.");
+i18n_add ( "The system range was sucessfully updated.");
+i18n_add ( "Change a system range information.");
+i18n_add ( "The system range was removed.");
+i18n_add ( "Remove a system range.");
 
 /**
  * Add Brazilian Portuguese support
  */
-i18n_add ( "Ranges search (datatables standard)", "Pesquisa de faixas (padrão datatables)", "pt_BR");
-i18n_add ( "Request ranges listing", "Requisitar listagem de faixas", "pt_BR");
-i18n_add ( "View ranges informations", "Visualizar informações de faixas", "pt_BR");
+i18n_add ( "Search ranges", "Pesquisar faixas", "pt_BR");
+i18n_add ( "View ranges information", "Visualizar informações de faixas", "pt_BR");
 i18n_add ( "Add ranges", "Adicionar faixas", "pt_BR");
 i18n_add ( "The range description is required.", "A descrição da faixa é obrigatório.", "pt_BR");
 i18n_add ( "The server is required.", "O servidor é obrigatório.", "pt_BR");
@@ -95,9 +119,7 @@ i18n_add ( "Edit ranges", "Editar faixas", "pt_BR");
 i18n_add ( "Remove ranges", "Remover faixas", "pt_BR");
 i18n_add ( "Ranges", "Faixas", "pt_BR");
 i18n_add ( "ranges searching", "pesquisa de faixas", "pt_BR");
-i18n_add ( "Server", "Servidor", "pt_BR");
 i18n_add ( "In use", "Em uso", "pt_BR");
-i18n_add ( "Range removal", "Remover faixa", "pt_BR");
 i18n_add ( "Are sure you want to remove the range %s (from %s to %s)?", "Você tem certeza que deseja remover a faixa %s (de %s a %s)?", "pt_BR");
 i18n_add ( "Range removal", "Remoção de faixa", "pt_BR");
 i18n_add ( "Range sucessfully removed!", "Faixa removida com sucesso!", "pt_BR");
@@ -118,5 +140,33 @@ i18n_add ( "Range edition", "Edição de faixa", "pt_BR");
 i18n_add ( "Error requesting range data!", "Erro ao requisitar dados do faixa!", "pt_BR");
 i18n_add ( "Error changing range!", "Erro ao alterar faixa!", "pt_BR");
 i18n_add ( "Range changed sucessfully!", "Faixa alterada com sucesso!", "pt_BR");
-i18n_add ( "Finish", "Término", "pt_BR");
+i18n_add ( "Filter search with this string. If not provided, return all ranges.", "Filtrar a pesquisa com esta string. Se não informado, retorna todas as faixas.", "pt_BR");
+i18n_add ( "An array containing the system ranges.", "Um array contendo todas as faixas do sistema.", "pt_BR");
+i18n_add ( "The internal unique identification number of the ranges.", "O número único interno do sistema de identificação da faixa.", "pt_BR");
+i18n_add ( "The description of the range.", "A descrição da faixa.", "pt_BR");
+i18n_add ( "Headquarter", "Quartelgeneral", "pt_BR");
+i18n_add ( "The start number of range.", "O número inicial da faixa.", "pt_BR");
+i18n_add ( "The finish number of range.", "O número final da faixa.", "pt_BR");
+i18n_add ( "The name of the server where this range is allocated.", "O nome do servidor onde esta faixa está alocada.", "pt_BR");
+i18n_add ( "Main server", "Servidor principal", "pt_BR");
+i18n_add ( "The number of extensions using this range.", "O número de extensões utilizando esta faixa.", "pt_BR");
+i18n_add ( "Search for system ranges.", "Pesquisar por faixas do sistema.", "pt_BR");
+i18n_add ( "An object containing information about the system range.", "Um array contendo informações sobre uma faixa do sistema.", "pt_BR");
+i18n_add ( "The internal unique identification number of the range.", "O número de identificação interna única da faixa no sistema.", "pt_BR");
+i18n_add ( "The system server unique identifier where this range is allocated to.", "O número identificador do servidor do sistema onde esta faixa está alocada.", "pt_BR");
+i18n_add ( "The system server name where this range is allocated to.", "O nome do servidor do sistema onde esta faixa está alocada.", "pt_BR");
+i18n_add ( "The start allocation number for this range.", "O número de alocação inicial desta faixa.", "pt_BR");
+i18n_add ( "The finish allocation number for this range.", "O número de alocação final desta faixa.", "pt_BR");
+i18n_add ( "View ranges", "Visualizar faixas", "pt_BR");
+i18n_add ( "Get a system range information.", "Requisitar informações de uma faixa.", "pt_BR");
+i18n_add ( "The system range internal system unique identifier.", "O identificador interno único da faixa no sistema.", "pt_BR");
+i18n_add ( "The system server unique identifier where the range will be allocated.", "O identificador único do servidor do sistema onde esta faixa está alocada.", "pt_BR");
+i18n_add ( "The start allocation number of the range.", "O número de alocação inicial desta faixa.", "pt_BR");
+i18n_add ( "The finish allocation number of the range.", "O número de alocação final desta faixa.", "pt_BR");
+i18n_add ( "New system range was added sucessfully.", "A faixa do sistema foi adicionada com sucesso.", "pt_BR");
+i18n_add ( "Add a new system range.", "Adicionar uma nova faixa do sistema.", "pt_BR");
+i18n_add ( "The system range was sucessfully updated.", "A faixa do sistema foi atualizada com sucesso.", "pt_BR");
+i18n_add ( "Change a system range information.", "Altera informações de uma faixa do sistema.", "pt_BR");
+i18n_add ( "The system range was removed.", "A faixa do sistema foi removida.", "pt_BR");
+i18n_add ( "Remove a system range.", "Remover uma faixa do sistema.", "pt_BR");
 ?>

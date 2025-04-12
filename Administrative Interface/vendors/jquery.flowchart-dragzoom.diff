@@ -1,0 +1,84 @@
+diff -ruN jquery.flowchart-1.2-orig/jquery.flowchart.js jquery.flowchart-1.2/jquery.flowchart.js
+--- jquery.flowchart-1.2-orig/jquery.flowchart.js	2020-08-17 17:57:37.155424454 -0300
++++ jquery.flowchart-1.2/jquery.flowchart.js	2020-08-17 17:58:45.319208881 -0300
+@@ -686,26 +686,22 @@
+             // Small fix has been added in order to manage eventual zoom
+             // http://stackoverflow.com/questions/2930092/jquery-draggable-with-zoom-problem
+             if (this.options.canUserMoveOperators) {
+-                var pointerX;
+-                var pointerY;
+                 fullElement.operator.draggable({
+-                    containment: operatorData.internal.properties.uncontained ? false : this.element,
+                     handle: '.flowchart-operator-title, .flowchart-operator-body',
+                     start: function (e, ui) {
+                         if (self.lastOutputConnectorClicked != null) {
+                             e.preventDefault();
+                             return;
+                         }
+-                        var elementOffset = self.element.offset();
+-                        pointerX = (e.pageX - elementOffset.left) / self.positionRatio - parseInt($(e.target).css('left'), 10);
+-                        pointerY = (e.pageY - elementOffset.top) / self.positionRatio - parseInt($(e.target).css('top'), 10);
+                     },
+                     drag: function (e, ui) {
++                        var elementOffset = self.element.offset();
++                        ui.position.left = ( ui.offset.left - elementOffset.left) / self.positionRatio;
++                        ui.position.top = ( ui.offset.top - elementOffset.top) / self.positionRatio;
+                         if (self.options.grid) {
+                             var grid = self.options.grid;
+-                            var elementOffset = self.element.offset();
+-                            ui.position.left = Math.round(((e.pageX - elementOffset.left) / self.positionRatio - pointerX) / grid) * grid;
+-                            ui.position.top = Math.round(((e.pageY - elementOffset.top) / self.positionRatio - pointerY) / grid) * grid;
++                            ui.position.left = Math.round(ui.position.left / grid) * grid;
++                            ui.position.top = Math.round(ui.position.top / grid) * grid;
+                             
+                             if (!operatorData.internal.properties.uncontained) {
+                                 var $this = $(this);
+@@ -717,6 +713,25 @@
+                             ui.offset.top = Math.round(ui.position.top + elementOffset.top);
+                             fullElement.operator.css({left: ui.position.left, top: ui.position.top});
+                         }
++                        if ( ! operatorData.internal.properties.uncontained)
++                        {
++                            if ( ui.position.left < 0)
++                            {
++                              ui.position.left = 0;
++                            }
++                            if ( ui.position.top < 0)
++                            {
++                              ui.position.top = 0;
++                            }
++                            if ( ui.position.left > self.element.width () - $(this).outerWidth ())
++                            {
++                              ui.position.left = self.element.width () - $(this).outerWidth ();
++                            }
++                            if ( ui.position.top > self.element.height () - $(this).outerHeight())
++                            {
++                              ui.position.top = self.element.height () - $(this).outerHeight();
++                            }
++                        }
+                         operatorChangedPosition($(this).data('operator_id'), ui.position);
+                     },
+                     stop: function (e, ui) {
+diff -ruN jquery.flowchart-1.2-orig/jquery.flowchart.min.js jquery.flowchart-1.2/jquery.flowchart.min.js
+--- jquery.flowchart-1.2-orig/jquery.flowchart.min.js	2020-08-14 15:08:49.386001154 -0300
++++ jquery.flowchart-1.2/jquery.flowchart.min.js	2020-08-17 17:58:52.044483603 -0300
+@@ -28,9 +28,17 @@
+ var grid=this.options.grid;if(grid){operatorData.top=Math.round(operatorData.top/grid)*grid;operatorData.left=Math.round(operatorData.left/grid)*grid;}
+ fullElement.operator.appendTo(this.objs.layers.operators);fullElement.operator.css({top:operatorData.top,left:operatorData.left});fullElement.operator.data('operator_id',operatorId);this.data.operators[operatorId]=operatorData;this.data.operators[operatorId].internal.els=fullElement;if(operatorId==this.selectedOperatorId){this._addSelectedClass(operatorId);}
+ var self=this;function operatorChangedPosition(operator_id,pos){operatorData.top=pos.top;operatorData.left=pos.left;for(var linkId in self.data.links){if(self.data.links.hasOwnProperty(linkId)){var linkData=self.data.links[linkId];if(linkData.fromOperator==operator_id||linkData.toOperator==operator_id){self._refreshLinkPositions(linkId);}}}}
+-if(this.options.canUserMoveOperators){var pointerX;var pointerY;fullElement.operator.draggable({containment:operatorData.internal.properties.uncontained?false:this.element,handle:'.flowchart-operator-title, .flowchart-operator-body',start:function(e,ui){if(self.lastOutputConnectorClicked!=null){e.preventDefault();return;}
+-var elementOffset=self.element.offset();pointerX=(e.pageX-elementOffset.left)/self.positionRatio-parseInt($(e.target).css('left'),10);pointerY=(e.pageY-elementOffset.top)/self.positionRatio-parseInt($(e.target).css('top'),10);},drag:function(e,ui){if(self.options.grid){var grid=self.options.grid;var elementOffset=self.element.offset();ui.position.left=Math.round(((e.pageX-elementOffset.left)/self.positionRatio-pointerX)/grid)*grid;ui.position.top=Math.round(((e.pageY-elementOffset.top)/self.positionRatio-pointerY)/grid)*grid;if(!operatorData.internal.properties.uncontained){var $this=$(this);ui.position.left=Math.min(Math.max(ui.position.left,0),self.element.width()-$this.outerWidth());ui.position.top=Math.min(Math.max(ui.position.top,0),self.element.height()-$this.outerHeight());}
++if(this.options.canUserMoveOperators){fullElement.operator.draggable({handle:'.flowchart-operator-title, .flowchart-operator-body',start:function(e,ui){if(self.lastOutputConnectorClicked!=null){e.preventDefault();return;}},drag:function(e,ui){var elementOffset=self.element.offset();ui.position.left=(ui.offset.left-elementOffset.left)/self.positionRatio;ui.position.top=(ui.offset.top-elementOffset.top)/self.positionRatio;if(self.options.grid){var grid=self.options.grid;ui.position.left=Math.round(ui.position.left/grid)*grid;ui.position.top=Math.round(ui.position.top/grid)*grid;if(!operatorData.internal.properties.uncontained){var $this=$(this);ui.position.left=Math.min(Math.max(ui.position.left,0),self.element.width()-$this.outerWidth());ui.position.top=Math.min(Math.max(ui.position.top,0),self.element.height()-$this.outerHeight());}
+ ui.offset.left=Math.round(ui.position.left+elementOffset.left);ui.offset.top=Math.round(ui.position.top+elementOffset.top);fullElement.operator.css({left:ui.position.left,top:ui.position.top});}
++if(!operatorData.internal.properties.uncontained)
++{if(ui.position.left<0)
++{ui.position.left=0;}
++if(ui.position.top<0)
++{ui.position.top=0;}
++if(ui.position.left>self.element.width()-$(this).outerWidth())
++{ui.position.left=self.element.width()-$(this).outerWidth();}
++if(ui.position.top>self.element.height()-$(this).outerHeight())
++{ui.position.top=self.element.height()-$(this).outerHeight();}}
+ operatorChangedPosition($(this).data('operator_id'),ui.position);},stop:function(e,ui){self._unsetTemporaryLink();var operatorId=$(this).data('operator_id');operatorChangedPosition(operatorId,ui.position);fullElement.operator.css({height:'auto'});self.callbackEvent('operatorMoved',[operatorId,ui.position]);self.callbackEvent('afterChange',['operator_moved']);}});}
+ this.callbackEvent('afterChange',['operator_create']);},_connectorClicked:function(operator,connector,subConnector,connectorCategory){if(connectorCategory=='outputs'){var d=new Date();this.lastOutputConnectorClicked={operator:operator,connector:connector,subConnector:subConnector};this.objs.layers.temporaryLink.show();var position=this.getConnectorPosition(operator,connector,subConnector);var x=position.x+position.width;var y=position.y;this.objs.temporaryLink.setAttribute('x1',x.toString());this.objs.temporaryLink.setAttribute('y1',y.toString());this._mousemove(x,y);}
+ if(connectorCategory=='inputs'&&this.lastOutputConnectorClicked!=null){var linkData={fromOperator:this.lastOutputConnectorClicked.operator,fromConnector:this.lastOutputConnectorClicked.connector,fromSubConnector:this.lastOutputConnectorClicked.subConnector,toOperator:operator,toConnector:connector,toSubConnector:subConnector};this.addLink(linkData);this._unsetTemporaryLink();}},_unsetTemporaryLink:function(){this.lastOutputConnectorClicked=null;this.objs.layers.temporaryLink.hide();},_mousemove:function(x,y,e){if(this.lastOutputConnectorClicked!=null){this.objs.temporaryLink.setAttribute('x2',x);this.objs.temporaryLink.setAttribute('y2',y);}},_click:function(x,y,e){var $target=$(e.target);if($target.closest('.flowchart-operator-connector').length==0){this._unsetTemporaryLink();}

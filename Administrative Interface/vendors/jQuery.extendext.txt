@@ -1,0 +1,7 @@
+  jQuery.extendext
+--================--
+
+URL: https://github.com/mistic100/jQuery.extendext
+Version: 1.0.0
+License: MIT
+Modifications: Added minified version of jquery-extendext.js.

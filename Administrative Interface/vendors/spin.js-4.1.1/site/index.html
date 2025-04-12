@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>spin.js</title>
+  <meta name="title" content="Animated activity indicator">
+  <meta name="description" content="A highly configurable JavaScript/CSS spinner that can be used as a resolution-independent loading indicator.">
+  <meta name="viewport" content="width=device-width">
+  <meta property="og:image" content="https://spin.js.org/assets/preview.png"/>
+  <link rel="shortcut icon" href="assets/favicon.ico">
+  <link href="spin.css" rel="stylesheet">
+  <link href="assets/gh-fork-ribbon.css" rel="stylesheet">
+  <link href="assets/main.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Amaranth:400,700" rel="stylesheet">
+  <link href="assets/prism.css" rel="stylesheet">
+</head>
+<body>
+
+<a class="github-fork-ribbon right-top" href="https://github.com/fgnass/spin.js" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
+
+<div id="content">
+
+<h1>spin.js</h1>
+
+<div id="download">
+  <a href="spin.js" class="button">spin.js (ESM)</a>
+  <a href="spin.umd.js" class="button">spin.umd.js</a>
+  <a href="spin.css" class="button">spin.css</a>
+</div>
+
+<h2>Example</h2>
+<div id="example">
+  <div id="preview"></div>
+  <div class="mid_col"></div>
+  <form id="opts">
+    <label>Lines:</label><input type="range" name="lines" min="5" max="20" step="1" value="13"><br>
+    <label>Length:</label><input type="range" name="length" min="0" max="80" value="38"><br>
+    <label>Width:</label><input type="range" name="width" min="2" max="52" value="17"><br>
+    <label>Radius:</label><input type="range" name="radius" min="0" max="84" value="45"><br>
+    <label>Scale:</label><input type="range" name="scale" min="0.05" max="4.0" step="0.05" value="1.0"><br>
+    <label>Corners:</label><input type="range" name="corners" min="0" max="1" step="0.1" value="1"><br>
+    <label>Speed:</label><input type="range" name="speed" min="0.5" max="2.2" step="0.1" value="1"><br>
+    <label>Rotate:</label><input type="range" name="rotate" min="0" max="90" value="0"><br>
+    <label>Animation:</label>
+    <select class="string" name="animation">
+      <option value="spinner-line-fade-default">spinner-line-fade-default</option>
+      <option value="spinner-line-fade-quick" selected>spinner-line-fade-quick</option>
+      <option value="spinner-line-fade-more">spinner-line-fade-more</option>
+      <option value="spinner-line-shrink">spinner-line-shrink</option>
+    </select>
+    <br>
+    <label>Direction:</label>
+    <select name="direction">
+      <option value="1">Clockwise</option>
+      <option value="-1">Counterclockwise</option>
+    </select>
+    <br>
+    <label>Color:</label><input class="string" type="color" name="color" value="#ffffff"><br>
+    <label>Fade color:</label><input class="string" type="text" name="fadeColor" value="transparent"><br>
+    <label>↕:</label><input class="percent" type="range" name="top" min="0" max="100" value="50"><br>
+    <label>↔:</label><input class="percent" type="range" name="left" min="0" max="100" value="50"><br>
+    <label>Shadow:</label><input class="string" type="text" name="shadow" value="0 0 1px transparent"><br>
+  </form>
+</div>
+
+<p>
+  <input type="checkbox" id="share">
+  <label for="share">
+    <b>Share it!</b> If checked, the option values will be stored in the URL so that you can easily share your settings.
+  </label>
+</p>
+
+<h2>Features</h2>
+<ul>
+  <li>No images</li>
+  <li>No dependencies</li>
+  <li>Highly configurable</li>
+  <li>Resolution independent</li>
+  <li>Uses CSS keyframe animations</li>
+  <li>Works in all major browsers</li>
+  <li>Includes TypeScript definitions</li>
+  <li>Distributed as a native ECMAScript module</li>
+  <li>MIT License</li>
+</ul>
+<p>
+  Spin.js dynamically creates spinning activity indicators that can be used as
+  a resolution-independent replacement for loading GIFs.
+</p>
+
+<h2>Installation</h2>
+<p>
+  Run <code>npm install spin.js</code>, or save the spin.js and spin.css files in your repository.
+</p>
+
+<h3>JS bundling</h3>
+<p>
+  For best performance and compatibility, it is recommended to use a module bundler such as
+  <a href="https://parceljs.org/">Parcel</a>, <a href="https://rollupjs.org/">Rollup</a>,
+  or <a href="https://webpack.js.org/">Webpack</a> to create a production-ready code bundle.
+  However, in modern browsers it is also possible to directly load the module via a script tag:
+</p>
+<pre>
+<code class="language-html">&lt;script type="module" src="node_modules/spin.js/spin.js">&lt;/script></code>
+</pre>
+<p>
+  If for some reason you can't use ECMAScript modules or a module bundler,
+  download <a href="spin.umd.js">spin.umd.js</a> and save it in your repository.
+  The UMD script can be used as follows:
+</p>
+<pre>
+<code class="language-js">var spinner = new Spin.Spinner(opts).spin(target);</code>
+</pre>
+<p>
+  Note that the UMD version is only available as a temporary workaround.
+  Longer term it is recommended to migrate to the standard ECMAScript module.
+</p>
+
+<h3>CSS</h3>
+<p>
+  Load the spin.css file to include the default animation presets.
+  You could alternatively create a custom CSS keyframe animation (in your own CSS file)
+  and set it using the <code>animation</code> property.
+</p>
+<p>
+  Note: do not use <code>&lt;script&gt;</code> or <code>&lt;link&gt;</code> tags directly referencing the files on this website.
+  Doing this is likely to break your app whenever a major new version is released.
+</p>
+
+<h2 id="usage">Usage</h2>
+<p>
+  Run the following code when the document has loaded:
+</p>
+
+<!-- populated dynamically -->
+<pre>
+<code id="spinner-options" class="language-js"></code>
+</pre>
+
+<p>
+  The <code>spin()</code> method creates the necessary HTML elements and starts the animation. If a target
+  element is passed as argument, the spinner is added as first child and horizontally and vertically centered.
+</p>
+
+<h3>Manual insertion</h3>
+<p>
+  In order to manually insert the spinner into the DOM you can invoke the <code>spin()</code> method
+  without any arguments and use the <code>el</code> property to access the HTML element:
+</p>
+<pre>
+<code class="language-js">var spinner = new Spinner().spin();
+target.appendChild(spinner.el);</code>
+</pre>
+
+<h3>Hiding the spinner</h3>
+<p>
+  To hide the spinner, invoke the
+  <code>stop()</code> method, which removes the UI elements from the DOM and stops the animation.
+  Stopped spinners may be reused by calling <code>spin()</code> again.
+</p>
+
+<h3>Positioning</h3>
+<p>
+  The spinner is absolutely positioned at 50% of its offset parent.
+  You may specify a <code>top</code> and <code>left</code> option to position the spinner manually.
+</p>
+<p>
+  <b>Note:</b> The spinner element is a 0&times;0 pixel div that represents the center of the spinner.
+  Hence, if you passed <code>{top:0, left:0}</code> only the lower right quarter of the spinner would
+  be inside the target's bounding box.
+</p>
+<p>
+  The spinner element must be surrounded by an element using relative positioning, or the spinner will be
+  outside of the parent element.
+</p>
+
+<h2>Supported browsers</h2>
+<img src="assets/browsers.svg">
+<p>
+  Spin.js has been successfully tested in the following browsers:
+</p>
+<ul>
+  <li>Firefox</li>
+  <li>Microsoft Edge</li>
+  <li>Safari</li>
+  <li>Chrome</li>
+  <li>Internet Explorer 10+</li>
+</ul>
+
+<h2>Changes</h2>
+
+<p>
+   See <a href="https://github.com/fgnass/spin.js/blob/master/CHANGELOG.md">CHANGELOG.md</a>
+</p>
+
+<h2>Support</h2>
+
+<p>
+  If you encounter any problems, please use the <a href="https://github.com/fgnass/spin.js/issues">GitHub issue tracker</a>.
+</p>
+
+<h2>Authors</h2>
+
+<div class="authors">
+  <div class="contact">
+    <img src="https://www.gravatar.com/avatar/f1f2e1842f6ff681a6d1b0a2405d0117"/>
+    <h3>Felix Gnass</h3>
+    <p>JS 💛 React ⚛️ NodeJS 💚</p>
+    <p>
+      Twitter: <a href="https://twitter.com/fgnass">@fgnass</a>
+    </p>
+  </div>
+  
+  <div class="contact">
+    <img src="https://www.gravatar.com/avatar/5f7e5be7427b4c706eb1ff85ceb98998"/>
+    <h3>Theodore Brown</h3>
+    <p>PHP 🐘 TypeScript 📐 SQL 📊</p>
+    <p>
+      Website: <a href="https://theodorejb.me">theodorejb.me</a><br/>
+      Twitter: <a href="https://twitter.com/theodorejb">@theodorejb</a>
+    </p>
+  </div>
+</div>
+
+</div>
+<div id="footer">
+  <a class="github" href="https://github.com/fgnass/spin.js">Hosted on GitHub</a>
+</div>
+
+<script src="assets/prism.js"></script>
+<script src="bundle.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,7 @@
+  webfontloader
+--=============--
+
+URL: https://github.com/typekit/webfontloader
+Version: 1.6.28
+License: Apache 2.0
+Modifications: Added symbolic link to minified version.
