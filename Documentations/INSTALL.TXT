@@ -1,151 +1,203 @@
-/**   ___ ___       ___ _______     ______                        __
- *   |   Y   .-----|   |   _   |   |   _  \ .-----.--------.---.-|__.-----.
- *   |.  |   |  _  |.  |.  1   |   |.  |   \|  _  |        |  _  |  |     |
- *   |.  |   |_____|.  |.  ____|   |.  |    |_____|__|__|__|___._|__|__|__|
- *   |:  1   |     |:  |:  |       |:  1    /
- *    \:.. ./      |::.|::.|       |::.. . /
- *     `---'       `---`---'       `------'
- *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
+    ___ ___       ___ _______     ______                        __
+   |   Y   .-----|   |   _   |   |   _  \ .-----.--------.---.-|__.-----.
+   |.  |   |  _  |.  |.  1   |   |.  |   \|  _  |        |  _  |  |     |
+   |.  |   |_____|.  |.  ____|   |.  |    |_____|__|__|__|___._|__|__|__|
+   |:  1   |     |:  |:  |       |:  1    /
+    \:.. ./      |::.|::.|       |::.. . /
+     `---'       `---`---'       `------'
 
-  Installation HowTo
---==================--
+ Copyright (C) 2016-2025 Ernani José Camargo Azevedo
 
-The system was made to run clear on a RHEL 7. VoIP Domain has a RPM repository with all packages you'll need, with many VoIP tools too. All packages has their related src.rpm published at same URL. You can access the repository at http://rhel.voipdomain.io/.
-If you want to install VoIP Domain at any other Linux/Unix-like distribution, you'll need:
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-To the web administrative interface:
-- MySQL (or MariaDB) server (minimum 5.0.2 release, but tested only with MariaDB 5.5 release);
-- PHP 5.4.16 or higher with MySQLi support;
-- PHP-FPM;
-- NGiNX;
-- NGiNX push stream module.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-To the Asterisk servers:
-- MySQL (or MariaDB) server (tested only with MariaDB 5.5 release, but use only very basic SQL commands);
-- PHP 5.4.16 or higher with MySQLi support;
-- PHP PECL proctitle (optional);
-- Asterisk 11 or higher (repository has release 16, recommended).
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-You can have one or more Asterisk servers at your network. It's recommended if you've physically distant infra structures, to use one server at each location, to be able to keep your VoIP network resilient, because VoIP Domain Asterisk servers could work without intra networks communication.
+                           INSTALL HOW-TO
+                         --==============--
 
-The web administrative interface could be installed on a Virtual Machine, managing one or more remote Asterisk servers. You can also install the web administrative interface at the same server that manage the Asterisk service. In this case, just combine the minimum software requirements.
+The VoIP Domain system need a series of requirements to work. The developer of
+this software uses RHEL as main Linux system to all the servers (or the server,
+if you want to run everything togheter).
 
+The requirements to the main administration interface will be:
 
-  Web Administrative Interface
---============================--
+* NGiNX server (http://nginx.org/)
+* MariaDB server (https://mariadb.org/)
+* PHP (at least version 5.5.0) with PHP-FPM support
+  (https://www.php.net/manual/en/install.fpm.php) and the following modules:
+  - PDO
+  - SimpleXML
+  - curl
+  - date
+  - dom
+  - ereg
+  - exif
+  - fileinfo
+  - gd
+  - gearman (https://www.php.net/manual/en/book.gearman.php)
+  - gettext
+  - hash
+  - iconv
+  - imagick
+  - json
+  - libxml
+  - mbstring
+  - mysql
+  - mysqli
+  - openssl
+  - pcntl
+  - pcre
+  - session
+  - sockets
+  - standard
+  - xml
+  - zip
+* PHP Gearman PECL module (https://pecl.php.net/package/gearman)
 
-To install the web administrative interface, you need to deploy the application to the web server root directory (usually /usr/share/voipdomain), create configuration files at system configuration directory (/etc), deploy the basic database structure and system initialization files. To do that, do the following procedures:
+You can run the administrative interface on a small Virtual Machine or low-cost
+server. The administrative interface doesn't need to be active 100% of the time,
+as Asterisk servers managed by the system doesn't depend on the administrative
+interface to work. Any offline data (such as billing, LCR, etc) can be done
+locally on the Asterisk servers and therefore sent to the administrative
+interface.
 
-1) Install required packages. If you're using RHEL, add VoIP Domain repository (see below how to add the repository), and use:
-   yum install -y php-cli php-mysql php-cgi php-gd php-pear php-mbstring mariadb-server nginx nginx-push-stream-module
-2) Deploy application to /usr/share/voipdomain;
-3) Configure PHP-FPM entry, copying docs/php-fpm.d/voipcentral.conf to /etc/php-fpm.d/;
-4) Configure NGiNX server. You can use structure available at docs/nginx;
-5) Put your SSL certificate at /etc/nginx/ssl (or create a self signed one, see below how to);
-6) Create your /etc/voipdomain configuration directory. Copy configuration files from docs/etc/voipdomain;
-7) Create MariaDB database and grant permissions;
-8) Import basic vd database structure, using: mysql -u root -p vd < docs/voipdomain.sqldump
-9) If you're using ANATEL plugin, create ANATEL database and import structure and data;
-10) Config your system initialization files:
-  for service in php-fpm nginx mariadb asterisk; do systemctl enable ${service}.service; systemctl start ${service}.service; done
+The administrative interface will be used to configure your telephony environment
+and provide usage reports.
 
+To configure PHP-FPM and NGiNX, you can refer to the examples in the docs
+directory.
 
-  VoIP Domain RHEL repository
---===========================--
+The requirements to the control daemons will be:
 
-To enable the VoIP Domain RHEL packages repository at your RHEL installation, create the repository file pasting the following command:
+* PHP (at least version 5.5.0) with cli and the following modules:
+  - SimpleXML
+  - curl
+  - date
+  - dom
+  - ereg
+  - gearman (https://www.php.net/manual/en/book.gearman.php)
+  - gettext
+  - hash
+  - json
+  - mbstring
+  - mysql
+  - mysqli
+  - openssl
+  - pcntl
+  - pcre
+  - posix
+  - proctitle (https://www.php.net/manual/en/book.proctitle.php) (optional)
+  - sockets
+  - standard
+* PHP Gearman PECL module (https://pecl.php.net/package/gearman)
 
-cat > /etc/yum.repos.d/VoIPDomain.repo << __EOF__
-[VoIPDomain-$basearch]
-name=VoIPDomain-$releasever - $basearch
-baseurl=http://rhel.voipdomain.io/$releasever/$basearch/
-gpgcheck=1
-gpgkey=http://rhel.voipdomain.io/azevedo@voipdomain.io.key
+The control daemons will basically route the Asterisk events and administrative
+interface events and generate notifications for external daemons. The monitor
+daemon will connect to the Asterisk AMI interface and process the telephony
+events sent by Gearman API to the router daemon. You'll need one monitor daemon
+per Asterisk server and one router daemon for the entire system. You can run
+these daemons wherever you want on your network, but it's recommended to run the
+Asterisk monitor daemon on the same machine as your Asterisk server, to avoid
+missing events in case of network problems. The router daemon can run on the same
+server as the administrative interface.
 
-[VoIPDomain-noarch]
-name=VoIPDomain-$releasever - noarch
-baseurl=http://rhel.voipdomain.io/$releasever/noarch/
-gpgcheck=1
-gpgkey=http://rhel.voipdomain.io/azevedo@voipdomain.io.key
-__EOF__
+The requirements to the Asterisk servers will be:
 
-This command will create the repository entry file at /etc/yum.repos.d/VoIPDomain.repo. You also need to import the VoIP Domain repository signature key, to ensure that the packages are signed by a VoIP Domain authorized repository administrator. Use the following command to import the key:
+* Asterisk (at least version 20.0.0)
+* MariaDB server (https://mariadb.org/)
+* PHP (at least version 5.5.0) with cli and the following modules:
+  - SimpleXML
+  - curl
+  - date
+  - dom
+  - ereg
+  - gettext
+  - hash
+  - json
+  - mbstring
+  - mysql
+  - mysqli
+  - openssl
+  - pcntl
+  - pcre
+  - posix
+  - proctitle (https://www.php.net/manual/en/book.proctitle.php) (optional)
+  - sockets
+  - standard
+* PHP Gearman PECL module (https://pecl.php.net/package/gearman)
 
-rpm --import - 1>/dev/null 2>&1 << __EOF__
------BEGIN PGP PUBLIC KEY BLOCK-----
+MariaDB server is required to run with Asterisk for local storage of billing
+entries. If communication with the administrative interface is interrupted, the
+data will not be lost, it will resynchronize when the connection is restored. In
+addition, some plugins need a database with local data to work (for example, the
+Brazilian telecommunication agency standard, which needs a huge database to
+determine the cost of the call). PHP is required to run the configuration daemon,
+which will receive events from the administrative interface to change Asterisk
+configurations and provide basic system intelligence such as LCR.
 
-mQINBFsAlYQBEADOxmxQW0z3BDHhrJEEVDNzCyWg9FPa5QhqBxwKIttCIUzKi0Nr
-ZIC7b8SuSVn/Fkc6yoDncnyadU13ZTyB/G0yuZnQp6FACCq4VXgD4YY1zYfuSfKm
-k6VJ/0PCG9AsKHOk+0Ky1/kBS6LJ4obqHDLVwwCxNoJYPpvO3LROsVYGMoI4WMjh
-Ovxw7rgBQDNUNfYDEY4sXvMHzXBdRTJry4H5cy9KjWiMmz9UEA7frvoH8Mz2hcFk
-ZkQ5nD9CYVjWov9N/tuBbePA5MGgojNmaid53yKh0IOxDt/7kx+3MUsxtQDhsTv3
-5VsfBQSyp7QK5IO2xg8oSV4TFeJfzNBP+5WmtoFX9BmbyK/FP8M7WWjMtimDeJ84
-cSpEwB7zQe4dGeGZqLV3lA+voAsgqIybx6THXrIc6sQidRuDCHtXtaJmJz1uUoUA
-8SXNBD/HUyGcKLWRrMZCeVNFmLzb6KaI6tu+TcucSsnmxEWjgFUpPZ3yRxsuLrHr
-wMprvJ886JsAfFg7GLOPtEJpMVOnKBIRsMJC81OjZyr6rG5ofPUHazaVU4aC0F2b
-wc4XsbVNV6cNn3Gdr54EIGc79z7xQdBcFd+Vj15SEgfU1oqpE1X8QPnCLVj2xf4F
-ZJMQHByBsocrNxtYqDflMPCijW1+r7QeBa3xRKgJMfm/ueS5zW5QWO8r4wARAQAB
-tCZFcm5hbmkgQXpldmVkbyA8YXpldmVkb0B2b2lwZG9tYWluLmlvPokCOAQTAQIA
-IgUCWwCVhAIbAwYLCQgHAwIGFQgCCQoLBBYCAwECHgECF4AACgkQbdVMTZToSubL
-Yw/6A4ZXratNHTvSKuw0foMwf1iMHp5UeHIc+LGqnAhe8xx2hNX37xxyWNY1IIRZ
-jQBrwIiVm3iUZahURmwZAtTAEkw/mekOmGEIP7spKL8Qu5Jlia7kEDW/xW5L4vcg
-uAAU7OSKUHSrRGQHSin/Bhw1NOl6GLqmbKyyYAN9NJCAAam7G8P1BY1yKttKXrT8
-QN2klyJOlRHSMDptHXXPhgudWt4rlLf1J0khh8IfcPYNGZuJlWu/FbaobQSxzLyz
-XHieiHGH5WmCeh8hJ1E4rMWk+JtOnIcKLAmoO7H6nLGYLuK/5K+H5GDOqGiKq3NI
-m+6ILg4N67C/H5TPBXoiB5fjny1CvfmG8INsO7Z6u6amd3qeH+SiAUV6IgTmyQX2
-JWy8oef0db6TxurEy9AOUCUPJgNbN9nD7M+hPgKcx9Pb1LN8RGLj9TcQlvsKl0iX
-Tk0eaf8X04m0a3/3pJZ5xbv1ZGf0GzOn7o+UaXlpfNu8htjNgbk9lh/0aNWg2Imk
-le6JAOXtl1Nq/y4UVCPKlfjHgqtFqFe1iy4Y08WQ74RysHxR8+Caa5RdtKhGrreK
-TGWvbssn4iT29jI3t1V7VG9rNCuzJWLATY8nbLDJ61s0lw8QzwRZ+NYFSNunNodT
-dT0tHptw1hAWIP/NxR/s2Jt5WiAHuPYLIHUz6jRKRETcxmy5Ag0EWwCVhAEQAMG5
-2kLrjwOAl7OpZvbidkTEtbaEfwuzh2uqsa7l67t5B8QvLJ8Rd4a6XW5Yw4axJceg
-kK88leV4nVzwQJaFztshsWJVnYU9hXSdibprVWB0rvO5SGFHFnlLGQCYh4Ti0Q1n
-SrgPeK5Rkqh8Rb3YLEB4vyvkzQQBR6wZkUCPMyhunT2G+THjcUgSGOxw4Qde8BqC
-lg/mN+psjNlpui+dLE8/cwG6Q8X9IL6Fa+ipbrt14jFYXwTyjKTV/KF4FZaJgT1i
-yZlUS3ey5d6Eh9PEWv2bUWZINfMeWBe6XQm39Le1xK9ozXopsNmsUZWQqqsI37Je
-rYit6KCkFR3MUuuXrSH2preiWwPJLiC9XQZSTFtS9d/Du2ymz7yTG3I7HYXH2I3r
-kfLIJgsjpAn0KrCEweOWMj+zcxPK6OoSmCei3V1ZFauZWyoN+CdftDY/JnJpc6Il
-80P2TSkNRMlgo1QXLf4PJmRfRH3JH5ATpwA5zjYM1RhrA1retCsCvbjHnVdaUAu7
-+Myp0hJWN4Dxqid+5aJk8t3V8+dlGNaUQzYy3xz2oy59dJM+WBYiulxr2Tt1Pgc7
-gGcfDnIblYSfiiXF8EcDGaLsLSxvahr2DwZWSJLIEXavLzjFQr7JxfuCSC5UQDqC
-YPlVXnbywNFmaL1rJ4I2KpJkfHv/MgsFKaa1XZLTABEBAAGJAh8EGAECAAkFAlsA
-lYQCGwwACgkQbdVMTZToSuY2JQ//SoMxuF6R9t90PsSytLSoCHwW8zd2/Cq4j4UK
-BKAYlxBGLHtng7jjH/lEbwcUNUnmZ3ZmVLmdLR/OSBN7cF+Cs9HpVfpaYeZsPRzE
-aruNgNjNDaoSZK+bzh9eb75ulD/N3SmFdzcVqN4OCEArSN3NTh+VltQ2ofKkl6zR
-HXXIyZNSqhb+gpNSgcAE+uy6REUd1pc9miX6BaggZ9y7olB4iYJ/GySf/7wYO4G9
-FUKJZ3ZvWg1pxCQtl7rBR8patiSkSKVTQbgnqjajVJL1Xk+GLDo6rFg4RbdDh5Tb
-iEQRxkqVtmuDh+JBBKyEB/qhAHOF+pj9ZU/TBrX8ZnMMfQMa5JlTT+WXwux4zmSl
-xXnCAGl3fhzeU+NX19XSNoA3A1Wf89rzpkcLYcsUcB250Zh9XG3mhMcpxktViJXD
-icn9fElp56DQK1CKvgixRo0xdxWYmkXRtZ5WDcTUDh9z1gtr+TCjD1ruLycQcjIl
-kOqokcJ3sLEOE8EiRhJ2AcrUVn0sxLCD1WMf+p/HOriGLZM669EnxWTFwio7JgVY
-K5A1K4jkHi4RR/9GmzX7i0D1kVfK8GtoRxrLtrvmNKTDUbizIHrtLxdVadS/fhkI
-T/fQJ1elWTKKL+0gQMJ34xtzBRIIcNNPGMUdGLZn+4oeybOMvDMBXO5QrPwUrjPu
-BdDNe/o=
-=AYsh
------END PGP PUBLIC KEY BLOCK-----
-__EOF__
+Once everything is installed, you'll need to create the main system database and
+populate it with MariaDB install script found in docs/voipdomain.sqldump.
 
+When starting the system, the default user will be "admin", with password
+"admin".
 
-  Creating a Self Signed Certificate
---==================================--
+To configure the system, you'll need to create a basic tree of objects, in the
+following sequence:
 
-Use the following commands to create your self signed SSL certificate:
+1) Server
+2) Gateway (you can create a dummy one if needed to test the system)
+3) Profile
+4) Cost center
+5) Group
+6) Range
+7) Extension
 
-openssl req -new -x509 -sha256 -newkey rsa:2048 -days 365 -nodes -out YOUR.FQDN.pem -keyout YOUR.FQDN.key
-openssl req -new -sha256 -key YOUR.FQDN.key -out YOUR.FQDN.csr
-chmod 600 YOUR.FQDN.key
+Once all that work is done, you can make calls and generate reports in the
+administrative interface.
+
+Installing all-in-one server:
+-----------------------------
+
+If you're running all services in the same server, remember that php-fpm process
+will run as user `nginx`, and the main server certificate
+(`/etc/voipdomain/master-certificate.key`) will be owned by it. The `router`
+daemon will need to read this file. Use `setfacl` to allow the `asterisk` user
+(that runs `router` daemon) to read the file after installing the system:
+```
+# setfacl -m u:asterisk:rw- /etc/voipdomain/master-certificate.key
+```
+
+Installing Asterisk server:
+---------------------------
+
+The Asterisk server configuration is done including the VoIP Domain bootstrap
+files for each required configuration file.
+
+Just install a fresh new Asterisk server and include the lines below in each
+configuration file:
+- agents.conf:
+  #include voipdomain/bootstrap/agents.conf
+- extensions.conf:
+  #include voipdomain/bootstrap/dialplan.conf
+- musiconhold.conf:
+  #include voipdomain/bootstrap/musiconhold.conf
+- pjsip.conf:
+  #include voipdomain/bootstrap/pjsip.conf
+- pjsip_notify.conf:
+  #include voipdomain/bootstrap/pjsip_notify.conf
+- queues.conf:
+  #include voipdomain/bootstrap/queues.conf
+- voicemail.conf:
+  #include voipdomain/bootstrap/voicemail.conf
+
+You can also execute the "configure-asterisk.sh" script available in the
+/etc/asterisk/voipdomain/ directory to do this job.

@@ -3,7 +3,7 @@ Description=VoIP Domain FastAGI Service
 After=rc-local.service
 
 [Service]
-ExecStart=/usr/libexec/voipdomain/fastagi/fastagi.php -d
+ExecStart=/usr/libexec/voipdomain/daemons/fastagi.php -d
 KillMode=process
 Restart=always
 RestartSec=5

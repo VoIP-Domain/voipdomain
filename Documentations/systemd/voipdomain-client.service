@@ -3,7 +3,7 @@ Description=VoIP Domain Asterisk Client Service
 After=rc-local.service
 
 [Service]
-ExecStart=/usr/libexec/voipdomain/client/client.php -d
+ExecStart=/usr/libexec/voipdomain/daemons/client.php -d
 KillMode=process
 Restart=always
 RestartSec=5
