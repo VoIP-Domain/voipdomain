@@ -3,11 +3,28 @@
 [![GitHub release](https://img.shields.io/github/release/VoIP-Domain/voipdomain.svg?maxAge=2592000)](https://github.com/VoIP-Domain/voipdomain)
 [![GitHub license](https://img.shields.io/github/license/VoIP-Domain/voipdomain.svg)](https://github.com/VoIP-Domain/voipdomain)
 
-**VoIP Domain** is a modern interface designed to manage a network of Asterisk VoIP servers, offering a wide range of native features. The entire system is built around a RESTful API—used not only by third-party integrations such as CRMs but also by the administrative interface itself. This architecture allows seamless interaction and control over your telephony infrastructure.
+**VoIP Domain – The new era of business telephony**
 
-Communication between the administrative interface and the Asterisk servers is handled by a dedicated daemon. This daemon manages all necessary local configurations, ensuring that key features such as Least Cost Routing, Call Billing, and Call Routing continue to function even if the connection to the central interface is lost.
+Migrating your telephony to VoIP has never been easier!
 
-Deployment is streamlined: once your servers are installed, all configurations can be managed through the web interface—no need to log in to individual servers again.
+**VoIP Domain** was created to address a real business need: modernizing communications **without complications or disruption for end users**.
+
+Our platform was built with a focus on simplicity and cutting-edge technology, offering:
+- **Smart Auto-Provisioning**: Automatically configure any device from any manufacturer with a unified standard.
+- **Multiple Servers**: Manage a network of Asterisk VoIP servers easily using a modern interface.
+- **Intuitive and Powerful Interface**: No need to be a VoIP or telephony expert to manage the system.
+- **Full Compatibility**: Native support for multiple Asterisk servers, even offline.
+- **Automatic Dial Plans** and **Smart Least-Cost Routing**.
+- **Call Billing**: Native billing of each call.
+- **Workflow-Configurable IVR**: Create dynamic and efficient call menus.
+- **Local Standards**: Second dial tone, tones, and language automatically configured to ensure user familiarity.
+- **Streamline Deployment**: once your servers are installed, all configurations can be managed through the web interface—no need to log in to individual servers again.
+- **Complete RESTful API**: Generated directly from the code, documented in Swagger OAS 3.0.
+- **100% Modular Architecture**: Build plugins, translations, custom integrations, and more!
+
+**VoIP Domain** is the system that respects your legacy while delivering all the innovation your business needs for the future, allowing seamless interaction and control over your telephony infrastructure.
+
+**Modernize your company’s communication today with VoIP Domain!**
 
 A live demo will be available soon.
 
@@ -18,6 +35,13 @@ A live demo will be available soon.
 - Call billing
 - Centralized management for multiple Asterisk servers
 - Intelligent call routing
+- RESTfull API
+- Code documentation
+- Modular code with plugin support
+- Multi language
+  - English (native language)
+  - Brazilian Portuguese
+- Easy to use
 
 ## Project Status
 
