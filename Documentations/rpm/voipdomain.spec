@@ -1,7 +1,7 @@
 Name: voipdomain
 Version: 0.1.rc1
 Release: 1%{?dist}
-Summary: Asterisk web administration interface
+Summary: Enterprise network VoIP solution
 License: GPLv3
 Url: http://voipdomain.io/
 Group: Applications/Communications
@@ -13,7 +13,7 @@ VoIP Domain network telephony solution meta package.
 
 %package webserver
 Summary: VoIP Domain Web administrative interface
-Requires: %{name}-%{version}
+Requires: %{name} = %{version}
 Requires: php(language) >= 5.4.0
 %if 0%{?rhel} > 7
 Requires: php-mysqlnd
@@ -34,7 +34,7 @@ to use it with PHP-FPM and NGiNX.
 
 %package daemons-common
 Summary: VoIP Domain daemons common files
-Requires: %{name}-%{version}
+Requires: %{name} = %{version}
 Requires: php(language) >= 5.4.0
 %if 0%{?rhel} > 7
 Requires: php-mysqlnd
@@ -51,8 +51,8 @@ This package contains VoIP Domain daemons common files.
 
 %package router
 Summary: VoIP Domain message router management daemon
-Requires: %{name}-%{version}
-Requires: %{name}-daemons-common-%{version}
+Requires: %{name} = %{version}
+Requires: %{name}-daemons-common = %{version}
 Requires: php(language) >= 5.4.0
 %if 0%{?rhel} > 7
 Requires: php-mysqlnd
@@ -74,8 +74,8 @@ communication between server and Asterisk clients and other daemons.
 
 %package client
 Summary: VoIP Domain Asterisk management client daemons
-Requires: %{name}-%{version}
-Requires: %{name}-daemons-common-%{version}
+Requires: %{name} = %{version}
+Requires: %{name}-daemons-common = %{version}
 Requires: php(language) >= 5.4.0
 %if 0%{?rhel} > 7
 Requires: php-mysqlnd
@@ -97,8 +97,8 @@ administration system.
 
 %package fastagi
 Summary: VoIP Domain FastAGI application daemon
-Requires: %{name}-%{version}
-Requires: %{name}-daemons-common-%{version}
+Requires: %{name} = %{version}
+Requires: %{name}-daemons-common = %{version}
 Requires: php(language) >= 5.4.0
 %if 0%{?rhel} > 7
 Requires: php-mysqlnd
@@ -119,8 +119,8 @@ administration system.
 
 %package monitor
 Summary: VoIP Domain Asterisk server monitor daemon
-Requires: %{name}-%{version}
-Requires: %{name}-daemons-common-%{version}
+Requires: %{name} = %{version}
+Requires: %{name}-daemons-common = %{version}
 Requires: php(language) >= 5.4.0
 %if 0%{?rhel} > 7
 Requires: php-mysqlnd
