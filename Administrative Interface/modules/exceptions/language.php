@@ -76,7 +76,6 @@ i18n_add ( "An object containing information about the exception number.");
 i18n_add ( "Edit a system exceptions number.");
 i18n_add ( "Filter search with this string. If not provided, return all exceptions.");
 i18n_add ( "Get an exception number information.");
-i18n_add ( "John Doe");
 i18n_add ( "New system exception number added sucessfully.");
 i18n_add ( "Remove a exception number from system.");
 i18n_add ( "Search for system exception numbers.");
@@ -88,6 +87,8 @@ i18n_add ( "The number must be in E.164 format, including the prefix +.");
 i18n_add ( "The system exception number was removed.");
 i18n_add ( "The system exception number was sucessfully updated.");
 i18n_add ( "View exceptions");
+i18n_add ( "Invalid exception ID.");
+i18n_add ( "Exception cloning");
 
 /**
  * Add Brazilian Portuguese support
@@ -131,7 +132,6 @@ i18n_add ( "An object containing information about the exception number.", "Um o
 i18n_add ( "Edit a system exceptions number.", "Editar um número de excessão do sistema.", "pt_BR");
 i18n_add ( "Filter search with this string. If not provided, return all exceptions.", "Filtrar a pesquisa com esta string. Se não informado, retorna todos os números de excessão.", "pt_BR");
 i18n_add ( "Get an exception number information.", "Requisita informações de um número de excessão.", "pt_BR");
-i18n_add ( "John Doe", "Zé Ninguém", "pt_BR");
 i18n_add ( "New system exception number added sucessfully.", "Novo número de excessão adicionado com sucesso.", "pt_BR");
 i18n_add ( "Remove a exception number from system.", "Remover um número de excessão do sistema.", "pt_BR");
 i18n_add ( "Search for system exception numbers.", "Pesquisa por números de excessão do sistema.", "pt_BR");
@@ -143,4 +143,6 @@ i18n_add ( "The number must be in E.164 format, including the prefix +.", "O nú
 i18n_add ( "The system exception number was removed.", "O número de excessão do sistema foi removido.", "pt_BR");
 i18n_add ( "The system exception number was sucessfully updated.", "O número de excessão do sistema foi atualizado com sucesso.", "pt_BR");
 i18n_add ( "View exceptions", "Visualizar excessões", "pt_BR");
+i18n_add ( "Invalid exception ID.", "ID de excessão inválido.", "pt_BR");
+i18n_add ( "Exception cloning", "Clonagem de excessão", "pt_BR");
 ?>

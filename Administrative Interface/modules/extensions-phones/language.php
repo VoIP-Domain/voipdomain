@@ -98,7 +98,6 @@ i18n_add ( "IT Team");
 i18n_add ( "An array containing the groups that can capture this extension phone calls.");
 i18n_add ( "The system group internal identified that can capture this phone calls.");
 i18n_add ( "The system group description that can capture this phone calls.");
-i18n_add ( "The group code that can capture this phone calls.");
 i18n_add ( "The custom permissions for this extension phone.");
 i18n_add ( "Landline calls system maximum permissions.");
 i18n_add ( "Permission to local landline call.");
@@ -127,7 +126,6 @@ i18n_add ( "An array containing the extensions that should tranship this extensi
 i18n_add ( "The system unique identifier of transhipment extension.");
 i18n_add ( "The number of the transhipment extension.");
 i18n_add ( "The description of the transhipment extension.");
-i18n_add ( "John Doe");
 i18n_add ( "An array containing all extension phone accounts.");
 i18n_add ( "The system unique identifier of extension account.");
 i18n_add ( "The system unique identifier of equipment type for the account.");
@@ -186,6 +184,16 @@ i18n_add ( "The name of the extension account.");
 i18n_add ( "The account username of the extension account.");
 i18n_add ( "The password of the extension account.");
 i18n_add ( "An object containing information about the extension account.");
+i18n_add ( "An object with phone information.");
+i18n_add ( "An object with extension account MAC address.");
+i18n_add ( "The extension account equipment MAC address.");
+i18n_add ( "An object with extension account username and password.");
+i18n_add ( "An extension can not have more than 10 accounts.");
+i18n_add ( "Error retrieving equipment types!");
+i18n_add ( "Show password");
+i18n_add ( "Copy password");
+i18n_add ( "Extension view");
+i18n_add ( "Password copied to clipboard!");
 
 /**
  * Add Brazilian Portuguese support
@@ -251,7 +259,6 @@ i18n_add ( "IT Team", "Time de TI", "pt_BR");
 i18n_add ( "An array containing the groups that can capture this extension phone calls.", "Um array contendo os grupos que esta extensão de telefone pode capturar.", "pt_BR");
 i18n_add ( "The system group internal identified that can capture this phone calls.", "O identificador interno do grupo do sistema que pode capturar chamadas desta extensão de telefone.", "pt_BR");
 i18n_add ( "The system group description that can capture this phone calls.", "A descrição do grupo do sistema que pode capturar chamadas desta extensão de telefone.", "pt_BR");
-i18n_add ( "The group code that can capture this phone calls.", "O código do grupo que pode capturar chamadas desta extensão de telefone.", "pt_BR");
 i18n_add ( "The custom permissions for this extension phone.", "As permissões customizadas para esta extensão de telefone.", "pt_BR");
 i18n_add ( "Landline calls system maximum permissions.", "Permissões máximas do sistema para chamadas à telefones fixos.", "pt_BR");
 i18n_add ( "Permission to local landline call.", "Permissão para chamada para telefone fixo local.", "pt_BR");
@@ -280,7 +287,6 @@ i18n_add ( "An array containing the extensions that should tranship this extensi
 i18n_add ( "The system unique identifier of transhipment extension.", "O identificador único do sistema para a extensão de transbordo.", "pt_BR");
 i18n_add ( "The number of the transhipment extension.", "O número da extensão de transbordo.", "pt_BR");
 i18n_add ( "The description of the transhipment extension.", "A descrição da extensão de transbordo.", "pt_BR");
-i18n_add ( "John Doe", "Zé Ninguém", "pt_BR");
 i18n_add ( "An array containing all extension phone accounts.", "Um array contendo todas as contas da extensão de telefone.", "pt_BR");
 i18n_add ( "The system unique identifier of extension account.", "O identificador único do sistema da conta da extensão.", "pt_BR");
 i18n_add ( "The system unique identifier of equipment type for the account.", "O identificador único do sistema para o tipo de equipamento para a conta.", "pt_BR");
@@ -339,4 +345,14 @@ i18n_add ( "The name of the extension account.", "O nome da conta da extensão."
 i18n_add ( "The account username of the extension account.", "O nome do usuário da conta da extensão.", "pt_BR");
 i18n_add ( "The password of the extension account.", "A senha da conta da extensão.", "pt_BR");
 i18n_add ( "An object containing information about the extension account.", "Um objeto contendo as informações da conta da extensão.", "pt_BR");
+i18n_add ( "An object with phone information.", "Um objeto contendo as informações do telefone.", "pt_BR");
+i18n_add ( "An object with extension account MAC address.", "Um objeto com o endereço MAC da conta do telefone.", "pt_BR");
+i18n_add ( "The extension account equipment MAC address.", "O endereço MAC da conta da extensão.", "pt_BR");
+i18n_add ( "An object with extension account username and password.", "Um objeto com o usuário e senha da conta da extensão.", "pt_BR");
+i18n_add ( "An extension can not have more than 10 accounts.", "Uma extensão não pode ter mais que 10 contas.", "pt_BR");
+i18n_add ( "Error retrieving equipment types!", "Erro ao requisitar tipos de equipamentos!", "pt_BR");
+i18n_add ( "Show password", "Mostrar senha", "pt_BR");
+i18n_add ( "Copy password", "Copiar senha", "pt_BR");
+i18n_add ( "Extension view", "Visualizar extensão", "pt_BR");
+i18n_add ( "Password copied to clipboard!", "Senha copiada para a área de transferência!", "pt_BR");
 ?>

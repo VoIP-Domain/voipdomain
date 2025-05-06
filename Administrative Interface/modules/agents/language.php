@@ -93,10 +93,6 @@ i18n_add ( "View agents");
 i18n_add ( "Generate random password");
 i18n_add ( "Code must have four digit numbers.");
 i18n_add ( "Invalid agent ID.");
-i18n_add ( "Clone");
-i18n_add ( "Toggle options");
-i18n_add ( "and create new");
-i18n_add ( "and duplicate content");
 i18n_add ( "Agent cloning");
 
 /**
@@ -158,9 +154,5 @@ i18n_add ( "View agents", "Visualizar agentes", "pt_BR");
 i18n_add ( "Generate random password", "Gerar senha aleatória", "pt_BR");
 i18n_add ( "Code must have four digit numbers.", "Código deve conter quatro dígitos numéricos.", "pt_BR");
 i18n_add ( "Invalid agent ID.", "ID de agente inválido.", "pt_BR");
-i18n_add ( "Clone", "Clonar", "pt_BR");
-i18n_add ( "Toggle options", "Alternar opções", "pt_BR");
-i18n_add ( "and create new", "e criar novo", "pt_BR");
-i18n_add ( "and duplicate content", "e duplicar conteúdo", "pt_BR");
 i18n_add ( "Agent cloning", "Clonagem de agente", "pt_BR");
 ?>

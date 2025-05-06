@@ -93,12 +93,9 @@ i18n_add ( "If the user is an administrator.");
 i18n_add ( "If the user is an auditor.");
 i18n_add ( "If the user is or is not a system administrator.");
 i18n_add ( "If the user is or is not a system auditor.");
-i18n_add ( "johndoe");
 i18n_add ( "john.doe");
-i18n_add ( "John Doe");
 i18n_add ( "john.doe@voipdomain.io");
 i18n_add ( "johndoe@voipdomain.io");
-i18n_add ( "mypassword");
 i18n_add ( "New system user added sucessfully.");
 i18n_add ( "Remove a user from system.");
 i18n_add ( "Search for system users.");
@@ -149,6 +146,8 @@ i18n_add ( "Second factor authentication activated!");
 i18n_add ( "Invalid second factor authentication code!");
 i18n_add ( "Second factor authentication disabled!");
 i18n_add ( "Error disabling second factor authentication!");
+i18n_add ( "Invalid user ID.");
+i18n_add ( "User cloning");
 
 /**
  * Add Brazilian Portuguese support
@@ -209,12 +208,9 @@ i18n_add ( "If the user is an administrator.", "Se o usuário é um administrado
 i18n_add ( "If the user is an auditor.", "Se o usuário é um auditor.", "pt_BR");
 i18n_add ( "If the user is or is not a system administrator.", "Se o usuário não é um administrador do sistema.", "pt_BR");
 i18n_add ( "If the user is or is not a system auditor.", "Se o usuário não é um auditor do sistema.", "pt_BR");
-i18n_add ( "johndoe", "zéninguém", "pt_BR");
 i18n_add ( "john.doe", "zé.ninguém", "pt_BR");
-i18n_add ( "John Doe", "Zé Ninguém", "pt_BR");
 i18n_add ( "john.doe@voipdomain.io", "ze.ninguem@voipdomain.io", "pt_BR");
 i18n_add ( "johndoe@voipdomain.io", "zeninguem@voipdomain.io", "pt_BR");
-i18n_add ( "mypassword", "minhasenha", "pt_BR");
 i18n_add ( "New system user added sucessfully.", "Novo usuário do sistema adicionado com sucesso.", "pt_BR");
 i18n_add ( "Remove a user from system.", "Remover um usuário do sistema.", "pt_BR");
 i18n_add ( "Search for system users.", "Pesquisar por usuários do sistema.", "pt_BR");
@@ -264,4 +260,6 @@ i18n_add ( "Second factor authentication activated!", "Autenticação de dois fa
 i18n_add ( "Invalid second factor authentication code!", "Código de autenticação de dois fatores inválido!", "pt_BR");
 i18n_add ( "Second factor authentication disabled!", "Autenticação de dois fatores desabilitada!", "pt_BR");
 i18n_add ( "Error disabling second factor authentication!", "Erro ao desabilitar a autenticação de dois fatores!", "pt_BR");
+i18n_add ( "Invalid user ID.", "ID de usuário inválido.", "pt_BR");
+i18n_add ( "User cloning", "Clonagem de usuário", "pt_BR");
 ?>

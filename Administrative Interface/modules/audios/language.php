@@ -103,6 +103,10 @@ i18n_add ( "The system audio file was sucessfully updated.");
 i18n_add ( "View audios");
 i18n_add ( "The mime type of the audio file.");
 i18n_add ( "Clear file");
+i18n_add ( "Invalid filter.");
+i18n_add ( "Invalid audio ID.");
+i18n_add ( "Audio cloning");
+i18n_add ( "Error requesting audio data!");
 
 /**
  * Add Brazilian Portuguese support
@@ -173,4 +177,8 @@ i18n_add ( "The system audio file was sucessfully updated.", "O arquivo de áudi
 i18n_add ( "View audios", "Visualizar áudios", "pt_BR");
 i18n_add ( "The mime type of the audio file.", "O tipo de mime do arquivo de áudio.", "pt_BR");
 i18n_add ( "Clear file", "Limpar arquivo", "pt_BR");
+i18n_add ( "Invalid filter.", "Filtro inválido.", "pt_BR");
+i18n_add ( "Invalid audio ID.", "ID de áudio inválido.", "pt_BR");
+i18n_add ( "Audio cloning", "Clonagem de áudio", "pt_BR");
+i18n_add ( "Error requesting audio data!", "Erro requisitando dados do áudio!", "pt_BR");
 ?>

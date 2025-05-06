@@ -108,10 +108,12 @@ i18n_add ( "The system token was sucessfully updated.");
 i18n_add ( "The token hash of the token.");
 i18n_add ( "The token permission description, associated to token key.");
 i18n_add ( "The UNIX timestamp of the token expiration.");
-i18n_add ( "View system tokens");
 i18n_add ( "View tokens");
 i18n_add ( "Generate random password");
 i18n_add ( "Show calendar");
+i18n_add ( "Invalid token ID.");
+i18n_add ( "Invalid block ID.");
+i18n_add ( "Token cloning");
 
 /**
  * Add Brazilian Portuguese support
@@ -187,7 +189,9 @@ i18n_add ( "The system token was sucessfully updated.", "O token do sistema foi 
 i18n_add ( "The token hash of the token.", "O hash de acesso do token.", "pt_BR");
 i18n_add ( "The token permission description, associated to token key.", "A descrição do token de permissão, associado com a chave do token.", "pt_BR");
 i18n_add ( "The UNIX timestamp of the token expiration.", "O timestamp UNIX de expiração do token.", "pt_BR");
-i18n_add ( "View system tokens", "Visualizar tokens do sistema", "pt_BR");
 i18n_add ( "Generate random password", "Gerar senha aleatória", "pt_BR");
 i18n_add ( "Show calendar", "Mostrar calendário", "pt_BR");
+i18n_add ( "Invalid token ID.", "ID de token inválido.", "pt_BR");
+i18n_add ( "Invalid block ID.", "ID de bloco inválido.", "pt_BR");
+i18n_add ( "Token cloning", "Clonagem de token", "pt_BR");
 ?>

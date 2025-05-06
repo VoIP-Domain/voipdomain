@@ -162,6 +162,26 @@ i18n_add ( "The profile domain is required.");
 i18n_add ( "Domain");
 i18n_add ( "Profile domain");
 i18n_add ( "The country ISO 3166-2 code of the profile.");
+i18n_add ( "The time zone of the profile.");
+i18n_add ( "The time offset of the profile.");
+i18n_add ( "Invalid profile ID.");
+i18n_add ( "The system unique identifier of the gateway.");
+i18n_add ( "The profile time zone is required.");
+i18n_add ( "The profile time offset is invalid.");
+i18n_add ( "The profile country is invalid.");
+i18n_add ( "The profile time zone is invalid.");
+i18n_add ( "The profile time offset is required.");
+i18n_add ( "The profile area code is invalid.");
+i18n_add ( "The profile language is invalid.");
+i18n_add ( "One or more gateways are invalid.");
+i18n_add ( "One or more blocked gateways are invalid.");
+i18n_add ( "Profile is already in use.");
+i18n_add ( "Geographical");
+i18n_add ( "Map");
+i18n_add ( "Time zone");
+i18n_add ( "Profile time zone");
+i18n_add ( "Profile cloning");
+i18n_add ( "Error requesting profile data!");
 
 /**
  * Add Brazilian Portuguese support
@@ -291,4 +311,24 @@ i18n_add ( "The profile domain is required.", "O domínio do perfil é obrigató
 i18n_add ( "Domain", "Domínio", "pt_BR");
 i18n_add ( "Profile domain", "Domínio do perfil", "pt_BR");
 i18n_add ( "The country ISO 3166-2 code of the profile.", "O código ISO 3166-2 do país do perfil.", "pt_BR");
+i18n_add ( "The time zone of the profile.", "O fuso horário do perfil.", "pt_BR");
+i18n_add ( "The time offset of the profile.", "A diferença de horário do perfil.", "pt_BR");
+i18n_add ( "Invalid profile ID.", "ID do perfil inválido.", "pt_BR");
+i18n_add ( "The system unique identifier of the gateway.", "O identificador único do gateway no sistema.", "pt_BR");
+i18n_add ( "The profile time zone is required.", "O fuso horário do perfil é obrigatório.", "pt_BR");
+i18n_add ( "The profile time offset is invalid.", "A diferença de horário do perfil é inválida.", "pt_BR");
+i18n_add ( "The profile country is invalid.", "O país do perfil é inválido.", "pt_BR");
+i18n_add ( "The profile time zone is invalid.", "O fuso horário do perfil é inválido.", "pt_BR");
+i18n_add ( "The profile time offset is required.", "A diferença de horário do perfil é obrigatório.", "pt_BR");
+i18n_add ( "The profile area code is invalid.", "O código de área do perfil é inválido.", "pt_BR");
+i18n_add ( "The profile language is invalid.", "O idioma do perfil é inválido.", "pt_BR");
+i18n_add ( "One or more gateways are invalid.", "Um ou mais gateways são inválidos.", "pt_BR");
+i18n_add ( "One or more blocked gateways are invalid.", "Um ou mais gateways bloqueados são inválidos.", "pt_BR");
+i18n_add ( "Profile is already in use.", "Perfil já está em uso.", "pt_BR");
+i18n_add ( "Geographical", "Geográfico", "pt_BR");
+i18n_add ( "Map", "Mapa", "pt_BR");
+i18n_add ( "Time zone", "Fuso horário", "pt_BR");
+i18n_add ( "Profile time zone", "Fuso horário do perfil", "pt_BR");
+i18n_add ( "Profile cloning", "Clonagem de perfil", "pt_BR");
+i18n_add ( "Error requesting profile data!", "Erro ao requisitar dados do perfil!", "pt_BR");
 ?>

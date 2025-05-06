@@ -87,6 +87,8 @@ i18n_add ( "The description of the blocked number.");
 i18n_add ( "The system blocked number was removed.");
 i18n_add ( "The system blocked number was sucessfully updated.");
 i18n_add ( "View blocks");
+i18n_add ( "Invalid block ID.");
+i18n_add ( "Block cloning");
 
 /**
  * Add Brazilian Portuguese support
@@ -141,4 +143,6 @@ i18n_add ( "The description of the blocked number.", "Descrição do número blo
 i18n_add ( "The system blocked number was removed.", "O número bloqueado no sistema foi removido.", "pt_BR");
 i18n_add ( "The system blocked number was sucessfully updated.", "O número bloqueado no sistema foi atualizado com sucesso.", "pt_BR");
 i18n_add ( "View blocks", "Visualizar bloqueios", "pt_BR");
+i18n_add ( "Invalid block ID.", "ID de bloco inválido.", "pt_BR");
+i18n_add ( "Block cloning", "Clonagem de bloco", "pt_BR");
 ?>

@@ -72,7 +72,6 @@ i18n_add ( "Add cost centers");
 i18n_add ( "An array containing the cost centers.");
 i18n_add ( "An object containing information about the cost center.");
 i18n_add ( "Edit a cost center.");
-i18n_add ( "Edit cost centers");
 i18n_add ( "Filter search with this string. If not provided, return all cost centers.");
 i18n_add ( "Get a cost center information.");
 i18n_add ( "New cost center added sucessfully.");
@@ -88,6 +87,9 @@ i18n_add ( "The internal unique identification number of the cost center.");
 i18n_add ( "The cost center was removed.");
 i18n_add ( "The cost center was sucessfully updated.");
 i18n_add ( "View cost centers");
+i18n_add ( "Invalid cost center ID.");
+i18n_add ( "Edit costcenters");
+i18n_add ( "Cost center cloning");
 
 /**
  * Add Brazilian Portuguese support
@@ -142,4 +144,7 @@ i18n_add ( "The internal unique identification number of the cost center.", "O n
 i18n_add ( "The cost center was removed.", "O centro de custo foi removido.", "pt_BR");
 i18n_add ( "The cost center was sucessfully updated.", "O centro de custo foi atualizado com sucesso.", "pt_BR");
 i18n_add ( "View cost centers", "Visualizar centros de custo", "pt_BR");
+i18n_add ( "Invalid cost center ID.", "ID de centro de custo inválido.", "pt_BR");
+i18n_add ( "Edit costcenters", "Editar centros de custo", "pt_BR");
+i18n_add ( "Cost center cloning", "Clonagem de centro de custo", "pt_BR");
 ?>

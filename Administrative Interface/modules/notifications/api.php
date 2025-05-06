@@ -257,7 +257,7 @@ framework_add_hook (
             ),
             "EventEN" => array (
               "type" => "string",
-              "description" => __ ( "The origienal English name of the notification event."),
+              "description" => __ ( "The original English name of the notification event."),
               "example" => "New call"
             ),
             "Description" => array (
@@ -267,7 +267,7 @@ framework_add_hook (
             ),
             "DescriptionEN" => array (
               "type" => "string",
-              "description" => __ ( "The origienal English description of the notification event."),
+              "description" => __ ( "The original English description of the notification event."),
               "example" => "Event fired when a new call happen at the system."
             ),
             "Fields" => array (

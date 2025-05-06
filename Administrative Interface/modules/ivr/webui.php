@@ -809,7 +809,7 @@ function ivrs_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "IVR cloning") . "', text: '" . __ ( "Error requesting ivr data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "IVR cloning") . "', text: '" . __ ( "Error requesting IVR data!") . "', type: 'error'});\n" .
               "});\n");
 }
 

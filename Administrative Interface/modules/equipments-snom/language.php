@@ -29,7 +29,7 @@
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
- * @subpackage Equipments Snom
+ * @subpackage Equipments SNOM
  * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
@@ -38,25 +38,37 @@
  * Add basic language structure (english)
  */
 i18n_add ( "The password must have at least 6 digits.");
-i18n_add ( "User password");
-i18n_add ( "Password of non-privileged user");
 i18n_add ( "Show password");
 i18n_add ( "Copy password");
 i18n_add ( "Admin password");
 i18n_add ( "Password of privileged administrator");
 i18n_add ( "Equipment view");
 i18n_add ( "Password copied to clipboard!");
+i18n_add ( "The password is required.");
+i18n_add ( "Extras");
+i18n_add ( "Generate random password");
+i18n_add ( "The username is required.");
+i18n_add ( "Admin username");
+i18n_add ( "Username of privileged administrator");
+i18n_add ( "Admin mode password");
+i18n_add ( "Password for phone admin mode");
 
 /**
  * Add Brazilian Portuguese support
  */
 i18n_add ( "The password must have at least 6 digits.", "A senha deve ter no mínimo 6 dígitos.", "pt_BR");
-i18n_add ( "User password", "Senha de usuário", "pt_BR");
-i18n_add ( "Password of non-privileged user", "Senha do usuário não-privilegiado", "pt_BR");
 i18n_add ( "Show password", "Exibir senha", "pt_BR");
 i18n_add ( "Copy password", "Copiar senha", "pt_BR");
 i18n_add ( "Admin password", "Senha de administrador", "pt_BR");
 i18n_add ( "Password of privileged administrator", "Senha de administrador privilegiado", "pt_BR");
 i18n_add ( "Equipment view", "Visualizar equipamento", "pt_BR");
 i18n_add ( "Password copied to clipboard!", "Senha copiada para a área de transferência!", "pt_BR");
+i18n_add ( "The password is required.", "A senha é obrigatória.", "pt_BR");
+i18n_add ( "Extras", "Extras", "pt_BR");
+i18n_add ( "Generate random password", "Gerar uma senha aleatória", "pt_BR");
+i18n_add ( "The username is required.", "O usuário é obrigatório.", "pt_BR");
+i18n_add ( "Admin username", "Administrador", "pt_BR");
+i18n_add ( "Username of privileged administrator", "Nome do usuário administrador", "pt_BR");
+i18n_add ( "Admin mode password", "Senha do modo administrador", "pt_BR");
+i18n_add ( "Password for phone admin mode", "Senha para o modo administrador do telefone", "pt_BR");
 ?>

@@ -126,7 +126,7 @@ function equipments_khomp_view_subpage ( $buffer, $parameters)
                             "  document.execCommand ( 'copy');\n" .
                             "  $(this).focus ();\n" .
                             "  $(target).removeAttr ( 'readonly').attr ( 'disabled', 'disabled').attr ( 'type', 'password');\n" .
-                            "  new PNotify ( { title: '" . __ ( "Equipment view") . "', text: '" . __ ( "Password copyed to clipboard!") . "', type: 'success'});\n" .
+                            "  new PNotify ( { title: '" . __ ( "Equipment view") . "', text: '" . __ ( "Password copied to clipboard!") . "', type: 'success'});\n" .
                             "});\n";
 
   /**
@@ -204,7 +204,7 @@ function equipments_khomp_view_subpage ( $buffer, $parameters)
                             "  document.execCommand ( 'copy');\n" .
                             "  $(this).focus ();\n" .
                             "  $(target).removeAttr ( 'readonly').attr ( 'disabled', 'disabled').attr ( 'type', 'password');\n" .
-                            "  new PNotify ( { title: '" . __ ( "Equipment view") . "', text: '" . __ ( "Password copyed to clipboard!") . "', type: 'success'});\n" .
+                            "  new PNotify ( { title: '" . __ ( "Equipment view") . "', text: '" . __ ( "Password copied to clipboard!") . "', type: 'success'});\n" .
                             "});\n";
 
   return $buffer;

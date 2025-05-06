@@ -101,6 +101,8 @@ i18n_add ( "The system range was sucessfully updated.");
 i18n_add ( "Change a system range information.");
 i18n_add ( "The system range was removed.");
 i18n_add ( "Remove a system range.");
+i18n_add ( "Invalid range ID.");
+i18n_add ( "Range cloning");
 
 /**
  * Add Brazilian Portuguese support
@@ -169,4 +171,6 @@ i18n_add ( "The system range was sucessfully updated.", "A faixa do sistema foi 
 i18n_add ( "Change a system range information.", "Altera informações de uma faixa do sistema.", "pt_BR");
 i18n_add ( "The system range was removed.", "A faixa do sistema foi removida.", "pt_BR");
 i18n_add ( "Remove a system range.", "Remover uma faixa do sistema.", "pt_BR");
+i18n_add ( "Invalid range ID.", "ID de faixa inválido.", "pt_BR");
+i18n_add ( "Range cloning", "Clonagem de faixa", "pt_BR");
 ?>

@@ -39,10 +39,12 @@
  */
 i18n_add ( "Reserves");
 i18n_add ( "Reserve");
+i18n_add ( "An object with reserve information.");
 
 /**
  * Add Brazilian Portuguese support
  */
 i18n_add ( "Reserves", "Reservas", "pt_BR");
 i18n_add ( "Reserve", "Reserva", "pt_BR");
+i18n_add ( "An object with reserve information.", "Um objeto contendo as informações da reserva.", "pt_BR");
 ?>

@@ -46,6 +46,9 @@ i18n_add ( "Admin password");
 i18n_add ( "Password of privileged administrator");
 i18n_add ( "Equipment view");
 i18n_add ( "Password copied to clipboard!");
+i18n_add ( "The password is required.");
+i18n_add ( "Extras");
+i18n_add ( "Generate random password");
 
 /**
  * Add Brazilian Portuguese support
@@ -59,4 +62,7 @@ i18n_add ( "Admin password", "Senha de administrador", "pt_BR");
 i18n_add ( "Password of privileged administrator", "Senha de administrador privilegiado", "pt_BR");
 i18n_add ( "Equipment view", "Visualizar equipamento", "pt_BR");
 i18n_add ( "Password copied to clipboard!", "Senha copiada para a área de transferência!", "pt_BR");
+i18n_add ( "The password is required.", "A senha é obrigatória.", "pt_BR");
+i18n_add ( "Extras", "Extras", "pt_BR");
+i18n_add ( "Generate random password", "Gerar uma senha aleatória", "pt_BR");
 ?>

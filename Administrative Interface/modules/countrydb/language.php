@@ -57,6 +57,7 @@ i18n_add ( "The region of the country.");
 i18n_add ( "The sub region of the country.");
 i18n_add ( "View a country information.");
 i18n_add ( "View country");
+i18n_add ( "Invalid country code.");
 
 /**
  * Add Brazilian Portuguese support
@@ -81,4 +82,5 @@ i18n_add ( "The region of the country.", "A região do país.", "pt_BR");
 i18n_add ( "The sub region of the country.", "A sub região do país.", "pt_BR");
 i18n_add ( "View a country information.", "Visualizar informações de um país.", "pt_BR");
 i18n_add ( "View country", "Visualizar país", "pt_BR");
+i18n_add ( "Invalid country code.", "Código do país inválido.", "pt_BR");
 ?>

@@ -1235,7 +1235,7 @@ function extensions_phones_view_subpage ( $buffer, $parameters)
                             "  document.execCommand ( 'copy');\n" .
                             "  $(this).focus ();\n" .
                             "  $(target).removeAttr ( 'readonly').attr ( 'disabled', 'disabled').attr ( 'type', 'password');\n" .
-                            "  new PNotify ( { title: '" . __ ( "Extension view") . "', text: '" . __ ( "Password copyed to clipboard!") . "', type: 'success'});\n" .
+                            "  new PNotify ( { title: '" . __ ( "Extension view") . "', text: '" . __ ( "Password copied to clipboard!") . "', type: 'success'});\n" .
                             "});\n" .
                             "$('#extension_view_accounts').on ( 'click', '.btn-export', function ( event)\n" .
                             "{\n" .

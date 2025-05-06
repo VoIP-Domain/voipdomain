@@ -38,9 +38,11 @@
  * Add basic language structure (english)
  */
 i18n_add ( "Cisco doesn't allow disabling \"G.729\", \"G.711 a-law\" or \"G.711 µ-law\" codec's.");
+i18n_add ( "This equipment does not allow disabling this codec!");
 
 /**
  * Add Brazilian Portuguese support
  */
 i18n_add ( "Cisco doesn't allow disabling \"G.729\", \"G.711 a-law\" or \"G.711 µ-law\" codec's.", "Cisco não permite desabilitar os codec's \"G.729\", \"G.711 a-law\" ou \"G.711 µ-law\".", "pt_BR");
+i18n_add ( "This equipment does not allow disabling this codec!", "Este equipamento não permite desabilitar este codec!", "pt_BR");
 ?>

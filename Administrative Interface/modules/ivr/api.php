@@ -2045,7 +2045,7 @@ framework_add_component_documentation (
                           "Parameter" => array (
                             "type" => "string",
                             "required" => true,
-                            "description" => __ ( "The parameter to be passed ot the script."),
+                            "description" => __ ( "The parameter to be passed to the script."),
                             "example" => "1000"
                           )
                         )

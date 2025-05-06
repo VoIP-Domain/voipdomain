@@ -44,7 +44,6 @@ i18n_add ( "ACME Mobile");
 i18n_add ( "An object containing a large three with internal system API information.");
 i18n_add ( "An object containing an OpenAPI v3 documentation of system API.");
 i18n_add ( "An object containing information about the requested number.");
-i18n_add ( "A PHP serialized object of request body parameters.");
 i18n_add ( "API key is missing or invalid.");
 i18n_add ( "Auditor");
 i18n_add ( "Debug");
@@ -84,7 +83,6 @@ i18n_add ( "points!");
 i18n_add ( "Requested endpoint not found.");
 i18n_add ( "Restart");
 i18n_add ( "Score");
-i18n_add ( "Serialized PHP variables.");
 i18n_add ( "Springfield");
 i18n_add ( "Successfully executed.");
 i18n_add ( "The Alpha2 (abbreviation of country with 2 letters) country of the number, if available.");
@@ -115,6 +113,12 @@ i18n_add ( "An object containing information about the requested hook.");
 i18n_add ( "Debug an internal hook");
 i18n_add ( "Debug an internal hook.");
 i18n_add ( "The name of the hook to be called.");
+i18n_add ( "A string containing a pong.");
+i18n_add ( "Pong");
+i18n_add ( "Debug ping/pong hook");
+i18n_add ( "Debug ping/pong");
+i18n_add ( "Debug ping/pong messages.");
+i18n_add ( "callback ( 'variables')");
 
 /**
  * Add Brazilian Portuguese support
@@ -126,7 +130,6 @@ i18n_add ( "ACME Mobile", "Operadora ACME", "pt_BR");
 i18n_add ( "An object containing a large three with internal system API information.", "Uma grande árvore de objetos contendo informações internas da API do sistema.", "pt_BR");
 i18n_add ( "An object containing an OpenAPI v3 documentation of system API.", "Um objeto contendo a documentação da API do sistema em OpenAPI v3.", "pt_BR");
 i18n_add ( "An object containing information about the requested number.", "Um objeto contendo informações sobre o número requisitado.", "pt_BR");
-i18n_add ( "A PHP serialized object of request body parameters.", "Um objeto PHP serializado dos parâmetros requisitados do corpo.", "pt_BR");
 i18n_add ( "API key is missing or invalid.", "A chave da API está faltando ou é inválida.", "pt_BR");
 i18n_add ( "Auditor", "Auditor", "pt_BR");
 i18n_add ( "Debug", "Depuração", "pt_BR");
@@ -166,7 +169,6 @@ i18n_add ( "points!", "pontos!", "pt_BR");
 i18n_add ( "Requested endpoint not found.", "Endpoint requisitado não encontrado.", "pt_BR");
 i18n_add ( "Restart", "Reiniciar", "pt_BR");
 i18n_add ( "Score", "Pontuação", "pt_BR");
-i18n_add ( "Serialized PHP variables.", "Variáveis PHP serializadas.", "pt_BR");
 i18n_add ( "Springfield", "Springfield", "pt_BR");
 i18n_add ( "Successfully executed.", "Executado com sucesso.", "pt_BR");
 i18n_add ( "The Alpha2 (abbreviation of country with 2 letters) country of the number, if available.", "O código Alpha2 (abreviação de 2 letras do país) do país, se disponível.", "pt_BR");
@@ -197,4 +199,10 @@ i18n_add ( "An object containing information about the requested hook.", "Um obj
 i18n_add ( "Debug an internal hook", "Depurar um gancho interno", "pt_BR");
 i18n_add ( "Debug an internal hook.", "Depurar um gancho interno.", "pt_BR");
 i18n_add ( "The name of the hook to be called.", "O nome do gancho a ser executado.", "pt_BR");
+i18n_add ( "A string containing a pong.", "Uma string contendo um pong.", "pt_BR");
+i18n_add ( "Pong", "Pong", "pt_BR");
+i18n_add ( "Debug ping/pong hook", "Gancho de depuração ping/pong", "pt_BR");
+i18n_add ( "Debug ping/pong", "Depuração ping/pong", "pt_BR");
+i18n_add ( "Debug ping/pong messages.", "Mensagens de depuração ping/pong.", "pt_BR");
+i18n_add ( "callback ( 'variables')", "callback ( 'variáveis')", "pt_BR");
 ?>

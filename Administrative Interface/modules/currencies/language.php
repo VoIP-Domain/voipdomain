@@ -72,6 +72,7 @@ i18n_add ( "View currencies information");
 i18n_add ( "View currency");
 i18n_add ( "View a currency information.");
 i18n_add ( "The code of currency to be requested.");
+i18n_add ( "Invalid country code.");
 
 /**
  * Add Brazilian Portuguese support
@@ -111,4 +112,5 @@ i18n_add ( "View currencies information", "Visualizar informações da moeda", "
 i18n_add ( "View currency", "Visualizar moeda", "pt_BR");
 i18n_add ( "View a currency information.", "Visualizar informações de uma moeda.", "pt_BR");
 i18n_add ( "The code of currency to be requested.", "O código da moeda a ser requisitada.", "pt_BR");
+i18n_add ( "Invalid country code.", "Código de país inválido.", "pt_BR");
 ?>

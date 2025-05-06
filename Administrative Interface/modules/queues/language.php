@@ -122,6 +122,8 @@ i18n_add ( "Pause a system agent member at a queue.");
 i18n_add ( "The agent was sucessfully resumed at the queue.");
 i18n_add ( "Resume a paused member at queues");
 i18n_add ( "Resume a paused system agent member at a queue.");
+i18n_add ( "Invalid queue ID.");
+i18n_add ( "Queue cloning");
 
 /**
  * Add Brazilian Portuguese support
@@ -211,4 +213,6 @@ i18n_add ( "Pause a system agent member at a queue.", "Pausar um membro do siste
 i18n_add ( "The agent was sucessfully resumed at the queue.", "O agente foi retornado com sucesso à fila.", "pt_BR");
 i18n_add ( "Resume a paused member at queues", "Retornar de pausa um membro nas filas", "pt_BR");
 i18n_add ( "Resume a paused system agent member at a queue.", "Remover a pausa de um agente do sistema em uma fila.", "pt_BR");
+i18n_add ( "Invalid queue ID.", "ID de fila inválido.", "pt_BR");
+i18n_add ( "Queue cloning", "Clonagem de fila", "pt_BR");
 ?>
