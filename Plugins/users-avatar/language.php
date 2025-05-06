@@ -63,6 +63,7 @@ i18n_add ( "The system user avatar was sucessfully updated.");
 i18n_add ( "Edit users avatar");
 i18n_add ( "Change a system user avatar.");
 i18n_add ( "The base64 encoded avatar JPEG image file.");
+i18n_add ( "The md5 hash of the image.");
 
 /**
  * Add Brazilian Portuguese support
@@ -93,4 +94,5 @@ i18n_add ( "The system user avatar was sucessfully updated.", "O avatar do usuá
 i18n_add ( "Edit users avatar", "Alterar o avatar de usuários", "pt_BR");
 i18n_add ( "Change a system user avatar.", "Altera o avatar de um usuário do sistema.", "pt_BR");
 i18n_add ( "The base64 encoded avatar JPEG image file.", "O arquivo de imagem JPEG do avatar codificado em base64.", "pt_BR");
+i18n_add ( "The md5 hash of the image.", "O hash md5 da imagem.", "pt_BR");
 ?>
