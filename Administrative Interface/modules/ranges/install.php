@@ -62,7 +62,7 @@ function ranges_install_db ( $buffer, $parameters)
                                    "  KEY `Range` (`Start`,`Finish`),\n" .
                                    "  KEY `Ranges_ibfk_1` (`Server`),\n" .
                                    "  CONSTRAINT `Ranges_ibfk_1` FOREIGN KEY (`Server`) REFERENCES `Servers` (`ID`) ON UPDATE CASCADE\n" .
-                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n", array ( "Servers"));
+                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extension number ranges allocation';\n", array ( "Servers"));
 
   /**
    * Add basic system triggers

@@ -66,7 +66,7 @@ function users_install_db ( $buffer, $parameters)
                                   "  `OTPKey` char(32) DEFAULT '',\n" .
                                   "  PRIMARY KEY (`ID`),\n" .
                                   "  KEY `Username` (`Username`)\n" .
-                                  ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n");
+                                  ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Administration users';\n");
   install_add_db_table ( "UserSFA", "CREATE TABLE `UserSFA` (\n" .
                                     "  `UID` bigint unsigned NOT NULL,\n" .
                                     "  `Key` char(32) NOT NULL,\n" .
@@ -74,13 +74,13 @@ function users_install_db ( $buffer, $parameters)
                                     "  UNIQUE KEY `UID` (`UID`),\n" .
                                     "  KEY `UserSFA_ibfk_1` (`UID`),\n" .
                                     "  CONSTRAINT `UserSFA_ibfk_1` FOREIGN KEY (`UID`) REFERENCES `Users` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" .
-                                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n", array ( "Users"));
+                                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Administration users SFA';\n", array ( "Users"));
   install_add_db_table ( "SFACache", "CREATE TABLE `SFACache` (\n" .
                                      "  `UID` bigint unsigned NOT NULL,\n" .
                                      "  `Key` char(32) NOT NULL,\n" .
                                      "  KEY `UID` (`UID`),\n" .
                                      "  CONSTRAINT `SFACache_ibfk_1` FOREIGN KEY (`UID`) REFERENCES `Users` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" .
-                                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n", array ( "Users"));
+                                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Administration users SFA cache (remember me)';\n", array ( "Users"));
   install_add_db_table ( "Sessions", "CREATE TABLE `Sessions` (\n" .
                                      "  `SID` char(64) NOT NULL,\n" .
                                      "  `User` bigint unsigned NOT NULL,\n" .
@@ -89,7 +89,7 @@ function users_install_db ( $buffer, $parameters)
                                      "  UNIQUE KEY `SID` (`SID`),\n" .
                                      "  KEY `Sessions_ibfk_1` (`User`),\n" .
                                      "  CONSTRAINT `Sessions_ibfk_1` FOREIGN KEY (`User`) REFERENCES `Users` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" .
-                                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n", array ( "Users"));
+                                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='System users sessions';\n", array ( "Users"));
 
   /**
    * Add basic system triggers

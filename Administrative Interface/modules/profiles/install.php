@@ -72,7 +72,7 @@ function profiles_install_db ( $buffer, $parameters)
                                      "  KEY `Profiles_ibfk_2` (`NGGW`),\n" .
                                      "  CONSTRAINT `Profiles_ibfk_1` FOREIGN KEY (`Country`) REFERENCES `Countries` (`Code`) ON UPDATE CASCADE,\n" .
                                      "  CONSTRAINT `Profiles_ibfk_2` FOREIGN KEY (`NGGW`) REFERENCES `Gateways` (`ID`) ON UPDATE CASCADE\n" .
-                                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n", array ( "Countries", "Gateways"));
+                                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extension profiles';\n", array ( "Countries", "Gateways"));
 
   /**
    * Add basic system triggers

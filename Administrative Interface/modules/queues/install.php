@@ -59,21 +59,13 @@ function queues_install_db ( $buffer, $parameters)
                                    "  `Strategy` enum('ringall','roundrobin','leastrecent','fewestcalls','random','rrmemory') NOT NULL DEFAULT 'ringall',\n" .
                                    "  PRIMARY KEY (`ID`),\n" .
                                    "  UNIQUE KEY `Name` (`Name`)\n" .
-                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n");
+                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Call center queues';\n");
   install_add_db_table ( "QueueMembers", "CREATE TABLE `QueueMembers` (\n" .
                                          "  `Queue` bigint unsigned NOT NULL,\n" .
                                          "  `Member` varchar(255) NOT NULL,\n" .
                                          "  KEY `Queue` (`Queue`),\n" .
                                          "  CONSTRAINT `QueueMembers_ibfk_1` FOREIGN KEY (`Queue`) REFERENCES `Queues` (`ID`) ON UPDATE CASCADE ON DELETE CASCADE\n" .
-                                         ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n", array ( "Queues"));
-  install_add_db_table ( "ExtensionQueue", "CREATE TABLE `ExtensionQueue` (\n" .
-                                           "  `Extension` bigint unsigned NOT NULL,\n" .
-                                           "  `Queue` bigint unsigned NOT NULL,\n" .
-                                           "  UNIQUE KEY `Extension` (`Extension`),\n" .
-                                           "  KEY `Queue` (`Queue`),\n" .
-                                           "  CONSTRAINT `ExtensionQueue_ibfk_1` FOREIGN KEY (`Extension`) REFERENCES `Extensions` (`ID`) ON UPDATE CASCADE,\n" .
-                                           "  CONSTRAINT `ExtensionQueue_ibfk_2` FOREIGN KEY (`Queue`) REFERENCES `Queues` (`ID`) ON UPDATE CASCADE\n" .
-                                           ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n", array ( "Extensions", "Queues"));
+                                         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Queue members link';\n", array ( "Queues"));
 
   /**
    * Add basic system triggers
@@ -84,9 +76,6 @@ function queues_install_db ( $buffer, $parameters)
   install_add_db_trigger ( "QueueMembersInsert", "CREATE TRIGGER `QueueMembersInsert` AFTER INSERT ON `QueueMembers` FOR EACH ROW CALL UpdateCache('QueueMembers')");
   install_add_db_trigger ( "QueueMembersUpdate", "CREATE TRIGGER `QueueMembersUpdate` AFTER UPDATE ON `QueueMembers` FOR EACH ROW CALL UpdateCache('QueueMembers')");
   install_add_db_trigger ( "QueueMembersDelete", "CREATE TRIGGER `QueueMembersDelete` AFTER DELETE ON `QueueMembers` FOR EACH ROW CALL UpdateCache('QueueMembers')");
-  install_add_db_trigger ( "ExtensionQueueInsert", "CREATE TRIGGER `ExtensionQueueInsert` AFTER INSERT ON `ExtensionQueue` FOR EACH ROW CALL UpdateCache('Extensions')");
-  install_add_db_trigger ( "ExtensionQueueUpdate", "CREATE TRIGGER `ExtensionQueueUpdate` AFTER UPDATE ON `ExtensionQueue` FOR EACH ROW CALL UpdateCache('Extensions')");
-  install_add_db_trigger ( "ExtensionQueueDelete", "CREATE TRIGGER `ExtensionQueueDelete` AFTER DELETE ON `ExtensionQueue` FOR EACH ROW CALL UpdateCache('Extensions')");
 
   /**
    * Return structured data

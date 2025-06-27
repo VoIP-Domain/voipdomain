@@ -77,7 +77,7 @@ function gateways_install_db ( $buffer, $parameters)
                                      "  KEY `Description` (`Description`),\n" .
                                      "  KEY `Type` (`Type`),\n" .
                                      "  CONSTRAINT `Gateways_ibfk_1` FOREIGN KEY (`Currency`) REFERENCES `Currencies` (`Code`) ON UPDATE CASCADE\n" .
-                                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n");
+                                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Call gateways';\n");
 
   /**
    * Add basic system triggers

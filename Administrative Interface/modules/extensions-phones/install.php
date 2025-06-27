@@ -65,7 +65,7 @@ function extensionsphones_install_db ( $buffer, $parameters)
                                           "  KEY `Equipment` (`Equipment`),\n" .
                                           "  CONSTRAINT `PhoneAccounts_ibfk_1` FOREIGN KEY (`Extension`) REFERENCES `Extensions` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE,\n" .
                                           "  CONSTRAINT `PhoneAccounts_ibfk_2` FOREIGN KEY (`Equipment`) REFERENCES `Equipments` (`ID`) ON UPDATE CASCADE\n" .
-                                          ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n", array ( "Extensions", "Equipments"));
+                                          ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extension phone accounts';\n", array ( "Extensions", "Equipments"));
   install_add_db_table ( "PhoneCapture", "CREATE TABLE `PhoneCapture` (\n" .
                                          "  `Extension` bigint unsigned NOT NULL,\n" .
                                          "  `Group` bigint unsigned NOT NULL,\n" .
@@ -73,7 +73,7 @@ function extensionsphones_install_db ( $buffer, $parameters)
                                          "  KEY `PhoneCapture_ibfk_2` (`Group`),\n" .
                                          "  CONSTRAINT `PhoneCapture_ibfk_1` FOREIGN KEY (`Extension`) REFERENCES `Extensions` (`ID`) ON UPDATE CASCADE,\n" .
                                          "  CONSTRAINT `PhoneCapture_ibfk_2` FOREIGN KEY (`Group`) REFERENCES `Groups` (`ID`) ON UPDATE CASCADE\n" .
-                                         ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n", array ( "Extensions", "Groups"));
+                                         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extension capture groups link';\n", array ( "Extensions", "Groups"));
   install_add_db_table ( "PhoneHint", "CREATE TABLE `PhoneHint` (\n" .
                                       "  `Extension` bigint unsigned NOT NULL,\n" .
                                       "  `Hint` bigint unsigned NOT NULL,\n" .
@@ -81,7 +81,7 @@ function extensionsphones_install_db ( $buffer, $parameters)
                                       "  KEY `PhoneHint_ibfk_2` (`Hint`),\n" .
                                       "  CONSTRAINT `PhoneHint_ibfk_1` FOREIGN KEY (`Extension`) REFERENCES `Extensions` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE,\n" .
                                       "  CONSTRAINT `PhoneHint_ibfk_2` FOREIGN KEY (`Hint`) REFERENCES `Extensions` (`ID`) ON UPDATE CASCADE\n" .
-                                      ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n", array ( "Extensions"));
+                                      ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extension BLFs (hints) link';\n", array ( "Extensions"));
   install_add_db_table ( "PhoneTranshipment", "CREATE TABLE `PhoneTranshipment` (\n" .
                                               "  `Extension` bigint unsigned NOT NULL,\n" .
                                               "  `Transhipment` bigint unsigned NOT NULL,\n" .
@@ -89,7 +89,7 @@ function extensionsphones_install_db ( $buffer, $parameters)
                                               "  KEY `PhoneTranshipment_ibfk_2` (`Transhipment`),\n" .
                                               "  CONSTRAINT `PhoneTranshipment_ibfk_1` FOREIGN KEY (`Extension`) REFERENCES `Extensions` (`ID`) ON UPDATE CASCADE,\n" .
                                               "  CONSTRAINT `PhoneTranshipment_ibfk_2` FOREIGN KEY (`Transhipment`) REFERENCES `Extensions` (`ID`) ON UPDATE CASCADE\n" .
-                                              ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n", array ( "Extensions"));
+                                              ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extension transhipment link';\n", array ( "Extensions"));
   install_add_db_table ( "ExtensionPhone", "CREATE TABLE `ExtensionPhone` (\n" .
                                            "  `Extension` bigint unsigned NOT NULL,\n" .
                                            "  `Email` varchar(255) DEFAULT NULL,\n" .
@@ -103,7 +103,16 @@ function extensionsphones_install_db ( $buffer, $parameters)
                                            "  KEY `ExtensionPhone_ibfk_2` (`Group`),\n" .
                                            "  CONSTRAINT `ExtensionPhone_ibfk_1` FOREIGN KEY (`Extension`) REFERENCES `Extensions` (`ID`) ON UPDATE CASCADE,\n" .
                                            "  CONSTRAINT `ExtensionPhone_ibfk_2` FOREIGN KEY (`Group`) REFERENCES `Groups` (`ID`) ON UPDATE CASCADE\n" .
-                                           ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n", array ( "Extensions", "Groups"));
+                                           ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extension phone extra information';\n", array ( "Extensions", "Groups"));
+  install_add_db_table ( "ExtensionHunt", "CREATE TABLE `ExtensionHunt` (\n" .
+                                          "  `Extension` bigint unsigned NOT NULL,\n" .
+                                          "  `Hunt` bigint unsigned NOT NULL,\n" .
+                                          "  UNIQUE KEY `ExtensionHunt` (`Extension`, `Hunt`),\n" .
+                                          "  KEY `ExtensionHunt_ibfk_1` (`Extension`),\n" .
+                                          "  KEY `ExtensionHunt_ibfk_2` (`Hunt`),\n" .
+                                          "  CONSTRAINT `ExtensionHunt_ibfk_1` FOREIGN KEY (`Extension`) REFERENCES `Extensions` (`ID`) ON UPDATE CASCADE,\n" .
+                                          "  CONSTRAINT `ExtensionHunt_ibfk_2` FOREIGN KEY (`Hunt`) REFERENCES `Extensions` (`ID`) ON UPDATE CASCADE\n" .
+                                          ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extension hunt link';\n", array ( "Extensions"));
 
   /**
    * Add basic system triggers
@@ -123,6 +132,9 @@ function extensionsphones_install_db ( $buffer, $parameters)
   install_add_db_trigger ( "ExtensionPhoneInsert", "CREATE TRIGGER `ExtensionPhoneInsert` AFTER INSERT ON `ExtensionPhone` FOR EACH ROW CALL UpdateCache('Extensions')");
   install_add_db_trigger ( "ExtensionPhoneUpdate", "CREATE TRIGGER `ExtensionPhoneUpdate` AFTER UPDATE ON `ExtensionPhone` FOR EACH ROW CALL UpdateCache('Extensions')");
   install_add_db_trigger ( "ExtensionPhoneDelete", "CREATE TRIGGER `ExtensionPhoneDelete` AFTER DELETE ON `ExtensionPhone` FOR EACH ROW CALL UpdateCache('Extensions')");
+  install_add_db_trigger ( "ExtensionHuntInsert", "CREATE TRIGGER `ExtensionHuntInsert` AFTER INSERT ON `ExtensionHunt` FOR EACH ROW CALL UpdateCache('Extensions')");
+  install_add_db_trigger ( "ExtensionHuntUpdate", "CREATE TRIGGER `ExtensionHuntUpdate` AFTER UPDATE ON `ExtensionHunt` FOR EACH ROW CALL UpdateCache('Extensions')");
+  install_add_db_trigger ( "ExtensionHuntDelete", "CREATE TRIGGER `ExtensionHuntDelete` AFTER DELETE ON `ExtensionHunt` FOR EACH ROW CALL UpdateCache('Extensions')");
 
   /**
    * Return structured data

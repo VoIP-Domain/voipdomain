@@ -63,33 +63,15 @@ function extensions_install_db ( $buffer, $parameters)
                                        "  KEY `Type` (`Type`),\n" .
                                        "  KEY `Extensions_ibfk_1` (`Range`),\n" .
                                        "  CONSTRAINT `Extensions_ibfk_1` FOREIGN KEY (`Range`) REFERENCES `Ranges` (`ID`) ON UPDATE CASCADE\n" .
-                                       ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n", array ( "Ranges"));
-  install_add_db_table ( "BLFs", "CREATE TABLE `BLFs` (\n" .
-                                 "  `Account` bigint unsigned NOT NULL,\n" .
-                                 "  `Position` smallint(2) unsigned NOT NULL,\n" .
-                                 "  `Extension` bigint unsigned NOT NULL,\n" .
-                                 "  PRIMARY KEY (`Account`,`Position`),\n" .
-                                 "  KEY `BLFs_ibfk_2` (`Extension`),\n" .
-                                 "  CONSTRAINT `BLFs_ibfk_1` FOREIGN KEY (`Account`) REFERENCES `PhoneAccounts` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE,\n" .
-                                 "  CONSTRAINT `BLFs_ibfk_2` FOREIGN KEY (`Extension`) REFERENCES `Extensions` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" .
-                                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n", array ( "PhoneAccounts", "Extensions"));
+                                       ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extensions';\n", array ( "Ranges"));
   install_add_db_table ( "ExtensionActivity", "CREATE TABLE `ExtensionActivity` (\n" .
                                               "  `UID` bigint unsigned NOT NULL,\n" .
                                               "  `LastDialed` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',\n" .
                                               "  `LastReceived` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',\n" .
                                               "  PRIMARY KEY (`UID`),\n" .
-                                              "  KEY `ExtensionActivity_ibfk_1` (`UID`),\n" .
+                                              "  KEY `ExtensionActivity_ibfk_1` (`UID`),\n" . 
                                               "  CONSTRAINT `ExtensionActivity_ibfk_1` FOREIGN KEY (`UID`) REFERENCES `Extensions` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" .
-                                              ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n", array ( "Extensions"));
-  install_add_db_table ( "ExtensionHunt", "CREATE TABLE `ExtensionHunt` (\n" .
-                                          "  `Extension` bigint unsigned NOT NULL,\n" .
-                                          "  `Hunt` bigint unsigned NOT NULL,\n" .
-                                          "  UNIQUE KEY `ExtensionHunt` (`Extension`, `Hunt`),\n" .
-                                          "  KEY `ExtensionHunt_ibfk_1` (`Extension`),\n" .
-                                          "  KEY `ExtensionHunt_ibfk_2` (`Hunt`),\n" .
-                                          "  CONSTRAINT `ExtensionHunt_ibfk_1` FOREIGN KEY (`Extension`) REFERENCES `Extensions` (`ID`) ON UPDATE CASCADE,\n" .
-                                          "  CONSTRAINT `ExtensionHunt_ibfk_2` FOREIGN KEY (`Hunt`) REFERENCES `Extensions` (`ID`) ON UPDATE CASCADE\n" .
-                                          ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n", array ( "Extensions"));
+                                              ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extension activity';\n", array ( "Extensions"));
 
   /**
    * Add basic system triggers
@@ -97,12 +79,6 @@ function extensions_install_db ( $buffer, $parameters)
   install_add_db_trigger ( "ExtensionsInsert", "CREATE TRIGGER `ExtensionsInsert` AFTER INSERT ON `Extensions` FOR EACH ROW CALL UpdateCache('Extensions')");
   install_add_db_trigger ( "ExtensionsUpdate", "CREATE TRIGGER `ExtensionsUpdate` AFTER UPDATE ON `Extensions` FOR EACH ROW CALL UpdateCache('Extensions')");
   install_add_db_trigger ( "ExtensionsDelete", "CREATE TRIGGER `ExtensionsDelete` AFTER DELETE ON `Extensions` FOR EACH ROW CALL UpdateCache('Extensions')");
-  install_add_db_trigger ( "BLFsInsert", "CREATE TRIGGER `BLFsInsert` AFTER INSERT ON `BLFs` FOR EACH ROW CALL UpdateCache('Extensions')");
-  install_add_db_trigger ( "BLFsUpdate", "CREATE TRIGGER `BLFsUpdate` AFTER UPDATE ON `BLFs` FOR EACH ROW CALL UpdateCache('Extensions')");
-  install_add_db_trigger ( "BLFsDelete", "CREATE TRIGGER `BLFsDelete` AFTER DELETE ON `BLFs` FOR EACH ROW CALL UpdateCache('Extensions')");
-  install_add_db_trigger ( "ExtensionHuntInsert", "CREATE TRIGGER `ExtensionHuntInsert` AFTER INSERT ON `ExtensionHunt` FOR EACH ROW CALL UpdateCache('Extensions')");
-  install_add_db_trigger ( "ExtensionHuntUpdate", "CREATE TRIGGER `ExtensionHuntUpdate` AFTER UPDATE ON `ExtensionHunt` FOR EACH ROW CALL UpdateCache('Extensions')");
-  install_add_db_trigger ( "ExtensionHuntDelete", "CREATE TRIGGER `ExtensionHuntDelete` AFTER DELETE ON `ExtensionHunt` FOR EACH ROW CALL UpdateCache('Extensions')");
 
   /**
    * Return structured data

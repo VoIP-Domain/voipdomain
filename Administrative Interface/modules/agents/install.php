@@ -59,7 +59,7 @@ function agents_install_db ( $buffer, $parameters)
                                    "  `Password` char(6) NOT NULL,\n" .
                                    "  PRIMARY KEY (`ID`),\n" .
                                    "  UNIQUE KEY `Code` (`Code`)\n" .
-                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n");
+                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Call center agents';\n");
 
   /**
    * Add basic system triggers

@@ -58,7 +58,7 @@ function useravatar_install_db ( $buffer, $parameters)
                                        "  UNIQUE KEY `User` (`User`),\n" .
                                        "  KEY `UserAvatar_ibfk_1` (`User`),\n" .
                                        "  CONSTRAINT `UserAvatar_ibfk_1` FOREIGN KEY (`User`) REFERENCES `Users` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" .
-                                       ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n", array ( "Users"));
+                                       ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Administration users avatar';\n", array ( "Users"));
 
   /**
    * Add basic system triggers

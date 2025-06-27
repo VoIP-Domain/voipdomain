@@ -66,7 +66,7 @@ function authentication_install_db ( $buffer, $parameters)
                                                 "  `Expire` int(11) UNSIGNED NOT NULL,\n" .
                                                 "  `Callback` varchar(255),\n" .
                                                 "  UNIQUE KEY `AuthenticationPair` (`Cookie`, `State`)\n" .
-                                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n");
+                                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Authentication proccess cache';\n");
   install_add_db_table ( "AuthenticationToken", "CREATE TABLE `AuthenticationToken` (\n" .
                                                 "  `Token` char(32) NOT NULL,\n" .
                                                 "  `Plugin` varchar(255) NOT NULL,\n" .
@@ -78,7 +78,7 @@ function authentication_install_db ( $buffer, $parameters)
                                                 "  `UserData` text NOT NULL DEFAULT '',\n" .
                                                 "  PRIMARY KEY (`Token`),\n" .
                                                 "  KEY `Email` (`Email`)\n" .
-                                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n");
+                                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Authentication tokens';\n");
 
   /**
    * Return structured data

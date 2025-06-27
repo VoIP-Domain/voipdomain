@@ -57,7 +57,7 @@ function audios_install_db ( $buffer, $parameters)
                                    "  `Filename` varchar(255) NOT NULL,\n" .
                                    "  `Description` varchar(255) NOT NULL,\n" .
                                    "  PRIMARY KEY (`ID`)\n" .
-                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n");
+                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='System audios';\n");
 
   /**
    * Add basic system triggers

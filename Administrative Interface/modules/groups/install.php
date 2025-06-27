@@ -63,7 +63,7 @@ function groups_install_db ( $buffer, $parameters)
                                    "  KEY `Groups_ibfk_2` (`Profile`),\n" .
                                    "  CONSTRAINT `Groups_ibfk_1` FOREIGN KEY (`CostCenter`) REFERENCES `CostCenters` (`ID`) ON UPDATE CASCADE,\n" .
                                    "  CONSTRAINT `Groups_ibfk_2` FOREIGN KEY (`Profile`) REFERENCES `Profiles` (`ID`) ON UPDATE CASCADE\n" .
-                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n", array ( "CostCenters", "Profiles"));
+                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Group of extensions';\n", array ( "CostCenters", "Profiles"));
 
   /**
    * Add basic system triggers

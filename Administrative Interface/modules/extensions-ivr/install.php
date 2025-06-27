@@ -24,47 +24,49 @@
  */
 
 /**
- * VoIP Domain costcenters module install script.
+ * VoIP Domain extensions IVRs module install script.
  *
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
- * @subpackage CostCenters
+ * @subpackage Extensions IVRs
  * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * Hook to create CostCenters database
+ * Hook to create Extensions IVRs database
  */
-framework_add_hook ( "install_db", "costcenters_install_db");
+framework_add_hook ( "install_db", "extensions_ivrs_install_db");
 
 /**
- * Function to create costcenters database structure.
+ * Function to create extensions ivrs database structure.
  *
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
  * @return string Output of the generated page
  */
-function costcenters_install_db ( $buffer, $parameters)
+function extensions_ivrs_install_db ( $buffer, $parameters)
 {
   /**
    * Add basic system tables
    */
-  install_add_db_table ( "CostCenters", "CREATE TABLE `CostCenters` (\n" .
-                                        "  `ID` bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
-                                        "  `Description` varchar(255) NOT NULL,\n" .
-                                        "  `Code` varchar(10) NOT NULL,\n" .
-                                        "  PRIMARY KEY (`ID`)\n" .
-                                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Cost centers';\n");
+  install_add_db_table ( "ExtensionIVR", "CREATE TABLE `ExtensionIVR` (\n" .
+                                         "  `Extension` bigint unsigned NOT NULL,\n" .
+                                         "  `IVR` bigint unsigned NOT NULL,\n" .
+                                         "  UNIQUE KEY `Extension` (`Extension`),\n" .
+                                         "  KEY `IVR` (`IVR`),\n" .
+                                         "  CONSTRAINT `ExtensionIVR_ibfk_1` FOREIGN KEY (`Extension`) REFERENCES `Extensions` (`ID`) ON UPDATE CASCADE,\n" .
+                                         "  CONSTRAINT `ExtensionIVR_ibfk_2` FOREIGN KEY (`IVR`) REFERENCES `IVRs` (`ID`) ON UPDATE CASCADE\n" .
+                                         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extension to IVRs link';\n", array ( "Extensions", "IVRs"));
 
   /**
    * Add basic system triggers
    */
-  install_add_db_trigger ( "CostCentersInsert", "CREATE TRIGGER `CostCentersInsert` AFTER INSERT ON `CostCenters` FOR EACH ROW CALL UpdateCache('CostCenters')");
-  install_add_db_trigger ( "CostCentersUpdate", "CREATE TRIGGER `CostCentersUpdate` AFTER UPDATE ON `CostCenters` FOR EACH ROW CALL UpdateCache('CostCenters')");
-  install_add_db_trigger ( "CostCentersDelete", "CREATE TRIGGER `CostCentersDelete` AFTER DELETE ON `CostCenters` FOR EACH ROW CALL UpdateCache('CostCenters')");
+  install_add_db_trigger ( "ExtensionIVRInsert", "CREATE TRIGGER `ExtensionIVRInsert` AFTER INSERT ON `ExtensionIVR` FOR EACH ROW CALL UpdateCache('Extensions')");
+  install_add_db_trigger ( "ExtensionIVRUpdate", "CREATE TRIGGER `ExtensionIVRUpdate` AFTER UPDATE ON `ExtensionIVR` FOR EACH ROW CALL UpdateCache('Extensions')");
+  install_add_db_trigger ( "ExtensionIVRDelete", "CREATE TRIGGER `ExtensionIVRDelete` AFTER DELETE ON `ExtensionIVR` FOR EACH ROW CALL UpdateCache('Extensions')");
 
   /**
    * Return structured data

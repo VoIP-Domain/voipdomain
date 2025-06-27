@@ -58,7 +58,7 @@ function blocks_install_db ( $buffer, $parameters)
                                    "  `Number` varchar(80) NOT NULL,\n" .
                                    "  PRIMARY KEY (`ID`),\n" .
                                    "  UNIQUE KEY `Number` (`Number`)\n" .
-                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n");
+                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Blocked numbers';\n");
 
   /**
    * Add basic system triggers

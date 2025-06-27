@@ -62,7 +62,7 @@ function tokens_install_db ( $buffer, $parameters)
                                    "  `Language` varchar(255) DEFAULT '',\n" .
                                    "  PRIMARY KEY (`ID`),\n" .
                                    "  KEY `Token` (`Token`)\n" .
-                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n");
+                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='API access tokens';\n");
 
   /**
    * Add basic system triggers

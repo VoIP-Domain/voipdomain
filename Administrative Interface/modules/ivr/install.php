@@ -24,7 +24,7 @@
  */
 
 /**
- * VoIP Domain ivrs module install script.
+ * VoIP Domain IVRs module install script.
  *
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
@@ -58,7 +58,7 @@ function ivrs_install_db ( $buffer, $parameters)
                                  "  `Description` varchar(255) NOT NULL,\n" .
                                  "  PRIMARY KEY (`ID`),\n" .
                                  "  UNIQUE KEY `Name` (`Name`)\n" .
-                                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n");
+                                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='IVRs information';\n");
   install_add_db_table ( "IVRWorkflows", "CREATE TABLE `IVRWorkflows` (\n" .
                                          "  `IVR` bigint unsigned NOT NULL,\n" .
                                          "  `Name` varchar(255) NOT NULL,\n" .
@@ -67,15 +67,7 @@ function ivrs_install_db ( $buffer, $parameters)
                                          "  `Workflow` blob NOT NULL,\n" .
                                          "  UNIQUE KEY `IVRRevision` (`IVR`, `Revision`),\n" .
                                          "  CONSTRAINT `IVRWorkflows_ibfk_1` FOREIGN KEY (`IVR`) REFERENCES `IVRs` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" .
-                                         ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n", array ( "IVRs"));
-  install_add_db_table ( "ExtensionIVR", "CREATE TABLE `ExtensionIVR` (\n" .
-                                         "  `Extension` bigint unsigned NOT NULL,\n" .
-                                         "  `IVR` bigint unsigned NOT NULL,\n" .
-                                         "  UNIQUE KEY `Extension` (`Extension`),\n" .
-                                         "  KEY `IVR` (`IVR`),\n" .
-                                         "  CONSTRAINT `ExtensionIVR_ibfk_1` FOREIGN KEY (`Extension`) REFERENCES `Extensions` (`ID`) ON UPDATE CASCADE,\n" .
-                                         "  CONSTRAINT `ExtensionIVR_ibfk_2` FOREIGN KEY (`IVR`) REFERENCES `IVRs` (`ID`) ON UPDATE CASCADE\n" .
-                                         ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n", array ( "Extensions", "IVRs"));
+                                         ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='IVRs workflow history';\n", array ( "IVRs"));
 
   /**
    * Add basic system triggers
@@ -86,9 +78,6 @@ function ivrs_install_db ( $buffer, $parameters)
   install_add_db_trigger ( "IVRWorkflowsInsert", "CREATE TRIGGER `IVRWorkflowsInsert` AFTER INSERT ON `IVRWorkflows` FOR EACH ROW CALL UpdateCache('IVRs')");
   install_add_db_trigger ( "IVRWorkflowsUpdate", "CREATE TRIGGER `IVRWorkflowsUpdate` AFTER UPDATE ON `IVRWorkflows` FOR EACH ROW CALL UpdateCache('IVRs')");
   install_add_db_trigger ( "IVRWorkflowsDelete", "CREATE TRIGGER `IVRWorkflowsDelete` AFTER DELETE ON `IVRWorkflows` FOR EACH ROW CALL UpdateCache('IVRs')");
-  install_add_db_trigger ( "ExtensionIVRInsert", "CREATE TRIGGER `ExtensionIVRInsert` AFTER INSERT ON `ExtensionIVR` FOR EACH ROW CALL UpdateCache('Extensions')");
-  install_add_db_trigger ( "ExtensionIVRUpdate", "CREATE TRIGGER `ExtensionIVRUpdate` AFTER UPDATE ON `ExtensionIVR` FOR EACH ROW CALL UpdateCache('Extensions')");
-  install_add_db_trigger ( "ExtensionIVRDelete", "CREATE TRIGGER `ExtensionIVRDelete` AFTER DELETE ON `ExtensionIVR` FOR EACH ROW CALL UpdateCache('Extensions')");
 
   /**
    * Return structured data

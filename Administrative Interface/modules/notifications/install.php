@@ -66,7 +66,7 @@ function notifications_install_db ( $buffer, $parameters)
                                           "  `Expire` datetime NOT NULL,\n" .
                                           "  PRIMARY KEY (`ID`),\n" .
                                           "  KEY `Event` (`Event`)\n" .
-                                          ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n");
+                                          ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Event notifications';\n");
 
   /**
    * Add basic system triggers

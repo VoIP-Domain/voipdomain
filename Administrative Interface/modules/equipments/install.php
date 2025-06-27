@@ -81,7 +81,7 @@ function equipments_install_db ( $buffer, $parameters)
                                        "  UNIQUE KEY `UID` (`UID`),\n" .
                                        "  KEY `Vendor` (`Vendor`),\n" .
                                        "  KEY `Model` (`Model`)\n" .
-                                       ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n");
+                                       ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Vendors hardware information';\n");
 
   /**
    * Add basic system triggers
