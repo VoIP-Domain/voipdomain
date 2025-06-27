@@ -53,10 +53,10 @@ function groups_install_db ( $buffer, $parameters)
    * Add basic system tables
    */
   install_add_db_table ( "Groups", "CREATE TABLE `Groups` (\n" .
-                                   "  `ID` bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                   "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
                                    "  `Description` varchar(255) NOT NULL,\n" .
-                                   "  `CostCenter` bigint unsigned NOT NULL,\n" .
-                                   "  `Profile` bigint unsigned NOT NULL,\n" .
+                                   "  `CostCenter` bigint(20) unsigned NOT NULL,\n" .
+                                   "  `Profile` bigint(20) unsigned NOT NULL,\n" .
                                    "  PRIMARY KEY (`ID`),\n" .
                                    "  KEY `Description` (`Description`),\n" .
                                    "  KEY `Groups_ibfk_1` (`CostCenter`),\n" .

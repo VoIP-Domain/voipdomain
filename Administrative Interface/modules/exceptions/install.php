@@ -53,7 +53,7 @@ function exceptions_install_db ( $buffer, $parameters)
    * Add basic system tables
    */
   install_add_db_table ( "Exceptions", "CREATE TABLE `Exceptions` (\n" .
-                                       "  `ID` bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                       "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
                                        "  `Description` varchar(255) NOT NULL,\n" .
                                        "  `Number` varchar(80) NOT NULL,\n" .
                                        "  PRIMARY KEY (`ID`),\n" .

@@ -53,14 +53,14 @@ function ivrs_install_db ( $buffer, $parameters)
    * Add basic system tables
    */
   install_add_db_table ( "IVRs", "CREATE TABLE `IVRs` (\n" .
-                                 "  `ID` bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                 "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
                                  "  `Name` varchar(255) NOT NULL,\n" .
                                  "  `Description` varchar(255) NOT NULL,\n" .
                                  "  PRIMARY KEY (`ID`),\n" .
                                  "  UNIQUE KEY `Name` (`Name`)\n" .
                                  ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='IVRs information';\n");
   install_add_db_table ( "IVRWorkflows", "CREATE TABLE `IVRWorkflows` (\n" .
-                                         "  `IVR` bigint unsigned NOT NULL,\n" .
+                                         "  `IVR` bigint(20) unsigned NOT NULL,\n" .
                                          "  `Name` varchar(255) NOT NULL,\n" .
                                          "  `Description` varchar(255) NOT NULL,\n" .
                                          "  `Revision` int unsigned NOT NULL,\n" .

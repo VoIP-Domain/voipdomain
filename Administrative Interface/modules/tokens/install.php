@@ -53,7 +53,7 @@ function tokens_install_db ( $buffer, $parameters)
    * Add basic system tables
    */
   install_add_db_table ( "Tokens", "CREATE TABLE `Tokens` (\n" .
-                                   "  `ID` bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                   "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
                                    "  `Description` varchar(255) NOT NULL,\n" .
                                    "  `Token` char(68) NOT NULL,\n" .
                                    "  `Access` text NOT NULL,\n" .

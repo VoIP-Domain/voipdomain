@@ -53,7 +53,7 @@ function users_install_db ( $buffer, $parameters)
    * Add basic system tables
    */
   install_add_db_table ( "Users", "CREATE TABLE `Users` (\n" .
-                                  "  `ID` bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                  "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
                                   "  `Name` varchar(255) NOT NULL,\n" .
                                   "  `Username` varchar(50) NOT NULL,\n" .
                                   "  `Password` char(64) NOT NULL,\n" .
@@ -68,7 +68,7 @@ function users_install_db ( $buffer, $parameters)
                                   "  KEY `Username` (`Username`)\n" .
                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Administration users';\n");
   install_add_db_table ( "UserSFA", "CREATE TABLE `UserSFA` (\n" .
-                                    "  `UID` bigint unsigned NOT NULL,\n" .
+                                    "  `UID` bigint(20) unsigned NOT NULL,\n" .
                                     "  `Key` char(32) NOT NULL,\n" .
                                     "  `Status` enum('Pending', 'Active') NOT NULL,\n" .
                                     "  UNIQUE KEY `UID` (`UID`),\n" .
@@ -76,15 +76,15 @@ function users_install_db ( $buffer, $parameters)
                                     "  CONSTRAINT `UserSFA_ibfk_1` FOREIGN KEY (`UID`) REFERENCES `Users` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" .
                                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Administration users SFA';\n", array ( "Users"));
   install_add_db_table ( "SFACache", "CREATE TABLE `SFACache` (\n" .
-                                     "  `UID` bigint unsigned NOT NULL,\n" .
+                                     "  `UID` bigint(20) unsigned NOT NULL,\n" .
                                      "  `Key` char(32) NOT NULL,\n" .
                                      "  KEY `UID` (`UID`),\n" .
                                      "  CONSTRAINT `SFACache_ibfk_1` FOREIGN KEY (`UID`) REFERENCES `Users` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" .
                                      ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Administration users SFA cache (remember me)';\n", array ( "Users"));
   install_add_db_table ( "Sessions", "CREATE TABLE `Sessions` (\n" .
                                      "  `SID` char(64) NOT NULL,\n" .
-                                     "  `User` bigint unsigned NOT NULL,\n" .
-                                     "  `LastSeen` bigint unsigned NOT NULL,\n" .
+                                     "  `User` bigint(20) unsigned NOT NULL,\n" .
+                                     "  `LastSeen` bigint(20) unsigned NOT NULL,\n" .
                                      "  PRIMARY KEY (`SID`),\n" .
                                      "  UNIQUE KEY `SID` (`SID`),\n" .
                                      "  KEY `Sessions_ibfk_1` (`User`),\n" .

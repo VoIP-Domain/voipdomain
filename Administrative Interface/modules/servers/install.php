@@ -53,7 +53,7 @@ function servers_install_db ( $buffer, $parameters)
    * Add basic system tables
    */
   install_add_db_table ( "Servers", "CREATE TABLE `Servers` (\n" .
-                                    "  `ID` bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                    "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
                                     "  `Description` varchar(255) NOT NULL,\n" .
                                     "  `Address` varchar(255) NOT NULL,\n" .
                                     "  `Port` int(2) unsigned NOT NULL,\n" .
@@ -65,8 +65,8 @@ function servers_install_db ( $buffer, $parameters)
                                     "  PRIMARY KEY (`ID`)\n" .
                                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Remote Asterisk servers';\n");
   install_add_db_table ( "ServerBackup", "CREATE TABLE `ServerBackup` (\n" .
-                                         "  `ID` bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
-                                         "  `Server` bigint unsigned NOT NULL,\n" .
+                                         "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                         "  `Server` bigint(20) unsigned NOT NULL,\n" .
                                          "  `Description` varchar(255) NOT NULL,\n" .
                                          "  `Address` varchar(255) NOT NULL,\n" .
                                          "  `Port` int(2) unsigned NOT NULL,\n" .
@@ -77,8 +77,8 @@ function servers_install_db ( $buffer, $parameters)
                                          "  CONSTRAINT `ServerBackup_ibfk_1` FOREIGN KEY (`Server`) REFERENCES `Servers` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" .
                                          ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Remote Asterisk backup servers';\n", array ( "Servers"));
   install_add_db_table ( "Commands", "CREATE TABLE `Commands` (\n" .
-                                     "  `ID` bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
-                                     "  `Server` bigint unsigned NOT NULL,\n" .
+                                     "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                     "  `Server` bigint(20) unsigned NOT NULL,\n" .
                                      "  `Event` varchar(255) NOT NULL,\n" .
                                      "  `Data` longblob,\n" .
                                      "  PRIMARY KEY (`ID`),\n" .
@@ -86,16 +86,16 @@ function servers_install_db ( $buffer, $parameters)
                                      "  CONSTRAINT `Commands_ibfk_1` FOREIGN KEY (`Server`) REFERENCES `Servers` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" .
                                      ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Remote management commands cache';\n", array ( "Servers"));
   install_add_db_table ( "GroupedCommands", "CREATE TABLE `GroupedCommands` (\n" .
-                                            "  `ID` bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
-                                            "  `Server` bigint unsigned NOT NULL,\n" .
+                                            "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                            "  `Server` bigint(20) unsigned NOT NULL,\n" .
                                             "  `Total` smallint(2) UNSIGNED NOT NULL,\n" .
                                             "  `Left` smallint(2) UNSIGNED NOT NULL,\n" .
                                             "  PRIMARY KEY (`ID`),\n" .
                                             "  CONSTRAINT `GroupedCommands_ibfk_1` FOREIGN KEY (`Server`) REFERENCES `Servers` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" .
                                             ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Remote management grouped commands';\n", array ( "Servers"));
   install_add_db_table ( "GroupCommand", "CREATE TABLE `GroupCommand` (\n" .
-                                         "  `Group` bigint unsigned NOT NULL,\n" .
-                                         "  `Command` bigint unsigned NOT NULL,\n" .
+                                         "  `Group` bigint(20) unsigned NOT NULL,\n" .
+                                         "  `Command` bigint(20) unsigned NOT NULL,\n" .
                                          "  KEY `Group` (`Group`),\n" .
                                          "  KEY `Command` (`Command`),\n" .
                                          "  CONSTRAINT `GroupCommand_ibfk_1` FOREIGN KEY (`Group`) REFERENCES `GroupedCommands` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE,\n" .

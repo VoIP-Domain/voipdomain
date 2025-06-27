@@ -53,10 +53,10 @@ function extensions_install_db ( $buffer, $parameters)
    * Add basic system tables
    */
   install_add_db_table ( "Extensions", "CREATE TABLE `Extensions` (\n" .
-                                       "  `ID` bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                       "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
                                        "  `Number` smallint(2) unsigned NOT NULL,\n" .
                                        "  `Description` varchar(50) NOT NULL,\n" .
-                                       "  `Range` bigint unsigned NOT NULL,\n" .
+                                       "  `Range` bigint(20) unsigned NOT NULL,\n" .
                                        "  `Type` varchar(50) NOT NULL,\n" .
                                        "  PRIMARY KEY (`ID`),\n" .
                                        "  UNIQUE KEY `Number` (`Number`),\n" .
@@ -65,7 +65,7 @@ function extensions_install_db ( $buffer, $parameters)
                                        "  CONSTRAINT `Extensions_ibfk_1` FOREIGN KEY (`Range`) REFERENCES `Ranges` (`ID`) ON UPDATE CASCADE\n" .
                                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extensions';\n", array ( "Ranges"));
   install_add_db_table ( "ExtensionActivity", "CREATE TABLE `ExtensionActivity` (\n" .
-                                              "  `UID` bigint unsigned NOT NULL,\n" .
+                                              "  `UID` bigint(20) unsigned NOT NULL,\n" .
                                               "  `LastDialed` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',\n" .
                                               "  `LastReceived` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',\n" .
                                               "  PRIMARY KEY (`UID`),\n" .

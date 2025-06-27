@@ -53,7 +53,7 @@ function profiles_install_db ( $buffer, $parameters)
    * Add basic system tables
    */
   install_add_db_table ( "Profiles", "CREATE TABLE `Profiles` (\n" .
-                                     "  `ID` bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                     "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
                                      "  `Description` varchar(255) NOT NULL,\n" .
                                      "  `Domain` varchar(255) NOT NULL,\n" .
                                      "  `Country` int(2) unsigned NOT NULL,\n" .
@@ -61,7 +61,7 @@ function profiles_install_db ( $buffer, $parameters)
                                      "  `Offset` int(2) NOT NULL,\n" .
                                      "  `AreaCode` smallint(2) unsigned NOT NULL,\n" .
                                      "  `Prefix` smallint(1) unsigned NOT NULL,\n" .
-                                     "  `NGGW` bigint unsigned NOT NULL,\n" .
+                                     "  `NGGW` bigint(20) unsigned NOT NULL,\n" .
                                      "  `DefaultGW` text DEFAULT '',\n" .
                                      "  `BlockedGW` text DEFAULT '',\n" .
                                      "  `Language` varchar(5) NOT NULL DEFAULT 'en_US',\n" .

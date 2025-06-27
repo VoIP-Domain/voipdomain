@@ -53,7 +53,7 @@ function equipments_install_db ( $buffer, $parameters)
    * Add basic system tables
    */
   install_add_db_table ( "Equipments", "CREATE TABLE `Equipments` (\n" .
-                                       "  `ID` bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                       "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
                                        "  `UID` varchar(255) NOT NULL,\n" .
                                        "  `Vendor` varchar(255) NOT NULL,\n" .
                                        "  `Model` varchar(255) NOT NULL,\n" .

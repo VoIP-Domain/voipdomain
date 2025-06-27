@@ -53,7 +53,7 @@ function agents_install_db ( $buffer, $parameters)
    * Add basic system tables
    */
   install_add_db_table ( "Agents", "CREATE TABLE `Agents` (\n" .
-                                   "  `ID` bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                   "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
                                    "  `Name` varchar(255) NOT NULL,\n" .
                                    "  `Code` char(4) NOT NULL,\n" .
                                    "  `Password` char(6) NOT NULL,\n" .

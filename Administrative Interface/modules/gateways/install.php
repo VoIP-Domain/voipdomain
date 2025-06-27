@@ -53,7 +53,7 @@ function gateways_install_db ( $buffer, $parameters)
    * Add basic system tables
    */
   install_add_db_table ( "Gateways", "CREATE TABLE `Gateways` (\n" .
-                                     "  `ID` bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                     "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
                                      "  `Description` varchar(255) NOT NULL,\n" .
                                      "  `Active` boolean NOT NULL DEFAULT false,\n" .
                                      "  `Config` varchar(255) NOT NULL,\n" .

@@ -391,7 +391,7 @@ function install_populate ( $buffer, $parameters)
                                    "  UNIQUE KEY `Key_key` (`Key`)\n" .
                                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='System configuration entries';\n");
   install_add_db_table ( "Files", "CREATE TABLE `Files` (\n" .
-                                  "  `ID` bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                  "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
                                   "  `Type` enum('fares') NOT NULL,\n" .
                                   "  `Name` varchar(255) DEFAULT NULL,\n" .
                                   "  `Content` longblob,\n" .

@@ -53,7 +53,7 @@ function costcenters_install_db ( $buffer, $parameters)
    * Add basic system tables
    */
   install_add_db_table ( "CostCenters", "CREATE TABLE `CostCenters` (\n" .
-                                        "  `ID` bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                        "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
                                         "  `Description` varchar(255) NOT NULL,\n" .
                                         "  `Code` varchar(10) NOT NULL,\n" .
                                         "  PRIMARY KEY (`ID`)\n" .

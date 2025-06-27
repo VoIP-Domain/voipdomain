@@ -53,9 +53,9 @@ function ranges_install_db ( $buffer, $parameters)
    * Add basic system tables
    */
   install_add_db_table ( "Ranges", "CREATE TABLE `Ranges` (\n" .
-                                   "  `ID` bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                   "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
                                    "  `Description` varchar(255) NOT NULL,\n" .
-                                   "  `Server` bigint unsigned NOT NULL,\n" .
+                                   "  `Server` bigint(20) unsigned NOT NULL,\n" .
                                    "  `Start` smallint(2) unsigned NOT NULL,\n" .
                                    "  `Finish` smallint(2) unsigned NOT NULL,\n" .
                                    "  PRIMARY KEY (`ID`),\n" .

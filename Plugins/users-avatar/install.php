@@ -53,7 +53,7 @@ function useravatar_install_db ( $buffer, $parameters)
    * Add basic system tables
    */
   install_add_db_table ( "UserAvatar", "CREATE TABLE `UserAvatar` (\n" .
-                                       "  `User` bigint unsigned NOT NULL,\n" .
+                                       "  `User` bigint(20) unsigned NOT NULL,\n" .
                                        "  `Avatar` char(23) NOT NULL,\n" .
                                        "  UNIQUE KEY `User` (`User`),\n" .
                                        "  KEY `UserAvatar_ibfk_1` (`User`),\n" .

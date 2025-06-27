@@ -53,7 +53,7 @@ function queues_install_db ( $buffer, $parameters)
    * Add basic system tables
    */
   install_add_db_table ( "Queues", "CREATE TABLE `Queues` (\n" .
-                                   "  `ID` bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                   "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
                                    "  `Description` varchar(255) NOT NULL,\n" .
                                    "  `Name` varchar(255) NOT NULL,\n" .
                                    "  `Strategy` enum('ringall','roundrobin','leastrecent','fewestcalls','random','rrmemory') NOT NULL DEFAULT 'ringall',\n" .
@@ -61,7 +61,7 @@ function queues_install_db ( $buffer, $parameters)
                                    "  UNIQUE KEY `Name` (`Name`)\n" .
                                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Call center queues';\n");
   install_add_db_table ( "QueueMembers", "CREATE TABLE `QueueMembers` (\n" .
-                                         "  `Queue` bigint unsigned NOT NULL,\n" .
+                                         "  `Queue` bigint(20) unsigned NOT NULL,\n" .
                                          "  `Member` varchar(255) NOT NULL,\n" .
                                          "  KEY `Queue` (`Queue`),\n" .
                                          "  CONSTRAINT `QueueMembers_ibfk_1` FOREIGN KEY (`Queue`) REFERENCES `Queues` (`ID`) ON UPDATE CASCADE ON DELETE CASCADE\n" .

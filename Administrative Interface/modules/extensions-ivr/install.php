@@ -53,8 +53,8 @@ function extensions_ivrs_install_db ( $buffer, $parameters)
    * Add basic system tables
    */
   install_add_db_table ( "ExtensionIVR", "CREATE TABLE `ExtensionIVR` (\n" .
-                                         "  `Extension` bigint unsigned NOT NULL,\n" .
-                                         "  `IVR` bigint unsigned NOT NULL,\n" .
+                                         "  `Extension` bigint(20) unsigned NOT NULL,\n" .
+                                         "  `IVR` bigint(20) unsigned NOT NULL,\n" .
                                          "  UNIQUE KEY `Extension` (`Extension`),\n" .
                                          "  KEY `IVR` (`IVR`),\n" .
                                          "  CONSTRAINT `ExtensionIVR_ibfk_1` FOREIGN KEY (`Extension`) REFERENCES `Extensions` (`ID`) ON UPDATE CASCADE,\n" .

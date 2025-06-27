@@ -53,7 +53,7 @@ function audios_install_db ( $buffer, $parameters)
    * Add basic system tables
    */
   install_add_db_table ( "Audios", "CREATE TABLE `Audios` (\n" .
-                                   "  `ID` bigint unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                   "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
                                    "  `Filename` varchar(255) NOT NULL,\n" .
                                    "  `Description` varchar(255) NOT NULL,\n" .
                                    "  PRIMARY KEY (`ID`)\n" .
