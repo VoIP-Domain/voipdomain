@@ -88,6 +88,18 @@ if ( ! file_exists ( "/etc/voipdomain/webinterface.conf"))
 $_in["version"] = "1.0";
 
 /**
+ * Initialize session variables
+ */
+$_in["session"] = array ();
+$_in["session"]["Authenticated"] = false;
+$_in["session"]["Method"] = NULL;
+$_in["session"]["Tenant"] = NULL;
+$_in["session"]["Language"] = NULL;
+$_in["session"]["Timezone"] = NULL;
+$_in["session"]["Permissions"] = array ();
+$_in["session"]["Data"] = array ();
+
+/**
  * Initialize page variables
  */
 $_in["page"]["title"] = "";
@@ -164,12 +176,6 @@ if ( ini_get ( "magic_quotes_gpc"))
     $_COOKIE[$var] = stripslashes ( $val);
   }
 }
-
-/**
- * Clear authentication variables
- */
-$_in["session"] = array ();
-$_in["session"]["type"] = "unauthenticated";
 
 /**
  * Default template javascript codes to load
@@ -1079,7 +1085,7 @@ function api_call ( $path, $route, $parameters = array ())
      * Check if path is allowed for non authenticated users, and if user is
      * logged in or not.
      */
-    if ( $entry[$route]["unauthenticated"] == false && ! array_key_exists ( "token", $_in) && ! array_key_exists ( "session", $_in) && ! array_key_exists ( "server", $_in) && ! array_key_exists ( "authtoken", $_in))
+    if ( $entry[$route]["unauthenticated"] == false && ! $_in["session"]["Authenticated"])
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 401 Unauthorized");
       exit ();

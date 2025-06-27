@@ -243,7 +243,7 @@ function avatar_user_get ( $buffer, $parameters)
   $data = array ();
   if ( $avatar = $result->fetch_assoc ()["Avatar"])
   {
-    if ( ( preg_match ( "/(^|\|)" . $avatar . "($|\|)/", $_COOKIE[$_in["general"]["cookie"] . "_avatar"]) || ( array_key_exists ( "token", $_in) || array_key_exists ( "session", $_in) || array_key_exists ( "server", $_in))) && is_readable ( $_in["general"]["storagedir"] . "/avatars/profile-" . $avatar . ".jpg"))
+    if ( ( preg_match ( "/(^|\|)" . $avatar . "($|\|)/", $_COOKIE[$_in["general"]["cookie"] . "_avatar"]) || $_in["session"]["Authenticated"]) && is_readable ( $_in["general"]["storagedir"] . "/avatars/profile-" . $avatar . ".jpg"))
     {
       $data["Avatar"] = base64_encode ( file_get_contents ( $_in["general"]["storagedir"] . "/avatars/profile-" . $avatar . ".jpg"));
       $data["Hash"] = md5 ( file_get_contents ( $_in["general"]["storagedir"] . "/avatars/profile-" . $avatar . ".jpg"));
@@ -428,9 +428,9 @@ function avatar_user_remove ( $buffer, $parameters)
   /**
    * Update session
    */
-  if ( $_in["session"]["ID"] == $parameters["ID"])
+  if ( $_in["session"]["Method"] == "Session" && $_in["session"]["Data"]["ID"] == $parameters["ID"])
   {
-    $_in["session"]["Avatar"] = '';
+    $_in["session"]["Data"]["Avatar"] = "";
   }
 
   /**
@@ -632,7 +632,10 @@ function avatar_user_set ( $buffer, $parameters)
   /**
    * Update session
    */
-  $_in["session"]["Avatar"] = $avatar;
+  if ( $_in["session"]["Method"] == "Session" && $_in["session"]["Data"]["ID"] == $parameters["ID"])
+  {
+    $_in["session"]["Data"]["Avatar"] = $avatar;
+  }
 
   /**
    * Format data

@@ -280,18 +280,19 @@ header ( "Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token,  Acc
 /**
  * First, check for user authentication, token or internal access
  */
-if ( ! array_key_exists ( "permissions", $_in))
-{
-  $_in["permissions"] = array ();
-}
 if ( $_SERVER["REMOTE_ADDR"] == "127.0.0.1")
 {
-  $_in["permissions"][] = "Internal";
+  $_in["session"]["Authenticated"] = true;
+  $_in["session"]["Method"] = "Internal";
+  $_in["session"]["Permissions"][] = "Internal";
+  $_in["session"]["Language"] = $_in["general"]["language"];
 }
 if ( $_in["mode"] == "install")
 {
-  $_in["permissions"][] = "Internal";
-  $_in["permissions"][] = "Install";
+  $_in["session"]["Authenticated"] = true;
+  $_in["session"]["Method"] = "Install";
+  $_in["session"]["Permissions"][] = "Install";
+  $_in["session"]["Language"] = $_in["general"]["language"];
 }
 if ( array_key_exists ( "HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_TOKEN", $_SERVER) || array_key_exists ( "token", $_GET))
 {
@@ -315,19 +316,29 @@ if ( array_key_exists ( "HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_
   }
 
   /**
-   * Create token permissions variable
+   * Set session variables
    */
-  $_in["token"] = $token;
-  $_in["permissions"][] = "Token";
-  foreach ( explode ( ",", $_in["token"]["Permissions"]) as $permission)
+  $_in["session"]["Authenticated"] = true;
+  $_in["session"]["Method"] = "Token";
+  $_in["session"]["Language"] = $token["Language"] ? $token["Language"] : $_in["general"]["language"];
+  $_in["session"]["Data"]["ID"] = $token["ID"];
+  $_in["session"]["Data"]["Description"] = $token["Description"];
+  $_in["session"]["Data"]["Access"] = $token["Access"];
+  $_in["session"]["Data"]["Expires"] = $token["Expires"];
+  $_in["session"]["Permissions"][] = "Token";
+
+  /**
+   * Inject token permissions in session
+   */
+  foreach ( explode ( ",", $token["Permissions"]) as $permission)
   {
-    $_in["permissions"][] = $permission;
+    $_in["session"]["Permissions"][] = $permission;
   }
 
   /**
    * Set system language if token has different language than system default
    */
-  if ( ! empty ( $_in["token"]["Language"]) && array_key_exists ( $_in["token"]["Language"], $_in["languages"]))
+  if ( ! empty ( $token["Language"]) && array_key_exists ( $token["Language"], $_in["languages"]))
   {
     $_in["general"]["language"] = $_in["token"]["Language"];
   }
@@ -354,10 +365,15 @@ if ( array_key_exists ( "HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_
   }
 
   /**
-   * Create server permissions variable
+   * Set session variables
    */
-  $_in["server"] = $server;
-  $_in["permissions"][] = "Server";
+  $_in["session"]["Authenticated"] = true;
+  $_in["session"]["Method"] = "Server";
+  $_in["session"]["Language"] = $_in["general"]["language"];
+  $_in["session"]["Data"]["ID"] = $server["ID"];
+  $_in["session"]["Data"]["Description"] = $server["Description"];
+  $_in["session"]["Data"]["PublicKey"] = $server["PublicKey"];
+  $_in["session"]["Permissions"][] = "Server";
 }
 if ( array_key_exists ( $_in["general"]["cookie"] . "_authtoken", $_COOKIE))
 {
@@ -374,45 +390,76 @@ if ( array_key_exists ( $_in["general"]["cookie"] . "_authtoken", $_COOKIE))
   }
 
   /**
-   * Create authentication token permissions variable
+   * Set session variables
    */
-  $_in["authtoken"] = $authtoken;
-  $_in["permissions"][] = "AuthToken";
+  $_in["session"]["Authenticated"] = true;
+  $_in["session"]["Method"] = "AuthToken";
+  $_in["session"]["Language"] = $_in["general"]["language"];
+  $_in["session"]["Data"]["Token"] = $authtoken["Token"];
+  $_in["session"]["Data"]["Plugin"] = $authtoken["Plugin"];
+  $_in["session"]["Data"]["Email"] = $authtoken["Email"];
+  $_in["session"]["Data"]["IssueDate"] = $authtoken["IssueDate"];
+  $_in["session"]["Data"]["LastSeen"] = $authtoken["LastSeen"];
+  $_in["session"]["Data"]["Expires"] = $authtoken["Expires"];
+  $_in["session"]["Permissions"][] = "AuthToken";
 }
-if ( $_in["mode"] == "normal" && ! array_key_exists ( "HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_TOKEN", $_SERVER) && ! array_key_exists ( "token", $_GET) && ! array_key_exists ( "HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_SID", $_SERVER) && ! in_array ( "Internal", $_in["permissions"]))
+if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE))
 {
-  $_in["session"] = array ();
-  if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE) && $result = @$_in["mysql"]["id"]->query ( "SELECT `Sessions`.`SID`, `Sessions`.`LastSeen`, `Users`.* FROM `Sessions`, `Users` WHERE `Sessions`.`SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_COOKIE[$_in["general"]["cookie"]]) . "' AND `Sessions`.`User` = `Users`.`ID`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Sessions`.`SID`, `Sessions`.`LastSeen`, `Users`.* FROM `Sessions`, `Users` WHERE `Sessions`.`SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_COOKIE[$_in["general"]["cookie"]]) . "' AND `Sessions`.`User` = `Users`.`ID`"))
   {
-    $_in["session"] = $result->fetch_assoc ();
-    /**
-     * Check if session has expired
-     */
-    if ( $_in["general"]["timeout"] > 0 && $_in["session"]["LastSeen"] + $_in["general"]["timeout"] < time ())
-    {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 401 Unauthorized");
-      echo json_encode ( array ( "event" => "session_timeout"));
-      exit ();
-    }
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! $session = $result->fetch_assoc ())
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 401 Unauthorized");
+    exit ();
+  }
 
-    /**
-     * Update session last seen
-     */
-    $_in["session"]["LastSeen"] = time ();
-    @$_in["mysql"]["id"]->query ( "UPDATE `Sessions` SET `LastSeen` = '" . $_in["mysql"]["id"]->real_escape_string ( time ()) . "' WHERE `SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["SID"]) . "'");
+  /**
+   * Check if session has expired
+   */
+  if ( $_in["general"]["timeout"] > 0 && $session["LastSeen"] + $_in["general"]["timeout"] < time ())
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 401 Unauthorized");
+    echo json_encode ( array ( "event" => "session_timeout"));
+    exit ();
+  }
 
-    /**
-     * Set system language if user has different language than system default
-     */
-    if ( ! empty ( $_in["session"]["Language"]) && array_key_exists ( $_in["session"]["Language"], $_in["languages"]))
-    {
-      $_in["general"]["language"] = $_in["session"]["Language"];
-    }
+  /**
+   * Update session last seen
+   */
+  @$_in["mysql"]["id"]->query ( "UPDATE `Sessions` SET `LastSeen` = '" . $_in["mysql"]["id"]->real_escape_string ( time ()) . "' WHERE `SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $session["SID"]) . "'");
 
-    /**
-     * Create user permissions variable
-     */
-    $_in["permissions"] = array_merge ( $_in["permissions"], array_merge ( array ( "User"), json_decode ( $_in["session"]["Permissions"], true)));
+  /**
+   * Set session variables
+   */
+  $_in["session"]["Authenticated"] = true;
+  $_in["session"]["Method"] = "Session";
+  $_in["session"]["Language"] = $session["Language"];
+  $_in["session"]["Data"]["ID"] = $session["ID"];
+  $_in["session"]["Data"]["Username"] = $session["Username"];
+  $_in["session"]["Data"]["Name"] = $session["Name"];
+  $_in["session"]["Data"]["Email"] = $session["Email"];
+  $_in["session"]["Data"]["Since"] = $session["Since"];
+  $_in["session"]["Data"]["LastSeen"] = $session["LastSeen"];
+  $_in["session"]["Data"]["Expires"] = time () + $_in["general"]["timeout"];
+  $_in["session"]["Permissions"][] = "User";
+
+  /**
+   * Inject user permissions in session
+   */
+  foreach ( json_decode ( $_in["session"]["Permissions"], true) as $permission)
+  {
+    $_in["session"]["Permissions"][] = $permission;
+  }
+
+  /**
+   * Set system language if user has different language than system default
+   */
+  if ( ! empty ( $session["Language"]) && array_key_exists ( $session["Language"], $_in["languages"]))
+  {
+    $_in["general"]["language"] = $session["Language"];
   }
 }
 
@@ -519,7 +566,7 @@ if ( $inputRoute == "help")
      */
     foreach ( $apiRoutes as $route)
     {
-      if ( $entry[$route]["unauthenticated"] == false && ! array_key_exists ( "token", $_in) && ! array_key_exists ( "session", $_in) && ! array_key_exists ( "server", $_in) && ! array_key_exists ( "authtoken", $_in))
+      if ( $entry[$route]["unauthenticated"] == false && ! $_session["Authenticated"])
       {
         continue;
       }

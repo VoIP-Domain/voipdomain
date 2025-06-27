@@ -1084,7 +1084,7 @@ function users_remove ( $buffer, $parameters)
   /**
    * Check if are removing itself
    */
-  if ( $parameters["ID"] == $_in["session"]["ID"])
+  if ( $in["session"]["Method"] == "Session" && $_in["session"]["Data"]["ID"] == $parameters["ID"])
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1261,6 +1261,15 @@ function users_add_sfa ( $buffer, $parameters)
   global $_in;
 
   /**
+   * If not authenticated using Session method, just fail
+   */
+  if ( $_in["session"]["Method"] != "Session")
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+
+  /**
    * If no code sent, check to create a key to the user
    */
   if ( ! array_key_exists ( "Code", $parameters))
@@ -1268,7 +1277,7 @@ function users_add_sfa ( $buffer, $parameters)
     /**
      * Check if user has a SFA
      */
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `UserSFA` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["ID"]) . "' AND `Status` = 'Active'"))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `UserSFA` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["ID"]) . "' AND `Status` = 'Active'"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -1282,7 +1291,7 @@ function users_add_sfa ( $buffer, $parameters)
     /**
      * Remove any older SFA not active to the user
      */
-    if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `UserSFA` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["ID"]) . "' AND `Status` != 'Active'"))
+    if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `UserSFA` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["ID"]) . "' AND `Status` != 'Active'"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -1296,7 +1305,7 @@ function users_add_sfa ( $buffer, $parameters)
     /**
      * Add new SFA with pending status
      */
-    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `UserSFA` (`UID`, `Key`, `Status`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["ID"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $key) . "', 'Pending')"))
+    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `UserSFA` (`UID`, `Key`, `Status`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["ID"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $key) . "', 'Pending')"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -1305,13 +1314,13 @@ function users_add_sfa ( $buffer, $parameters)
     /**
      * Return Key and URI to the user
      */
-    return array ( "Key" => $key, "URI" => rfc6238_uri ( substr ( $_in["session"]["Email"], 0, strpos ( $_in["session"]["Email"], "@")), substr ( $_in["session"]["Email"], strpos ( $_in["session"]["Email"], "@") + 1), $key, "VoIP Domain"));
+    return array ( "Key" => $key, "URI" => rfc6238_uri ( substr ( $_in["session"]["Data"]["Email"], 0, strpos ( $_in["session"]["Data"]["Email"], "@")), substr ( $_in["session"]["Data"]["Email"], strpos ( $_in["session"]["Data"]["Email"], "@") + 1), $key, "VoIP Domain"));
   }
 
   /**
    * The code was sent, validate it
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `UserSFA` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["ID"]) . "' AND `Status` = 'Pending'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `UserSFA` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["ID"]) . "' AND `Status` = 'Pending'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1326,7 +1335,7 @@ function users_add_sfa ( $buffer, $parameters)
       /**
        * Promote key from Pending to Active
        */
-      if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `UserSFA` SET `Status` = 'Active' WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["ID"]) . "' AND `Key` = '" . $_in["mysql"]["id"]->real_escape_string ( $data["Key"]) . "'"))
+      if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `UserSFA` SET `Status` = 'Active' WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["ID"]) . "' AND `Key` = '" . $_in["mysql"]["id"]->real_escape_string ( $data["Key"]) . "'"))
       {
         header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
         exit ();
@@ -1336,7 +1345,7 @@ function users_add_sfa ( $buffer, $parameters)
        * Key successfully authenticated
        */
       header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-      header ( "Location: " . $_in["api"]["baseurl"] . "/users/" . $_in["session"]["ID"]);
+      header ( "Location: " . $_in["api"]["baseurl"] . "/users/" . $_in["session"]["Data"]["ID"]);
       return $buffer;
     }
   }
@@ -1392,9 +1401,18 @@ function users_remove_sfa ( $buffer, $parameters)
   global $_in;
 
   /**
+   * If not authenticated using Session method, just fail
+   */
+  if ( $_in["session"]["Method"] != "Session")
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+
+  /**
    * Check if user has a SFA
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `UserSFA` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["ID"]) . "' AND `Status` = 'Active'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `UserSFA` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["ID"]) . "' AND `Status` = 'Active'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1408,7 +1426,7 @@ function users_remove_sfa ( $buffer, $parameters)
   /**
    * Remove any SFA cache to the user
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `SFACache` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["ID"]) . "'"))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `SFACache` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["ID"]) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1417,7 +1435,7 @@ function users_remove_sfa ( $buffer, $parameters)
   /**
    * Remove active SFA to the user
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `UserSFA` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["ID"]) . "' AND `Status` = 'Active'"))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `UserSFA` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["ID"]) . "' AND `Status` = 'Active'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

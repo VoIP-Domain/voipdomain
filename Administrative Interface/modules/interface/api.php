@@ -903,17 +903,41 @@ function user_login ( $buffer, $parameters)
   }
 
   /**
-   * Create global configuration session information
+   * Set session variables
    */
-  $_in["session"] = $userdata;
-  $_in["session"]["SID"] = hash ( "sha256", uniqid ( "", true));
-  $_in["session"]["LastSeen"] = time ();
-  $_in["session"]["Permissions"] = json_decode ( $_in["session"]["Permissions"], true);
+  $_in["session"]["Authenticated"] = true;
+  $_in["session"]["Method"] = "Session";
+  $_in["session"]["Language"] = $userdata["Language"];
+  $_in["session"]["Data"]["ID"] = $userdata["ID"];
+  $_in["session"]["Data"]["Username"] = $userdata["Username"];
+  $_in["session"]["Data"]["Name"] = $userdata["Name"];
+  $_in["session"]["Data"]["Email"] = $userdata["Email"];
+  $_in["session"]["Data"]["Since"] = $userdata["Since"];
+  $_in["session"]["Data"]["LastSeen"] = time ();
+  $_in["session"]["Data"]["Expires"] = time () + $_in["general"]["timeout"];
+  $_in["session"]["Permissions"][] = "User";
+
+  /**
+   * Inject user permissions in session
+   */
+  foreach ( json_decode ( $userdata["Permissions"], true) as $permission)
+  {
+    $_in["session"]["Permissions"][] = $permission;
+  }
+
+  /**
+   * Set system language if user has different language than system default
+   */
+  if ( ! empty ( $userdata["Language"]) && array_key_exists ( $userdata["Language"], $_in["languages"]))
+  {
+    $_in["general"]["language"] = $userdata["Language"];
+  }
 
   /**
    * Create session at database
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Sessions` (`SID`, `User`, `LastSeen`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["SID"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["ID"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( time ()) . ")"))
+  $SID = hash ( "sha256", uniqid ( "", true));
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Sessions` (`SID`, `User`, `LastSeen`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $SID) . "', " . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["ID"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( time ()) . ")"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -930,7 +954,7 @@ function user_login ( $buffer, $parameters)
   /**
    * Start user session.
    */
-  setcookie ( $_in["general"]["cookie"], $_in["session"]["SID"], 0, "/" . ( PHP_VERSION_ID < 70300 ? "; SameSite=Strict" : ""));
+  setcookie ( $_in["general"]["cookie"], $SID, 0, "/" . ( PHP_VERSION_ID < 70300 ? "; SameSite=Strict" : ""));
 
   /**
    * Execute finish hook if exist

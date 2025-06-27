@@ -57,24 +57,32 @@ function avatar_authentication_success ( $buffer, $parameters)
   global $_in;
 
   /**
+   * If not authenticated using Session method, just return
+   */
+  if ( $_in["session"]["Method"] != "Session")
+  {
+    return $buffer;
+  }
+
+  /**
    * Fetch user avatar from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Avatar` FROM `UserAvatar` WHERE `User` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $_in["session"]["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Avatar` FROM `UserAvatar` WHERE `User` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $_in["session"]["Data"]["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  if ( ! $_in["session"]["Avatar"] = $result->fetch_assoc ()["Avatar"])
+  if ( ! $_in["session"]["Data"]["Avatar"] = $result->fetch_assoc ()["Avatar"])
   {
-    $_in["session"]["Avatar"] = "";
+    $_in["session"]["Data"]["Avatar"] = "";
   }
 
   /**
    * Verify if avatar is enabled to user browser, otherwise, add/update the cookie
    */
-  if ( ! empty ( $_in["session"]["Avatar"]) && ( ! array_key_exists ( $_in["general"]["cookie"] . "_avatar", $_COOKIE) || ! preg_match ( "/(^|\|)" . $_in["session"]["Avatar"] . "($|\|)/", $_COOKIE[$_in["general"]["cookie"] . "_avatar"])))
+  if ( ! empty ( $_in["session"]["Data"]["Avatar"]) && ( ! array_key_exists ( $_in["general"]["cookie"] . "_avatar", $_COOKIE) || ! preg_match ( "/(^|\|)" . $_in["session"]["Data"]["Avatar"] . "($|\|)/", $_COOKIE[$_in["general"]["cookie"] . "_avatar"])))
   {
-    setcookie ( $_in["general"]["cookie"] . "_avatar", ( array_key_exists ( $_in["general"]["cookie"] . "_avatar", $_COOKIE) && ! empty ( $_COOKIE[$_in["general"]["cookie"] . "_avatar"]) ? $_COOKIE[$_in["general"]["cookie"] . "_avatar"] . "|" : "") . $_in["session"]["Avatar"], time () + 31536000, "/" . ( PHP_VERSION_ID < 70300 ? "; SameSite=Strict" : ""));
+    setcookie ( $_in["general"]["cookie"] . "_avatar", ( array_key_exists ( $_in["general"]["cookie"] . "_avatar", $_COOKIE) && ! empty ( $_COOKIE[$_in["general"]["cookie"] . "_avatar"]) ? $_COOKIE[$_in["general"]["cookie"] . "_avatar"] . "|" : "") . $_in["session"]["Data"]["Avatar"], time () + 31536000, "/" . ( PHP_VERSION_ID < 70300 ? "; SameSite=Strict" : ""));
   }
 
   /**
@@ -97,16 +105,24 @@ function avatar_session_extend ( $buffer, $parameters)
   global $_in;
 
   /**
+   * If not authenticated using Session method, just return
+   */
+  if ( $_in["session"]["Method"] != "Session")
+  {
+    return $buffer;
+  }
+
+  /**
    * Fetch user avatar from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Avatar` FROM `UserAvatar` WHERE `User` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $_in["session"]["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Avatar` FROM `UserAvatar` WHERE `User` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $_in["session"]["Data"]["ID"])))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  if ( ! $_in["session"]["Avatar"] = $result->fetch_assoc ()["Avatar"])
+  if ( ! $_in["session"]["Data"]["Avatar"] = $result->fetch_assoc ()["Avatar"])
   {
-    $_in["session"]["Avatar"] = "";
+    $_in["session"]["Data"]["Avatar"] = "";
   }
 
   /**

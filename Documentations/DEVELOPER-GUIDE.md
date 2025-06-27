@@ -180,4 +180,46 @@ Enable *debug* module permissions for your account inside the Web UI.
 * `Daemons/router.php` – main event router.
 * `Daemons/monitor.php` – AMI listener, call detail collector.
 
+## 10. API session variable
+
+Session authentication is storaged at $_in["session"]. The structure is:
+
+* $_in["session"]["Authenticated"] → If user is authenticated or not. Before authentication proccess, it will be set as FALSE and $_in["session"]["Method"] will be empty.
+* $_in["session"]["Method"] → Authentication method used. Could be: None (no authentication, after authentication process and in a unauthenticated allowed endpoint), Session (user session), Token (access token), Server (Managed server authentication), AuthToken (extension authentication), Internal (internal system call) or Install (installation proccess)
+* $_in["session"]["Tenant"] → ID of session tenant context.
+* $_in["session"]["Language"] → Session language.
+* $_in["session"]["Timezone"] → Session timezone.
+* $_in["session"]["Permissions"] → Session permissions array.
+* $_in["session"]["Data"] → Variable session data array. The values will depend on authentication method used:
+  * No authentication:
+    - None
+  * Session:
+    - ID → User ID
+    - Username → User username
+    - Name → User name
+    - Email → User email
+    - Since → Date/time user created
+  * Token:
+    - ID → Token ID
+    - Description → Token description
+    - Access → CIDR access restrition
+    - Expires → Date/time of token expiration
+  * Server:
+    - ID → Server ID
+    - Description → Server description
+    - PublicKey → Server public key
+  * AuthToken:
+    - Token → Authentication token
+    - Plugin → Authentication plugin used
+    - Email → Authentication email
+    - IssueDate → Date/time of token creation
+    - LastSeen → Date/time last token activity
+    - Expires → Date/time of token expiration
+  * Internal:
+    - None
+  * Install:
+    - None
+
+**Note**: The authentication methods can be extended through plugins or in new software releases.
+
 Happy hacking! 🍻
