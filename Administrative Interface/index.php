@@ -228,16 +228,49 @@ if ( $_SERVER["REQUEST_URI"] == "/auth" || substr ( $_SERVER["REQUEST_URI"], 0, 
 /**
  * Check if user is authenticated
  */
-$_in["session"] = array ();
-if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE) && $result = @$_in["mysql"]["id"]->query ( "SELECT `Sessions`.`SID`, `Sessions`.`LastSeen`, `Users`.* FROM `Sessions` LEFT JOIN `Users` ON `Sessions`.`User` = `Users`.`ID` WHERE `Sessions`.`SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_COOKIE[$_in["general"]["cookie"]]) . "'"))
+if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE))
 {
-  $_in["session"] = $result->fetch_assoc ();
-  $_in["session"]["Permissions"] = json_decode ( $_in["session"]["Permissions"], true);
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Sessions`.`SID`, `Sessions`.`LastSeen`, `Users`.* FROM `Sessions` LEFT JOIN `Users` ON `Sessions`.`User` = `Users`.`ID` WHERE `Sessions`.`SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_COOKIE[$_in["general"]["cookie"]]) . "'"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! $session = $result->fetch_assoc ())
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 401 Unauthorized");
+    exit ();
+  }
 
   /**
-   * Create user permissions variable
+   * Set session variables
    */
-  $_in["permissions"] = array_merge ( array ( "User"), $_in["session"]["Permissions"]);
+  $_in["session"]["Authenticated"] = true;
+  $_in["session"]["Method"] = "Session";
+  $_in["session"]["Language"] = $session["Language"];
+  $_in["session"]["Data"]["ID"] = $session["ID"];
+  $_in["session"]["Data"]["Username"] = $session["Username"];
+  $_in["session"]["Data"]["Name"] = $session["Name"];
+  $_in["session"]["Data"]["Email"] = $session["Email"];
+  $_in["session"]["Data"]["Since"] = $session["Since"];
+  $_in["session"]["Data"]["LastSeen"] = $session["LastSeen"];
+  $_in["session"]["Data"]["Expires"] = time () + $_in["general"]["timeout"];
+  $_in["session"]["Permissions"][] = "User";
+
+  /**
+   * Inject user permissions in session
+   */
+  foreach ( json_decode ( $_in["session"]["Permissions"], true) as $permission)
+  {
+    $_in["session"]["Permissions"][] = $permission;
+  }
+
+  /**
+   * Set system language if user has different language than system default
+   */
+  if ( ! empty ( $session["Language"]) && array_key_exists ( $session["Language"], $_in["languages"]))
+  {
+    $_in["general"]["language"] = $session["Language"];
+  }
 
   /**
    * Call start hook if exist
@@ -255,7 +288,7 @@ if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE) && $result = @$_in[
   /**
    * Check if session has expired
    */
-  if ( $_in["general"]["timeout"] > 0 && $_in["session"]["LastSeen"] + $_in["general"]["timeout"] < time ())
+  if ( $_in["general"]["timeout"] > 0 && $_in["session"]["Data"]["LastSeen"] + $_in["general"]["timeout"] < time ())
   {
     /**
      * Call session timeout hook if exist
@@ -289,16 +322,7 @@ if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE) && $result = @$_in[
   /**
    * Update session last seen
    */
-  $_in["session"]["LastSeen"] = time ();
-  @$_in["mysql"]["id"]->query ( "UPDATE `Sessions` SET `LastSeen` = '" . $_in["mysql"]["id"]->real_escape_string ( time ()) . "' WHERE `SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["SID"]) . "'");
-
-  /**
-   * Set system language if user has different language than system default
-   */
-  if ( ! empty ( $_in["session"]["Language"]) && array_key_exists ( $_in["session"]["Language"], $_in["languages"]))
-  {
-    $_in["general"]["language"] = $_in["session"]["Language"];
-  }
+  @$_in["mysql"]["id"]->query ( "UPDATE `Sessions` SET `LastSeen` = '" . $_in["mysql"]["id"]->real_escape_string ( time ()) . "' WHERE `SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $session["SID"]) . "'");
 
   /**
    * Call post hook if exist
@@ -322,7 +346,7 @@ if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE) && $result = @$_in[
  */
 if ( ! array_key_exists ( "HTTP_X_INFRAMEWORK", $_SERVER) || $_SERVER["HTTP_X_INFRAMEWORK"] != "page")
 {
-  if ( array_key_exists ( "SID", $_in["session"]))
+  if ( $_in["session"]["Authenticated"])
   {
     echo framework_call ( "framework_page_generate");
   } else {
@@ -362,7 +386,7 @@ foreach ( $_paths as $entrypath => $entry)
    * Check if path is allowed for non authenticated users, and if user is
    * logged in or not.
    */
-  if ( $entry["options"]["unauthenticated"] == false && ! array_key_exists ( "SID", $_in["session"]))
+  if ( $entry["options"]["unauthenticated"] == false && ! $_in["session"]["Authenticated"])
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 403 Forbidden");
     exit ();

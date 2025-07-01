@@ -51,30 +51,112 @@ require_once ( "includes/config.inc.php");
 /**
  * Check if user is authenticated
  */
-$_in["session"] = array ();
-if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE) && $result = @$_in["mysql"]["id"]->query ( "SELECT `Sessions`.`SID`, `Sessions`.`LastSeen`, `Users`.* FROM `Sessions`, `Users` WHERE `Sessions`.`SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_COOKIE[$_in["general"]["cookie"]]) . "' AND `Sessions`.`User` = `Users`.`ID`"))
+if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE))
 {
-  $_in["session"] = $result->fetch_assoc ();
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Sessions`.`SID`, `Sessions`.`LastSeen`, `Users`.* FROM `Sessions` LEFT JOIN `Users` ON `Sessions`.`User` = `Users`.`ID` WHERE `Sessions`.`SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_COOKIE[$_in["general"]["cookie"
+]]) . "'"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! $session = $result->fetch_assoc ())
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 401 Unauthorized");
+    exit ();
+  }
+
+  /**
+   * Set session variables
+   */
+  $_in["session"]["Authenticated"] = true;
+  $_in["session"]["Method"] = "Session";
+  $_in["session"]["Language"] = $session["Language"];
+  $_in["session"]["Data"]["ID"] = $session["ID"];
+  $_in["session"]["Data"]["Username"] = $session["Username"];
+  $_in["session"]["Data"]["Name"] = $session["Name"];
+  $_in["session"]["Data"]["Email"] = $session["Email"];
+  $_in["session"]["Data"]["Since"] = $session["Since"];
+  $_in["session"]["Data"]["LastSeen"] = $session["LastSeen"];
+  $_in["session"]["Data"]["Expires"] = time () + $_in["general"]["timeout"];
+  $_in["session"]["Permissions"][] = "User";
+
+  /**
+   * Inject user permissions in session
+   */
+  foreach ( json_decode ( $_in["session"]["Permissions"], true) as $permission)
+  {
+    $_in["session"]["Permissions"][] = $permission;
+  }
+
+  /**
+   * Set system language if user has different language than system default
+   */
+  if ( ! empty ( $session["Language"]) && array_key_exists ( $session["Language"], $_in["languages"]))
+  {
+    $_in["general"]["language"] = $session["Language"];
+  }
+
+  /**
+   * Call start hook if exist
+   */
+  if ( framework_has_hook ( "user_session_validate_start"))
+  {
+    $parameters = framework_call ( "user_session_validate_start", $parameters);
+  }
+
+  /**
+   * Extend session variables
+   */
+  filters_call ( "session_extend");
 
   /**
    * Check if session has expired
    */
-  if ( $_in["general"]["timeout"] > 0 && $_in["session"]["LastSeen"] + $_in["general"]["timeout"] < time ())
+  if ( $_in["general"]["timeout"] > 0 && $_in["session"]["Data"]["LastSeen"] + $_in["general"]["timeout"] < time ())
   {
+    /**
+     * Call session timeout hook if exist
+     */
+    if ( framework_has_hook ( "user_session_timeout"))
+    {
+      framework_call ( "user_session_timeout", $parameters);
+    }
+
+    /**
+     * Return error
+     */
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
 
   /**
-   * Update session last seen
+   * Call pre hook if exist
    */
-  $_in["session"]["LastSeen"] = time ();
-  @$_in["mysql"]["id"]->query ( "UPDATE `Sessions` SET `LastSeen` = '" . $_in["mysql"]["id"]->real_escape_string ( time ()) . "' WHERE `SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["SID"]) . "'");
+  if ( framework_has_hook ( "user_session_validate_pre"))
+  {
+    $parameters = framework_call ( "user_session_validate_pre", $parameters);
+  }
 
   /**
-   * Create user permissions variable
+   * Update session last seen
    */
-  $_in["permissions"] = array_merge ( array ( "user" => true), json_decode ( $_in["session"]["Permissions"], true));
+  @$_in["mysql"]["id"]->query ( "UPDATE `Sessions` SET `LastSeen` = '" . $_in["mysql"]["id"]->real_escape_string ( time ()) . "' WHERE `SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $session["SID"]) . "'");
+
+  /**
+   * Call post hook if exist
+   */
+  if ( framework_has_hook ( "user_session_validate_post"))
+  {
+    framework_call ( "user_session_validate_post", $parameters, false, $data);
+  }
+
+  /**
+   * Execute finish hook if exist
+   */
+  if ( framework_has_hook ( "user_session_validate_finish"))
+  {
+    framework_call ( "user_session_validate_finish", $parameters);
+  }
 }
 
 /**

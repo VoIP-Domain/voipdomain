@@ -937,7 +937,7 @@ function user_login ( $buffer, $parameters)
    * Create session at database
    */
   $SID = hash ( "sha256", uniqid ( "", true));
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Sessions` (`SID`, `User`, `LastSeen`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $SID) . "', " . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["ID"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( time ()) . ")"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Sessions` (`SID`, `User`, `LastSeen`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $SID) . "', " . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["ID"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( time ()) . ")"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -954,7 +954,7 @@ function user_login ( $buffer, $parameters)
   /**
    * Start user session.
    */
-  setcookie ( $_in["general"]["cookie"], $SID, 0, "/" . ( PHP_VERSION_ID < 70300 ? "; SameSite=Strict" : ""));
+  setcookie ( $_in["general"]["cookie"], $SID, 0, "/");
 
   /**
    * Execute finish hook if exist
@@ -968,7 +968,7 @@ function user_login ( $buffer, $parameters)
    * Return OK
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . $_in["api"]["baseurl"] . "/users/" . $_in["session"]["ID"]);
+  header ( "Location: " . $_in["api"]["baseurl"] . "/users/" . $_in["session"]["Data"]["ID"]);
   return $buffer;
 }
 
@@ -1088,8 +1088,12 @@ function user_logout ( $buffer, $parameters)
   /**
    * Remove system cookie and destroy global configuration session information
    */
-  setcookie ( $_in["general"]["cookie"], null, -1, "/" . ( PHP_VERSION_ID < 70300 ? "; SameSite=Strict" : ""));
-  $_in["session"] = array ();
+  setcookie ( $_in["general"]["cookie"], null, -1, "/");
+  $_in["session"]["Authenticated"] = false;
+  $_in["session"]["Method"] = "";
+  $_in["session"]["Language"] = $_in["general"]["language"];
+  $_in["session"]["Data"] = array ();
+  $_in["session"]["Permissions"] = array ();
 
   /**
    * Call post hook if exist
