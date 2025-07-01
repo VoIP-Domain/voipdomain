@@ -1,0 +1,25 @@
+{
+  "libs": [
+    "browser",
+    "jQuery"
+  ],
+  "loadEagerly": [
+    "src/js/**/*.js"
+  ],
+  "dontLoad": [
+    "test/**/*",
+    "dist/**/*",
+    "node_modules/**/*",
+    "maps/**/*"
+  ],
+  "plugin": {
+    "complete_strings": {
+      "maxLength": 15
+    },
+    "node": {},
+    "doc_comment": {
+      "fullDocs": true,
+      "strong": true
+    }
+  }
+}
