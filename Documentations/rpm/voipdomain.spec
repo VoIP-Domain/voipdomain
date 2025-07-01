@@ -25,6 +25,7 @@ Requires: php-json
 %endif
 Requires: php-mbstring
 Requires: php-gd
+Requires: php-xml
 Requires: php-fpm
 Requires: php-pecl-gearman
 Requires: nginx
