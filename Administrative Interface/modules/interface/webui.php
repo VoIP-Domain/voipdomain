@@ -440,7 +440,7 @@ function framework_page_generate ( $content)
   $body .= "                <img src=\"/img/avatar.jpg\" class=\"img-circle avatar\" alt=\"\">\n";
   $body .= "                <p>\n";
   $body .= "                  " . strip_tags ( $_in["session"]["Data"]["Name"]) . " - " . ( in_array ( "Administrator", $_in["session"]["Permissions"]) ? __ ( "Administrator") : __ ( "User")) . "\n";
-  $body .= "                  <small>" . __ ( "Since") . " " . date ( __ ( "m/d/Y"), mktime ( 0, 0, 0, substr ( $_in["session"]["Data"]["Since"], 5, 2), substr ( $_in["session"]["Data"]["Since"], 8, 2), substr ( $_in["session"]["Since"], 0, 4))) . "</small>\n";
+  $body .= "                  <small>" . __ ( "Since") . " " . date ( __ ( "m/d/Y"), mktime ( 0, 0, 0, substr ( $_in["session"]["Data"]["Since"], 5, 2), substr ( $_in["session"]["Data"]["Since"], 8, 2), substr ( $_in["session"]["Data"]["Since"], 0, 4))) . "</small>\n";
   $body .= "                </p>\n";
   $body .= "              </li>\n";
   $body .= "              <li class=\"user-footer\">\n";
