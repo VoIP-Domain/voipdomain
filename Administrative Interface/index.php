@@ -259,7 +259,7 @@ if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE))
   /**
    * Inject user permissions in session
    */
-  foreach ( json_decode ( $_in["session"]["Permissions"], true) as $permission)
+  foreach ( json_decode ( $session["Permissions"], true) as $permission)
   {
     $_in["session"]["Permissions"][] = $permission;
   }
