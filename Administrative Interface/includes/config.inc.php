@@ -1099,7 +1099,7 @@ function api_call ( $path, $route, $parameters = array ())
       $authenticated = false;
       foreach ( $entry[$route]["permissions"] as $permission)
       {
-        if ( in_array ( $permission, $_in["permissions"]))
+        if ( in_array ( $permission, $_in["session"]["Permissions"]))
         {
           $authenticated = true;
         }
