@@ -63,7 +63,6 @@ function users_install_db ( $buffer, $parameters)
                                   "  `Email` varchar(255) NOT NULL,\n" .
                                   "  `Since` datetime NOT NULL,\n" .
                                   "  `Language` varchar(255) DEFAULT '',\n" .
-                                  "  `OTPKey` char(32) DEFAULT '',\n" .
                                   "  PRIMARY KEY (`ID`),\n" .
                                   "  KEY `Username` (`Username`)\n" .
                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Administration users';\n");
