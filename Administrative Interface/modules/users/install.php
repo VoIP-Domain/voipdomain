@@ -75,12 +75,6 @@ function users_install_db ( $buffer, $parameters)
                                     "  KEY `UserSFA_ibfk_1` (`UID`),\n" .
                                     "  CONSTRAINT `UserSFA_ibfk_1` FOREIGN KEY (`UID`) REFERENCES `Users` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" .
                                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Administration users SFA';\n", array ( "Users"));
-  install_add_db_table ( "SFACache", "CREATE TABLE `SFACache` (\n" .
-                                     "  `UID` bigint(20) unsigned NOT NULL,\n" .
-                                     "  `Key` char(32) NOT NULL,\n" .
-                                     "  KEY `UID` (`UID`),\n" .
-                                     "  CONSTRAINT `SFACache_ibfk_1` FOREIGN KEY (`UID`) REFERENCES `Users` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" .
-                                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Administration users SFA cache (remember me)';\n", array ( "Users"));
   install_add_db_table ( "Sessions", "CREATE TABLE `Sessions` (\n" .
                                      "  `SID` char(64) NOT NULL,\n" .
                                      "  `User` bigint(20) unsigned NOT NULL,\n" .

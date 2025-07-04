@@ -1426,7 +1426,7 @@ function users_remove_sfa ( $buffer, $parameters)
   /**
    * Remove any SFA cache to the user
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `SFACache` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["ID"]) . "'"))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `UserSFA` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["ID"]) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
