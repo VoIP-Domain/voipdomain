@@ -40,8 +40,8 @@
 framework_add_hook ( "authentication_page", "authentication_page", IN_HOOK_INSERT_FIRST);
 framework_add_path ( "/config/authentication", "authentication_page");
 
-framework_add_hook ( "authentication_page_generate", "authentication_page_generate", IN_HOOK_INSERT_FIRST);
-framework_add_path ( "/auth", "authentication_page_generate");
+framework_add_hook ( "authentication_login_page_generate", "authentication_login_page_generate", IN_HOOK_INSERT_FIRST);
+framework_add_path ( "/auth", "authentication_login_page_generate");
 
 /**
  * Function to create the authentication page code.
@@ -292,7 +292,7 @@ function authentication_page ( $output, $parameters)
  * @param array $parameters Optional parameters to the function
  * @return string Output of the generated page
  */
-function authentication_page_generate ( $buffer, $parameters)
+function authentication_login_page_generate ( $buffer, $parameters)
 {
   global $_in;
 
