@@ -1037,22 +1037,6 @@ function user_logout ( $buffer, $parameters)
   $data = array ();
 
   /**
-   * Check if code was already added
-   */
-  if ( ! array_key_exists ( "Code", $data))
-  {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Agents` WHERE `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "'"))
-    {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
-    }
-    if ( $result->num_rows != 0)
-    {
-      $data["Code"] = __ ( "The provided code was already in use.");
-    }
-  }
-
-  /**
    * Call validate hook if exist
    */
   if ( framework_has_hook ( "user_logout_validate"))
