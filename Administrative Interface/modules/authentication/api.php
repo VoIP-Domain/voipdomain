@@ -155,7 +155,7 @@ function authentication_view ( $buffer, $parameters)
   /**
    * Get authentication from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Key` = 'Authentication'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'Authentication'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -274,7 +274,7 @@ framework_add_api_call (
   array ( "Modify", "Edit"),
   "authentication_edit",
   array (
-    "permissions" => array ( "User", "authentication_edit"),
+    "permissions" => array ( "Administrator", "authentication_edit"),
     "title" => __ ( "Change authentication"),
     "description" => __ ( "Change system authentication.")
   )
@@ -362,7 +362,7 @@ function authentication_edit ( $buffer, $parameters)
    * Change configuration entry
    */
   $tmp = json_encode ( array ( "Status" => $parameters["Status"], "Background" => $parameters["Background"], "Password" => $parameters["Password"]));
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Data`) VALUES ('Authentication', '" . $_in["mysql"]["id"]->real_escape_string ( $tmp) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( $tmp) . "'"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Authentication', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $tmp) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( $tmp) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -413,6 +413,12 @@ framework_add_hook (
           "description" => __ ( "The password of user to authenticate."),
           "required" => true,
           "example" => __ ( "mypassword")
+        ),
+        "Context" => array (
+          "type" => "string",
+          "description" => __ ( "The tenant domain of user to authenticate. If not provided, the server hostname will be used."),
+          "required" => false,
+          "example" => "voipdomain.io"
         )
       )
     ),
@@ -477,23 +483,29 @@ function authentication_password ( $buffer, $parameters)
   global $_in;
 
   /**
+   * Get current tenant ID
+   */
+  $tenantid = get_tenant ( ! empty ( $parameters["Context"]) ? $parameters["Context"] : $_SERVER["HTTP_HOST"]);
+
+  /**
    * Get authentication config from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Key` LIKE 'Authentication'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $tenantid . " AND `Key` LIKE 'Authentication'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  if ( ! $config = json_decode ( $result->fetch_assoc ()["Data"], true))
+  if ( ! $config = $result->fetch_assoc ())
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
     exit ();
   }
+  $config["Data"] = json_decode ( $config["Data"], true);
 
   /**
    * Return if password authentication is disabled
    */
-  if ( $config["Password"] === false)
+  if ( $config["Data"]["Password"] === false)
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
     exit ();
@@ -566,7 +578,7 @@ function authentication_password ( $buffer, $parameters)
   /**
    * Validate user into database
    */
-  if ( ! $result = $_in["mysql"]["id"]->query ( "SELECT * FROM `ExtensionPhone` WHERE `Email` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "' AND Password = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "'"))
+  if ( ! $result = $_in["mysql"]["id"]->query ( "SELECT `ExtensionPhone`.* FROM `ExtensionPhone` LEFT JOIN `Extensions` ON `Extensions`.`ID` = `ExtensionPhone`.`Extension` WHERE `Extension`.`Tenant` = " . (int) $tenantid . " AND `ExtensionPhone`.`Email` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "' AND `ExtensionPhone`.`Password` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -592,7 +604,7 @@ function authentication_password ( $buffer, $parameters)
    */
   $token = bin2hex ( openssl_random_pseudo_bytes ( 16));
   $cookie = bin2hex ( openssl_random_pseudo_bytes ( 8));
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `AuthenticationToken` (`Token`, `Plugin`, `Email`, `IssueDate`, `LastSeen`, `Expires`, `TokenData`, `UserData`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $cookie) . "', 'Password', '" . $_in["mysql"]["id"]->real_escape_string ( $userInfo["Email"]) . "', NOW(), NOW(), '" . $_in["mysql"]["id"]->real_escape_string ( date ( "Y-m-d h:i:s", time () + $_in["general"]["timeout"])) . "', '', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $userInfo)) . "')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `AuthenticationToken` (`Token`, `Tenant`, `Plugin`, `Email`, `IssueDate`, `LastSeen`, `Expires`, `TokenData`, `UserData`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $cookie) . "', " . (int) $tenantid . ", 'Password', '" . $_in["mysql"]["id"]->real_escape_string ( $userInfo["Email"]) . "', NOW(), NOW(), '" . $_in["mysql"]["id"]->real_escape_string ( date ( "Y-m-d h:i:s", time () + $_in["general"]["timeout"])) . "', '', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $userInfo)) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -624,6 +636,39 @@ function authentication_password ( $buffer, $parameters)
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
   header ( "Location: " . ( $callback ? $callback : "/auth") . "?Message=" . urlencode ( __ ( "User authenticated!")) . "&MessageType=info");
+  return $buffer;
+}
+
+/**
+ * Implement tenant addition hook
+ */
+framework_add_hook ( "tenants_add_post", "authentication_tenant_add_post");
+
+/**
+ * Function to add default authentication settings to new tenant.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function authentication_tenant_add_post ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Add authentication settings
+   */
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Authentication', " . (int) $parameters["ID"] . ", '{\"Status\":false,\"Background\":1,\"Password\":true}}')"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+
+  /**
+   * Return data to user
+   */
   return $buffer;
 }
 ?>

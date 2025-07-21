@@ -241,7 +241,7 @@ function extensions_view_ivr ( $buffer, $parameters)
   /**
    * Fetch IVR information
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `IVRs`.`ID`, `IVRs`.`Name`, `IVRs`.`Description` FROM `IVRs` LEFT JOIN `ExtensionIVR` ON `ExtensionIVR`.`IVR` = `IVRs`.`ID` WHERE `ExtensionIVR`.`Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `IVRs`.`ID`, `IVRs`.`Name`, `IVRs`.`Description` FROM `IVRs` LEFT JOIN `ExtensionIVR` ON `ExtensionIVR`.`IVR` = `IVRs`.`ID` WHERE `IVRs`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionIVR`.`Extension` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -291,7 +291,7 @@ function extensions_ivr_validate ( $buffer, $parameters)
    */
   if ( ! array_key_exists ( "IVR", $buffer))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `IVRs` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["IVR"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `IVRs` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["IVR"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -307,7 +307,7 @@ function extensions_ivr_validate ( $buffer, $parameters)
    */
   if ( array_key_exists ( "ORIGINAL", $buffer))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `IVR` FROM `ExtensionIVR` WHERE `ExtensionIVR`.`Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `IVR` FROM `ExtensionIVR` LEFT JOIN `Extensions` ON `IVR`.`Extension` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionIVR`.`Extension` = " . (int) $parameters["ID"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -341,7 +341,7 @@ function extensions_add_ivr_post ( $buffer, $parameters)
   /**
    * Add new extension IVR record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `ExtensionIVR` (`IVR`, `Extension`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $parameters["IVR"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . ")"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `ExtensionIVR` (`IVR`, `Extension`) VALUES (" . (int) $parameters["IVR"] . ", " . (int) $parameters["ID"] . ")"))
   {
     framework_call ( "extensions_add_abort", $parameters);
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
@@ -351,7 +351,7 @@ function extensions_add_ivr_post ( $buffer, $parameters)
   /**
    * Get IVR name
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `IVRs` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["IVR"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `IVRs` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["IVR"]))
   {
     framework_call ( "extensions_add_abort", $parameters);
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
@@ -398,7 +398,7 @@ function extensions_edit_ivr_post ( $buffer, $parameters)
    */
   if ( ! array_compare ( $parameters["ORIGINAL"]["IVR"], $parameters["IVR"]))
   {
-    if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `ExtensionIVR` SET `IVR` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["IVR"]) . " WHERE `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+    if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `ExtensionIVR` SET `IVR` = " . (int) $parameters["IVR"] . " WHERE `Extension` = " . (int) $parameters["ID"]))
     {
       framework_call ( "extensions_edit_abort", $parameters);
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
@@ -409,7 +409,7 @@ function extensions_edit_ivr_post ( $buffer, $parameters)
   /**
    * Get IVR name
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `IVRs` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["IVR"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `IVRs` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["IVR"]))
   {
     framework_call ( "extensions_edit_abort", $parameters);
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
@@ -454,7 +454,7 @@ function extensions_remove_ivr_pre ( $buffer, $parameters)
   /**
    * Get extension IVR to record
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `IVR` FROM `ExtensionIVR` WHERE `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `IVR` FROM `ExtensionIVR` WHERE `Extension` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -468,7 +468,7 @@ function extensions_remove_ivr_pre ( $buffer, $parameters)
   /**
    * Remove extension IVR from database
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ExtensionIVR` WHERE `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ExtensionIVR` WHERE `Extension` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -477,7 +477,7 @@ function extensions_remove_ivr_pre ( $buffer, $parameters)
   /**
    * Get extension number to notify server
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Number` FROM `Extensions` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Number` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -522,7 +522,7 @@ function extensions_ivr_server_reconfig ( $buffer, $parameters)
   /**
    * Fetch all extension IVRs and send to server
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ExtensionIVR`.`IVR`, `Extensions`.`Number` FROM `ExtensionIVR` LEFT JOIN `Extensions` ON `ExtensionIVR`.`Extension` = `Extensions`.`ID` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` WHERE `Ranges`.`Server` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ExtensionIVR`.`IVR`, `Extensions`.`Number` FROM `ExtensionIVR` LEFT JOIN `Extensions` ON `ExtensionIVR`.`Extension` = `Extensions`.`ID` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Ranges`.`Server` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

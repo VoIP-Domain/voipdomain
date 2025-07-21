@@ -56,7 +56,7 @@ framework_add_filter ( "extensions_edit_subpages", "extensions_phones_edit_subpa
  */
 function phones_object ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "object" => "extension_phone", "path" => "/extensions", "icon" => "phone", "label" => "info", "text" => array ( "singular" => __ ( "Phone"), "plural" => __ ( "Phones")))));
+  return array_merge ( (array) $buffer, array ( array ( "object" => "extension_phone", "type" => "human", "path" => "/extensions", "icon" => "phone", "label" => "info", "text" => array ( "singular" => __ ( "Phone"), "plural" => __ ( "Phones")))));
 }
 
 /**
@@ -78,11 +78,11 @@ function get_extensions_phone ( $buffer, $parameters)
   $where = "";
   if ( array_key_exists ( "ID", $parameters) && $parameters["called_filter"] == "get_extensions")
   {
-    $where .= " AND `Extensions`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
+    $where .= " AND `Extensions`.`ID` = " . (int) $parameters["ID"];
   }
   if ( array_key_exists ( "Number", $parameters))
   {
-    $where .= " AND `Extensions`.`Number` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Number"]);
+    $where .= " AND `Extensions`.`Number` = " . (int) $parameters["Number"];
   }
   if ( array_key_exists ( "Description", $parameters))
   {
@@ -90,21 +90,21 @@ function get_extensions_phone ( $buffer, $parameters)
   }
   if ( array_key_exists ( "Type", $parameters))
   {
-    $where .= " AND `Extensions`.`Type` = " . $_in["mysql"]["id"]->real_escape_string ( str_replace ( " ", "%", trim ( strip_tags ( $parameters["Type"])))) . "%'";
+    $where .= " AND `Extensions`.`Type` = '%" . $_in["mysql"]["id"]->real_escape_string ( str_replace ( " ", "%", trim ( strip_tags ( $parameters["Type"])))) . "%'";
   }
   if ( array_key_exists ( "Range", $parameters))
   {
-    $where .= " AND `Extensions`.`Range` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Range"]);
+    $where .= " AND `Extensions`.`Range` = " . (int) $parameters["Range"];
   }
   if ( array_key_exists ( "Group", $parameters))
   {
-    $where .= " AND `ExtensionPhone`.`Group` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Group"]);
+    $where .= " AND `ExtensionPhone`.`Group` = " . (int) $parameters["Group"];
   }
 
   /**
    * Check into database if queue exists
    */
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT " . ( $parameters["called_filter"] == "get_extensions" ? "`Extensions`.*, `ExtensionPhone`.`Email`, `ExtensionPhone`.`Group`, `ExtensionPhone`.`Permissions`, `ExtensionPhone`.`Options`, `ExtensionPhone`.`CostCenter`" : "COUNT(*) AS `Total`") . " FROM `Extensions` LEFT JOIN `ExtensionPhone` ON `Extensions`.`ID` = `ExtensionPhone`.`Extension`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT " . ( $parameters["called_filter"] == "get_extensions" ? "`Extensions`.*, `ExtensionPhone`.`Email`, `ExtensionPhone`.`Group`, `ExtensionPhone`.`Permissions`, `ExtensionPhone`.`Options`, `ExtensionPhone`.`CostCenter`" : "COUNT(*) AS `Total`") . " FROM `Extensions` LEFT JOIN `ExtensionPhone` ON `Extensions`.`ID` = `ExtensionPhone`.`Extension` WHERE `Extensions`.`Tenant` = " . (int) get_tenant () . $where))
   {
     if ( $parameters["called_filter"] == "get_extensions")
     {

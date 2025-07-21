@@ -54,6 +54,7 @@ function notifications_install_db ( $buffer, $parameters)
    */
   install_add_db_table ( "Notifications", "CREATE TABLE `Notifications` (\n" .
                                           "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                          "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
                                           "  `Description` varchar(255) NOT NULL,\n" .
                                           "  `Event` varchar(255) NOT NULL,\n" .
                                           "  `Filters` text NOT NULL,\n" .
@@ -65,8 +66,10 @@ function notifications_install_db ( $buffer, $parameters)
                                           "  `RelaxSSL` enum('Y','N') NOT NULL DEFAULT 'N',\n" .
                                           "  `Expire` datetime NOT NULL,\n" .
                                           "  PRIMARY KEY (`ID`),\n" .
-                                          "  KEY `Event` (`Event`)\n" .
-                                          ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Event notifications';\n");
+                                          "  KEY `Event` (`Tenant`,`Event`),\n" .
+                                          "  KEY `Notifications_ibfk_1` (`Tenant`),\n" . 
+                                          "  CONSTRAINT `Notifications_ibfk_1` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" . 
+                                          ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Event notifications';\n", array ( "Tenants"));
 
   /**
    * Add basic system triggers

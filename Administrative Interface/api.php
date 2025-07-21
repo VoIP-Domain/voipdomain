@@ -284,6 +284,7 @@ if ( $_SERVER["REMOTE_ADDR"] == "127.0.0.1")
 {
   $_in["session"]["Authenticated"] = true;
   $_in["session"]["Method"] = "Internal";
+  $_in["session"]["Tenant"] = null;
   $_in["session"]["Permissions"][] = "Internal";
   $_in["session"]["Language"] = $_in["general"]["language"];
 }
@@ -291,6 +292,7 @@ if ( $_in["mode"] == "install")
 {
   $_in["session"]["Authenticated"] = true;
   $_in["session"]["Method"] = "Install";
+  $_in["session"]["Tenant"] = null;
   $_in["session"]["Permissions"][] = "Install";
   $_in["session"]["Language"] = $_in["general"]["language"];
 }
@@ -320,6 +322,7 @@ if ( array_key_exists ( "HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_
    */
   $_in["session"]["Authenticated"] = true;
   $_in["session"]["Method"] = "Token";
+  $_in["session"]["Tenant"] = $token["Tenant"];
   $_in["session"]["Language"] = $token["Language"] ? $token["Language"] : $_in["general"]["language"];
   $_in["session"]["Data"]["ID"] = $token["ID"];
   $_in["session"]["Data"]["Description"] = $token["Description"];
@@ -369,6 +372,7 @@ if ( array_key_exists ( "HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_
    */
   $_in["session"]["Authenticated"] = true;
   $_in["session"]["Method"] = "Server";
+  $_in["session"]["Tenant"] = $server["Tenant"];
   $_in["session"]["Language"] = $_in["general"]["language"];
   $_in["session"]["Data"]["ID"] = $server["ID"];
   $_in["session"]["Data"]["Description"] = $server["Description"];
@@ -394,6 +398,7 @@ if ( array_key_exists ( $_in["general"]["cookie"] . "_authtoken", $_COOKIE))
    */
   $_in["session"]["Authenticated"] = true;
   $_in["session"]["Method"] = "AuthToken";
+  $_in["session"]["Tenant"] = $authtoken["Tenant"];
   $_in["session"]["Language"] = $_in["general"]["language"];
   $_in["session"]["Data"]["Token"] = $authtoken["Token"];
   $_in["session"]["Data"]["Plugin"] = $authtoken["Plugin"];
@@ -436,6 +441,7 @@ if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE))
    */
   $_in["session"]["Authenticated"] = true;
   $_in["session"]["Method"] = "Session";
+  $_in["session"]["Tenant"] = $session["Tenant"];
   $_in["session"]["Language"] = $session["Language"];
   $_in["session"]["Data"]["ID"] = $session["ID"];
   $_in["session"]["Data"]["Username"] = $session["Username"];
@@ -445,6 +451,66 @@ if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE))
   $_in["session"]["Data"]["LastSeen"] = $session["LastSeen"];
   $_in["session"]["Data"]["Expires"] = time () + $_in["general"]["timeout"];
   $_in["session"]["Permissions"][] = "User";
+
+  /**
+   * Inject user permissions in session
+   */
+  foreach ( json_decode ( $session["Permissions"], true) as $permission)
+  {
+    $_in["session"]["Permissions"][] = $permission;
+  }
+
+  /**
+   * Set system language if user has different language than system default
+   */
+  if ( ! empty ( $session["Language"]) && array_key_exists ( $session["Language"], $_in["languages"]))
+  {
+    $_in["general"]["language"] = $session["Language"];
+  }
+}
+if ( array_key_exists ( $_in["general"]["cookie"] . "_adm", $_COOKIE))
+{
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `AdminSessions`.`SID`, `AdminSessions`.`LastSeen`, `Admins`.* FROM `AdminSessions`, `Admins` WHERE `AdminSessions`.`SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_COOKIE[$_in["general"]["cookie"] . "_adm"]) . "' AND `AdminSessions`.`Admin` = `Admins`.`ID`"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! $session = $result->fetch_assoc ())
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 401 Unauthorized");
+    exit ();
+  }
+
+  /**
+   * Check if session has expired
+   */
+  if ( $_in["general"]["timeout"] > 0 && $session["LastSeen"] + $_in["general"]["timeout"] < time ())
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 401 Unauthorized");
+    echo json_encode ( array ( "event" => "session_timeout"));
+    exit ();
+  }
+
+  /**
+   * Update session last seen
+   */
+  @$_in["mysql"]["id"]->query ( "UPDATE `AdminSessions` SET `LastSeen` = '" . $_in["mysql"]["id"]->real_escape_string ( time ()) . "' WHERE `SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $session["SID"]) . "'");
+
+  /**
+   * Set session variables
+   */
+  $_in["session"]["Authenticated"] = true;
+  $_in["session"]["Method"] = "Session";
+  $_in["session"]["Tenant"] = 0;
+  $_in["session"]["Language"] = $session["Language"];
+  $_in["session"]["Data"]["ID"] = $session["ID"];
+  $_in["session"]["Data"]["Username"] = $session["Username"];
+  $_in["session"]["Data"]["Name"] = $session["Name"];
+  $_in["session"]["Data"]["Email"] = $session["Email"];
+  $_in["session"]["Data"]["Since"] = $session["Since"];
+  $_in["session"]["Data"]["LastSeen"] = $session["LastSeen"];
+  $_in["session"]["Data"]["Expires"] = time () + $_in["general"]["timeout"];
+  $_in["session"]["Permissions"][] = "Super-Administrator";
 
   /**
    * Inject user permissions in session
@@ -579,7 +645,7 @@ if ( $inputRoute == "help")
         $authenticated = false;
         foreach ( $entry[$route]["permissions"] as $permission)
         {
-          if ( in_array ( $permission, $_in["permissions"]))
+          if ( in_array ( $permission, $_in["session"]["Permissions"]))
           {
             $authenticated = true;
           }

@@ -52,7 +52,7 @@ framework_add_filter ( "objects_types", "exceptions_object");
  */
 function exceptions_object ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "object" => "exception", "path" => "/exceptions", "icon" => "thumbs-up", "label" => "success", "text" => array ( "singular" => __ ( "Exception"), "plural" => __ ( "Exceptions")))));
+  return array_merge ( (array) $buffer, array ( array ( "object" => "exception", "type" => "list", "path" => "/exceptions", "icon" => "thumbs-up", "label" => "success", "text" => array ( "singular" => __ ( "Exception"), "plural" => __ ( "Exceptions")))));
 }
 
 /**
@@ -65,7 +65,7 @@ function exceptions_object ( $buffer, $parameters)
  */
 function exceptions_menu ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "thumbs-up", "href" => "/exceptions", "text" => __ ( "Exceptions"))));
+  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "thumbs-up", "href" => "/exceptions", "text" => __ ( "Exceptions"), "permissions" => array ( "Administrator"))));
 }
 
 /**
@@ -87,7 +87,7 @@ function get_exceptions ( $buffer, $parameters)
   $where = "";
   if ( array_key_exists ( "ID", $parameters))
   {
-    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
+    $where .= " AND `ID` = " . (int) $parameters["ID"];
   }
   if ( array_key_exists ( "Text", $parameters))
   {
@@ -102,7 +102,7 @@ function get_exceptions ( $buffer, $parameters)
    * Check into database if exceptions exists
    */
   $data = array ();
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Exceptions`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Exceptions` WHERE `Tenant` = " . (int) get_tenant () . $where))
   {
     while ( $exception = $result->fetch_assoc ())
     {

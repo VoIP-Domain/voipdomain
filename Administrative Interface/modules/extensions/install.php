@@ -54,16 +54,19 @@ function extensions_install_db ( $buffer, $parameters)
    */
   install_add_db_table ( "Extensions", "CREATE TABLE `Extensions` (\n" .
                                        "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                       "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
                                        "  `Number` smallint(2) unsigned NOT NULL,\n" .
                                        "  `Description` varchar(50) NOT NULL,\n" .
                                        "  `Range` bigint(20) unsigned NOT NULL,\n" .
                                        "  `Type` varchar(50) NOT NULL,\n" .
                                        "  PRIMARY KEY (`ID`),\n" .
-                                       "  UNIQUE KEY `Number` (`Number`),\n" .
+                                       "  UNIQUE KEY `Number` (`Tenant`,`Number`),\n" .
                                        "  KEY `Type` (`Type`),\n" .
                                        "  KEY `Extensions_ibfk_1` (`Range`),\n" .
-                                       "  CONSTRAINT `Extensions_ibfk_1` FOREIGN KEY (`Range`) REFERENCES `Ranges` (`ID`) ON UPDATE CASCADE\n" .
-                                       ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extensions';\n", array ( "Ranges"));
+                                       "  KEY `Extensions_ibfk_2` (`Tenant`),\n" . 
+                                       "  CONSTRAINT `Extensions_ibfk_1` FOREIGN KEY (`Range`) REFERENCES `Ranges` (`ID`) ON UPDATE CASCADE,\n" .
+                                       "  CONSTRAINT `Extensions_ibfk_2` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" . 
+                                       ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extensions';\n", array ( "Ranges", "Tenants"));
   install_add_db_table ( "ExtensionActivity", "CREATE TABLE `ExtensionActivity` (\n" .
                                               "  `UID` bigint(20) unsigned NOT NULL,\n" .
                                               "  `LastDialed` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',\n" .

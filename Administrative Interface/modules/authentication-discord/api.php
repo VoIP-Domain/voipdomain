@@ -104,7 +104,7 @@ function authentication_view_post_discord ( $buffer, $parameters)
   /**
    * Get authentication from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Key` = 'Authentication_Discord'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'Authentication_Discord'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -266,7 +266,7 @@ function authentication_edit_post_discord ( $buffer, $parameters)
    * Change configuration entry
    */
   $tmp = json_encode ( array ( "Status" => $parameters["Plugins"]["Discord"]["Status"], "ClientID" => $parameters["Plugins"]["Discord"]["ClientID"], "ClientSecret" => $parameters["Plugins"]["Discord"]["ClientSecret"], "RedirectURI" => $parameters["Plugins"]["Discord"]["RedirectURI"]));
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Data`) VALUES ('Authentication_Discord', '" . $_in["mysql"]["id"]->real_escape_string ( $tmp) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( $tmp) . "'"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Authentication_Discord', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $tmp) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( $tmp) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -309,23 +309,29 @@ function authentication_discord_redirect ( $buffer, $parameters)
   global $_in;
 
   /**
-   * Get authentication plugins from database
+   * Get current tenant ID
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Key` LIKE 'Authentication_Discord'"))
+  $tenantid = get_tenant ( ! empty ( $parameters["Context"]) ? $parameters["Context"] : $_SERVER["HTTP_HOST"]);
+
+  /**
+   * Get authentication plugin information from database
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $tenantid . " AND `Key` LIKE 'Authentication_Discord'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  if ( ! $plugin = json_decode ( $result->fetch_assoc ()["Data"], true))
+  if ( ! $plugin = $result->fetch_assoc ())
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
     exit ();
   }
+  $plugin["Data"] = json_decode ( $plugin["Data"], true);
 
   /**
    * Return if plugin is disabled
    */
-  if ( $plugin["State"] === false)
+  if ( $plugin["Data"]["State"] === false)
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 404 Not Found");
     exit ();
@@ -348,7 +354,7 @@ function authentication_discord_redirect ( $buffer, $parameters)
     $cookie = bin2hex ( openssl_random_pseudo_bytes ( 8));
     $expire = time () + 300;
     setcookie ( $_in["general"]["cookie"] . "_oauth2_" . $cookie, $state, $expire, "/api/auth/discord");
-    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `AuthenticationCache` (`Plugin`, `Cookie`, `State`, `Expire`, `Callback`) VALUES ('Discord', '" . $_in["mysql"]["id"]->real_escape_string ( $cookie) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $state) . "', " . $_in["mysql"]["id"]->real_escape_string ( $expire) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Callback"]) . "')"))
+    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `AuthenticationCache` (`Tenant`, `Plugin`, `Cookie`, `State`, `Expire`, `Callback`) VALUES (" . (int) $plugin["Tenant"] . ", 'Discord', '" . $_in["mysql"]["id"]->real_escape_string ( $cookie) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $state) . "', " . (int) $expire . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Callback"]) . "')"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -359,8 +365,8 @@ function authentication_discord_redirect ( $buffer, $parameters)
      */
     header ( $_SERVER["SERVER_PROTOCOL"] . " 302 Redirected");
     header ( "Location: https://discord.com/api/oauth2/authorize?" . http_build_query ( array (
-                                                                                          "client_id" => $plugin["ClientID"],
-                                                                                          "redirect_uri" => $plugin["RedirectURI"],
+                                                                                          "client_id" => $plugin["Data"]["ClientID"],
+                                                                                          "redirect_uri" => $plugin["Data"]["RedirectURI"],
                                                                                           "response_type" => "code",
                                                                                           "scope" => "identify email",
                                                                                           "state" => $state,
@@ -388,7 +394,7 @@ function authentication_discord_redirect ( $buffer, $parameters)
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  if ( ! $callback = $result->fetch_assoc ()["Callback"])
+  if ( ! $cache = $result->fetch_assoc ())
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 302 Redirected");
     header ( "Location: /auth?Message=" . urlencode ( __ ( "Invalid authentication token!")));
@@ -411,11 +417,11 @@ function authentication_discord_redirect ( $buffer, $parameters)
   curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, true);
   curl_setopt ( $ch, CURLOPT_POST, true);
   curl_setopt ( $ch, CURLOPT_POSTFIELDS, http_build_query ( array (
-                                                              "client_id" => $plugin["ClientID"],
-                                                              "client_secret" => $plugin["ClientSecret"],
+                                                              "client_id" => $plugin["Data"]["ClientID"],
+                                                              "client_secret" => $plugin["Data"]["ClientSecret"],
                                                               "grant_type" => "authorization_code",
                                                               "code" => $parameters["code"],
-                                                              "redirect_uri" => $plugin["RedirectURI"],
+                                                              "redirect_uri" => $plugin["Data"]["RedirectURI"],
                                                               "scope" => "identify email"
                                                             )
                                                           )
@@ -431,7 +437,7 @@ function authentication_discord_redirect ( $buffer, $parameters)
   if ( ! array_key_exists ( "access_token", $tokenInfo))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 302 Redirected");
-    header ( "Location: /auth?" . ( $callback ? "Callback=" . urlencode ( $callback) . "&" : "") . "Message=" . urlencode ( __ ( "Invalid authentication token!")));
+    header ( "Location: /auth?" . ( $cache["Callback"] ? "Callback=" . urlencode ( $cache["Callback"]) . "&" : "") . "Message=" . urlencode ( __ ( "Invalid authentication token!")));
     exit ();
   }
   $accessToken = $tokenInfo["access_token"];
@@ -453,7 +459,7 @@ function authentication_discord_redirect ( $buffer, $parameters)
   /**
    * Insert token in database
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `AuthenticationToken` (`Token`, `Plugin`, `Email`, `IssueDate`, `LastSeen`, `Expires`, `TokenData`, `UserData`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $cookie) . "', 'Discord', '" . $_in["mysql"]["id"]->real_escape_string ( $userInfo["email"]) . "', NOW(), NOW(), '" . $_in["mysql"]["id"]->real_escape_string ( date ( "Y-m-d h:i:s", time () + $tokenInfo["expires_in"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $tokenInfo)) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $userInfo)) . "')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `AuthenticationToken` (`Token`, `Tenant`, `Plugin`, `Email`, `IssueDate`, `LastSeen`, `Expires`, `TokenData`, `UserData`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $cookie) . "', " . (int) $tenantid . ", 'Discord', '" . $_in["mysql"]["id"]->real_escape_string ( $userInfo["email"]) . "', NOW(), NOW(), '" . $_in["mysql"]["id"]->real_escape_string ( date ( "Y-m-d h:i:s", time () + $tokenInfo["expires_in"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $tokenInfo)) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $userInfo)) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -464,7 +470,40 @@ function authentication_discord_redirect ( $buffer, $parameters)
    * Redirect user to authentication page
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 302 Redirected");
-  header ( "Location: " . ( $callback ? $callback : "/auth") . "?Message=" . urlencode ( __ ( "User authenticated!")) . "&MessageType=info");
+  header ( "Location: " . ( $cache["Callback"] ? $cache["Callback"] : "/auth") . "?Message=" . urlencode ( __ ( "User authenticated!")) . "&MessageType=info");
   exit ();
+}
+
+/**
+ * Implement tenant addition hook
+ */
+framework_add_hook ( "tenants_add_post", "authentication_discord_tenant_add_post");
+
+/**
+ * Function to add default Discord authentication settings to new tenant.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function authentication_discord_tenant_add_post ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Add authentication settings
+   */
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Authentication_Plugin_Discord', " . (int) $parameters["ID"] . ", '{\"Status\":false,\"ClientID\":\"\",\"ClientSecret\":\"\",\"RedirectURI\":\"\"}}')"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+
+  /**
+   * Return data to user
+   */
+  return $buffer;
 }
 ?>

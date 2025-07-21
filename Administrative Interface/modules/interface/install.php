@@ -387,9 +387,12 @@ function install_populate ( $buffer, $parameters)
                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Internal database table cache timers';\n");
   install_add_db_table ( "Config", "CREATE TABLE `Config` (\n" .
                                    "  `Key` varchar(255) NOT NULL,\n" .
+                                   "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
                                    "  `Data` longblob NOT NULL,\n" .
-                                   "  UNIQUE KEY `Key_key` (`Key`)\n" .
-                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='System configuration entries';\n");
+                                   "  UNIQUE KEY `Key_key` (`Tenant`,`Key`),\n" .
+                                   "  KEY `Config_ibfk_1` (`Tenant`),\n" . 
+                                   "  CONSTRAINT `Config_ibfk_1` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" . 
+                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='System configuration entries';\n", array ( "Tenants"));
   install_add_db_table ( "Files", "CREATE TABLE `Files` (\n" .
                                   "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
                                   "  `Type` enum('fares') NOT NULL,\n" .
@@ -410,6 +413,7 @@ function install_populate ( $buffer, $parameters)
                                     "  UNIQUE KEY `Dirname` (`Dirname`)\n" .
                                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Installed plugins information';\n");
   install_add_db_table ( "cdr", "CREATE TABLE `cdr` (\n" .
+                                "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
                                 "  `calldate` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',\n" .
                                 "  `clid` varchar(80) NOT NULL DEFAULT '',\n" .
                                 "  `src` varchar(80) NOT NULL DEFAULT '',\n" .
@@ -458,8 +462,10 @@ function install_populate ( $buffer, $parameters)
                                 "  KEY `uniqueid` (`uniqueid`),\n" .
                                 "  KEY `server` (`server`),\n" .
                                 "  KEY `gateway` (`gateway`),\n" .
-                                "  KEY `processed` (`processed`)\n" .
-                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Call records';\n");
+                                "  KEY `processed` (`processed`),\n" .
+                                "  KEY `cdr_ibfk_1` (`Tenant`),\n" . 
+                                "  CONSTRAINT `cdr_ibfk_1` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" . 
+                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Call records';\n", array ( "Tenants"));
 
   /**
    * Add basic system triggers
@@ -825,7 +831,8 @@ function install_populate ( $buffer, $parameters)
     $config .= "title = VoIP Domain\n";
     $config .= "domain = voipdomain.io\n";
     $config .= "favicon = /img/phone.png\n";
-    $config .= "baseurl = " . $_SERVER["SERVER_NAME"] . "\n";
+    $config .= "baseurl = " . $_SERVER["HTTP_HOST"] . "\n";
+    $config .= "masterhostname = " . $_SERVER["HTTP_HOST"] . "\n";
     $config .= "contact = azevedo@voipdomain.io\n";
     $config .= "spooldir = /var/spool/voipdomain\n";
     $config .= "tempdir = /var/www/tmp\n";
@@ -870,6 +877,7 @@ function install_populate ( $buffer, $parameters)
   if ( sizeof ( $return) != 0)
   {
     $return["Result"] = false;
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
   } else {
     $return["Result"] = true;
   }

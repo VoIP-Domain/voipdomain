@@ -51,7 +51,7 @@ framework_add_filter ( "get_agents", "get_agents");
  */
 function agents_menu ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "chess-pawn", "href" => "/agents", "text" => __ ( "Agents"))));
+  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "chess-pawn", "href" => "/agents", "text" => __ ( "Agents"), "permissions" => array ( "Administrator"))));
 }
 
 /**
@@ -73,7 +73,7 @@ function get_agents ( $buffer, $parameters)
   $where = "";
   if ( array_key_exists ( "ID", $parameters))
   {
-    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
+    $where .= " AND `ID` = " . (int) $parameters["ID"];
   }
   if ( array_key_exists ( "Text", $parameters))
   {
@@ -88,7 +88,7 @@ function get_agents ( $buffer, $parameters)
    * Check into database if agents exists
    */
   $data = array ();
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Agents`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Agents` WHERE `Tenant` = " . (int) get_tenant () . $where))
   {
     while ( $agent = $result->fetch_assoc ())
     {

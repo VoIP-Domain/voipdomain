@@ -34,7 +34,7 @@
  *     `Name`        VARCHAR(64)  NOT NULL,
  *     `Description` TEXT         NULL,
  *     PRIMARY KEY   (`ID`)
- *   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+ *   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  *
  * This file will be automatically loaded by VoIP Domain's core.
  *
@@ -49,19 +49,19 @@
 /**
  * Add basic framework hooks, with the relative function.
  */
-framework_add_path ( "/sampleitems", "sampleitems_search_page");
+framework_add_path ( "/sampleitems", "sampleitems_search_page", array ( "permissions" => array ( "User")));
 framework_add_hook ( "sampleitems_search_page", "sampleitems_search_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/sampleitems/add", "sampleitems_add_page");
+framework_add_path ( "/sampleitems/add", "sampleitems_add_page", array ( "permissions" => array ( "User")));
 framework_add_hook ( "sampleitems_add_page", "sampleitems_add_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/sampleitems/:id/clone", "sampleitems_clone_function");
+framework_add_path ( "/sampleitems/:id/clone", "sampleitems_clone_function", array ( "permissions" => array ( "User")));
 framework_add_hook ( "sampleitems_clone_function", "sampleitems_clone_function", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/sampleitems/:id/view", "sampleitems_view_page");
+framework_add_path ( "/sampleitems/:id/view", "sampleitems_view_page", array ( "permissions" => array ( "User")));
 framework_add_hook ( "sampleitems_view_page", "sampleitems_view_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/sampleitems/:id/edit", "sampleitems_edit_page");
+framework_add_path ( "/sampleitems/:id/edit", "sampleitems_edit_page", array ( "permissions" => array ( "User")));
 framework_add_hook ( "sampleitems_edit_page", "sampleitems_edit_page", IN_HOOK_INSERT_FIRST);
 
 /**

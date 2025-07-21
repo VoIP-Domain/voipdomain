@@ -76,7 +76,7 @@ function avatar_users_view ( $buffer, $parameters)
   /**
    * Search user avatar
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Avatar` FROM `UserAvatar` WHERE `User` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Avatar` FROM `UserAvatar` WHERE `User` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -231,7 +231,7 @@ function avatar_user_get ( $buffer, $parameters)
   /**
    * Search for user avatar
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `UserAvatar`.`Avatar` FROM `UserAvatar` LEFT JOIN `Users` ON `UserAvatar`.`User` = `Users`.`ID` WHERE `Users`.`Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `UserAvatar`.`Avatar` FROM `UserAvatar` LEFT JOIN `Users` ON `UserAvatar`.`User` = `Users`.`ID` WHERE `Users`.`Tenant` = " . (int) get_tenant () . " AND `Users`.`Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -392,7 +392,7 @@ function avatar_user_remove ( $buffer, $parameters)
   /**
    * Check if user avatar exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `UserAvatar` WHERE `User` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `UserAvatar` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `User` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -414,7 +414,7 @@ function avatar_user_remove ( $buffer, $parameters)
   /**
    * Remove user avatar from database
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `UserAvatar` WHERE `User` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `UserAvatar` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `User` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -575,7 +575,7 @@ function avatar_user_set ( $buffer, $parameters)
   /**
    * Search for user
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Users`.*, `UserAvatar`.`Avatar` FROM `Users` LEFT JOIN `UserAvatar` ON `Users`.`ID` = `UserAvatar`.`User` WHERE `Users`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Users`.*, `UserAvatar`.`Avatar` FROM `Users` LEFT JOIN `UserAvatar` ON `Users`.`ID` = `UserAvatar`.`User` WHERE `Users`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Users`.`ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -598,7 +598,7 @@ function avatar_user_set ( $buffer, $parameters)
    * Generate new avatar ID
    */
   $avatar = uniqid ( "", true);
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `UserAvatar` (`User`, `Avatar`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $avatar) . "') ON DUPLICATE KEY UPDATE `Avatar` = '" . $_in["mysql"]["id"]->real_escape_string ( $avatar) . "'"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `UserAvatar` (`User`, `Avatar`) VALUES (" . (int) $parameters["ID"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $avatar) . "') ON DUPLICATE KEY UPDATE `Avatar` = '" . $_in["mysql"]["id"]->real_escape_string ( $avatar) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

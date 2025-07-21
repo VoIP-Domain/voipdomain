@@ -52,7 +52,7 @@ framework_add_filter ( "audio_inuse", "profiles_moh");
  */
 function profiles_menu ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "globe", "href" => "/profiles", "text" => __ ( "Profiles"))));
+  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "globe", "href" => "/profiles", "text" => __ ( "Profiles"), "permissions" => array ( "Administrator"))));
 }
 
 /**
@@ -74,7 +74,7 @@ function get_profiles ( $buffer, $parameters)
   $where = "";
   if ( array_key_exists ( "ID", $parameters))
   {
-    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
+    $where .= " AND `ID` = " . (int) $parameters["ID"];
   }
   if ( array_key_exists ( "Domain", $parameters))
   {
@@ -89,7 +89,7 @@ function get_profiles ( $buffer, $parameters)
    * Check into database if profiles exists
    */
   $data = array ();
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Profiles`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Profiles` WHERE `Tenant` = " . (int) get_tenant () . $where))
   {
     while ( $profile = $result->fetch_assoc ())
     {
@@ -117,14 +117,9 @@ function profiles_moh ( $buffer, $parameters)
   global $_in;
 
   /**
-   * Check basic parameters
-   */
-  $parameters["ID"] = (int) $parameters["ID"];
-
-  /**
    * Search profile using audio file
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Profiles` WHERE `Moh` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Profiles` WHERE `Tenant` = " . (int) get_tenant () . " AND `MOH` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

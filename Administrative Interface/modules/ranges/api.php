@@ -130,7 +130,7 @@ framework_add_api_call (
   "Read",
   "ranges_search",
   array (
-    "permissions" => array ( "User", "ranges_search"),
+    "permissions" => array ( "Administrator", "ranges_search"),
     "title" => __ ( "Search ranges"),
     "description" => __ ( "Search for system ranges.")
   )
@@ -174,7 +174,11 @@ function ranges_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -215,7 +219,7 @@ function ranges_search ( $buffer, $parameters)
   /**
    * Search ranges
    */
-  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `Ranges`.`ID`, `Ranges`.`Description`, `Ranges`.`Start`, `Ranges`.`Finish`, `Servers`.`Description` AS `Server` FROM `Ranges` LEFT JOIN `Servers` ON `Ranges`.`Server` = `Servers`.`ID`" . ( ! empty ( $parameters["Filter"]) ? " WHERE `Ranges`.`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " ORDER BY `Description`, `Start`"))
+  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `Ranges`.`ID`, `Ranges`.`Description`, `Ranges`.`Start`, `Ranges`.`Finish`, `Servers`.`Description` AS `Server` FROM `Ranges` LEFT JOIN `Servers` ON `Ranges`.`Server` = `Servers`.`ID` WHERE `Ranges`.`Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND `Ranges`.`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " ORDER BY `Description`, `Start`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -228,7 +232,7 @@ function ranges_search ( $buffer, $parameters)
   $fields = api_filter_fields ( $parameters["Fields"], $parameters["function"]["DefaultFields"], $parameters["function"]["PermittedFields"]);
   while ( $result = $results->fetch_assoc ())
   {
-    if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Extensions` WHERE `Range` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $result["ID"])))
+    if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Range` = " . (int) $result["ID"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -329,7 +333,7 @@ framework_add_api_call (
   "Read",
   "ranges_view",
   array (
-    "permissions" => array ( "User", "ranges_view"),
+    "permissions" => array ( "Administrator", "ranges_view"),
     "title" => __ ( "View ranges"),
     "description" => __ ( "Get a system range information."),
     "parameters" => array (
@@ -419,7 +423,7 @@ function ranges_view ( $buffer, $parameters)
   /**
    * Search ranges
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Ranges`.*, `Servers`.`Description` AS `ServerDescription` FROM `Ranges` LEFT JOIN `Servers` ON `Ranges`.`Server` = `Servers`.`ID` WHERE `Ranges`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Ranges`.*, `Servers`.`Description` AS `ServerDescription` FROM `Ranges` LEFT JOIN `Servers` ON `Ranges`.`Server` = `Servers`.`ID` WHERE `Ranges`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Ranges`.`ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -536,7 +540,7 @@ framework_add_api_call (
   "Create",
   "ranges_add",
   array (
-    "permissions" => array ( "User", "ranges_add"),
+    "permissions" => array ( "Administrator", "ranges_add"),
     "title" => __ ( "Add ranges"),
     "description" => __ ( "Add a new system range.")
   )
@@ -590,11 +594,30 @@ function ranges_add ( $buffer, $parameters)
   }
 
   /**
+   * Check for server extension number length
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Data` FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'NumbersLength'"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  $createnumberslength = false;
+  if ( ! $numberslength = $result->fetch_assoc ()["Data"])
+  {
+    $createnumberslength = true;
+    $numberslength = strlen ( (string) $parameters["Start"]);
+  }
+  if ( ! array_key_exists ( "Start", $data) && strlen ( (string) $parameters["Start"]) != $numberslength)
+  {
+    $data["Start"] = sprintf ( __ ( "The number length must have %d digits."), $numberslength);
+  }
+
+  /**
    * Search server
    */
   if ( ! array_key_exists ( "Server", $data))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Server"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["Server"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -610,7 +633,7 @@ function ranges_add ( $buffer, $parameters)
    */
   if ( ! array_key_exists ( "Start", $data) && ! array_key_exists ( "Finish", $data))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Finish"]) . " >= `Start` AND `Finish` >= " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Start"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND " . (int) $parameters["Finish"] . " >= `Start` AND `Finish` >= " . (int) $parameters["Start"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -664,12 +687,21 @@ function ranges_add ( $buffer, $parameters)
   /**
    * Add new range record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Ranges` (`Description`, `Server`, `Start`, `Finish`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Server"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Finish"]) . ")"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Ranges` (`Tenant`, `Description`, `Server`, `Start`, `Finish`) VALUES (" . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', " . (int) $parameters["Server"] . ", " . (int) $parameters["Start"] . ", " . (int) $parameters["Finish"] . ")"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   $parameters["ID"] = $_in["mysql"]["id"]->insert_id;
+
+  /**
+   * Update config if needed
+   */
+  if ( $createnumberslength && ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Tenant`, `Key`, `Data`) VALUES (" . (int) $_in["session"]["Tenant"] . ", 'NumbersLength', '" . (int) $numberslength . "')"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
 
   /**
    * Call post hook if exist
@@ -784,7 +816,7 @@ framework_add_api_call (
   array ( "Modify", "Edit"),
   "ranges_edit",
   array (
-    "permissions" => array ( "User", "ranges_edit"),
+    "permissions" => array ( "Administrator", "ranges_edit"),
     "title" => __ ( "Edit ranges"),
     "description" => __ ( "Change a system range information.")
   )
@@ -838,11 +870,29 @@ function ranges_edit ( $buffer, $parameters)
   }
 
   /**
+   * Check for server extension number length
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'NumbersLength'"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! $numberslength = $result->fetch_assoc ()["Data"])
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! array_key_exists ( "Start", $data) && strlen ( (string) $parameters["Start"]) != $numberslength)
+  {
+    $data["Start"] = sprintf ( __ ( "The number length must have %d digits."), $numberslength);
+  }
+
+  /**
    * Search server
    */
   if ( ! array_key_exists ( "Server", $data))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Server"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["Server"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -856,7 +906,7 @@ function ranges_edit ( $buffer, $parameters)
   /**
    * Check if range exist (could be removed by other user meanwhile)
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -872,7 +922,7 @@ function ranges_edit ( $buffer, $parameters)
    */
   if ( ! array_key_exists ( "Start", $data) && ! array_key_exists ( "Finish", $data))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Finish"]) . " >= `Start` AND `Finish` >= " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Start"]) . " AND `ID` != " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND " . (int) $parameters["Finish"] . " >= `Start` AND `Finish` >= " . (int) $parameters["Start"] . " AND `ID` != " . (int) $parameters["ID"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -927,7 +977,7 @@ function ranges_edit ( $buffer, $parameters)
   /**
    * Change range record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Ranges` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Server` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Server"]) . ", `Start` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . ", `Finish` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Finish"]) . " WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Ranges` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Server` = " . (int) $parameters["Server"] . ", `Start` = " . (int) $parameters["Start"] . ", `Finish` = " . (int) $parameters["Finish"] . " WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1010,7 +1060,7 @@ framework_add_api_call (
   "Delete",
   "ranges_remove",
   array (
-    "permissions" => array ( "User", "ranges_remove"),
+    "permissions" => array ( "Administrator", "ranges_remove"),
     "title" => __ ( "Remove ranges"),
     "description" => __ ( "Remove a system range.")
   )
@@ -1079,7 +1129,7 @@ function ranges_remove ( $buffer, $parameters)
   /**
    * Check if range exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1093,7 +1143,7 @@ function ranges_remove ( $buffer, $parameters)
   /**
    * Check if range has any allocated number
    */
-  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Extensions` WHERE `Range` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Range` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1117,7 +1167,7 @@ function ranges_remove ( $buffer, $parameters)
   /**
    * Remove range database record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Ranges` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1177,7 +1227,7 @@ function ranges_server_reconfig ( $buffer, $parameters)
   /**
    * Fetch all ranges and send to server
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Server` != " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Server` != " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

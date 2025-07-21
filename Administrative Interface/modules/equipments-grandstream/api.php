@@ -162,4 +162,72 @@ function equipments_configure_grandstream_userpass_validate ( $buffer, $paramete
    */
   return $buffer;
 }
+
+/**
+ * Implement tenant addition hook
+ */
+framework_add_hook ( "tenants_add_post", "equipments_grandstream_tenant_add_post");
+
+/**
+ * Function to add default Grandstream equipments settings to new tenant.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function equipments_grandstream_tenant_add_post ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Add authentication settings
+   */
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_gxp1160', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G723\",\"G729\",\"G722\",\"ILBC\",\"G726\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"UserPassword\":\"vduser\",\"AdminPassword\":\"vdadmin\"}}')"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_gxp1165', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G723\",\"G729\",\"G722\",\"ILBC\",\"G726\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"UserPassword\":\"vduser\",\"AdminPassword\":\"vdadmin\"}}')"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_gxp1610', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G723\",\"G729\",\"G722\",\"ILBC\",\"G726\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"UserPassword\":\"vduser\",\"AdminPassword\":\"vdadmin\"}}')"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_gxp1615', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G723\",\"G729\",\"G722\",\"ILBC\",\"G726\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"UserPassword\":\"vduser\",\"AdminPassword\":\"vdadmin\"}}')"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_gxp1620', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G723\",\"G729\",\"G722\",\"ILBC\",\"G726\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"UserPassword\":\"vduser\",\"AdminPassword\":\"vdadmin\"}}')"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_gxp1625', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G723\",\"G729\",\"G722\",\"ILBC\",\"G726\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"UserPassword\":\"vduser\",\"AdminPassword\":\"vdadmin\"}}')"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_gxp1628', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ALAW\",\"ULAW\",\"G723\",\"G729\",\"ILBC\",\"G726\",\"GSM\"],\"VideoCodecs\":[],\"ExtraSettings\":[]}')"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_gxp1630', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ALAW\",\"ULAW\",\"G723\",\"G729\",\"ILBC\",\"G726\",\"GSM\"],\"VideoCodecs\":[],\"ExtraSettings\":[]}')"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+
+  /**
+   * Return data to user
+   */
+  return $buffer;
+}
 ?>

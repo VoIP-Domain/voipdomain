@@ -51,7 +51,7 @@ framework_add_filter ( "get_gateways", "get_gateways");
  */
 function gateways_menu ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "cloud-upload-alt", "href" => "/gateways", "text" => __ ( "Gateways"))));
+  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "cloud-upload-alt", "href" => "/gateways", "text" => __ ( "Gateways"), "permissions" => array ( "Administrator"))));
 }
 
 /**
@@ -78,11 +78,11 @@ function get_gateways ( $buffer, $parameters)
       $where .= " AND `ID` IN (";
       foreach ( $parameters["ID"] as $id)
       {
-        $where .= $_in["mysql"]["id"]->real_escape_string ( (int) $id) . ", ";
+        $where .= (int) $id . ", ";
       }
       $where = substr ( $where, 0, strlen ( $where) - 2) . ")";
     } else {
-      $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
+      $where .= " AND `ID` = " . (int) $parameters["ID"];
     }
   }
   if ( array_key_exists ( "Text", $parameters))
@@ -91,14 +91,14 @@ function get_gateways ( $buffer, $parameters)
   }
   if ( array_key_exists ( "Active", $parameters))
   {
-    $where .= " AND `Active` = '" . $_in["mysql"]["id"]->real_escape_string ( (boolean) $parameters["Active"]) . "'";
+    $where .= " AND `Active` = '" . ( $parameters["Active"] ? 1 : 0) . "'";
   }
 
   /**
    * Check into database if gateways exists
    */
   $data = array ();
-  if ( $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Description`, `Active`, `Type`, `Priority`, `Number` FROM `Gateways`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
+  if ( $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Description`, `Active`, `Type`, `Priority`, `Number` FROM `Gateways` WHERE `Tenant` = " . (int) get_tenant () . $where))
   {
     /**
      * Create result structure

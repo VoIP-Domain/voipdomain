@@ -57,7 +57,7 @@ function sampleitems_install_db ( $buffer, $parameters)
                                         "  `Name` VARCHAR(64) NOT NULL,\n".
                                         "  `Description` TEXT NULL,\n".
                                         "  PRIMARY KEY (`ID`)\n".
-                                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8;\n");
+                                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;\n");
 
   /**
    * Add basic system triggers

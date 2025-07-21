@@ -54,6 +54,7 @@ function gateways_install_db ( $buffer, $parameters)
    */
   install_add_db_table ( "Gateways", "CREATE TABLE `Gateways` (\n" .
                                      "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                     "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
                                      "  `Description` varchar(255) NOT NULL,\n" .
                                      "  `Active` boolean NOT NULL DEFAULT false,\n" .
                                      "  `Config` varchar(255) NOT NULL,\n" .
@@ -76,8 +77,11 @@ function gateways_install_db ( $buffer, $parameters)
                                      "  PRIMARY KEY (`ID`),\n" .
                                      "  KEY `Description` (`Description`),\n" .
                                      "  KEY `Type` (`Type`),\n" .
-                                     "  CONSTRAINT `Gateways_ibfk_1` FOREIGN KEY (`Currency`) REFERENCES `Currencies` (`Code`) ON UPDATE CASCADE\n" .
-                                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Call gateways';\n");
+                                     "  KEY `Gateways_ibfk_1` (`Currency`),\n" . 
+                                     "  KEY `Gateways_ibfk_2` (`Tenant`),\n" . 
+                                     "  CONSTRAINT `Gateways_ibfk_1` FOREIGN KEY (`Currency`) REFERENCES `Currencies` (`Code`) ON UPDATE CASCADE,\n" .
+                                     "  CONSTRAINT `Gateways_ibfk_2` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" . 
+                                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Call gateways';\n", array ( "Tenants"));
 
   /**
    * Add basic system triggers

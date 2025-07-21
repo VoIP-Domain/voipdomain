@@ -54,12 +54,15 @@ function queues_install_db ( $buffer, $parameters)
    */
   install_add_db_table ( "Queues", "CREATE TABLE `Queues` (\n" .
                                    "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                   "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
                                    "  `Description` varchar(255) NOT NULL,\n" .
                                    "  `Name` varchar(255) NOT NULL,\n" .
                                    "  `Strategy` enum('ringall','roundrobin','leastrecent','fewestcalls','random','rrmemory') NOT NULL DEFAULT 'ringall',\n" .
                                    "  PRIMARY KEY (`ID`),\n" .
-                                   "  UNIQUE KEY `Name` (`Name`)\n" .
-                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Call center queues';\n");
+                                   "  UNIQUE KEY `Name` (`Tenant`,`Name`),\n" .
+                                   "  KEY `Queues_ibfk_1` (`Tenant`),\n" . 
+                                   "  CONSTRAINT `Queues_ibfk_1` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" . 
+                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Call center queues';\n", array ( "Tenants"));
   install_add_db_table ( "QueueMembers", "CREATE TABLE `QueueMembers` (\n" .
                                          "  `Queue` bigint(20) unsigned NOT NULL,\n" .
                                          "  `Member` varchar(255) NOT NULL,\n" .

@@ -76,6 +76,7 @@ i18n_add ( "Error authenticating user.");
 i18n_add ( "User authenticated!");
 i18n_add ( "AUTHENTICATE USING");
 i18n_add ( "Loading");
+i18n_add ( "The tenant domain of user to authenticate. If not provided, the server hostname will be used.");
 
 /**
  * Add Brazilian Portuguese support
@@ -119,4 +120,5 @@ i18n_add ( "Error authenticating user.", "Erro autenticando usuário.", "pt_BR")
 i18n_add ( "User authenticated!", "Usuário autenticado!", "pt_BR");
 i18n_add ( "AUTHENTICATE USING", "AUTENTIQUE UTILIZANDO", "pt_BR");
 i18n_add ( "Loading", "Carregando", "pt_BR");
+i18n_add ( "The tenant domain of user to authenticate. If not provided, the server hostname will be used.", "O domínio do tenant do usuário a ser autenticado. Se não informado, o nome do servidor será utilizado.", "pt_BR");
 ?>

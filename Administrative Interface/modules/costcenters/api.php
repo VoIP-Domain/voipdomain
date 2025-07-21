@@ -109,7 +109,7 @@ framework_add_api_call (
   "Read",
   "costcenters_search",
   array (
-    "permissions" => array ( "User", "costcenters_search"),
+    "permissions" => array ( "Administrator", "costcenters_search"),
     "title" => __ ( "Search cost centers"),
     "description" => __ ( "Search for cost centers.")
   )
@@ -148,7 +148,11 @@ function costcenters_search ( $buffer, $parameters)
    * Check for modifications time
    */
   check_table_modification ( "CostCenters");
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -194,7 +198,7 @@ function costcenters_search ( $buffer, $parameters)
   /**
    * Search cost centers
    */
-  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters`" . ( ! empty ( $parameters["Filter"]) ? " WHERE `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Code` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " ORDER BY `Description`, `Code`"))
+  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Code` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%')" : "") . " ORDER BY `Description`, `Code`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -287,7 +291,7 @@ framework_add_api_call (
   "Read",
   "costcenters_view",
   array (
-    "permissions" => array ( "User", "costcenters_view"),
+    "permissions" => array ( "Administrator", "costcenters_view"),
     "title" => __ ( "View cost centers"),
     "description" => __ ( "Get a cost center information."),
     "parameters" => array (
@@ -377,7 +381,7 @@ function costcenters_view ( $buffer, $parameters)
   /**
    * Search cost centers
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -473,7 +477,7 @@ framework_add_api_call (
   "Create",
   "costcenters_add",
   array (
-    "permissions" => array ( "User", "costcenters_add"),
+    "permissions" => array ( "Administrator", "costcenters_add"),
     "title" => __ ( "Add cost centers"),
     "description" => __ ( "Add a new cost center.")
   )
@@ -523,7 +527,7 @@ function costcenters_add ( $buffer, $parameters)
    */
   if ( ! array_key_exists ( "Code", $data))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "'"))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "'"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -570,7 +574,7 @@ function costcenters_add ( $buffer, $parameters)
   /**
    * Add new costcenter record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `CostCenters` (`Description`, `Code`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `CostCenters` (`Tenant`, `Description`, `Code`) VALUES (" . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -659,7 +663,7 @@ framework_add_api_call (
   array ( "Modify", "Edit"),
   "costcenters_edit",
   array (
-    "permissions" => array ( "User", "costcenters_edit"),
+    "permissions" => array ( "Administrator", "costcenters_edit"),
     "title" => __ ( "Edit cost centers"),
     "description" => __ ( "Edit a cost center.")
   )
@@ -709,7 +713,7 @@ function costcenters_edit ( $buffer, $parameters)
    */
   if ( ! array_key_exists ( "Code", $data))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "' AND `ID` != " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "' AND `ID` != " . (int) $parameters["ID"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -723,7 +727,7 @@ function costcenters_edit ( $buffer, $parameters)
   /**
    * Check if cost center exist (could be removed by other user meanwhile)
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -775,7 +779,7 @@ function costcenters_edit ( $buffer, $parameters)
   /**
    * Change cost center record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `CostCenters` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "' WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `CostCenters` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "' WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -837,7 +841,7 @@ framework_add_api_call (
   "Delete",
   "costcenters_remove",
   array (
-    "permissions" => array ( "User", "costcenters_remove"),
+    "permissions" => array ( "Administrator", "costcenters_remove"),
     "title" => __ ( "Remove cost centers"),
     "description" => __ ( "Remove a cost center.")
   )
@@ -906,7 +910,7 @@ function costcenters_remove ( $buffer, $parameters)
   /**
    * Check if costcenter exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -928,7 +932,7 @@ function costcenters_remove ( $buffer, $parameters)
   /**
    * Remove cost center database record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `CostCenters` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `CostCenters` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

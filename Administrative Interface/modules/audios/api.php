@@ -120,7 +120,7 @@ framework_add_api_call (
   "Read",
   "audios_search",
   array (
-    "permissions" => array ( "User", "audios_search"),
+    "permissions" => array ( "Administrator", "audios_search"),
     "title" => __ ( "Search audios"),
     "description" => __ ( "Search for system audio files.")
   )
@@ -164,7 +164,11 @@ function audios_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -205,7 +209,7 @@ function audios_search ( $buffer, $parameters)
   /**
    * Search audios
    */
-  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios`" . ( ! empty ( $parameters["Filter"]) ? " WHERE `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Filename` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " ORDER BY `Description`"))
+  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Filename` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%')" : "") . " ORDER BY `Description`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -299,7 +303,7 @@ framework_add_api_call (
   "Read",
   "audios_view",
   array (
-    "permissions" => array ( "User", "audios_view"),
+    "permissions" => array ( "Administrator", "audios_view"),
     "title" => __ ( "View audios"),
     "description" => __ ( "Get an audio file information."),
     "parameters" => array (
@@ -389,7 +393,7 @@ function audios_view ( $buffer, $parameters)
   /**
    * Search audio
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -533,7 +537,7 @@ framework_add_api_call (
   "Read",
   "audios_download",
   array (
-    "permissions" => array ( "User", "server", "audios_download"),
+    "permissions" => array ( "Administrator", "server", "audios_download"),
     "title" => __ ( "Download audios"),
     "description" => __ ( "Download system audio files."),
     "parameters" => array (
@@ -618,7 +622,7 @@ function audios_download ( $buffer, $parameters)
   /**
    * Search audio
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -733,7 +737,7 @@ framework_add_api_call (
   "Create",
   "audios_add",
   array (
-    "permissions" => array ( "User", "audios_add"),
+    "permissions" => array ( "Administrator", "audios_add"),
     "title" => __ ( "Add audios"),
     "description" => __ ( "Add a new system audio file.")
   )
@@ -784,7 +788,7 @@ function audios_add ( $buffer, $parameters)
    */
   if ( ! array_key_exists ( "Filename", $data))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Filename` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filename"]) . "'"))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Filename` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filename"]) . "'"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -831,7 +835,7 @@ function audios_add ( $buffer, $parameters)
   /**
    * Add new audio record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Audios` (`Filename`, `Description`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filename"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Audios` (`Tenant`, `Filename`, `Description`) VALUES (" . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filename"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -944,7 +948,7 @@ framework_add_api_call (
   array ( "Modify", "Edit"),
   "audios_edit",
   array (
-    "permissions" => array ( "User", "audios_edit"),
+    "permissions" => array ( "Administrator", "audios_edit"),
     "title" => __ ( "Edit audio"),
     "description" => __ ( "Edit a system audio file.")
   )
@@ -997,7 +1001,7 @@ function audios_edit ( $buffer, $parameters)
      */
     if ( ! array_key_exists ( "Filename", $data))
     {
-      if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Filename` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filename"]) . "' AND `ID` != " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+      if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Filename` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filename"]) . "' AND `ID` != " . (int) $parameters["ID"]))
       {
         header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
         exit ();
@@ -1012,7 +1016,7 @@ function audios_edit ( $buffer, $parameters)
   /**
    * Check if audio file exist (could be removed by other user meanwhile)
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1064,7 +1068,7 @@ function audios_edit ( $buffer, $parameters)
   /**
    * Change audio file record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Audios` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "'" . ( ! empty ( $parameters["Filename"]) ? ", `Filename` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filename"]) . "'" : "") . " WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Audios` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "'" . ( ! empty ( $parameters["Filename"]) ? ", `Filename` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filename"]) . "'" : "") . " WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1152,7 +1156,7 @@ framework_add_api_call (
   "Delete",
   "audios_remove",
   array (
-    "permissions" => array ( "User", "audios_remove"),
+    "permissions" => array ( "Administrator", "audios_remove"),
     "title" => __ ( "Remove audio"),
     "description" => __ ( "Remove a system audio file.")
   )
@@ -1213,7 +1217,7 @@ function audios_remove ( $buffer, $parameters)
   /**
    * Check if audio exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1244,7 +1248,7 @@ function audios_remove ( $buffer, $parameters)
   /**
    * Remove audio database record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Audios` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1309,7 +1313,7 @@ function audios_server_reconfig ( $buffer, $parameters)
   /**
    * Fetch all audios and send to server
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

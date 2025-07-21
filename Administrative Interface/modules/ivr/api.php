@@ -2338,7 +2338,11 @@ function ivrs_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -2379,7 +2383,7 @@ function ivrs_search ( $buffer, $parameters)
   /**
    * Search IVRs
    */
-  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Name`, `Description` FROM `IVRs`" . ( ! empty ( $parameters["Filter"]) ? " WHERE `Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " ORDER BY `Name`"))
+  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Name`, `Description` FROM `IVRs` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%')" : "") . " ORDER BY `Name`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -2563,7 +2567,7 @@ function ivrs_view ( $buffer, $parameters)
   /**
    * Search IVRs
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `IVRs`.`ID`, `IVRs`.`Name`, `IVRs`.`Description`, `IVRWorkflows`.`Workflow` FROM `IVRs` LEFT JOIN `IVRWorkflows` ON `IVRs`.`ID` = `IVRWorkflows`.`IVR` WHERE `IVRs`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . " ORDER BY `IVRWorkflows`.`Revision` DESC LIMIT 0,1"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `IVRs`.`ID`, `IVRs`.`Name`, `IVRs`.`Description`, `IVRWorkflows`.`Workflow` FROM `IVRs` LEFT JOIN `IVRWorkflows` ON `IVRs`.`ID` = `IVRWorkflows`.`IVR` WHERE `IVRs`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `IVRs`.`ID` = " . (int) $parameters["ID"] . " ORDER BY `IVRWorkflows`.`Revision` DESC LIMIT 0,1"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -2763,7 +2767,7 @@ function ivrs_add ( $buffer, $parameters)
   /**
    * Check if IVR was already added
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `IVRs` WHERE `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `IVRs` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -2809,7 +2813,7 @@ function ivrs_add ( $buffer, $parameters)
   /**
    * Add new IVR record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `IVRs` (`Name`, `Description`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `IVRs` (`Tenant`, `Name`, `Description`) VALUES (" . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -2819,7 +2823,7 @@ function ivrs_add ( $buffer, $parameters)
   /**
    * Add new IVR workflow record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `IVRWorkflows` (`IVR`, `Revision`, `Workflow`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . ", 1, '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Workflow"])) . "')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `IVRWorkflows` (`IVR`, `Revision`, `Workflow`) VALUES (" . (int) $parameters["ID"] . ", 1, '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Workflow"])) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -3017,7 +3021,7 @@ function ivrs_edit ( $buffer, $parameters)
   /**
    * Check if IVR was already in use
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `IVRs` WHERE `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "' AND `ID` != " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `IVRs` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "' AND `ID` != " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -3030,7 +3034,7 @@ function ivrs_edit ( $buffer, $parameters)
   /**
    * Check if IVR exist (could be removed by other user meanwhile)
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `IVRs`.*, `IVRWorkflows`.`Revision`, `IVRWorkflows`.`Workflow` FROM `IVRs` LEFT JOIN `IVRWorkflows` ON `IVRs`.`ID` = `IVRWorkflows`.`IVR` WHERE `IVRs`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]) . " ORDER BY `IVRWorkflows`.`Revision` DESC LIMIT 0, 1"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `IVRs`.*, `IVRWorkflows`.`Revision`, `IVRWorkflows`.`Workflow` FROM `IVRs` LEFT JOIN `IVRWorkflows` ON `IVRs`.`ID` = `IVRWorkflows`.`IVR` WHERE `IVRs`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `IVRs`.`ID` = " . (int) $parameters["ID"] . " ORDER BY `IVRWorkflows`.`Revision` DESC LIMIT 0, 1"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -3082,12 +3086,12 @@ function ivrs_edit ( $buffer, $parameters)
   /**
    * Change IVR record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `IVRs` Set `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "' WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `IVRs` Set `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "' WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `IVRWorkflows` (`IVR`, `Name`, `Description`, `Revision`, `Workflow`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', " . ( $ivr["Revision"] + 1) . ", '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Workflow"])) . "')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `IVRWorkflows` (`IVR`, `Revision`, `Workflow`) VALUES (" . (int) $parameters["ID"] . ", " . ( $ivr["Revision"] + 1) . ", '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Workflow"])) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -3228,7 +3232,7 @@ function ivrs_remove ( $buffer, $parameters)
   /**
    * Check if IVR exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `IVRs`.*, `IVRWorkflows`.`Revision`, `IVRWorkflows`.`Workflow` FROM `IVRs` LEFT JOIN `IVRWorkflows` ON `IVRs`.`ID` = `IVRWorkflows`.`IVR` WHERE `IVRs`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . " ORDER BY `IVRWorkflows`.`Revision` DESC LIMIT 0, 1"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `IVRs`.*, `IVRWorkflows`.`Revision`, `IVRWorkflows`.`Workflow` FROM `IVRs` LEFT JOIN `IVRWorkflows` ON `IVRs`.`ID` = `IVRWorkflows`.`IVR` WHERE `IVRs`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `IVRs`.`ID` = " . (int) $parameters["ID"] . " ORDER BY `IVRWorkflows`.`Revision` DESC LIMIT 0, 1"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -3260,12 +3264,12 @@ function ivrs_remove ( $buffer, $parameters)
   /**
    * Remove IVR database record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `IVRWorkflows` WHERE `IVR` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `IVRWorkflows` WHERE `IVR` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `IVRs` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `IVRs` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -3325,14 +3329,14 @@ function ivrs_server_reconfig ( $buffer, $parameters)
   /**
    * Fetch all IVRs and send to server
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `IVRs`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `IVRs` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   while ( $ivr = $result->fetch_assoc ())
   {
-    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT * FROM `IVRWorkflows` WHERE `IVR` = " . $_in["mysql"]["id"]->real_escape_string ( $ivr["ID"]) . " ORDER BY `Revision`"))
+    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT * FROM `IVRWorkflows` WHERE `IVR` = " . (int) $ivr["ID"] . " ORDER BY `Revision`"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();

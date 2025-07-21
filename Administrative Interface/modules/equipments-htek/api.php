@@ -120,4 +120,37 @@ function equipments_configure_htek_userpass_validate ( $buffer, $parameters)
    */
   return $buffer;
 }
+
+/**
+ * Implement tenant addition hook
+ */
+framework_add_hook ( "tenants_add_post", "equipments_htek_tenant_add_post");
+
+/**
+ * Function to add default Htek equipments settings to new tenant.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function equipments_htek_tenant_add_post ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Add authentication settings
+   */
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_uc902sp', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G722\",\"ILBC\",\"OPUS\",\"G726\],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"vduser\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"vdadmin\",\"Password\":\"vdadmin\"}}}')"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+
+  /**
+   * Return data to user
+   */
+  return $buffer;
+}
 ?>

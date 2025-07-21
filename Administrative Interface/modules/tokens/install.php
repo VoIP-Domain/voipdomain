@@ -54,6 +54,7 @@ function tokens_install_db ( $buffer, $parameters)
    */
   install_add_db_table ( "Tokens", "CREATE TABLE `Tokens` (\n" .
                                    "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                   "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
                                    "  `Description` varchar(255) NOT NULL,\n" .
                                    "  `Token` char(68) NOT NULL,\n" .
                                    "  `Access` text NOT NULL,\n" .
@@ -61,7 +62,9 @@ function tokens_install_db ( $buffer, $parameters)
                                    "  `Expire` datetime NOT NULL,\n" .
                                    "  `Language` varchar(255) DEFAULT '',\n" .
                                    "  PRIMARY KEY (`ID`),\n" .
-                                   "  KEY `Token` (`Token`)\n" .
+                                   "  UNIQUE KEY `Token` (`Token`),\n" .
+                                   "  KEY `Tokens_ibfk_1` (`Tenant`),\n" . 
+                                   "  CONSTRAINT `Tokens_ibfk_1` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" . 
                                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='API access tokens';\n");
 
   /**

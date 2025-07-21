@@ -144,4 +144,52 @@ function equipments_configure_audiocodes_userpass_validate ( $buffer, $parameter
    */
   return $buffer;
 }
+
+/**
+ * Implement tenant addition hook
+ */
+framework_add_hook ( "tenants_add_post", "equipments_audiocodes_tenant_add_post");
+
+/**
+ * Function to add default AudioCodes equipments settings to new tenant.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function equipments_audiocodes_tenant_add_post ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Add authentication settings
+   */
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_310hd', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"G729\",\"ALAW\",\"ULAW\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_405hd', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"G729\",\"ALAW\",\"ULAW\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_440hd', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"G729\",\"ALAW\",\"ULAW\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_450hd', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G722\",\"SILK8\",\"SILK16\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+
+  /**
+   * Return data to user
+   */
+  return $buffer;
+}
 ?>

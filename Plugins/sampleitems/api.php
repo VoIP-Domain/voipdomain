@@ -37,7 +37,7 @@
  *     `Name`        VARCHAR(64)  NOT NULL,
  *     `Description` TEXT         NULL,
  *     PRIMARY KEY   (`ID`)
- *   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+ *   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
  *
  * This file will be automatically loaded by VoIP Domain's core.
  *
@@ -190,7 +190,11 @@ function sampleitems_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Filter"], $parameters["function"]["Fields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Filter"], $parameters["function"]["Fields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -440,7 +444,7 @@ function sampleitems_view ( $buffer, $parameters)
   /**
    * Search sampleitem. This is the main logic of the function.
    */
-  $sql = "SELECT `ID`, `Name`, `Description` FROM `SampleItems` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]);
+  $sql = "SELECT `ID`, `Name`, `Description` FROM `SampleItems` WHERE `ID` = " . (int) $parameters["ID"];
   if ( ! $result = @$_in["mysql"]["id"]->query ( $sql))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
@@ -819,7 +823,7 @@ function sampleitems_edit ( $buffer, $parameters)
   /**
    * Update sample item in database. This is the main logic of the function.
    */
-  $sql = "UPDATE `SampleItems` SET `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "' WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]);
+  $sql = "UPDATE `SampleItems` SET `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "' WHERE `ID` = " . (int) $parameters["ID"];
   if ( ! $result = @$_in["mysql"]["id"]->query ( $sql))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
@@ -975,7 +979,7 @@ function sampleitems_remove ( $buffer, $parameters)
   /**
    * Remove sample item from database. This is the main logic of the function.
    */
-  $sql = "DELETE FROM `SampleItems` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]);
+  $sql = "DELETE FROM `SampleItems` WHERE `ID` = " . (int) $parameters["ID"];
   if ( ! $result = @$_in["mysql"]["id"]->query ( $sql))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");

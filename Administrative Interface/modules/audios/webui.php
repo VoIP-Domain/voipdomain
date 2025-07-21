@@ -38,19 +38,19 @@
 /**
  * Add basic framework hooks, with the relative function.
  */
-framework_add_path ( "/audios", "audios_search_page");
+framework_add_path ( "/audios", "audios_search_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "audios_search_page", "audios_search_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/audios/add", "audios_add_page");
+framework_add_path ( "/audios/add", "audios_add_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "audios_add_page", "audios_add_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/audios/:id/clone", "audios_clone_function");
+framework_add_path ( "/audios/:id/clone", "audios_clone_function", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "audios_clone_function", "audios_clone_function", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/audios/:id/view", "audios_view_page");
+framework_add_path ( "/audios/:id/view", "audios_view_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "audios_view_page", "audios_view_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/audios/:id/edit", "audios_edit_page");
+framework_add_path ( "/audios/:id/edit", "audios_edit_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "audios_edit_page", "audios_edit_page", IN_HOOK_INSERT_FIRST);
 
 /**

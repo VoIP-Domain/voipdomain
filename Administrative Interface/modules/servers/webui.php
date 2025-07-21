@@ -38,22 +38,22 @@
 /**
  * Add basic framework hooks, with the relative function.
  */
-framework_add_path ( "/servers", "servers_search_page");
+framework_add_path ( "/servers", "servers_search_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "servers_search_page", "servers_search_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/servers/add", "servers_add_page");
+framework_add_path ( "/servers/add", "servers_add_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "servers_add_page", "servers_add_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/servers/:id/clone", "servers_clone_function");
+framework_add_path ( "/servers/:id/clone", "servers_clone_function", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "servers_clone_function", "servers_clone_function", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/servers/:id/view", "servers_view_page");
+framework_add_path ( "/servers/:id/view", "servers_view_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "servers_view_page", "servers_view_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/servers/:id/edit", "servers_edit_page");
+framework_add_path ( "/servers/:id/edit", "servers_edit_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "servers_edit_page", "servers_edit_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/servers/:id/report", "servers_report_page");
+framework_add_path ( "/servers/:id/report", "servers_report_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "servers_report_page", "servers_report_page", IN_HOOK_INSERT_FIRST);
 
 /**

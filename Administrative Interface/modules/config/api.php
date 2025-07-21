@@ -289,7 +289,7 @@ function permissions_view ( $buffer, $parameters)
   /**
    * Get permissions
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Key` = 'Permissions'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'Permissions'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -589,7 +589,7 @@ function permissions_edit ( $buffer, $parameters)
   /**
    * Get permissions
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Key` = 'Permissions'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'Permissions'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -647,7 +647,7 @@ function permissions_edit ( $buffer, $parameters)
   /**
    * Change permission configuration record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Config` SET `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Permissions"])) . "' WHERE `Key` = 'Permissions'"))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Config` SET `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Permissions"])) . "' WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'Permissions'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -839,7 +839,7 @@ framework_add_api_call (
   "Read",
   "dns_check",
   array (
-    "permissions" => array ( "User", "dns_check"),
+    "permissions" => array ( "User", "Administrator", "Super-Administrator", "dns_check"),
     "title" => __ ( "Check DNS"),
     "description" => __ ( "Check VoIP DNS zone."),
     "parameters" => array (
@@ -1088,11 +1088,79 @@ framework_add_hook (
         "schema" => array (
           "type" => "object",
           "properties" => array (
-            "Language" => array (
+            "NumbersLength" => array (
+              "type" => "integer",
+              "minimum" => 2,
+              "maximum" => 6,
+              "description" => __ ( "The default system extension number length."),
+              "example" => 4
+            ),
+            "ImmutableLength" => array (
+              "type" => "boolean",
+              "description" => __ ( "If the system extension number length are immutable."),
+              "example" => false
+            ),
+            "Country" => array (
+              "type" => "object",
+              "description" => __ ( "The country code information of the tenant."),
+              "properties" => array (
+                "ID" => array (
+                  "type" => "integer",
+                  "description" => __ ( "The country code unique identifier."),
+                  "example" => 840
+                ),
+                "NameEN" => array (
+                  "type" => "string",
+                  "description" => __ ( "The english name of the country."),
+                  "example" => "United States of America"
+                ),
+                "Name" => array (
+                  "type" => "string",
+                  "description" => __ ( "The translated name of the country."),
+                  "example" => __ ( "United States of America")
+                ),
+                "ISO3166-2" => array (
+                  "type" => "string",
+                  "description" => __ ( "The *ISO3166-2* of the country."),
+                  "example" => __ ( "US")
+                )
+              )
+            ),
+            "TimeZone" => array (
               "type" => "string",
-              "enum" => array ( "en_US", "pt_BR"),
-              "description" => __ ( "The default system language."),
-              "example" => "en_US"
+              "description" => __ ( "The time zone of the tenant."),
+              "example" => __ ( "America/Los_Angeles")
+            ),
+            "Offset" => array (
+              "type" => "float",
+              "description" => __ ( "The time offset of the tenant."),
+              "example" => -8
+            ),
+            "Language" => array (
+              "type" => "object",
+              "description" => __ ( "The language used on this tenant."),
+              "properties" => array (
+                "Code" => array (
+                  "type" => "string",
+                  "description" => __ ( "The code of the language."),
+                  "example" => "en_US"
+                ),
+                "DescriptionEN" => array (
+                  "type" => "string",
+                  "description" => __ ( "The description in English of the language."),
+                  "example" => "English (United States)"
+                ),
+                "Description" => array (
+                  "type" => "string",
+                  "description" => __ ( "The translated description of the language."),
+                  "example" => __ ( "English (United States)")
+                )
+              )
+            ),
+            "Currency" => array (
+              "type" => "string",
+              "description" => __ ( "The currency code of the tenant."),
+              "example" => __ ( "BRL")
             ),
             "Operator" => array (
               "type" => "integer",
@@ -1196,12 +1264,12 @@ function configs_view ( $buffer, $parameters)
   /**
    * Get configurations from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Key` = 'Language' OR `Key` = 'Operator' OR `Key` = 'MOH' OR `Key` = 'NTP'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND (`Key` = 'NumbersLength' OR `Key` = 'Operator' OR `Key` = 'MOH' OR `Key` = 'NTP')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  $data = array ( "Language" => "", "Operator" => "", "MOH" => "", "NTP" => array ());
+  $data = array ( "NumbersLength" => "", "Operator" => "", "MOH" => "", "NTP" => array ());
   while ( $entry = $result->fetch_assoc ())
   {
     if ( is_json ( $entry["Data"]))
@@ -1210,6 +1278,36 @@ function configs_view ( $buffer, $parameters)
     }
     $data[$entry["Key"]] = $entry["Data"];
   }
+
+  /**
+   * Check if any range exists, if so, number length is immutable
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT COUNT(`Tenant`) AS `Total` FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  $ranges = $result->fetch_assoc ();
+  $data["ImmutableLength"] = $ranges["Total"] != 0;
+
+  /**
+   * Get tenant language and currency configurations
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Tenants`.`Country`, `Tenants`.`TimeZone`, `Tenants`.`Offset`, `Currencies`.`Code` AS `Currency`, `Tenants`.`Language`, `Countries`.`Name` AS `CountryName`, `Countries`.`ISO3166-2` AS `CountryISO` FROM `Tenants` LEFT JOIN `Countries` ON `Tenants`.`Country` = `Countries`.`Code` LEFT JOIN `Currencies` ON `Tenants`.`Currency` = `Currencies`.`ISO4217` WHERE `Tenants`.`ID` = " . (int) $_in["session"]["Tenant"]))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! $tenantdata = $result->fetch_assoc ())
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  $data["Country"] = array ( "ID" => $tenantdata["Country"], "NameEN" => $tenantdata["CountryName"], "Name" => ( array_key_exists ( $tenantdata["CountryISO"], $_in["countries"][$_in["general"]["language"]]) ? $_in["countries"][$_in["general"]["language"]][$tenantdata["CountryISO"]] : $tenantdata["CountryName"]), "ISO3166-2" => $tenantdata["CountryISO"]);
+  $data["TimeZone"] = $tenantdata["TimeZone"];
+  $data["Offset"] = $tenantdata["Offset"];
+  $data["Currency"] = $tenantdata["Currency"];
+  $data["Language"] = filters_call ( "get_locale", array ( "Code" => $tenantdata["Language"]));
 
   /**
    * Call post hook if exist
@@ -1245,12 +1343,12 @@ framework_add_hook (
       "type" => "object",
       "required" => true,
       "properties" => array (
-        "Language" => array (
-          "type" => "string",
-          "description" => __ ( "The default system language."),
+        "NumbersLength" => array (
+          "type" => "integer",
+          "minimum" => 2,
+          "description" => __ ( "The default system extension number length."),
           "required" => false,
-          "enum" => array_keys ( $_in["languages"]),
-          "example" => "en_US"
+          "example" => 4
         ),
         "Operator" => array (
           "type" => "integer",
@@ -1263,6 +1361,31 @@ framework_add_hook (
           "description" => __ ( "The audio internal system unique identified of the default music on hold of the system."),
           "required" => false,
           "example" => 1
+        ),
+        "Country" => array (
+          "type" => "string",
+          "description" => __ ( "The *ISO3166-2* of the default system country."),
+          "required" => false,
+          "example" => __ ( "US")
+        ),
+        "TimeZone" => array (
+          "type" => "string",
+          "description" => __ ( "The time zone of the tenant."),
+          "required" => false,
+          "example" => __ ( "America/Los_Angeles")
+        ),
+        "Offset" => array (
+          "type" => "float",
+          "description" => __ ( "The time offset of the tenant."),
+          "required" => false,
+          "example" => -8
+        ),
+        "Language" => array (
+          "type" => "string",
+          "description" => __ ( "The default system language."),
+          "required" => false,
+          "enum" => array_keys ( $_in["languages"]),
+          "example" => "en_US"
         ),
         "NTP" => array (
           "type" => "array",
@@ -1317,7 +1440,7 @@ framework_add_api_call (
   array ( "Modify", "Edit"),
   "configs_edit",
   array (
-    "permissions" => array ( "User", "configs_edit"),
+    "permissions" => array ( "Administrator", "configs_edit"),
     "title" => __ ( "Change configurations"),
     "description" => __ ( "Change system global configurations.")
   )
@@ -1348,9 +1471,94 @@ function configs_edit ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( ! empty ( $parameters["Language"]) && ! array_key_exists ( $parameters["Language"], $_in["languages"]))
+  if ( ! empty ( $parameters["NumbersLength"]) && ( $parameters["NumbersLength"] < 2 || $parameters["NumbersLength"] > 6))
   {
-    $data["Language"] = __ ( "The selected language is not valid.");
+    $data["NumbersLength"] = __ ( "The numbers length must be between 2 and 6.");
+  }
+  if ( empty ( $parameters["Country"]))
+  {
+    $data["Country"] = __ ( "The country is required.");
+  }
+  if ( ! array_key_exists ( "Country", $data) && ! preg_match ( "/^[A-Z]{2}$/", $parameters["Country"]))
+  {
+    $data["Country"] = __ ( "The country is invalid.");
+  }
+  if ( empty ( $parameters["TimeZone"]))
+  {
+    $data["TimeZone"] = __ ( "The time zone is required.");
+  }
+  if ( ! array_key_exists ( "TimeZone", $data) && ! preg_match ( "/^(?:(?:[A-Za-z_\-]+\/[A-Za-z_\-]+(?:\/[A-Za-z_\-]+)?)|(?:Etc\/[A-Za-z0-9+\-]+(?:\/[A-Za-z0-9]+)?|(?:CET|CST6CDT|EET|EST|EST5EDT|MET|MST|MST7MDT|PST8PDT|HST)))$/", $parameters["TimeZone"]))
+  {
+    $data["TimeZone"] = __ ( "The time zone is invalid.");
+  }
+  if ( empty ( $parameters["Language"]))
+  {
+    $data["Language"] = __ ( "The language is required.");
+  }
+  if ( ! array_key_exists ( "Language", $data) && ! array_key_exists ( $parameters["Language"], $_in["languages"]))
+  {
+    $data["Language"] = __ ( "The provided language is not valid.");
+  }
+  if ( empty ( $parameters["Currency"]))
+  {
+    $data["Currency"] = __ ( "The currency is required.");
+  }
+
+  /**
+   * Check if numbers length can be changed
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Data` FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'NumbersLength'"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  $parameters["ORIGINAL"] = array ();
+  if ( ! $parameters["ORIGINAL"]["NumbersLength"] = $result->fetch_assoc ()["Data"])
+  {
+    $parameters["ORIGINAL"]["NumbersLength"] = NULL;
+  }
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT COUNT(`Tenant`) AS `Total` FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  $ranges = $result->fetch_assoc ();
+  $immutablelength = $ranges["Total"] != 0;
+  if ( ! empty ( $parameters["NumbersLength"]) && ! array_key_exists ( "NumbersLength", $data) && $parameters["NumberLength"] != $parameters["ORIGINAL"]["NumbersLength"] && $immutablelength)
+  {
+    $data["NumbersLength"] = __ ( "The number length is immutable.");
+  }
+
+  /**
+   * Check if provided currency is recognized by the system
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Currencies` WHERE `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Currency"]) . "'"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! $currency = $result->fetch_assoc ())
+  {
+    if ( ! array_key_exists ( "Currency", $data))
+    {
+      $data["Currency"] = __ ( "The informed currency is invalid.");
+    }
+  }
+
+  /**
+   * Check if provided country is recognized by the system
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Countries` WHERE `ISO3166-2` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Country"]) . "'"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! $country = $result->fetch_assoc ())
+  {
+    if ( ! array_key_exists ( "Country", $data))
+    {
+      $data["Country"] = __ ( "The informed country is invalid.");
+    }
   }
 
   /**
@@ -1358,8 +1566,16 @@ function configs_edit ( $buffer, $parameters)
    */
   if ( ! empty ( $parameters["Operator"]))
   {
-    // **TODO**: Check if extension type is "dialable" (phone, group, etc) and not a "block" or other non-dialable number
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Operator"])))
+    $objects = filters_call ( "objects_types");
+    $dialable = array ();
+    foreach ( $objects as $object)
+    {
+      if ( $object["type"] == "human")
+      {
+        $dialable[] = "'" . $_in["mysql"]["id"]->real_escape_string ( substr ( $object["object"], 9)) . "'";
+      }
+    }
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Type` IN (" . implode ( ",", $dialable) . ") AND `ID` = " . (int) $parameters["Operator"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -1375,7 +1591,7 @@ function configs_edit ( $buffer, $parameters)
    */
   if ( ! empty ( $parameters["MOH"]))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["MOH"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["MOH"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -1443,12 +1659,14 @@ function configs_edit ( $buffer, $parameters)
   /**
    * Get configurations from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Key` = 'Language' OR `Key` = 'Operator' OR `Key` = 'MOH' OR `Key` = 'NTP'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Key`, `Data` FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND (`Key` = 'Operator' OR `Key` = 'MOH' OR `Key` = 'NTP')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  $parmeters["ORIGINAL"] = array ( "Language" => "", "Operator" => "", "MOH" => "", "NTP" => array ());
+  $parmeters["ORIGINAL"]["Operator"] = "";
+  $parmeters["ORIGINAL"]["MOH"] = "";
+  $parmeters["ORIGINAL"]["NTP"] = array ();
   while ( $entry = $result->fetch_assoc ())
   {
     if ( is_json ( $entry["Data"]))
@@ -1459,11 +1677,30 @@ function configs_edit ( $buffer, $parameters)
   }
 
   /**
+   * Get tenant configurations from database
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Tenants`.`Country`, `Tenants`.`TimeZone`, `Tenants`.`Offset`, `Currencies`.`Code` AS `Currency`, `Tenants`.`Language`, `Countries`.`Name` AS `CountryName`, `Countries`.`ISO3166-2` AS `CountryISO` FROM `Tenants` LEFT JOIN `Countries` ON `Tenants`.`Country` = `Countries`.`Code` LEFT JOIN `Currencies` ON `Tenants`.`Currency` = `Currencies`.`ISO4217` WHERE `Tenants`.`ID` = " . (int) $_in["session"]["Tenant"]))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! $tenantdata = $result->fetch_assoc ())
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  $parameters["ORIGINAL"]["Country"] = $tenantdata["Country"];
+  $parameters["ORIGINAL"]["TimeZone"] = $tenantdata["TimeZone"];
+  $parameters["ORIGINAL"]["Offset"] = $tenantdata["Offset"];
+  $parameters["ORIGINAL"]["Currency"] = $tenantdata["Currency"];
+  $parameters["ORIGINAL"]["Language"] = $tenantdata["Language"];
+
+  /**
    * Change each configuration entry
    */
-  if ( ! empty ( $parameters["Language"]))
+  if ( $parameters["ORIGINAL"]["NumbersLength"] != $parameters["NumbersLength"])
   {
-    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Data`) VALUES ('Language', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Language"]) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Language"]) . "'"))
+    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('NumbersLength', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["NumbersLength"]) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Language"]) . "'"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -1471,7 +1708,7 @@ function configs_edit ( $buffer, $parameters)
   }
   if ( ! empty ( $parameters["MOH"]))
   {
-    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Data`) VALUES ('MOH', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["MOH"]) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["MOH"]) . "'"))
+    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('MOH', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["MOH"]) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["MOH"]) . "'"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -1479,7 +1716,7 @@ function configs_edit ( $buffer, $parameters)
   }
   if ( ! empty ( $parameters["Operator"]))
   {
-    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Data`) VALUES ('Operator', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Operator"]) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Operator"]) . "'"))
+    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Operator', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Operator"]) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Operator"]) . "'"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -1487,7 +1724,40 @@ function configs_edit ( $buffer, $parameters)
   }
   if ( sizeof ( $parameters["NTP"]) != 0)
   {
-    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Data`) VALUES ('NTP', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["NTP"])) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["NTP"])) . "'"))
+    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('NTP', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["NTP"])) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["NTP"])) . "'"))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+  }
+
+  /**
+   * Update tenant configuration
+   */
+  if ( $country["Code"] != $parameters["ORIGINAL"]["Country"] || $parameters["TimeZone"] != $parameters["ORIGINAL"]["TimeZone"] || $parameters["Offset"] != $parameters["ORIGINAL"]["Offset"] || $currency["ISO4217"] != $parameters["ORIGINAL"]["Currency"] || $parameters["Language"] != $parameters["ORIGINAL"]["Language"])
+  {
+    $updates = "";
+    if ( $country["Code"] != $parameters["ORIGINAL"]["Country"])
+    {
+      $updates .= ", `Country` = " . (int) $country["Code"];
+    }
+    if ( $parameters["TimeZone"] != $parameters["ORIGINAL"]["TimeZone"])
+    {
+      $updates .= ", `TimeZone` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["TimeZone"]) . "'";
+    }
+    if ( $parameters["Offset"] != $parameters["ORIGINAL"]["Offset"])
+    {
+      $updates .= ", `Offset` = '" . (float) $parameters["Offset"] . "'";
+    }
+    if ( $currency["ISO4217"] != $parameters["ORIGINAL"]["Currency"])
+    {
+      $updates .= ", `Currency` = " . (int) $currency["ISO4217"];
+    }
+    if ( $parameters["Language"] != $parameters["ORIGINAL"]["Language"])
+    {
+      $updates .= ", `Language` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Language"]) . "'";
+    }
+    if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Tenants` SET" . substr ( $updates, 2) . " WHERE `ID` = " . (int) $_in["session"]["Tenant"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -1505,7 +1775,7 @@ function configs_edit ( $buffer, $parameters)
   /**
    * Notify servers about change
    */
-  if ( ! empty ( $parameters["Language"]))
+  if ( $parameters["Language"] != $parameters["ORIGINAL"]["Language"])
   {
     $notify = array ( "Language" => $parameters["Language"]);
     if ( framework_has_hook ( "configs_language_notify"))
@@ -1560,8 +1830,8 @@ function configs_edit ( $buffer, $parameters)
  * API call to import plugin files
  */
 framework_add_hook (
-  "plugin_import",
-  "plugin_import",
+  "plugins_import",
+  "plugins_import",
   IN_HOOK_NULL,
   array (
     "requests" => array (
@@ -1601,13 +1871,13 @@ framework_add_hook (
     )
   )
 );
-framework_add_permission ( "plugin_import", __ ( "Import plugin file"));
+framework_add_permission ( "plugins_import", __ ( "Import plugin file"));
 framework_add_api_call (
   "/config/plugin",
   "Create",
-  "plugin_import",
+  "plugins_import",
   array (
-    "permissions" => array ( "Administrator", "plugin_import"),
+    "permissions" => array ( "Super-Administrator", "plugins_import"),
     "title" => __ ( "Import plugin"),
     "description" => __ ( "Import a plugin file.")
   )
@@ -1622,16 +1892,16 @@ framework_add_api_call (
  * @param array $parameters Optional parameters to the function
  * @return string Output of the generated page
  */
-function plugin_import ( $buffer, $parameters)
+function plugins_import ( $buffer, $parameters)
 {
   global $_in;
 
   /**
    * Call start hook if exist
    */
-  if ( framework_has_hook ( "plugin_import_start"))
+  if ( framework_has_hook ( "plugins_import_start"))
   {
-    $parameters = framework_call ( "plugin_import_start", $parameters);
+    $parameters = framework_call ( "plugins_import_start", $parameters);
   }
 
   /**
@@ -1663,9 +1933,9 @@ function plugin_import ( $buffer, $parameters)
   /**
    * Call validate hook if exist
    */
-  if ( framework_has_hook ( "plugin_import_validate"))
+  if ( framework_has_hook ( "plugins_import_validate"))
   {
-    $data = framework_call ( "plugin_import_validate", $parameters, false, $data);
+    $data = framework_call ( "plugins_import_validate", $parameters, false, $data);
   }
 
   /**
@@ -1684,9 +1954,9 @@ function plugin_import ( $buffer, $parameters)
   /**
    * Call pre hook if exist
    */
-  if ( framework_has_hook ( "plugin_import_pre"))
+  if ( framework_has_hook ( "plugins_import_pre"))
   {
-    $parameters = framework_call ( "plugin_import_pre", $parameters, false, $parameters);
+    $parameters = framework_call ( "plugins_import_pre", $parameters, false, $parameters);
   }
 
   /**
@@ -1982,7 +2252,7 @@ function plugin_import ( $buffer, $parameters)
   /**
    * Add plugin to database
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Plugins` (`Dirname`, `Name`, `Version`, `Author`, `Description`, `License`, `Status`, `Requires`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( (float) $parameters["config"]["version"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["author"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["license"]) . "', 'A', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["config"]["require"])) . "')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Plugins` (`Dirname`, `Name`, `Version`, `Author`, `Description`, `License`, `Status`, `Requires`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["name"]) . "', '" . (float) $parameters["config"]["version"] . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["author"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["license"]) . "', 'A', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["config"]["require"])) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -2004,17 +2274,17 @@ function plugin_import ( $buffer, $parameters)
   /**
    * Call post hook if exist
    */
-  if ( framework_has_hook ( "plugin_import_post"))
+  if ( framework_has_hook ( "plugins_import_post"))
   {
-    $data = framework_call ( "plugin_import_post", $parameters, false, $data);
+    $data = framework_call ( "plugins_import_post", $parameters, false, $data);
   }
 
   /**
    * Execute finish hook if exist
    */
-  if ( framework_has_hook ( "plugin_import_finish"))
+  if ( framework_has_hook ( "plugins_import_finish"))
   {
-    framework_call ( "plugin_import_finish", $parameters, false);
+    framework_call ( "plugins_import_finish", $parameters, false);
   }
 
   /**
@@ -2027,8 +2297,8 @@ function plugin_import ( $buffer, $parameters)
  * API call to check validate VoIP Domain plugin file (internal use only)
  */
 framework_add_hook (
-  "plugin_check_file",
-  "plugin_check_file",
+  "plugins_check_file",
+  "plugins_check_file",
   IN_HOOK_NULL,
   array (
     "requests" => array (
@@ -2126,7 +2396,7 @@ framework_add_hook (
 framework_add_api_call (
   "/config/testfile",
   "Read",
-  "plugin_check_file",
+  "plugins_check_file",
   array (
     "permissions" => array ( "Internal"),
     "title" => __ ( "Check plugin file"),
@@ -2152,16 +2422,16 @@ framework_add_api_call (
  * @param array $parameters Optional parameters to the function
  * @return string Output of the generated page
  */
-function plugin_check_file ( $buffer, $parameters)
+function plugins_check_file ( $buffer, $parameters)
 {
   global $_in, $_api, $_filters, $_plugins;
 
   /**
    * Call start hook if exist
    */
-  if ( framework_has_hook ( "plugin_check_file_start"))
+  if ( framework_has_hook ( "plugins_check_file_start"))
   {
-    $parameters = framework_call ( "plugin_check_file_start", $parameters);
+    $parameters = framework_call ( "plugins_check_file_start", $parameters);
   }
 
   /**
@@ -2196,9 +2466,9 @@ function plugin_check_file ( $buffer, $parameters)
   /**
    * Call validate hook if exist
    */
-  if ( framework_has_hook ( "plugin_check_file_validate"))
+  if ( framework_has_hook ( "plugins_check_file_validate"))
   {
-    $data = framework_call ( "plugin_check_file_validate", $parameters, false, $data);
+    $data = framework_call ( "plugins_check_file_validate", $parameters, false, $data);
   }
 
   /**
@@ -2227,17 +2497,17 @@ function plugin_check_file ( $buffer, $parameters)
   /**
    * Call sanitize hook if exist
    */
-  if ( framework_has_hook ( "plugin_check_file_sanitize"))
+  if ( framework_has_hook ( "plugins_check_file_sanitize"))
   {
-    $parameters = framework_call ( "plugin_check_file_sanitize", $parameters, false, $parameters);
+    $parameters = framework_call ( "plugins_check_file_sanitize", $parameters, false, $parameters);
   }
 
   /**
    * Call pre hook if exist
    */
-  if ( framework_has_hook ( "plugin_check_file_pre"))
+  if ( framework_has_hook ( "plugins_check_file_pre"))
   {
-    $parameters = framework_call ( "plugin_check_file_pre", $parameters, false, $parameters);
+    $parameters = framework_call ( "plugins_check_file_pre", $parameters, false, $parameters);
   }
 
   /**
@@ -2277,17 +2547,17 @@ function plugin_check_file ( $buffer, $parameters)
   /**
    * Call post hook if exist
    */
-  if ( framework_has_hook ( "plugin_check_file_post"))
+  if ( framework_has_hook ( "plugins_check_file_post"))
   {
-    $data = framework_call ( "plugin_check_file_post", $parameters, false, $data);
+    $data = framework_call ( "plugins_check_file_post", $parameters, false, $data);
   }
 
   /**
    * Execute finish hook if exist
    */
-  if ( framework_has_hook ( "plugin_check_file_finish"))
+  if ( framework_has_hook ( "plugins_check_file_finish"))
   {
-    framework_call ( "plugin_check_file_finish", $parameters, false);
+    framework_call ( "plugins_check_file_finish", $parameters, false);
   }
 
   /**
@@ -2394,7 +2664,7 @@ framework_add_api_call (
   "Read",
   "plugins_search",
   array (
-    "permissions" => array ( "Administrator", "plugins_search"),
+    "permissions" => array ( "Super-Administrator", "plugins_search"),
     "title" => __ ( "Search plugins"),
     "description" => __ ( "Search for system plugins.")
   )
@@ -2438,7 +2708,11 @@ function plugins_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -2557,7 +2831,7 @@ framework_add_api_call (
   array ( "Modify", "Edit"),
   "plugins_toggle",
   array (
-    "permissions" => array ( "Administrator", "plugins_toggle"),
+    "permissions" => array ( "Super-Administrator", "plugins_toggle"),
     "title" => __ ( "Toggle plugin status"),
     "description" => __ ( "Toggle plugin status enabled/disabled."),
     "parameters" => array (
@@ -2575,7 +2849,7 @@ framework_add_api_call (
   array ( "Modify", "Edit"),
   "plugins_toggle",
   array (
-    "permissions" => array ( "Administrator", "plugins_toggle"),
+    "permissions" => array ( "Super-Administrator", "plugins_toggle"),
     "title" => __ ( "Enable plugin"),
     "description" => __ ( "Enable a system plugin."),
     "parameters" => array (
@@ -2593,7 +2867,7 @@ framework_add_api_call (
   array ( "Modify", "Edit"),
   "plugins_toggle",
   array (
-    "permissions" => array ( "Administrator", "plugins_toggle"),
+    "permissions" => array ( "Super-Administrator", "plugins_toggle"),
     "title" => __ ( "Disable plugin"),
     "description" => __ ( "Disable a system plugin."),
     "parameters" => array (
@@ -2830,7 +3104,7 @@ framework_add_api_call (
   "Read",
   "plugins_view",
   array (
-    "permissions" => array ( "Administrator", "plugins_view"),
+    "permissions" => array ( "Super-Administrator", "plugins_view"),
     "title" => __ ( "View plugin"),
     "description" => __ ( "View system plugin information."),
     "parameters" => array (
@@ -3000,7 +3274,7 @@ framework_add_api_call (
   "Delete",
   "plugins_remove",
   array (
-    "permissions" => array ( "Administrator", "plugins_remove"),
+    "permissions" => array ( "Super-Administrator", "plugins_remove"),
     "title" => __ ( "Remove plugin"),
     "description" => __ ( "Remove a system plugin.")
   )

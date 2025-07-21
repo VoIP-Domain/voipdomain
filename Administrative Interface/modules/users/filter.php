@@ -51,7 +51,7 @@ framework_add_filter ( "get_users", "get_users");
  */
 function users_menu ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "user", "href" => "/users", "text" => __ ( "Users"), "permission" => "Administrator")));
+  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "user", "href" => "/users", "text" => __ ( "Users"), "permissions" => array ( "Administrator"))));
 }
 
 /**
@@ -73,7 +73,7 @@ function get_users ( $buffer, $parameters)
   $where = "";
   if ( array_key_exists ( "ID", $parameters))
   {
-    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
+    $where .= " AND `ID` = " . (int) $parameters["ID"];
   }
   if ( array_key_exists ( "Username", $parameters))
   {
@@ -92,7 +92,7 @@ function get_users ( $buffer, $parameters)
    * Check into database if users exists
    */
   $data = array ();
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Users`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Users` WHERE `Tenant` = " . (int) get_tenant () . $where))
   {
     while ( $user = $result->fetch_assoc ())
     {

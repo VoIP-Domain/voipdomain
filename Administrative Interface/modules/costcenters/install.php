@@ -54,10 +54,13 @@ function costcenters_install_db ( $buffer, $parameters)
    */
   install_add_db_table ( "CostCenters", "CREATE TABLE `CostCenters` (\n" .
                                         "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                        "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
                                         "  `Description` varchar(255) NOT NULL,\n" .
                                         "  `Code` varchar(10) NOT NULL,\n" .
-                                        "  PRIMARY KEY (`ID`)\n" .
-                                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Cost centers';\n");
+                                        "  PRIMARY KEY (`ID`),\n" .
+                                        "  KEY `CostCenters_ibfk_1` (`Tenant`),\n" . 
+                                        "  CONSTRAINT `CostCenters_ibfk_1` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" . 
+                                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Cost centers';\n", array ( "Tenants"));
 
   /**
    * Add basic system triggers

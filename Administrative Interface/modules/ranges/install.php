@@ -54,6 +54,7 @@ function ranges_install_db ( $buffer, $parameters)
    */
   install_add_db_table ( "Ranges", "CREATE TABLE `Ranges` (\n" .
                                    "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                   "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
                                    "  `Description` varchar(255) NOT NULL,\n" .
                                    "  `Server` bigint(20) unsigned NOT NULL,\n" .
                                    "  `Start` smallint(2) unsigned NOT NULL,\n" .
@@ -61,8 +62,10 @@ function ranges_install_db ( $buffer, $parameters)
                                    "  PRIMARY KEY (`ID`),\n" .
                                    "  KEY `Range` (`Start`,`Finish`),\n" .
                                    "  KEY `Ranges_ibfk_1` (`Server`),\n" .
-                                   "  CONSTRAINT `Ranges_ibfk_1` FOREIGN KEY (`Server`) REFERENCES `Servers` (`ID`) ON UPDATE CASCADE\n" .
-                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extension number ranges allocation';\n", array ( "Servers"));
+                                   "  KEY `Ranges_ibfk_2` (`Tenant`),\n" . 
+                                   "  CONSTRAINT `Ranges_ibfk_1` FOREIGN KEY (`Server`) REFERENCES `Servers` (`ID`) ON UPDATE CASCADE,\n" .
+                                   "  CONSTRAINT `Ranges_ibfk_2` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" . 
+                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extension number ranges allocation';\n", array ( "Servers", "Tenants"));
 
   /**
    * Add basic system triggers

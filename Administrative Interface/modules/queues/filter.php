@@ -51,7 +51,7 @@ framework_add_filter ( "get_queues", "get_queues");
  */
 function queues_menu ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "code-branch", "href" => "/queues", "text" => __ ( "Queues"))));
+  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "code-branch", "href" => "/queues", "text" => __ ( "Queues"), "permissions" => array ( "Administrator"))));
 }
 
 /**
@@ -73,11 +73,11 @@ function get_queues ( $buffer, $parameters)
   $where = "";
   if ( array_key_exists ( "ID", $parameters))
   {
-    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
+    $where .= " AND `ID` = " . (int) $parameters["ID"];
   }
   if ( array_key_exists ( "Number", $parameters))
   {
-    $where .= " AND `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Number"]);
+    $where .= " AND `Extension` = " . (int) $parameters["Number"];
   }
   if ( array_key_exists ( "Text", $parameters))
   {
@@ -85,14 +85,14 @@ function get_queues ( $buffer, $parameters)
   }
   if ( array_key_exists ( "Range", $parameters))
   {
-    $where .= " AND `Range` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Range"]);
+    $where .= " AND `Range` = " . (int) $parameters["Range"];
   }
 
   /**
    * Check into database if queue exists
    */
   $data = array ();
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) get_tenant () . $where))
   {
     while ( $queue = $result->fetch_assoc ())
     {

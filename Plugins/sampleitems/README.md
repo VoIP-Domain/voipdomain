@@ -17,7 +17,7 @@ This folder contains a **minimal, fully-featured CRUD plugin** that you can use 
      `Name` VARCHAR(64) NOT NULL,
      `Description` TEXT NULL,
      PRIMARY KEY (`ID`)
-   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
    ```
 2. Copy this directory into `Plugins/` (already done if you are reading this).
 3. Reload the UI – a new **Sample items** entry should appear in the sidebar.

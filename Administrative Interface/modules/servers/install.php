@@ -54,6 +54,7 @@ function servers_install_db ( $buffer, $parameters)
    */
   install_add_db_table ( "Servers", "CREATE TABLE `Servers` (\n" .
                                     "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                    "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
                                     "  `Description` varchar(255) NOT NULL,\n" .
                                     "  `Address` varchar(255) NOT NULL,\n" .
                                     "  `Port` int(2) unsigned NOT NULL,\n" .
@@ -62,8 +63,10 @@ function servers_install_db ( $buffer, $parameters)
                                     "  `TransfEnd` time DEFAULT NULL,\n" .
                                     "  `PublicKey` blob NOT NULL,\n" .
                                     "  `PrivateKey` blob NOT NULL,\n" .
-                                    "  PRIMARY KEY (`ID`)\n" .
-                                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Remote Asterisk servers';\n");
+                                    "  PRIMARY KEY (`ID`),\n" .
+                                    "  KEY `Servers_ibfk_1` (`Tenant`),\n" . 
+                                    "  CONSTRAINT `Servers_ibfk_1` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" . 
+                                    ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Remote Asterisk servers';\n", array ( "Tenants"));
   install_add_db_table ( "ServerBackup", "CREATE TABLE `ServerBackup` (\n" .
                                          "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
                                          "  `Server` bigint(20) unsigned NOT NULL,\n" .

@@ -79,7 +79,7 @@ function extension_ivrs_inuse ( $buffer, $parameters)
   /**
    * Search extension using IVR entry
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `ExtensionIVR` WHERE `IVR` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `ExtensionIVR` WHERE `IVR` = " . $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

@@ -259,7 +259,7 @@ function extensions_view_hunt ( $buffer, $parameters)
   /**
    * Search extensions for the extension hunt
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Description`, `Number` FROM `Extensions` LEFT JOIN `ExtensionHunt` ON `ExtensionHunt`.`Hunt` = `Extensions`.`ID` WHERE `ExtensionHunt`.`Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Description`, `Number` FROM `Extensions` LEFT JOIN `ExtensionHunt` ON `ExtensionHunt`.`Hunt` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionHunt`.`Extension` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -304,17 +304,16 @@ function extensions_hunt_sanitize ( $buffer, $parameters)
   /**
    * Fetch all new hunts numbers
    */
-  $hunttypes = "";
+  $hunttypes = array ();
   foreach ( $_in["hunts"] as $hunttype)
   {
-    $hunttypes .= ", '" . $_in["mysql"]["id"]->real_escape_string ( substr ( $hunttype, 10)) . "'";
+    $hunttypes[] = "'" . $_in["mysql"]["id"]->real_escape_string ( substr ( $hunttype, 10)) . "'";
   }
-  $hunttypes = substr ( $hunttypes, 2);
   $tmp = $buffer["Hunts"];
   $buffer["Hunts"] = array ();
   foreach ( $tmp as $hunt)
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Number` FROM `Extensions` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $hunt) . " AND `Type` IN (" . $hunttypes . ")"))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Number` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $hunt . " AND `Type` IN (" . implode ( ",", $hunttypes) . ")"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -327,7 +326,7 @@ function extensions_hunt_sanitize ( $buffer, $parameters)
    */
   if ( array_key_exists ( "ORIGINAL", $buffer))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`ID`, `Extensions`.`Number` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Hunt` = `Extensions`.`ID` WHERE `ExtensionHunt`.`Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`ID`, `Extensions`.`Number` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Hunt` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionHunt`.`Extension` = " . (int) $parameters["ID"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -401,7 +400,7 @@ function extensions_add_hunt_post ( $buffer, $parameters)
    */
   foreach ( $parameters["Hunts"] as $hunt => $number)
   {
-    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `ExtensionHunt` (`Extension`, `Hunt`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $hunt) . ")"))
+    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `ExtensionHunt` (`Extension`, `Hunt`) VALUES (" . (int) $parameters["ID"] . ", " . (int) $hunt . ")"))
     {
       framework_call ( "extensions_add_abort", $parameters);
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
@@ -443,7 +442,7 @@ function extensions_edit_hunt_post ( $buffer, $parameters)
    */
   if ( ! array_compare ( $parameters["ORIGINAL"]["Hunts"], $parameters["Hunts"]))
   {
-    if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ExtensionHunt` WHERE `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+    if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ExtensionHunt` WHERE `Extension` = " . (int) $parameters["ID"]))
     {
       framework_call ( "extensions_edit_abort", $parameters);
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
@@ -451,7 +450,7 @@ function extensions_edit_hunt_post ( $buffer, $parameters)
     }
     foreach ( $parameters["Hunts"] as $hunt => $number)
     {
-      if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `ExtensionHunt` (`Extension`, `Hunt`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $hunt) . ")"))
+      if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `ExtensionHunt` (`Extension`, `Hunt`) VALUES (" . (int) $parameters["ID"] . ", " . (int) $hunt . ")"))
       {
         framework_call ( "extensions_edit_abort", $parameters);
         header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
@@ -508,7 +507,7 @@ function extensions_remove_hunt_pre ( $buffer, $parameters)
   /**
    * Get extension hunts to record
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`ID`, `Extensions`.`Number` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Hunt` = `Extensions`.`ID` WHERE `ExtensionHunt`.`Extension` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`ID`, `Extensions`.`Number` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Hunt` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionHunt`.`Extension` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -522,7 +521,7 @@ function extensions_remove_hunt_pre ( $buffer, $parameters)
   /**
    * Remove extension hunts from database
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ExtensionHunt` WHERE `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ExtensionHunt` WHERE `Extension` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -565,14 +564,14 @@ function extension_hunt_extensions_changed ( $buffer, $parameters)
   /**
    * Search for extension hunts that has the changed extension
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ExtensionHunt`.`Hunt`, `ExtensionHunt`.`Extension`, `Extensions`.`Number`, `Extensions`.`Description` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` WHERE `ExtensionHunt`.`Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ExtensionHunt`.`Hunt`, `ExtensionHunt`.`Extension`, `Extensions`.`Number`, `Extensions`.`Description` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionHunt`.`Extension` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   while ( $hunt = $result->fetch_assoc ())
   {
-    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`Extensions`.`Number` SEPARATOR ',') AS `Extensions` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` WHERE `ExtensionHunt`.`Hunt` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $hunt["Hunt"])))
+    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`Extensions`.`Number` SEPARATOR ',') AS `Extensions` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionHunt`.`Hunt` = " . (int) $hunt["Hunt"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -612,19 +611,19 @@ function extension_hunt_extensions_remove_pre ( $buffer, $parameters)
   /**
    * Search for extension hunts that has the removed extension
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ExtensionHunt`.`Hunt`, `ExtensionHunt`.`Extension`, `Extensions`.`Number`, `Extensions`.`Description` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` WHERE `ExtensionHunt`.`Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ExtensionHunt`.`Hunt`, `ExtensionHunt`.`Extension`, `Extensions`.`Number`, `Extensions`.`Description` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionHunt`.`Extension` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ExtensionHunt` WHERE `Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ExtensionHunt` WHERE `Extension` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   while ( $hunt = $result->fetch_assoc ())
   {
-    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`Extensions`.`Number` SEPARATOR ',') AS `Extensions` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` WHERE `ExtensionHunt`.`Hunt` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $hunt["Hunt"])))
+    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`Extensions`.`Number` SEPARATOR ',') AS `Extensions` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionHunt`.`Hunt` = " . (int) $hunt["Hunt"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -646,19 +645,19 @@ function extension_hunt_extensions_remove_pre ( $buffer, $parameters)
   /**
    * Check if the removed extesion exist into any other extension hunt and remove it
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ExtensionHunt`.`Hunt`, `ExtensionHunt`.`Extension`, `Extensions`.`Number`, `Extensions`.`Description` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` WHERE `ExtensionHunt`.`Hunt` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ExtensionHunt`.`Hunt`, `ExtensionHunt`.`Extension`, `Extensions`.`Number`, `Extensions`.`Description` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionHunt`.`Hunt` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ExtensionHunt` WHERE `Hunt` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ExtensionHunt` WHERE `Hunt` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   while ( $hunt = $result->fetch_assoc ())
   {
-    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`Extensions`.`Number` SEPARATOR ',') AS `Extensions` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` WHERE `ExtensionHunt`.`Extension` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $hunt["Extension"])))
+    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`Extensions`.`Number` SEPARATOR ',') AS `Extensions` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionHunt`.`Extension` = " . (int) $hunt["Extension"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -704,7 +703,7 @@ function extension_hunt_server_reconfig ( $buffer, $parameters)
   /**
    * Fetch all hunts and send to server
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT (SELECT `Number` FROM `Extensions` WHERE `ID` = `ExtensionHunt`.`Extension`) AS `Number`, `Extensions`.`Description`, GROUP_CONCAT(`Extensions`.`Number` SEPARATOR ',') AS `Extensions` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` WHERE `Extensions`.`Type` = 'hunt' AND `Ranges`.`Server` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]) . " GROUP BY `ExtensionHunt`.`Extension`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT (SELECT `Number` FROM `Extensions` WHERE `ID` = `ExtensionHunt`.`Extension`) AS `Number`, `Extensions`.`Description`, GROUP_CONCAT(`Extensions`.`Number` SEPARATOR ',') AS `Extensions` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Extensions`.`Type` = 'hunt' AND `Ranges`.`Server` = " . (int) $parameters["ID"] . " GROUP BY `ExtensionHunt`.`Extension`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

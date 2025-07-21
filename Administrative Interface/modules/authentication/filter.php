@@ -50,8 +50,6 @@ framework_add_filter ( "page_menu_configurations", "authentication_menu");
  */
 function authentication_menu ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array (
-    array ( "type" => "entry", "icon" => "user-shield", "href" => "/config/authentication", "text" => __ ( "Authentication"))
-  ));
+  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "user-shield", "href" => "/config/authentication", "text" => __ ( "Authentication"), "permissions" => array ( "Administrator"))));
 }
 ?>

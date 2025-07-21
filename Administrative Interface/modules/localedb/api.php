@@ -115,7 +115,7 @@ framework_add_api_call (
   "Read",
   "locales_search",
   array (
-    "permissions" => array ( "User", "Token"),
+    "permissions" => array ( "User", "Administrator", "Super-Administrator", "Token", "locales_search"),
     "title" => __ ( "Search locales"),
     "description" => __ ( "Search for system locales.")
   )
@@ -159,7 +159,11 @@ function locales_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -303,7 +307,7 @@ framework_add_api_call (
   "Read",
   "locales_view",
   array (
-    "permissions" => array ( "User", "Token"),
+    "permissions" => array ( "User", "Administrator", "Super-Administrator", "Token", "locales_view"),
     "title" => __ ( "View locales"),
     "description" => __ ( "Get a locale information."),
     "parameters" => array (

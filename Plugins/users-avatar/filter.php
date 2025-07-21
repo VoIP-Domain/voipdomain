@@ -67,7 +67,7 @@ function avatar_authentication_success ( $buffer, $parameters)
   /**
    * Fetch user avatar from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Avatar` FROM `UserAvatar` WHERE `User` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $_in["session"]["Data"]["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Avatar` FROM `UserAvatar` WHERE `User` = " . (int) $_in["session"]["Data"]["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -115,7 +115,7 @@ function avatar_session_extend ( $buffer, $parameters)
   /**
    * Fetch user avatar from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Avatar` FROM `UserAvatar` WHERE `User` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $_in["session"]["Data"]["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Avatar` FROM `UserAvatar` WHERE `User` = " . (int) $_in["session"]["Data"]["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

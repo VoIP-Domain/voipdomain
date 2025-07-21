@@ -38,22 +38,22 @@
 /**
  * Add basic framework hooks, with the relative function.
  */
-framework_add_path ( "/extensions", "extensions_search_page");
+framework_add_path ( "/extensions", "extensions_search_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "extensions_search_page", "extensions_search_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/extensions/add", "extensions_add_page");
+framework_add_path ( "/extensions/add", "extensions_add_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "extensions_add_page", "extensions_add_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/extensions/:id/clone", "extensions_clone_function");
+framework_add_path ( "/extensions/:id/clone", "extensions_clone_function", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "extensions_clone_function", "extensions_clone_function", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/extensions/:id/view", "extensions_view_page");
+framework_add_path ( "/extensions/:id/view", "extensions_view_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "extensions_view_page", "extensions_view_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/extensions/:id/edit", "extensions_edit_page");
+framework_add_path ( "/extensions/:id/edit", "extensions_edit_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "extensions_edit_page", "extensions_edit_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/extensions/:id/report", "extensions_report_page");
+framework_add_path ( "/extensions/:id/report", "extensions_report_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "extensions_report_page", "extensions_report_page", IN_HOOK_INSERT_FIRST);
 
 /**

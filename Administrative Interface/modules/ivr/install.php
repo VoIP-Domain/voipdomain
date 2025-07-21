@@ -54,15 +54,16 @@ function ivrs_install_db ( $buffer, $parameters)
    */
   install_add_db_table ( "IVRs", "CREATE TABLE `IVRs` (\n" .
                                  "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                 "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
                                  "  `Name` varchar(255) NOT NULL,\n" .
                                  "  `Description` varchar(255) NOT NULL,\n" .
                                  "  PRIMARY KEY (`ID`),\n" .
-                                 "  UNIQUE KEY `Name` (`Name`)\n" .
-                                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='IVRs information';\n");
+                                 "  UNIQUE KEY `Name` (`Tenant`,`Name`),\n" .
+                                 "  KEY `IVRs_ibfk_1` (`Tenant`),\n" . 
+                                 "  CONSTRAINT `IVRs_ibfk_1` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" . 
+                                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='IVRs information';\n", array ( "Tenants"));
   install_add_db_table ( "IVRWorkflows", "CREATE TABLE `IVRWorkflows` (\n" .
                                          "  `IVR` bigint(20) unsigned NOT NULL,\n" .
-                                         "  `Name` varchar(255) NOT NULL,\n" .
-                                         "  `Description` varchar(255) NOT NULL,\n" .
                                          "  `Revision` int unsigned NOT NULL,\n" .
                                          "  `Workflow` blob NOT NULL,\n" .
                                          "  UNIQUE KEY `IVRRevision` (`IVR`, `Revision`),\n" .

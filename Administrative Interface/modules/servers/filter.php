@@ -51,7 +51,7 @@ framework_add_filter ( "get_servers", "get_servers");
  */
 function servers_menu ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "globe", "href" => "/servers", "text" => __ ( "Servers"))));
+  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "globe", "href" => "/servers", "text" => __ ( "Servers"), "permissions" => array ( "Administrator"))));
 }
 
 /**
@@ -73,7 +73,7 @@ function get_servers ( $buffer, $parameters)
   $where = "";
   if ( array_key_exists ( "ID", $parameters))
   {
-    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
+    $where .= " AND `ID` = " . (int) $parameters["ID"];
   }
   if ( array_key_exists ( "Address", $parameters))
   {
@@ -88,7 +88,7 @@ function get_servers ( $buffer, $parameters)
    * Check into database if servers exists
    */
   $data = array ();
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) get_tenant () . $where))
   {
     while ( $server = $result->fetch_assoc ())
     {

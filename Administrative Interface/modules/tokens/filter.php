@@ -51,7 +51,7 @@ framework_add_filter ( "get_tokens", "get_tokens");
  */
 function tokens_menu ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "id-card", "href" => "/tokens", "text" => __ ( "Tokens"), "permission" => "Administrator")));
+  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "id-card", "href" => "/tokens", "text" => __ ( "Tokens"), "permissions" => array ( "Administrator"))));
 }
 
 /**
@@ -73,7 +73,7 @@ function get_tokens ( $buffer, $parameters)
   $where = "";
   if ( array_key_exists ( "ID", $parameters))
   {
-    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
+    $where .= " AND `ID` = " . (int) $parameters["ID"];
   }
   if ( array_key_exists ( "Text", $parameters))
   {
@@ -84,7 +84,7 @@ function get_tokens ( $buffer, $parameters)
    * Check into database if tokens exists
    */
   $data = array ();
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Tokens`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Tokens` WHERE `Tenant` = " . (int) get_tenant () . $where))
   {
     while ( $token = $result->fetch_assoc ())
     {

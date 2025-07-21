@@ -57,9 +57,27 @@ function page_menu ( $structure, $indent = "")
     {
       continue;
     }
-    if ( array_key_exists ( "permission", $entry) && ! in_array ( $entry["permission"], $_in["session"]["Permissions"]))
+    if ( array_key_exists ( "permissions", $entry))
     {
-      continue;
+      if ( ! is_array ( $entry["permissions"]))
+      {
+        $entry["permissions"] = explode ( ",", $entry["permissions"]);
+      }
+    }
+    if ( sizeof ( $entry["permissions"]) != 0)
+    {
+      $allow = false;
+      foreach ( $entry["permissions"] as $permission)
+      {
+        if ( in_array ( $permission, $_in["session"]["Permissions"]))
+        {
+          $allow = true;
+        }
+      }
+      if ( ! $allow)
+      {
+        continue;
+      }
     }
     if ( ! array_key_exists ( "group", $entry))
     {
@@ -88,27 +106,31 @@ function page_menu ( $structure, $indent = "")
         $content .= $indent . "        <li class=\"header\">" . $entry["text"] . "</li>\n";
         break;
       case "submenu":
-        $content .= $indent . "        <li class=\"treeview\">\n";
-        $content .= $indent . "          <a href=\"\">";
-        if ( ! empty ( $entry["icon"]))
+        $submenu = page_menu ( $entry["entries"], $indent . "    ");
+        if ( ! empty ( $submenu))
         {
-          $content .= "<i class=\"fa fa-" . $entry["icon"] . ( isset ( $entry["color"]) ? " text-" . $entry["color"] : "") . "\"></i> ";
-        }
-        $content .= "<span>" . $entry["text"] . "</span><span class=\"pull-right-container\">";
-        if ( isset ( $entry["labels"]))
-        {
-          foreach ( $entry["labels"] as $label)
+          $content .= $indent . "        <li class=\"treeview\">\n";
+          $content .= $indent . "          <a href=\"\">";
+          if ( ! empty ( $entry["icon"]))
           {
-            $content .= "<small class=\"label pull-right bg-" . $label["color"] . "\">" . $label["text"] . "</small>";
+            $content .= "<i class=\"fa fa-" . $entry["icon"] . ( isset ( $entry["color"]) ? " text-" . $entry["color"] : "") . "\"></i> ";
           }
-        } else {
-          $content .= "<i class=\"fa fa-angle-left pull-right\"></i>";
+          $content .= "<span>" . $entry["text"] . "</span><span class=\"pull-right-container\">";
+          if ( isset ( $entry["labels"]))
+          {
+            foreach ( $entry["labels"] as $label)
+            {
+              $content .= "<small class=\"label pull-right bg-" . $label["color"] . "\">" . $label["text"] . "</small>";
+            }
+          } else {
+            $content .= "<i class=\"fa fa-angle-left pull-right\"></i>";
+          }
+          $content .= "</span></a>\n";
+          $content .= $indent . "          <ul class=\"treeview-menu\">\n";
+          $content .= page_menu ( $entry["entries"], $indent . "    ");
+          $content .= $indent . "          </ul>\n";
+          $content .= $indent . "        </li>\n";
         }
-        $content .= "</span></a>\n";
-        $content .= $indent . "          <ul class=\"treeview-menu\">\n";
-        $content .= page_menu ( $entry["entries"], $indent . "    ");
-        $content .= $indent . "          </ul>\n";
-        $content .= $indent . "        </li>\n";
         break;
       case "divider":
         $content .= $indent . "        <hr class=\"sidebar-menu\">\n";
@@ -191,6 +213,37 @@ function framework_page_generate ( $content)
   $head .= "    {\n";
   $head .= "      display: none;\n";
   $head .= "    }\n";
+
+  /**
+   * If in multi-tenant framework, change top bar to red
+   */
+  if ( in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
+  {
+    $head .= "    .skin-blue .main-header .navbar, .skin-blue .main-header li.user-header\n";
+    $head .= "    {\n";
+    $head .= "      background-color: #bc3c3c !important;\n";
+    $head .= "    }\n";
+    $head .= "    .skin-blue .main-header .logo, .skin-blue .main-header .logo:hover, .skin-blue .main-header .navbar .sidebar-toggle:hover\n";
+    $head .= "    {\n";
+    $head .= "      background-color: #a93636 !important;\n";
+    $head .= "    }\n";
+  }
+
+  /**
+   * If in impersonate mode, change top bar to orange
+   */
+  if ( $_in["session"]["Impersonate"] === true)
+  {
+    $head .= "    .skin-blue .main-header .navbar, .skin-blue .main-header li.user-header\n";
+    $head .= "    {\n";
+    $head .= "      background-color: #bc923c !important;\n";
+    $head .= "    }\n";
+    $head .= "    .skin-blue .main-header .logo, .skin-blue .main-header .logo:hover, .skin-blue .main-header .navbar .sidebar-toggle:hover\n";
+    $head .= "    {\n";
+    $head .= "      background-color: #a98436 !important;\n";
+    $head .= "    }\n";
+  }
+
   $head .= "    .loader\n";
   $head .= "    {\n";
   $head .= "      position: fixed;\n";
@@ -465,7 +518,7 @@ function framework_page_generate ( $content)
   $menu[] = array ( "type" => "entry", "icon" => "home", "color" => "red", "href" => "/", "text" => __ ( "Start"));
   $menu[] = array ( "type" => "submenu", "icon" => "book", "text" => __ ( "Entries"), "entries" => (array) filters_call ( "page_menu_registers"));
   $menu[] = array ( "type" => "submenu", "icon" => "file", "text" => __ ( "Reports"), "entries" => (array) filters_call ( "page_menu_reports"));
-  $menu[] = array ( "type" => "submenu", "icon" => "cog", "text" => __ ( "Configurations"), "permission" => "Administrator", "entries" => (array) filters_call ( "page_menu_configurations"));
+  $menu[] = array ( "type" => "submenu", "icon" => "cog", "text" => __ ( "Configurations"), "entries" => (array) filters_call ( "page_menu_configurations"));
   $menu[] = array ( "type" => "submenu", "icon" => "suitcase", "text" => __ ( "Resources"), "entries" => (array) filters_call ( "page_menu_resources"));
   $menu[] = (array) filters_call ( "page_menu_others");
   $menu[] = array ( "type" => "entry", "icon" => "info-circle", "color" => "blue", "href" => "/about", "text" => __ ( "About"));
@@ -1895,7 +1948,7 @@ function login_page_generate ( $buffer, $parameters)
   $footer .= "      {\n";
   $footer .= "        type: 'POST',\n";
   $footer .= "        url: '/api/session',\n";
-  $footer .= "        data: JSON.stringify ( { Username: $('#log_" . $usernamefieldname . "').val (), Password: $('#log_" . $passwordfieldname . "').val (), Code: $('#log_" . $totpfieldname . "').val ().replace ( / /g, ''), Remember: $('#log_remember').prop ( 'checked')}),\n";
+  $footer .= "        data: JSON.stringify ( { Username: $('#log_" . $usernamefieldname . "').val (), Password: $('#log_" . $passwordfieldname . "').val (), Domain: window.location.hostname, Code: $('#log_" . $totpfieldname . "').val ().replace ( / /g, ''), Remember: $('#log_remember').prop ( 'checked')}),\n";
   $footer .= "        headers: {\n";
   $footer .= "                   'X-HTTP-Method-Override': 'POST',\n";
   $footer .= "                   'Accept': 'application/json'\n";
@@ -2446,7 +2499,7 @@ function install_page_generate ( $buffer, $parameters)
  * Dashboard
  */
 framework_add_hook ( "dashboard_page", "dashboard_page");
-framework_add_path ( "/dashboard", "dashboard_page");
+framework_add_path ( "/dashboard", "dashboard_page", array ( "permissions" => array ( "User", "Administrator")));
 
 /**
  * Function to draw a dashboard to user.

@@ -52,7 +52,7 @@ framework_add_filter ( "search_range", "search_range");
  */
 function ranges_menu ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "cloud", "href" => "/ranges", "text" => __ ( "Ranges"))));
+  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "cloud", "href" => "/ranges", "text" => __ ( "Ranges"), "permissions" => array ( "Administrator"))));
 }
 
 /**
@@ -74,11 +74,11 @@ function get_ranges ( $buffer, $parameters)
   $where = "";
   if ( array_key_exists ( "ID", $parameters))
   {
-    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
+    $where .= " AND `ID` = " . (int) $parameters["ID"];
   }
   if ( array_key_exists ( "Server", $parameters))
   {
-    $where .= " AND `Server` = '" . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Server"]) . "'";
+    $where .= " AND `Server` = " . (int) $parameters["Server"];
   }
   if ( array_key_exists ( "Text", $parameters))
   {
@@ -89,7 +89,7 @@ function get_ranges ( $buffer, $parameters)
    * Check into database if ranges exists
    */
   $data = array ();
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Tenant` = " . (int) get_tenant () . $where))
   {
     while ( $range = $result->fetch_assoc ())
     {
@@ -119,7 +119,7 @@ function search_range ( $buffer, $parameters)
   /**
    * Check into database if range exists
    */
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT `Ranges`.*, `Servers`.`NTP` FROM `Ranges` LEFT JOIN `Servers` ON `Ranges`.`Server` = `Servers`.`ID` WHERE `Ranges`.`Start` <= " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Number"]) . " AND `Ranges`.`Finish` >= " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Number"])))
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT `Ranges`.*, `Servers`.`NTP` FROM `Ranges` LEFT JOIN `Servers` ON `Ranges`.`Server` = `Servers`.`ID` WHERE `Servers`.`Tenant` = " . (int) get_tenant () . " AND `Ranges`.`Start` <= " . (int) $parameters["Number"] . " AND `Ranges`.`Finish` >= " . (int) $parameters["Number"]))
   {
     if ( $data = $result->fetch_assoc ())
     {

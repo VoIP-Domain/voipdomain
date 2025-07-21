@@ -226,6 +226,139 @@ if ( $_SERVER["REQUEST_URI"] == "/auth" || substr ( $_SERVER["REQUEST_URI"], 0, 
 }
 
 /**
+ * Determine login page hook
+ */
+if ( $_SERVER["HTTP_HOST"] == $_in["general"]["masterhostname"])
+{
+  $loginpage = "multitenant_login_page_generate";
+}
+if ( $_SERVER["HTTP_HOST"] == $_in["general"]["authhostname"])
+{
+  $loginpage = "authentication_page_generate";
+}
+if ( ! isset ( $loginpage))
+{
+  $loginpage = "login_page_generate";
+}
+
+/**
+ * Check if admin is authenticated
+ */
+if ( array_key_exists ( $_in["general"]["cookie"] . "_adm", $_COOKIE))
+{
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `AdminSessions`.`SID`, `AdminSessions`.`LastSeen`, `Admins`.* FROM `AdminSessions` LEFT JOIN `Admins` ON `AdminSessions`.`Admin` = `Admins`.`ID` WHERE `AdminSessions`.`SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_COOKIE[$_in["general"]["cookie"] . "_adm"]) . "'"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! $session = $result->fetch_assoc ())
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 401 Unauthorized");
+    exit ();
+  }
+
+  /**
+   * Set session variables
+   */
+  $_in["session"]["Authenticated"] = true;
+  $_in["session"]["Method"] = "Session";
+  $_in["session"]["Tenant"] = 0;
+  $_in["session"]["Language"] = $session["Language"];
+  $_in["session"]["Data"]["ID"] = $session["ID"];
+  $_in["session"]["Data"]["Username"] = $session["Username"];
+  $_in["session"]["Data"]["Name"] = $session["Name"];
+  $_in["session"]["Data"]["Email"] = $session["Email"];
+  $_in["session"]["Data"]["Since"] = $session["Since"];
+  $_in["session"]["Data"]["LastSeen"] = $session["LastSeen"];
+  $_in["session"]["Data"]["Expires"] = time () + $_in["general"]["timeout"];
+  $_in["session"]["Permissions"][] = "Super-Administrator";
+
+  /**
+   * Inject admin permissions in session
+   */
+  foreach ( json_decode ( $session["Permissions"], true) as $permission)
+  {
+    $_in["session"]["Permissions"][] = $permission;
+  }
+
+  /**
+   * Set system language if admin has different language than system default
+   */
+  if ( ! empty ( $session["Language"]) && array_key_exists ( $session["Language"], $_in["languages"]))
+  {
+    $_in["general"]["language"] = $session["Language"];
+  }
+
+  /**
+   * Call start hook if exist
+   */
+  if ( framework_has_hook ( "admin_session_validate_start"))
+  {
+    $parameters = framework_call ( "admin_session_validate_start", $parameters);
+  }
+
+  /**
+   * Extend session variables
+   */
+  filters_call ( "session_extend");
+
+  /**
+   * Check if session has expired
+   */
+  if ( $_in["general"]["timeout"] > 0 && $_in["session"]["Data"]["LastSeen"] + $_in["general"]["timeout"] < time ())
+  {
+    /**
+     * Call session timeout hook if exist
+     */
+    if ( framework_has_hook ( "admin_session_timeout"))
+    {
+      framework_call ( "admin_session_timeout", $parameters);
+    }
+
+    /**
+     * Print response
+     */
+    if ( array_key_exists ( "HTTP_X_INFRAMEWORK", $_SERVER) && $_SERVER["HTTP_X_INFRAMEWORK"] == "page")
+    {
+      echo json_encode ( array ( "event" => "session_timeout"));
+    } else {
+      setcookie ( $_in["general"]["cookie"], null, -1, "/");
+      echo framework_call ( "multitenant_login_page_generate", array ( "message" => __ ( "Session expired.")));
+    }
+    exit ();
+  }
+
+  /**
+   * Call pre hook if exist
+   */
+  if ( framework_has_hook ( "admin_session_validate_pre"))
+  {
+    $parameters = framework_call ( "admin_session_validate_pre", $parameters);
+  }
+
+  /**
+   * Update session last seen
+   */
+  @$_in["mysql"]["id"]->query ( "UPDATE `AdminSessions` SET `LastSeen` = '" . $_in["mysql"]["id"]->real_escape_string ( time ()) . "' WHERE `SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $session["SID"]) . "'");
+
+  /**
+   * Call post hook if exist
+   */
+  if ( framework_has_hook ( "admin_session_validate_post"))
+  {
+    framework_call ( "admin_session_validate_post", $parameters, false, $data);
+  }
+
+  /**
+   * Execute finish hook if exist
+   */
+  if ( framework_has_hook ( "admin_session_validate_finish"))
+  {
+    framework_call ( "admin_session_validate_finish", $parameters);
+  }
+}
+
+/**
  * Check if user is authenticated
  */
 if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE))
@@ -246,6 +379,7 @@ if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE))
    */
   $_in["session"]["Authenticated"] = true;
   $_in["session"]["Method"] = "Session";
+  $_in["session"]["Tenant"] = $session["Tenant"];
   $_in["session"]["Language"] = $session["Language"];
   $_in["session"]["Data"]["ID"] = $session["ID"];
   $_in["session"]["Data"]["Username"] = $session["Username"];
@@ -350,7 +484,7 @@ if ( ! array_key_exists ( "HTTP_X_INFRAMEWORK", $_SERVER) || $_SERVER["HTTP_X_IN
   {
     echo framework_call ( "framework_page_generate");
   } else {
-    echo framework_call ( "login_page_generate");
+    echo framework_call ( $loginpage);
   }
   exit ();
 }
@@ -400,7 +534,7 @@ foreach ( $_paths as $entrypath => $entry)
     $allowed = false;
     foreach ( $entry["options"]["permissions"] as $permission)
     {
-      if ( in_array ( $permission, $_in["permissions"]))
+      if ( in_array ( $permission, $_in["session"]["Permissions"]))
       {
         $allowed = true;
       }

@@ -38,19 +38,19 @@
 /**
  * Add basic framework hooks, with the relative function.
  */
-framework_add_path ( "/ranges", "ranges_search_page");
+framework_add_path ( "/ranges", "ranges_search_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "ranges_search_page", "ranges_search_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/ranges/add", "ranges_add_page");
+framework_add_path ( "/ranges/add", "ranges_add_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "ranges_add_page", "ranges_add_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/ranges/:id/clone", "ranges_clone_function");
+framework_add_path ( "/ranges/:id/clone", "ranges_clone_function", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "ranges_clone_function", "ranges_clone_function", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/ranges/:id/view", "ranges_view_page");
+framework_add_path ( "/ranges/:id/view", "ranges_view_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "ranges_view_page", "ranges_view_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/ranges/:id/edit", "ranges_edit_page");
+framework_add_path ( "/ranges/:id/edit", "ranges_edit_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "ranges_edit_page", "ranges_edit_page", IN_HOOK_INSERT_FIRST);
 
 /**

@@ -51,7 +51,7 @@ framework_add_filter ( "get_extensions", "get_extensions");
  */
 function extensions_menu ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "phone", "href" => "/extensions", "text" => __ ( "Extensions"))));
+  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "phone", "href" => "/extensions", "text" => __ ( "Extensions"), "permissions" => array ( "Administrator"))));
 }
 
 /**
@@ -73,11 +73,11 @@ function get_extensions ( $buffer, $parameters)
   $where = "";
   if ( array_key_exists ( "ID", $parameters))
   {
-    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
+    $where .= " AND `ID` = " . (int) $parameters["ID"];
   }
   if ( array_key_exists ( "Number", $parameters))
   {
-    $where .= " AND `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "'";
+    $where .= " AND `Number` = " . (int) $parameters["Number"];
   }
   if ( array_key_exists ( "Type", $parameters))
   {
@@ -92,7 +92,7 @@ function get_extensions ( $buffer, $parameters)
    * Check into database if extensions exists
    */
   $data = array ();
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `Tenant` = " . (int) get_tenant () . $where))
   {
     while ( $extension = $result->fetch_assoc ())
     {

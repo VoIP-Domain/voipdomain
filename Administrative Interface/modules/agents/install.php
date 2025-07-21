@@ -54,12 +54,15 @@ function agents_install_db ( $buffer, $parameters)
    */
   install_add_db_table ( "Agents", "CREATE TABLE `Agents` (\n" .
                                    "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                   "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
                                    "  `Name` varchar(255) NOT NULL,\n" .
                                    "  `Code` char(4) NOT NULL,\n" .
                                    "  `Password` char(6) NOT NULL,\n" .
                                    "  PRIMARY KEY (`ID`),\n" .
-                                   "  UNIQUE KEY `Code` (`Code`)\n" .
-                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Call center agents';\n");
+                                   "  UNIQUE KEY `Code` (`Tenant`,`Code`),\n" .
+                                   "  KEY `Agents_ibfk_1` (`Tenant`),\n" . 
+                                   "  CONSTRAINT `Agents_ibfk_1` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" . 
+                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Call center agents';\n", array ( "Tenants"));
 
   /**
    * Add basic system triggers

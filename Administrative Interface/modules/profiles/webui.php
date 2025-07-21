@@ -38,19 +38,19 @@
 /**
  * Add basic framework hooks, with the relative function.
  */
-framework_add_path ( "/profiles", "profiles_search_page");
+framework_add_path ( "/profiles", "profiles_search_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "profiles_search_page", "profiles_search_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/profiles/add", "profiles_add_page");
+framework_add_path ( "/profiles/add", "profiles_add_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "profiles_add_page", "profiles_add_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/profiles/:id/clone", "profiles_clone_function");
+framework_add_path ( "/profiles/:id/clone", "profiles_clone_function", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "profiles_clone_function", "profiles_clone_function", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/profiles/:id/view", "profiles_view_page");
+framework_add_path ( "/profiles/:id/view", "profiles_view_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "profiles_view_page", "profiles_view_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/profiles/:id/edit", "profiles_edit_page");
+framework_add_path ( "/profiles/:id/edit", "profiles_edit_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "profiles_edit_page", "profiles_edit_page", IN_HOOK_INSERT_FIRST);
 
 /**

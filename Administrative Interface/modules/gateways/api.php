@@ -287,7 +287,7 @@ framework_add_api_call (
   "Read",
   "gateways_search",
   array (
-    "permissions" => array ( "User", "gateways_search"),
+    "permissions" => array ( "Administrator", "gateways_search"),
     "title" => __ ( "Search gateways"),
     "description" => __ ( "Search for system gateways.")
   )
@@ -331,7 +331,11 @@ function gateways_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -372,7 +376,7 @@ function gateways_search ( $buffer, $parameters)
   /**
    * Search gateways
    */
-  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Description`, `Active`, `Type`, `Priority`, `Number` FROM `Gateways`" . ( ! empty ( $parameters["Filter"]) ? " WHERE (`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Number` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%')" : "") . ( ! empty ( $parameters["ActiveOnly"]) ? ( ! empty ( $parameters["Filter"]) ? " AND" : " WHERE") . " `Active` = TRUE" : "") . " ORDER BY `Description`, `Number`"))
+  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Description`, `Active`, `Type`, `Priority`, `Number` FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Number` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%')" : "") . ( ! empty ( $parameters["ActiveOnly"]) ? " AND `Active` = TRUE" : "") . " ORDER BY `Description`, `Number`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -501,7 +505,7 @@ framework_add_api_call (
   "Read",
   "gateways_fares_search",
   array (
-    "permissions" => array ( "User", "gateways_fares_search"),
+    "permissions" => array ( "Administrator", "gateways_fares_search"),
     "title" => __ ( "Search gateway fares"),
     "description" => __ ( "Search for system gateway fares.")
   )
@@ -545,7 +549,11 @@ function gateways_fares_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -664,7 +672,7 @@ framework_add_api_call (
   "Read",
   "gateways_fares_file",
   array (
-    "permissions" => array ( "User", "gateways_fares_file"),
+    "permissions" => array ( "Administrator", "gateways_fares_file"),
     "title" => __ ( "View gateway fares files"),
     "description" => __ ( "Get the gateway fares files information."),
     "parameters" => array (
@@ -754,7 +762,7 @@ function gateways_fares_file ( $buffer, $parameters)
   /**
    * Search fare
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Files` WHERE `Type` = 'fares' AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Files` WHERE `Type` = 'fares' AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -824,7 +832,7 @@ framework_add_api_call (
   "Read",
   "gateways_view",
   array (
-    "permissions" => array ( "User", "gateways_view"),
+    "permissions" => array ( "Administrator", "gateways_view"),
     "title" => __ ( "View gateways"),
     "description" => __ ( "Get a gateway information."),
     "parameters" => array (
@@ -914,7 +922,7 @@ function gateways_view ( $buffer, $parameters)
   /**
    * Search gateways
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1232,7 +1240,7 @@ framework_add_api_call (
   "Create",
   "gateways_add",
   array (
-    "permissions" => array ( "User", "gateways_add"),
+    "permissions" => array ( "Administrator", "gateways_add"),
     "title" => __ ( "Add gateways"),
     "description" => __ ( "Add a new system gateway.")
   )
@@ -1435,7 +1443,7 @@ function gateways_add ( $buffer, $parameters)
   /**
    * Add new gateway record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Gateways` (`Description`, `Config`, `Active`, `Number`, `Type`, `Priority`, `Currency`, `Address`, `Port`, `Username`, `Password`, `Routes`, `Translations`, `Discard`, `Minimum`, `Fraction`, `NAT`, `RPID`, `Qualify`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Config"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Active"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Priority"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Currency"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Port"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Routes"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Translations"])) . "', " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Discard"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Minimum"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Fraction"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["NAT"] ? 1 : 0) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["RPID"] ? 1 : 0) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Qualify"] ? 1 : 0) . "')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Gateways` (`Description`, `Tenant`, `Config`, `Active`, `Number`, `Type`, `Priority`, `Currency`, `Address`, `Port`, `Username`, `Password`, `Routes`, `Translations`, `Discard`, `Minimum`, `Fraction`, `NAT`, `RPID`, `Qualify`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Config"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Active"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Priority"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Currency"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "', " . (int) $parameters["Port"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Routes"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Translations"])) . "', " . (int) $parameters["Discard"] . ", " . (int) $parameters["Minimum"] . ", " . (int) $parameters["Fraction"] . ", '" . ( $parameters["NAT"] ? 1 : 0) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["RPID"] ? 1 : 0) . "', '" . ( $parameters["Qualify"] ? 1 : 0) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1737,7 +1745,7 @@ framework_add_api_call (
   array ( "Modify", "Edit"),
   "gateways_edit",
   array (
-    "permissions" => array ( "User", "gateways_edit"),
+    "permissions" => array ( "Administrator", "gateways_edit"),
     "title" => __ ( "Edit gateways"),
     "description" => __ ( "Change a system gateway information.")
   )
@@ -1894,7 +1902,7 @@ function gateways_edit ( $buffer, $parameters)
   /**
    * Get gateway information from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1953,7 +1961,7 @@ function gateways_edit ( $buffer, $parameters)
   /**
    * Update gateway record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Gateways` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Config` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Config"]) . "', `Active` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Active"]) . "', `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "', `Type` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "', `Priority` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Priority"]) . "', `Currency` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Currency"]) . "', `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "', `Port` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Port"]) . ", `Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "', `Password` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "', `Routes` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Routes"])) . "', `Translations` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Translations"])) . "', `Discard` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Discard"]) . ", `Minimum` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Minimum"]) . ", `Fraction` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Fraction"]) . ", `NAT` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["NAT"] ? 1 : 0) . "', `RPID` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["RPID"] ? 1 : 0) . "', `Qualify` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Qualify"] ? 1 : 0) . "' WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Gateways` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Config` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Config"]) . "', `Active` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Active"]) . "', `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "', `Type` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "', `Priority` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Priority"]) . "', `Currency` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Currency"]) . "', `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "', `Port` = " . (int) $parameters["Port"] . ", `Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "', `Password` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "', `Routes` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Routes"])) . "', `Translations` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Translations"])) . "', `Discard` = " . (int) $parameters["Discard"] . ", `Minimum` = " . (int) $parameters["Minimum"] . ", `Fraction` = " . (int) $parameters["Fraction"] . ", `NAT` = '" . ( $parameters["NAT"] ? 1 : 0) . "', `RPID` = '" . ( $parameters["RPID"] ? 1 : 0) . "', `Qualify` = '" . ( $parameters["Qualify"] ? 1 : 0) . "' WHERE `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -2053,7 +2061,7 @@ framework_add_api_call (
   "/gateways/:ID",
   "Delete",
   "gateways_remove",
-    array ( "permissions" => array ( "User", "gateways_remove"),
+    array ( "permissions" => array ( "Administrator", "gateways_remove"),
     "title" => __ ( "Remove gateways"),
     "description" => __ ( "Remove a system gateway from system.")
   )
@@ -2122,7 +2130,7 @@ function gateways_remove ( $buffer, $parameters)
   /**
    * Check if gateway exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -2144,7 +2152,7 @@ function gateways_remove ( $buffer, $parameters)
   /**
    * Remove gateway database record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Gateways` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -2248,7 +2256,7 @@ framework_add_api_call (
   "Read",
   "gateways_report",
   array (
-    "permissions" => array ( "User", "gateways_report"),
+    "permissions" => array ( "Administrator", "gateways_report"),
     "title" => __ ( "Gateways report"),
     "description" => __ ( "Generate a gateway call's usage report.", true, false),
     "parameters" => array (
@@ -2349,7 +2357,7 @@ function gateways_report ( $buffer, $parameters)
   /**
    * Get gateway information
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -2363,7 +2371,7 @@ function gateways_report ( $buffer, $parameters)
   /**
    * Get call records from database
    */
-  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `gateway` = " . $_in["mysql"]["id"]->real_escape_string ( $gateway["ID"]) . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `gateway` = " . (int) $gateway["ID"] . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -2422,7 +2430,7 @@ function gateways_server_reconfig ( $buffer, $parameters)
   /**
    * Fetch all gateways and send to server
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

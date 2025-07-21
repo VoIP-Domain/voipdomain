@@ -121,7 +121,7 @@ framework_add_api_call (
   "Read",
   "agents_search",
   array (
-    "permissions" => array ( "User", "agents_search"),
+    "permissions" => array ( "Administrator", "agents_search"),
     "title" => __ ( "Search agents"),
     "description" => __ ( "Search for system call center agents.")
   )
@@ -169,7 +169,11 @@ function agents_search ( $buffer, $parameters)
   {
     $data["Code"] = __ ( "Code must have four digit numbers.");
   }
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -210,7 +214,7 @@ function agents_search ( $buffer, $parameters)
   /**
    * Search agents
    */
-  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Name`, `Code` FROM `Agents`" . ( ! empty ( $parameters["Filter"]) ? " WHERE `Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Code` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " ORDER BY `Name`, `Code`"))
+  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Name`, `Code` FROM `Agents` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Code` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%')" : "") . " ORDER BY `Name`, `Code`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -310,7 +314,7 @@ framework_add_api_call (
   "Read",
   "agents_view",
   array (
-    "permissions" => array ( "User", "agents_view"),
+    "permissions" => array ( "Administrator", "agents_view"),
     "title" => __ ( "View agents"),
     "description" => __ ( "Get a call center agent information."),
     "parameters" => array (
@@ -400,7 +404,7 @@ function agents_view ( $buffer, $parameters)
   /**
    * Search agents
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Agents` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Agents` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -508,7 +512,7 @@ framework_add_api_call (
   "Create",
   "agents_add",
   array (
-    "permissions" => array ( "User", "agents_add"),
+    "permissions" => array ( "Administrator", "agents_add"),
     "title" => __ ( "Add agents"),
     "description" => __ ( "Add a new system call center agent.")
   )
@@ -566,7 +570,7 @@ function agents_add ( $buffer, $parameters)
    */
   if ( ! array_key_exists ( "Code", $data))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Agents` WHERE `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "'"))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Agents` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "'"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -613,7 +617,7 @@ function agents_add ( $buffer, $parameters)
   /**
    * Add new agent record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Agents` (`Name`, `Code`, `Password`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Agents` (`Tenant`, `Name`, `Code`, `Password`) VALUES (" . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -729,7 +733,7 @@ framework_add_api_call (
   array ( "Modify", "Edit"),
   "agents_edit",
   array (
-    "permissions" => array ( "User", "agents_edit"),
+    "permissions" => array ( "Administrator", "agents_edit"),
     "title" => __ ( "Edit agents"),
     "description" => __ ( "Change a call center agent information.")
   )
@@ -791,7 +795,7 @@ function agents_edit ( $buffer, $parameters)
    */
   if ( ! array_key_exists ( "Code", $data))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Agents` WHERE `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "' AND `ID` != " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Agents` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "' AND `ID` != " . (int) $parameters["ID"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -805,7 +809,7 @@ function agents_edit ( $buffer, $parameters)
   /**
    * Check if agent exist (could be removed by other user meanwhile)
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Agents` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Agents` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -857,7 +861,7 @@ function agents_edit ( $buffer, $parameters)
   /**
    * Change agent record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Agents` SET `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "', `Password` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "' WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Agents` SET `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "', `Password` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "' WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -929,7 +933,7 @@ framework_add_api_call (
   "Delete",
   "agents_remove",
   array (
-    "permissions" => array ( "User", "agents_remove"),
+    "permissions" => array ( "Administrator", "agents_remove"),
     "title" => __ ( "Remove agents"),
     "description" => __ ( "Remove a call center agent from system.")
   )
@@ -998,7 +1002,7 @@ function agents_remove ( $buffer, $parameters)
   /**
    * Check if agent exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Agents` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Agents` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1020,7 +1024,7 @@ function agents_remove ( $buffer, $parameters)
   /**
    * Remove agent database record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Agents` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Agents` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1080,7 +1084,7 @@ function agents_server_reconfig ( $buffer, $parameters)
   /**
    * Fetch all agents and send to server
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Agents`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Agents` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

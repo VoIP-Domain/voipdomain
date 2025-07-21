@@ -51,7 +51,7 @@ framework_add_filter ( "get_notifications", "get_notifications");
  */
 function notifications_menu ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "bullhorn", "href" => "/notifications", "text" => __ ( "Notifications"))));
+  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "bullhorn", "href" => "/notifications", "text" => __ ( "Notifications"), "permissions" => array ( "Administrator"))));
 }
 
 /**
@@ -73,7 +73,7 @@ function get_notifications ( $buffer, $parameters)
   $where = "";
   if ( array_key_exists ( "ID", $parameters))
   {
-    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
+    $where .= " AND `ID` = " . (int) $parameters["ID"];
   }
   if ( array_key_exists ( "Event", $parameters))
   {
@@ -88,7 +88,7 @@ function get_notifications ( $buffer, $parameters)
    * Check into database if notifications exists
    */
   $data = array ();
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Notifications`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Notifications` WHERE `Tenant` = " . (int) get_tenant () . $where))
   {
     while ( $notification = $result->fetch_assoc ())
     {

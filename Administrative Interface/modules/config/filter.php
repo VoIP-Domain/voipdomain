@@ -53,9 +53,9 @@ framework_add_filter ( "audio_inuse", "config_moh");
 function config_menu ( $buffer, $parameters)
 {
   return array_merge ( (array) $buffer, array (
-    array ( "type" => "entry", "icon" => "asterisk", "href" => "/config", "text" => __ ( "General")),
-    array ( "type" => "entry", "icon" => "puzzle-piece", "href" => "/config/plugins", "text" => __ ( "Plugins")),
-    array ( "type" => "entry", "icon" => "clipboard-check", "href" => "/config/permissions", "text" => __ ( "Permissions")),
+    array ( "type" => "entry", "icon" => "asterisk", "href" => "/config", "text" => __ ( "General"), "permissions" => array ( "Administrator")),
+    array ( "type" => "entry", "icon" => "puzzle-piece", "href" => "/config/plugins", "text" => __ ( "Plugins"), "permissions" => array ( "Super-Administrator")),
+    array ( "type" => "entry", "icon" => "clipboard-check", "href" => "/config/permissions", "text" => __ ( "Permissions"), "permissions" => array ( "Administrator"))
   ));
 }
 
@@ -69,9 +69,7 @@ function config_menu ( $buffer, $parameters)
  */
 function tools_menu ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array (
-    array ( "type" => "entry", "icon" => "shield-alt", "href" => "/config/dns", "text" => __ ( "DNS checker"))
-  ));
+  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "shield-alt", "href" => "/config/dns", "text" => __ ( "DNS checker"))));
 }
 
 /**
@@ -88,14 +86,9 @@ function config_moh ( $buffer, $parameters)
   global $_in;
 
   /**
-   * Check basic parameters
-   */
-  $parameters["ID"] = (int) $parameters["ID"];
-
-  /**
    * Search profile using audio file
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Key` = 'MOH' AND `Data` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) get_tenant () . " AND `Key` = 'MOH' AND `Data` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

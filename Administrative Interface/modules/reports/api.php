@@ -114,7 +114,7 @@ framework_add_api_call (
   "Read",
   "reports_weekhour",
   array (
-    "permissions" => array ( "User", "reports_weekhour"),
+    "permissions" => array ( "Administrator", "reports_weekhour"),
     "title" => __ ( "Week hourly usage count report"),
     "description" => __ ( "Generate a week call week hourly usage count report.")
   )
@@ -208,25 +208,25 @@ function reports_weekhour ( $buffer, $parameters)
   switch ( $parameters["Type"])
   {
     case "2":
-      $filter = " AND `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_EXTENSION) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_EXTENSION);
+      $filter = " AND `calltype` & " . VD_CALLENDPOINT_EXTENSION . " = " . VD_CALLENDPOINT_EXTENSION;
       break;
     case "3":
-      $filter = " AND (`calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_LANDLINE) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_LANDLINE) . " OR `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_MOBILE) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_MOBILE) . " OR `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_MARINE) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_MARINE) . " OR `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_TOLLFREE) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_TOLLFREE) . " OR `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_SPECIAL) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_SPECIAL) . " OR `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_SATELLITE) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_SATELLITE) . " OR `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_SERVICES) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_SERVICES) . ")";
+      $filter = " AND (`calltype` & " . VD_CALLENDPOINT_LANDLINE . " = " . VD_CALLENDPOINT_LANDLINE . " OR `calltype` & " . VD_CALLENDPOINT_MOBILE . " = " . VD_CALLENDPOINT_MOBILE . " OR `calltype` & " . VD_CALLENDPOINT_MARINE . " = " . VD_CALLENDPOINT_MARINE . " OR `calltype` & " . VD_CALLENDPOINT_TOLLFREE . " = " . VD_CALLENDPOINT_TOLLFREE . " OR `calltype` & " . VD_CALLENDPOINT_SPECIAL . " = " . VD_CALLENDPOINT_SPECIAL . " OR `calltype` & " . VD_CALLENDPOINT_SATELLITE . " = " . VD_CALLENDPOINT_SATELLITE . " OR `calltype` & " . VD_CALLENDPOINT_SERVICES . " = " . VD_CALLENDPOINT_SERVICES . ")";
       break;
     case "4":
-      $filter = " AND (`calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_LANDLINE) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_LANDLINE) . " OR `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_MOBILE) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_MOBILE) . " OR `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_MARINE) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_MARINE) . " OR `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_TOLLFREE) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_TOLLFREE) . " OR `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_SPECIAL) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_SPECIAL) . " OR `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_SATELLITE) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_SATELLITE) . " OR `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_SERVICES) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_SERVICES) . ") AND `value` != 0";
+      $filter = " AND (`calltype` & " . VD_CALLENDPOINT_LANDLINE . " = " . VD_CALLENDPOINT_LANDLINE . " OR `calltype` & " . VD_CALLENDPOINT_MOBILE . " = " . VD_CALLENDPOINT_MOBILE . " OR `calltype` & " . VD_CALLENDPOINT_MARINE . " = " . VD_CALLENDPOINT_MARINE . " OR `calltype` & " . VD_CALLENDPOINT_TOLLFREE . " = " . VD_CALLENDPOINT_TOLLFREE . " OR `calltype` & " . VD_CALLENDPOINT_SPECIAL . " = " . VD_CALLENDPOINT_SPECIAL . " OR `calltype` & " . VD_CALLENDPOINT_SATELLITE . " = " . VD_CALLENDPOINT_SATELLITE . " OR `calltype` & " . VD_CALLENDPOINT_SERVICES . " = " . VD_CALLENDPOINT_SERVICES . ") AND `value` != 0";
       break;
     case "5":
-      $filter = " AND (`calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_LANDLINE) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_LANDLINE) . " OR `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_MOBILE) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_MOBILE) . " OR `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_MARINE) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_MARINE) . " OR `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_TOLLFREE) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_TOLLFREE) . " OR `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_SPECIAL) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_SPECIAL) . " OR `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_SATELLITE) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_SATELLITE) . " OR `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_SERVICES) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_SERVICES) . ") AND `value` = 0";
+      $filter = " AND (`calltype` & " . VD_CALLENDPOINT_LANDLINE . " = " . VD_CALLENDPOINT_LANDLINE . " OR `calltype` & " . VD_CALLENDPOINT_MOBILE . " = " . VD_CALLENDPOINT_MOBILE . " OR `calltype` & " . VD_CALLENDPOINT_MARINE . " = " . VD_CALLENDPOINT_MARINE . " OR `calltype` & " . VD_CALLENDPOINT_TOLLFREE . " = " . VD_CALLENDPOINT_TOLLFREE . " OR `calltype` & " . VD_CALLENDPOINT_SPECIAL . " = " . VD_CALLENDPOINT_SPECIAL . " OR `calltype` & " . VD_CALLENDPOINT_SATELLITE . " = " . VD_CALLENDPOINT_SATELLITE . " OR `calltype` & " . VD_CALLENDPOINT_SERVICES . " = " . VD_CALLENDPOINT_SERVICES . ") AND `value` = 0";
       break;
     case "6":
-      $filter = " AND `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_MOBILE) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLENDPOINT_MOBILE);
+      $filter = " AND `calltype` & " . VD_CALLENDPOINT_MOBILE . " = " . VD_CALLENDPOINT_MOBILE;
       break;
     case "7":
-      $filter = " AND `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLTYPE_INTERSTATE) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLTYPE_INTERSTATE);
+      $filter = " AND `calltype` & " . VD_CALLTYPE_INTERSTATE . " = " . VD_CALLTYPE_INTERSTATE;
       break;
     case "8":
-      $filter = " AND `calltype` & " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLTYPE_INTERNATIONAL) . " = " . $_in["mysql"]["id"]->real_escape_string ( VD_CALLTYPE_INTERNATIONAL);
+      $filter = " AND `calltype` & " . VD_CALLTYPE_INTERNATIONAL . " = " . VD_CALLTYPE_INTERNATIONAL;
       break;
     default:
       $filter = "";
@@ -236,7 +236,7 @@ function reports_weekhour ( $buffer, $parameters)
   /**
    * Request call count from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT SUBSTR(`calldate`, 1, 13) AS `Data`, COUNT(*) AS `Total` FROM `cdr` WHERE `calldate` != '0000-00-00 00:00:00' AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . " 23:59:59'" . $filter . " GROUP BY `Data` ORDER BY `Data`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT SUBSTR(`calldate`, 1, 13) AS `Data`, COUNT(*) AS `Total` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `calldate` != '0000-00-00 00:00:00' AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . " 23:59:59'" . $filter . " GROUP BY `Data` ORDER BY `Data`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -359,7 +359,7 @@ framework_add_api_call (
   "Read",
   "reports_list",
   array (
-    "permissions" => array ( "User", "reports_list"),
+    "permissions" => array ( "Administrator", "reports_list"),
     "title" => __ ( "Extensions list report"),
     "description" => __ ( "Extensions list report.")
   )
@@ -446,7 +446,7 @@ function reports_list ( $buffer, $parameters)
   /**
    * Request extensions from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Number`, `Description`, `Type` FROM `Extensions`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "") . " ORDER BY `Number`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Number`, `Description`, `Type` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . $where . " ORDER BY `Number`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -585,7 +585,7 @@ framework_add_api_call (
   "Read",
   "reports_ranges",
   array (
-    "permissions" => array ( "User", "reports_ranges"),
+    "permissions" => array ( "Administrator", "reports_ranges"),
     "title" => __ ( "Ranges listing"),
     "description" => __ ( "Generate range extension listings.")
   )
@@ -662,7 +662,7 @@ function reports_ranges ( $buffer, $parameters)
   /**
    * Request extensions from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Ranges`.*, `Servers`.`ID` AS `ServerID`, `Servers`.`Description` AS `ServerDescription` FROM `Ranges` LEFT JOIN `Servers` ON `Ranges`.`Server` = `Servers`.`ID`" . ( $parameters["Range"] ? " WHERE `Ranges`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Range"]) : "")))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Ranges`.*, `Servers`.`ID` AS `ServerID`, `Servers`.`Description` AS `ServerDescription` FROM `Ranges` LEFT JOIN `Servers` ON `Ranges`.`Server` = `Servers`.`ID` WHERE `Ranges`.`Tenant` = " . (int) $_in["session"]["Tenant"] . ( $parameters["Range"] ? " AND `Ranges`.`ID` = " . (int) $parameters["Range"] : "")))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -821,7 +821,7 @@ framework_add_api_call (
   "Read",
   "reports_financial_costcenters",
   array (
-    "permissions" => array ( "User", "reports_financial_costcenters"),
+    "permissions" => array ( "Administrator", "reports_financial_costcenters"),
     "title" => __ ( "Cost center financial reports"),
     "description" => __ ( "Generate cost center financial reports."),
     "parameters" => array (
@@ -922,7 +922,7 @@ function reports_financial_costcenters ( $buffer, $parameters)
   /**
    * Request extensions with the requested cost center from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.* FROM `Extensions` LEFT JOIN `ExtensionPhone` ON `Extensions`.`ID` = `ExtensionPhone`.`Extension` LEFT JOIN `Groups` ON `ExtensionPhone`.`Group` = `Groups`.`ID` WHERE ( `ExtensionPhone`.`CostCenter` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . " OR ( `ExtensionPhone`.`CostCenter` IS NULL AND `Groups`.`CostCenter` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . ")) ORDER BY `Extensions`.`Number`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.* FROM `Extensions` LEFT JOIN `ExtensionPhone` ON `Extensions`.`ID` = `ExtensionPhone`.`Extension` LEFT JOIN `Groups` ON `ExtensionPhone`.`Group` = `Groups`.`ID` WHERE `Extension`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND (`ExtensionPhone`.`CostCenter` = " . (int) $parameters["ID"] . " OR ( `ExtensionPhone`.`CostCenter` IS NULL AND `Groups`.`CostCenter` = " . (int) $parameters["ID"] . ")) ORDER BY `Extensions`.`Number`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -934,7 +934,7 @@ function reports_financial_costcenters ( $buffer, $parameters)
   $data = array ();
   while ( $extension = $result->fetch_assoc ())
   {
-    if ( ! $sum = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total`, SUM(value) AS `Cost`, SUM(billsec) as `Time` FROM `cdr` WHERE `src` = '" . $_in["mysql"]["id"]->real_escape_string ( $extension["Number"]) . "' AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "'"))
+    if ( ! $sum = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total`, SUM(value) AS `Cost`, SUM(billsec) as `Time` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `src` = '" . $_in["mysql"]["id"]->real_escape_string ( $extension["Number"]) . "' AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "'"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -1081,7 +1081,7 @@ framework_add_api_call (
   "Read",
   "reports_financial_groups",
   array (
-    "permissions" => array ( "User", "reports_financial_groups"),
+    "permissions" => array ( "Administrator", "reports_financial_groups"),
     "title" => __ ( "Group financial reports"),
     "description" => __ ( "Generate group financial reports."),
     "parameters" => array (
@@ -1182,7 +1182,7 @@ function reports_financial_groups ( $buffer, $parameters)
   /**
    * Request extensions with the requested group from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` LEFT JOIN `ExtensionPhone` ON `ExtensionPhone`.`Extension` = `Extensions`.`ID` WHERE `ExtensionPhone`.`Group` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . " ORDER BY `Extensions`.`Number`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` LEFT JOIN `ExtensionPhone` ON `ExtensionPhone`.`Extension` = `Extensions`.`ID` WHERE `Extension`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionPhone`.`Group` = " . (int) $parameters["ID"] . " ORDER BY `Extensions`.`Number`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1194,7 +1194,7 @@ function reports_financial_groups ( $buffer, $parameters)
   $data = array ();
   while ( $extension = $result->fetch_assoc ())
   {
-    if ( ! $sum = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total`, SUM(value) AS `Cost`, SUM(billsec) as `Time` FROM `cdr` WHERE `src` = '" . $_in["mysql"]["id"]->real_escape_string ( $extension["Number"]) . "' AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "'"))
+    if ( ! $sum = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total`, SUM(value) AS `Cost`, SUM(billsec) as `Time` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `src` = '" . $_in["mysql"]["id"]->real_escape_string ( $extension["Number"]) . "' AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "'"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -1336,7 +1336,7 @@ framework_add_api_call (
   "Read",
   "reports_financial_gateways",
   array (
-    "permissions" => array ( "User", "reports_financial_gateways"),
+    "permissions" => array ( "Administrator", "reports_financial_gateways"),
     "title" => __ ( "Gateways financial reports"),
     "description" => __ ( "Generate gateways financial reports.")
   )
@@ -1428,7 +1428,7 @@ function reports_financial_gateways ( $buffer, $parameters)
   /**
    * Request gateways from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` ORDER BY `Description`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " ORDER BY `Description`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1440,7 +1440,7 @@ function reports_financial_gateways ( $buffer, $parameters)
   $data = array ();
   while ( $gateway = $result->fetch_assoc ())
   {
-    if ( ! $sum = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total`, SUM(value) AS `Cost`, SUM(billsec) as `Time` FROM `cdr` WHERE `gateway` = '" . $_in["mysql"]["id"]->real_escape_string ( $gateway["ID"]) . "' AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "'"))
+    if ( ! $sum = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total`, SUM(value) AS `Cost`, SUM(billsec) as `Time` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `gateway` = " . (int) $gateway["ID"] . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "'"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -1558,7 +1558,7 @@ framework_add_api_call (
   "Read",
   "reports_system_health",
   array (
-    "permissions" => array ( "User", "reports_system_health"),
+    "permissions" => array ( "Administrator", "reports_system_health"),
     "title" => __ ( "System usage health report"),
     "description" => __ ( "Provide the system usage health of server (Memory, CPU and Storage).")
   )
@@ -1768,7 +1768,7 @@ framework_add_api_call (
   "Read",
   "reports_activity",
   array (
-    "permissions" => array ( "User", "reports_activity"),
+    "permissions" => array ( "Administrator", "reports_activity"),
     "title" => __ ( "Call activity report"),
     "description" => __ ( "Generate an activity report with all extensions with latest received and dialed date time.")
   )
@@ -1836,7 +1836,7 @@ function reports_activity ( $buffer, $parameters)
   /**
    * Request extensions with activity from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`ID`, `Extensions`.`Number`, `Extensions`.`Description`, `Extensions`.`Type`, `ExtensionActivity`.`LastDialed`, `ExtensionActivity`.`LastReceived` FROM `Extensions` LEFT JOIN `ExtensionActivity` ON `Extensions`.`ID` = `ExtensionActivity`.`UID`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`ID`, `Extensions`.`Number`, `Extensions`.`Description`, `Extensions`.`Type`, `ExtensionActivity`.`LastDialed`, `ExtensionActivity`.`LastReceived` FROM `Extensions` LEFT JOIN `ExtensionActivity` ON `Extensions`.`ID` = `ExtensionActivity`.`UID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1948,7 +1948,7 @@ framework_add_api_call (
   "Read",
   "user_received_report",
   array (
-    "permissions" => array ( "User", "user_received_report"),
+    "permissions" => array ( "Administrator", "user_received_report"),
     "title" => __ ( "User received calls report"),
     "description" => __ ( "Generate user received calls reports."),
     "parameters" => array (
@@ -2049,7 +2049,7 @@ function user_received_report ( $buffer, $parameters)
   /**
    * Get user extension information
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -2063,7 +2063,7 @@ function user_received_report ( $buffer, $parameters)
   /**
    * Get call records from database
    */
-  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `dstid` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . "' AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `dstid` = " . (int) $parameters["ID"] . "' AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -2167,7 +2167,7 @@ framework_add_api_call (
   "Read",
   "group_received_report",
   array (
-    "permissions" => array ( "User", "group_received_report"),
+    "permissions" => array ( "Administrator", "group_received_report"),
     "title" => __ ( "Group received calls report"),
     "description" => __ ( "Generate group received calls reports."),
     "parameters" => array (
@@ -2268,7 +2268,7 @@ function group_received_report ( $buffer, $parameters)
   /**
    * Get all extensions from group information
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`ExtensionPhone`.`Extension` SEPARATOR ',') AS `Extensions` FROM `Groups` LEFT JOIN `ExtensionPhone` ON `Groups`.`ID` = `ExtensionPhone`.`Group` WHERE `Groups`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . " GROUP BY `Groups`.`ID`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`ExtensionPhone`.`Extension` SEPARATOR ',') AS `Extensions` FROM `Groups` LEFT JOIN `ExtensionPhone` ON `Groups`.`ID` = `ExtensionPhone`.`Group` WHERE `Groups`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Groups`.`ID` = " . (int) $parameters["ID"] . " GROUP BY `Groups`.`ID`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -2278,7 +2278,7 @@ function group_received_report ( $buffer, $parameters)
   /**
    * Get call records from database
    */
-  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `dstid` IN ('" . $_in["mysql"]["id"]->real_escape_string ( $extensions) . "') AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `dstid` IN ('" . $_in["mysql"]["id"]->real_escape_string ( $extensions) . "') AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -2382,7 +2382,7 @@ framework_add_api_call (
   "Read",
   "gateway_received_report",
   array (
-    "permissions" => array ( "User", "gateway_received_report"),
+    "permissions" => array ( "Administrator", "gateway_received_report"),
     "title" => __ ( "Gateway received calls report"),
     "description" => __ ( "Generate gateway received calls reports."),
     "parameters" => array (
@@ -2483,7 +2483,7 @@ function gateway_received_report ( $buffer, $parameters)
   /**
    * Get call records from database
    */
-  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `gateway` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' AND `dstid` != 0 ORDER BY `calldate` DESC"))
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `gateway` = " . (int) $parameters["ID"] . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' AND `dstid` != 0 ORDER BY `calldate` DESC"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -2587,7 +2587,7 @@ framework_add_api_call (
   "Read",
   "system_received_report",
   array (
-    "permissions" => array ( "User", "system_received_report"),
+    "permissions" => array ( "Administrator", "system_received_report"),
     "title" => __ ( "System received calls report"),
     "description" => __ ( "Generate system received calls reports.")
   )
@@ -2679,7 +2679,7 @@ function system_received_report ( $buffer, $parameters)
   /**
    * Get call records from database
    */
-  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `dstid` != 0 AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `dstid` != 0 AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -2783,7 +2783,7 @@ framework_add_api_call (
   "Read",
   "user_made_report",
   array (
-    "permissions" => array ( "User", "user_made_report"),
+    "permissions" => array ( "Administrator", "user_made_report"),
     "title" => __ ( "User made calls report"),
     "description" => __ ( "Generate user made calls reports."),
     "parameters" => array (
@@ -2884,7 +2884,7 @@ function user_made_report ( $buffer, $parameters)
   /**
    * Get user extension information
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -2898,7 +2898,7 @@ function user_made_report ( $buffer, $parameters)
   /**
    * Get call records from database
    */
-  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `srcid` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . "' AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `srcid` = " . (int) $parameters["ID"] . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -3002,7 +3002,7 @@ framework_add_api_call (
   "Read",
   "group_made_report",
   array (
-    "permissions" => array ( "User", "group_made_report"),
+    "permissions" => array ( "Administrator", "group_made_report"),
     "title" => __ ( "Group made calls report"),
     "description" => __ ( "Generate group made calls reports."),
     "parameters" => array (
@@ -3103,7 +3103,7 @@ function group_made_report ( $buffer, $parameters)
   /**
    * Get all extensions from group information
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`ExtensionPhone`.`Extension` SEPARATOR ',') AS `Extensions` FROM `Groups` LEFT JOIN `ExtensionPhone` ON `Groups`.`ID` = `ExtensionPhone`.`Group` WHERE `Groups`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . " GROUP BY `Groups`.`ID`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`ExtensionPhone`.`Extension` SEPARATOR ',') AS `Extensions` FROM `Groups` LEFT JOIN `ExtensionPhone` ON `Groups`.`ID` = `ExtensionPhone`.`Group` WHERE `Groups`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Groups`.`ID` = " . (int) $parameters["ID"] . " GROUP BY `Groups`.`ID`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -3113,7 +3113,7 @@ function group_made_report ( $buffer, $parameters)
   /**
    * Get call records from database
    */
-  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `srcid` IN ('" . $_in["mysql"]["id"]->real_escape_string ( $extensions) . "') AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `srcid` IN ('" . $_in["mysql"]["id"]->real_escape_string ( $extensions) . "') AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -3217,7 +3217,7 @@ framework_add_api_call (
   "Read",
   "gateway_made_report",
   array (
-    "permissions" => array ( "User", "gateway_made_report"),
+    "permissions" => array ( "Administrator", "gateway_made_report"),
     "title" => __ ( "Gateway made calls report"),
     "description" => __ ( "Generate gateway made calls reports."),
     "parameters" => array (
@@ -3318,7 +3318,7 @@ function gateway_made_report ( $buffer, $parameters)
   /**
    * Get call records from database
    */
-  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `gateway` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' AND `srcid` != 0 ORDER BY `calldate` DESC"))
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `gateway` = " . (int) $parameters["ID"] . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' AND `srcid` != 0 ORDER BY `calldate` DESC"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -3422,7 +3422,7 @@ framework_add_api_call (
   "Read",
   "system_made_report",
   array (
-    "permissions" => array ( "User", "system_made_report"),
+    "permissions" => array ( "Administrator", "system_made_report"),
     "title" => __ ( "System made calls report"),
     "description" => __ ( "Generate system made calls reports.")
   )
@@ -3514,7 +3514,7 @@ function system_made_report ( $buffer, $parameters)
   /**
    * Get call records from database
    */
-  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `srcid` != 0 AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `srcid` != 0 AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -3730,7 +3730,7 @@ framework_add_api_call (
   "Read",
   "consolidated_extension_report",
   array (
-    "permissions" => array ( "User", "consolidated_extension_report"),
+    "permissions" => array ( "Administrator", "consolidated_extension_report"),
     "title" => __ ( "Consolidated extensions calls report"),
     "description" => __ ( "Generate a consolidated calls report grouped by extensions.")
   )
@@ -3814,7 +3814,7 @@ function consolidated_extension_report ( $buffer, $parameters)
   /**
    * Generate report from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Number`, `Description`, `Type` FROM `Extensions`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Number`, `Description`, `Type` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -3829,7 +3829,7 @@ function consolidated_extension_report ( $buffer, $parameters)
     /**
      * Get all calls from extension for the requested period
      */
-    if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' AND `srcid` = " . $_in["mysql"]["id"]->real_escape_string ( $extension["ID"])))
+    if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' AND `srcid` = " . (int) $extension["ID"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -4051,7 +4051,7 @@ framework_add_api_call (
   "Read",
   "consolidated_group_report",
   array (
-    "permissions" => array ( "User", "consolidated_group_report"),
+    "permissions" => array ( "Administrator", "consolidated_group_report"),
     "title" => __ ( "Consolidated groups calls report"),
     "description" => __ ( "Generate a consolidated calls report grouped by groups.")
   )
@@ -4135,7 +4135,7 @@ function consolidated_group_report ( $buffer, $parameters)
   /**
    * Generate report from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Groups`.`ID`, `Groups`.`Description`, GROUP_CONCAT(`ExtensionPhone`.`Extension` SEPARATOR ',') AS `Extensions` FROM `Groups` LEFT JOIN `ExtensionPhone` ON `Groups`.`ID` = `ExtensionPhone`.`Group` GROUP BY `Groups`.`ID`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Groups`.`ID`, `Groups`.`Description`, GROUP_CONCAT(`ExtensionPhone`.`Extension` SEPARATOR ',') AS `Extensions` FROM `Groups` LEFT JOIN `ExtensionPhone` ON `Groups`.`ID` = `ExtensionPhone`.`Group` WHERE `Groups`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " GROUP BY `Groups`.`ID`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -4150,7 +4150,7 @@ function consolidated_group_report ( $buffer, $parameters)
     /**
      * Get all calls from extension for the requested period
      */
-    if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' AND `srcid` IN ('" . $_in["mysql"]["id"]->real_escape_string ( $group["Extensions"]) . "')"))
+    if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' AND `srcid` IN ('" . $_in["mysql"]["id"]->real_escape_string ( $group["Extensions"]) . "')"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -4372,7 +4372,7 @@ framework_add_api_call (
   "Read",
   "consolidated_gateway_report",
   array (
-    "permissions" => array ( "User", "consolidated_gateway_report"),
+    "permissions" => array ( "Administrator", "consolidated_gateway_report"),
     "title" => __ ( "Consolidated gateways calls report"),
     "description" => __ ( "Generate a consolidated calls report grouped by gateways.")
   )
@@ -4456,7 +4456,7 @@ function consolidated_gateway_report ( $buffer, $parameters)
   /**
    * Generate report from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Description` FROM `Gateways`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Description` FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -4471,7 +4471,7 @@ function consolidated_gateway_report ( $buffer, $parameters)
     /**
      * Get all calls made from this gateway for the requested period
      */
-    if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' AND `gateway` = " . $_in["mysql"]["id"]->real_escape_string ( $gateway["ID"])))
+    if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' AND `gateway` = " . (int) $gateway["ID"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -4693,7 +4693,7 @@ framework_add_api_call (
   "Read",
   "consolidated_server_report",
   array (
-    "permissions" => array ( "User", "consolidated_server_report"),
+    "permissions" => array ( "Administrator", "consolidated_server_report"),
     "title" => __ ( "Consolidated server calls report"),
     "description" => __ ( "Generate a consolidated calls report grouped by servers.")
   )
@@ -4777,7 +4777,7 @@ function consolidated_server_report ( $buffer, $parameters)
   /**
    * Generate report from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Description` FROM `Servers`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Description` FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -4792,7 +4792,7 @@ function consolidated_server_report ( $buffer, $parameters)
     /**
      * Get all calls from extension for the requested period
      */
-    if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' AND `server` = " . $_in["mysql"]["id"]->real_escape_string ( $server["ID"])))
+    if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' AND `server` = " . (int) $server["ID"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();

@@ -54,10 +54,13 @@ function audios_install_db ( $buffer, $parameters)
    */
   install_add_db_table ( "Audios", "CREATE TABLE `Audios` (\n" .
                                    "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                   "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
                                    "  `Filename` varchar(255) NOT NULL,\n" .
                                    "  `Description` varchar(255) NOT NULL,\n" .
-                                   "  PRIMARY KEY (`ID`)\n" .
-                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='System audios';\n");
+                                   "  PRIMARY KEY (`ID`),\n" .
+                                   "  KEY `Audios_ibfk_1` (`Tenant`),\n" .
+                                   "  CONSTRAINT `Audios_ibfk_1` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" .
+                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='System audios';\n", array ( "Tenants"));
 
   /**
    * Add basic system triggers

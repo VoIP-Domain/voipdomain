@@ -51,7 +51,7 @@ framework_add_filter ( "get_audios", "get_audios");
  */
 function audios_menu ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "file-audio", "href" => "/audios", "text" => __ ( "Audios"))));
+  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "file-audio", "href" => "/audios", "text" => __ ( "Audios"), "permissions" => array ( "Administrator"))));
 }
 
 /**
@@ -73,18 +73,18 @@ function get_audios ( $buffer, $parameters)
   $where = "";
   if ( array_key_exists ( "ID", $parameters))
   {
-    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
+    $where .= " AND `ID` = " . (int) $parameters["ID"];
   }
   if ( array_key_exists ( "Text", $parameters))
   {
-    $where .= " AND ( `Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( str_replace ( " ", "%", trim ( strip_tags ( $parameters["Text"])))) . "%' OR `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( str_replace ( " ", "%", trim ( strip_tags ( $parameters["Text"])))) . "%')";
+    $where .= " AND (`Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( str_replace ( " ", "%", trim ( strip_tags ( $parameters["Text"])))) . "%' OR `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( str_replace ( " ", "%", trim ( strip_tags ( $parameters["Text"])))) . "%')";
   }
 
   /**
    * Check into database if audios exists
    */
   $data = array ();
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Filename`, `Description` FROM `Audios`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Filename`, `Description` FROM `Audios` WHERE `Tenant` = " . (int) get_tenant () . $where))
   {
     while ( $audio = $result->fetch_assoc ())
     {

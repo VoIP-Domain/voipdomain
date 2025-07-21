@@ -124,7 +124,7 @@ framework_add_api_call (
   "Read",
   "notifications_events_search",
   array (
-    "permissions" => array ( "User", "notifications_events_search"),
+    "permissions" => array ( "Administrator", "notifications_events_search"),
     "title" => __ ( "Search notification events"),
     "description" => __ ( "Search for system notification events.")
   )
@@ -163,7 +163,11 @@ function notifications_events_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -349,7 +353,7 @@ framework_add_api_call (
   "Read",
   "notifications_events_view",
   array (
-    "permissions" => array ( "User", "notifications_events_view"),
+    "permissions" => array ( "Administrator", "notifications_events_view"),
     "title" => __ ( "View notifications"),
     "description" => __ ( "Get a system notification information."),
     "parameters" => array (
@@ -564,7 +568,7 @@ framework_add_api_call (
   "Read",
   "notifications_search",
   array (
-    "permissions" => array ( "User", "notifications_search"),
+    "permissions" => array ( "Administrator", "notifications_search"),
     "title" => __ ( "Search notifications"),
     "description" => __ ( "Search for system notifications.")
   )
@@ -608,7 +612,11 @@ function notifications_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -649,7 +657,7 @@ function notifications_search ( $buffer, $parameters)
   /**
    * Search notifications
    */
-  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Description`, `Event`, `Expire` FROM `Notifications`" . ( ! empty ( $parameters["Filter"]) ? " WHERE `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " ORDER BY `Description`, `Event`"))
+  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Description`, `Event`, `Expire` FROM `Notifications` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " ORDER BY `Description`, `Event`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -833,7 +841,7 @@ framework_add_api_call (
   "Read",
   "notifications_view",
   array (
-    "permissions" => array ( "User", "notifications_view"),
+    "permissions" => array ( "Administrator", "notifications_view"),
     "title" => __ ( "View notifications"),
     "description" => __ ( "Get a system notification information."),
     "parameters" => array (
@@ -924,7 +932,7 @@ function notifications_view ( $buffer, $parameters)
   /**
    * Search notifications
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Notifications` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Notifications` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1141,7 +1149,7 @@ framework_add_api_call (
   "Create",
   "notifications_add",
   array (
-    "permissions" => array ( "User", "notifications_add"),
+    "permissions" => array ( "Administrator", "notifications_add"),
     "title" => __ ( "Add notifications"),
     "description" => __ ( "Add a new system notification.")
   )
@@ -1229,7 +1237,7 @@ function notifications_add ( $buffer, $parameters)
   /**
    * Check if notification was already added
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Notifications` WHERE `Event` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Event"]) . "' AND `URL` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["URL"]) . "'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Notifications` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Event` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Event"]) . "' AND `URL` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["URL"]) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1285,7 +1293,7 @@ function notifications_add ( $buffer, $parameters)
   /**
    * Add new notification record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Notifications` (`Description`, `Event`, `Filters`, `URL`, `Method`, `Type`, `Variables`, `Headers`, `RelaxSSL`, `Expire`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Event"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Filters"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["URL"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Method"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Variables"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Headers"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["SSL"] ? "Y" : "N") . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Validity"]) . "')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Notifications` (`Tenant`, `Description`, `Event`, `Filters`, `URL`, `Method`, `Type`, `Variables`, `Headers`, `RelaxSSL`, `Expire`) VALUES (" . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Event"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Filters"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["URL"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Method"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Variables"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Headers"])) . "', '" . ( $parameters["SSL"] ? "Y" : "N") . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Validity"]) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1476,7 +1484,7 @@ framework_add_api_call (
   array ( "Modify", "Edit"),
   "notifications_edit",
   array (
-    "permissions" => array ( "User", "notifications_edit"),
+    "permissions" => array ( "Administrator", "notifications_edit"),
     "title" => __ ( "Edit notifications"),
     "description" => __ ( "Change a system notification information.")
   )
@@ -1568,7 +1576,7 @@ function notifications_edit ( $buffer, $parameters)
   /**
    * Check if notification was already added
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Notifications` WHERE `Event` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["event"]) . "' AND `URL` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["URL"]) . "' AND `ID` != " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Notifications` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Event` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["event"]) . "' AND `URL` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["URL"]) . "' AND `ID` != " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1581,7 +1589,7 @@ function notifications_edit ( $buffer, $parameters)
   /**
    * Check if notification exist (could be removed by other notification meanwhile)
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Notifications` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Notifications` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1635,7 +1643,7 @@ function notifications_edit ( $buffer, $parameters)
   /**
    * Change notification record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Notifications` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Event` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Event"]) . "', `Filters` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Filters"])) . "', `URL` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["URL"]) . "', `Method` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Method"]) . "', `Type` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "', `Variables` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Variables"])) . "', `Headers` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Headers"])) . "', `RelaxSSL` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["SSL"] ? "Y" : "N") . "', `Expire` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Validity"]) . "' WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Notifications` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Event` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Event"]) . "', `Filters` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Filters"])) . "', `URL` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["URL"]) . "', `Method` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Method"]) . "', `Type` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "', `Variables` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Variables"])) . "', `Headers` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Headers"])) . "', `RelaxSSL` = '" . ( $parameters["SSL"] ? "Y" : "N") . "', `Expire` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Validity"]) . "' WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1704,7 +1712,7 @@ framework_add_api_call (
   "Delete",
   "notifications_remove",
   array (
-    "permissions" => array ( "User", "notifications_remove"),
+    "permissions" => array ( "Administrator", "notifications_remove"),
     "title" => __ ( "Remove notifications"),
     "description" => __ ( "Remove a notification from system.")
   )
@@ -1773,7 +1781,7 @@ function notifications_remove ( $buffer, $parameters)
   /**
    * Check if notification exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Notifications` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Notifications` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1795,7 +1803,7 @@ function notifications_remove ( $buffer, $parameters)
   /**
    * Remove notification database record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Notifications` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Notifications` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

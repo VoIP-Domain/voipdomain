@@ -52,7 +52,7 @@ framework_add_filter ( "objects_types", "blocks_object");
  */
 function blocks_object ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "object" => "block", "path" => "/blocks", "icon" => "ban", "label" => "danger", "text" => array ( "singular" => __ ( "Block"), "plural" => __ ( "Blocks")))));
+  return array_merge ( (array) $buffer, array ( array ( "object" => "block", "type" => "list", "path" => "/blocks", "icon" => "ban", "label" => "danger", "text" => array ( "singular" => __ ( "Block"), "plural" => __ ( "Blocks")))));
 }
 
 /**
@@ -65,7 +65,7 @@ function blocks_object ( $buffer, $parameters)
  */
 function blocks_menu ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "ban", "href" => "/blocks", "text" => __ ( "Blocks"))));
+  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "ban", "href" => "/blocks", "text" => __ ( "Blocks"), "permissions" => array ( "Administrator"))));
 }
 
 /**
@@ -87,7 +87,7 @@ function get_blocks ( $buffer, $parameters)
   $where = "";
   if ( array_key_exists ( "ID", $parameters))
   {
-    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
+    $where .= " AND `ID` = " . (int) $parameters["ID"];
   }
   if ( array_key_exists ( "Text", $parameters))
   {
@@ -102,7 +102,7 @@ function get_blocks ( $buffer, $parameters)
    * Check into database if blocks exists
    */
   $data = array ();
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Blocks`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Blocks` WHERE `Tenant` = " . (int) get_tenant () . $where))
   {
     while ( $block = $result->fetch_assoc ())
     {

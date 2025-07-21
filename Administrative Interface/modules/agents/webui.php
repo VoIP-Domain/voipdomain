@@ -38,19 +38,19 @@
 /**
  * Add basic framework hooks, with the relative function.
  */
-framework_add_path ( "/agents", "agents_search_page");
+framework_add_path ( "/agents", "agents_search_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "agents_search_page", "agents_search_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/agents/add", "agents_add_page");
+framework_add_path ( "/agents/add", "agents_add_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "agents_add_page", "agents_add_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/agents/:id/clone", "agents_clone_function");
+framework_add_path ( "/agents/:id/clone", "agents_clone_function", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "agents_clone_function", "agents_clone_function", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/agents/:id/view", "agents_view_page");
+framework_add_path ( "/agents/:id/view", "agents_view_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "agents_view_page", "agents_view_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/agents/:id/edit", "agents_edit_page");
+framework_add_path ( "/agents/:id/edit", "agents_edit_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "agents_edit_page", "agents_edit_page", IN_HOOK_INSERT_FIRST);
 
 /**

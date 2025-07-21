@@ -115,7 +115,7 @@ framework_add_api_call (
   "Read",
   "exceptions_search",
   array (
-    "permissions" => array ( "User", "exceptions_search"),
+    "permissions" => array ( "Administrator", "exceptions_search"),
     "title" => __ ( "Search exceptions"),
     "description" => __ ( "Search for system exception numbers.")
   )
@@ -159,7 +159,11 @@ function exceptions_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -200,7 +204,7 @@ function exceptions_search ( $buffer, $parameters)
   /**
    * Search exceptions
    */
-  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Exceptions`" . ( ! empty ( $parameters["Filter"]) ? " WHERE `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Number` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " ORDER BY `Description`, `Number`"))
+  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Exceptions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Number` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%')" : "") . " ORDER BY `Description`, `Number`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -281,7 +285,7 @@ function exceptions_fastsearch ( $buffer, $parameters)
   /**
    * Search exceptions
    */
-  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Number`, `Description` FROM `Exceptions`" . ( ! empty ( $parameters["Filter"]) ? " WHERE `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "'" : "") . " ORDER BY `Number`, `Description`"))
+  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Number`, `Description` FROM `Exceptions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Number` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%')" : "") . " ORDER BY `Number`, `Description`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -351,7 +355,7 @@ framework_add_api_call (
   "Read",
   "exceptions_view",
   array (
-    "permissions" => array ( "User", "exceptions_view"),
+    "permissions" => array ( "Administrator", "exceptions_view"),
     "title" => __ ( "View exceptions"),
     "description" => __ ( "Get an exception number information."),
     "parameters" => array (
@@ -441,7 +445,7 @@ function exceptions_view ( $buffer, $parameters)
   /**
    * Search exceptions
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Exceptions` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Exceptions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -536,7 +540,7 @@ framework_add_api_call (
   "Create",
   "exceptions_add",
   array (
-    "permissions" => array ( "User", "exceptions_add"),
+    "permissions" => array ( "Administrator", "exceptions_add"),
     "title" => __ ( "Add exceptions"),
     "description" => __ ( "Add a new system exception number.")
   )
@@ -587,7 +591,7 @@ function exceptions_add ( $buffer, $parameters)
    */
   if ( ! array_key_exists ( "Number", $data))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Exceptions` WHERE `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "'"))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Exceptions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "'"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -634,7 +638,7 @@ function exceptions_add ( $buffer, $parameters)
   /**
    * Add new exception record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Exceptions` (`Description`, `Number`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Exceptions` (`Description`, `Tenant`, `Number`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -732,7 +736,7 @@ framework_add_api_call (
   array ( "Modify", "Edit"),
   "exceptions_edit",
   array (
-    "permissions" => array ( "User", "exceptions_edit"),
+    "permissions" => array ( "Administrator", "exceptions_edit"),
     "title" => __ ( "Edit exceptions"),
     "description" => __ ( "Edit a system exceptions number.")
   )
@@ -783,7 +787,7 @@ function exceptions_edit ( $buffer, $parameters)
    */
   if ( ! array_key_exists ( "Number", $data))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Exceptions` WHERE `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "' AND `ID` != " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Exceptions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "' AND `ID` != " . (int) $parameters["ID"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -797,7 +801,7 @@ function exceptions_edit ( $buffer, $parameters)
   /**
    * Check if exception exist (could be removed by other user meanwhile)
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Exceptions` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Exceptions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -849,7 +853,7 @@ function exceptions_edit ( $buffer, $parameters)
   /**
    * Change exception record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Exceptions` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "' WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Exceptions` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "' WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -921,7 +925,7 @@ framework_add_api_call (
   "Delete",
   "exceptions_remove",
   array (
-    "permissions" => array ( "User", "exceptions_remove"),
+    "permissions" => array ( "Administrator", "exceptions_remove"),
     "title" => __ ( "Remove exceptions"),
     "description" => __ ( "Remove a exception number from system.")
   )
@@ -990,7 +994,7 @@ function exceptions_remove ( $buffer, $parameters)
   /**
    * Check if exception exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Exceptions` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Exceptions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1012,7 +1016,7 @@ function exceptions_remove ( $buffer, $parameters)
   /**
    * Remove exception database record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Exceptions` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Exceptions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1072,7 +1076,7 @@ function exceptions_server_reconfig ( $buffer, $parameters)
   /**
    * Fetch all exceptions and send to server
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Exceptions`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Exceptions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

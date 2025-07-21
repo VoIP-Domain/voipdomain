@@ -38,19 +38,19 @@
 /**
  * Add basic framework hooks, with the relative function.
  */
-framework_add_path ( "/queues", "queues_search_page");
+framework_add_path ( "/queues", "queues_search_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "queues_search_page", "queues_search_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/queues/add", "queues_add_page");
+framework_add_path ( "/queues/add", "queues_add_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "queues_add_page", "queues_add_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/queues/:id/clone", "queues_clone_function");
+framework_add_path ( "/queues/:id/clone", "queues_clone_function", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "queues_clone_function", "queues_clone_function", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/queues/:id/view", "queues_view_page");
+framework_add_path ( "/queues/:id/view", "queues_view_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "queues_view_page", "queues_view_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/queues/:id/edit", "queues_edit_page");
+framework_add_path ( "/queues/:id/edit", "queues_edit_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "queues_edit_page", "queues_edit_page", IN_HOOK_INSERT_FIRST);
 
 /**

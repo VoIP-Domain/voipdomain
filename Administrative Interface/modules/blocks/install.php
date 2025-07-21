@@ -54,11 +54,14 @@ function blocks_install_db ( $buffer, $parameters)
    */
   install_add_db_table ( "Blocks", "CREATE TABLE `Blocks` (\n" .
                                    "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                   "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
                                    "  `Description` varchar(255) NOT NULL,\n" .
                                    "  `Number` varchar(80) NOT NULL,\n" .
                                    "  PRIMARY KEY (`ID`),\n" .
-                                   "  UNIQUE KEY `Number` (`Number`)\n" .
-                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Blocked numbers';\n");
+                                   "  UNIQUE KEY `Number` (`Tenant`,`Number`),\n" .
+                                   "  KEY `Blocks_ibfk_1` (`Tenant`),\n" . 
+                                   "  CONSTRAINT `Blocks_ibfk_1` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" . 
+                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Blocked numbers';\n", array ( "Tenants"));
 
   /**
    * Add basic system triggers

@@ -54,7 +54,7 @@ framework_add_filter ( "extensions_edit_subpages", "extensions_hunts_edit_subpag
  */
 function hunts_object ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "object" => "extension_hunt", "path" => "/extensions", "icon" => "crosshairs", "label" => "primary", "text" => array ( "singular" => __ ( "Line hunting"), "plural" => __ ( "Lines hunting")))));
+  return array_merge ( (array) $buffer, array ( array ( "object" => "extension_hunt", "type" => "human", "path" => "/extensions", "icon" => "crosshairs", "label" => "primary", "text" => array ( "singular" => __ ( "Line hunting"), "plural" => __ ( "Lines hunting")))));
 }
 
 /**

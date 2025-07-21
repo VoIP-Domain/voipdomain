@@ -10,6 +10,7 @@ Migrating your telephony to VoIP has never been easier!
 **VoIP Domain** was created to address a real business need: modernizing communications **without complications or disruption for end users**.
 
 Our platform was built with a focus on simplicity and cutting-edge technology, offering:
+- **Multi-Tenant**: The system supports multiple tenants, allowing service providers to offer the system to customers.
 - **Smart Auto-Provisioning**: Automatically configure any device from any manufacturer with a unified standard.
 - **Multiple Servers**: Manage a network of Asterisk VoIP servers easily using a modern interface.
 - **Intuitive and Powerful Interface**: No need to be a VoIP or telephony expert to manage the system.
@@ -30,6 +31,7 @@ A live demo will be available soon.
 
 ## Features
 
+- Multi-tenant
 - Automatic phone provisioning
 - Least Cost Routing (LCR)
 - Call billing
@@ -71,6 +73,9 @@ The project is currently in pre-release. Stay tuned for updates as we approach t
 
 **v0.1 – April 11, 2025**
 - After years of development and several rewrites, this version marks the first pre-release
+
+**v0.2 – July 21, 2025**
+- A major system refactory to add Multi-Tenant support and some minor optimizations
 
 ## License
 

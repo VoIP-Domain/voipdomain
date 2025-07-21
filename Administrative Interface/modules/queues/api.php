@@ -126,7 +126,7 @@ framework_add_api_call (
   "Read",
   "queues_search",
   array (
-    "permissions" => array ( "User", "queues_search"),
+    "permissions" => array ( "Administrator", "queues_search"),
     "title" => __ ( "Search queues"),
     "description" => __ ( "Search for system queues.")
   )
@@ -170,7 +170,11 @@ function queues_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -211,7 +215,7 @@ function queues_search ( $buffer, $parameters)
   /**
    * Search queues
    */
-  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues`" . ( ! empty ( $parameters["Filter"]) ? " WHERE `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " ORDER BY `Name`, `Description`"))
+  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%')" : "") . " ORDER BY `Name`, `Description`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -315,7 +319,7 @@ framework_add_api_call (
   "Read",
   "queues_view",
   array (
-    "permissions" => array ( "User", "queues_view"),
+    "permissions" => array ( "Administrator", "queues_view"),
     "title" => __ ( "View queues"),
     "description" => __ ( "Get a queue information."),
     "parameters" => array (
@@ -405,7 +409,7 @@ function queues_view ( $buffer, $parameters)
   /**
    * Search queues
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -515,7 +519,7 @@ framework_add_api_call (
   "Create",
   "queues_add",
   array (
-    "permissions" => array ( "User", "queues_add"),
+    "permissions" => array ( "Administrator", "queues_add"),
     "title" => __ ( "Add queues"),
     "description" => __ ( "Add a new queue.")
   )
@@ -573,7 +577,7 @@ function queues_add ( $buffer, $parameters)
    */
   if ( ! array_key_exists ( "Name", $data))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "'"))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "'"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -620,7 +624,7 @@ function queues_add ( $buffer, $parameters)
   /**
    * Add new queue record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Queues` (`Description`, `Name`, `Strategy`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Strategy"]) . "')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Queues` (`Tenant`, `Description`, `Name`, `Strategy`) VALUES (" . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Strategy"]) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -731,7 +735,7 @@ framework_add_api_call (
   array ( "Modify", "Edit"),
   "queues_edit",
   array (
-    "permissions" => array ( "User", "queues_edit"),
+    "permissions" => array ( "Administrator", "queues_edit"),
     "title" => __ ( "Edit queues"),
     "description" => __ ( "Change a queue information.")
   )
@@ -789,7 +793,7 @@ function queues_edit ( $buffer, $parameters)
    */
   if ( ! array_key_exists ( "Name", $data))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "' AND `ID` != " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "' AND `ID` != " . (int) $parameters["ID"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -803,7 +807,7 @@ function queues_edit ( $buffer, $parameters)
   /**
    * Check if queue exist (could be removed by other user meanwhile)
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -855,7 +859,7 @@ function queues_edit ( $buffer, $parameters)
   /**
    * Change queue record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Queues` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', `Strategy` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Strategy"]) . "' WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Queues` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', `Strategy` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Strategy"]) . "' WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -927,7 +931,7 @@ framework_add_api_call (
   "Delete",
   "queues_remove",
   array (
-    "permissions" => array ( "User", "queues_remove"),
+    "permissions" => array ( "Administrator", "queues_remove"),
     "title" => __ ( "Remove queues"),
     "description" => __ ( "Remove a queue from system.")
   )
@@ -996,7 +1000,7 @@ function queues_remove ( $buffer, $parameters)
   /**
    * Check if queue exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1010,7 +1014,7 @@ function queues_remove ( $buffer, $parameters)
   /**
    * Check if queue was in use
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `ExtensionQueue` WHERE `Queue` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `ExtensionQueue` WHERE `Queue` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1032,7 +1036,7 @@ function queues_remove ( $buffer, $parameters)
   /**
    * Remove queue database record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1110,7 +1114,7 @@ framework_add_api_call (
   "Create",
   "queues_join_member",
   array (
-    "permissions" => array ( "User", "queues_join_member"),
+    "permissions" => array ( "Administrator", "queues_join_member"),
     "title" => __ ( "Join member to queues"),
     "description" => __ ( "Join a system agent member to a queue."),
     "parameters" => array (
@@ -1159,7 +1163,7 @@ function queues_join_member ( $buffer, $parameters)
   /**
    * Check if queue exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Queue"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["Queue"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1181,7 +1185,7 @@ function queues_join_member ( $buffer, $parameters)
   /**
    * Check if member isn't already logged at queue
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `QueuesLogged` WHERE `Queue` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Queue"]) . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . (int) $parameters["Agent"]) . "'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `QueueMembers` WHERE `Queue` = " . (int) $parameters["Queue"] . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . (int) $parameters["Agent"]) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1233,7 +1237,7 @@ function queues_join_member ( $buffer, $parameters)
   /**
    * Add database registry
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `QueueMembers` (`Queue`, `Member`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Queue"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . $parameters["Agent"]) . "')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `QueueMembers` (`Queue`, `Member`) VALUES (" . (int) $parameters["Queue"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . $parameters["Agent"]) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1311,7 +1315,7 @@ framework_add_api_call (
   "Create",
   "queues_leave_member",
   array (
-    "permissions" => array ( "User", "queues_leave_member"),
+    "permissions" => array ( "Administrator", "queues_leave_member"),
     "title" => __ ( "Remove member from queues"),
     "description" => __ ( "Remove a system agent member from a queue."),
     "parameters" => array (
@@ -1360,7 +1364,7 @@ function queues_leave_member ( $buffer, $parameters)
   /**
    * Check if queue exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Queue"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["Queue"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1382,7 +1386,7 @@ function queues_leave_member ( $buffer, $parameters)
   /**
    * Check if member is logged at queue
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `QueuesLogged` WHERE `Queue` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Queue"]) . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . (int) $parameters["Agent"]) . "'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `QueueMembers` WHERE `Queue` = " . (int) $parameters["Queue"] . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . (int) $parameters["Agent"]) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1434,7 +1438,7 @@ function queues_leave_member ( $buffer, $parameters)
   /**
    * Remove database registry
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `QueueMembers` WHERE `Queue` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Queue"]) . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . $parameters["Agent"]) . "'"))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `QueueMembers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Queue` = " . (int) $parameters["Queue"] . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . $parameters["Agent"]) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1512,7 +1516,7 @@ framework_add_api_call (
   "Create",
   "queues_pause_member",
   array (
-    "permissions" => array ( "User", "queues_pause_member"),
+    "permissions" => array ( "Administrator", "queues_pause_member"),
     "title" => __ ( "Pause member at queues"),
     "description" => __ ( "Pause a system agent member at a queue."),
     "parameters" => array (
@@ -1561,7 +1565,7 @@ function queues_pause_member ( $buffer, $parameters)
   /**
    * Check if queue exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Queue"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["Queue"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1583,7 +1587,7 @@ function queues_pause_member ( $buffer, $parameters)
   /**
    * Check if member is logged at queue
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `QueuesLogged` WHERE `Queue` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Queue"]["ID"]) . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . (int) $parameters["Agent"]) . "'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `QueueMembers` WHERE `Queue` = " . (int) $parameters["Queue"]["ID"] . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . (int) $parameters["Agent"]) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1704,7 +1708,7 @@ framework_add_api_call (
   "Create",
   "queues_resume_member",
   array (
-    "permissions" => array ( "User", "queues_resume_member"),
+    "permissions" => array ( "Administrator", "queues_resume_member"),
     "title" => __ ( "Resume a paused member at queues"),
     "description" => __ ( "Resume a paused system agent member at a queue."),
     "parameters" => array (
@@ -1753,7 +1757,7 @@ function queues_resume_member ( $buffer, $parameters)
   /**
    * Check if queue exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Queue"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["Queue"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1775,7 +1779,7 @@ function queues_resume_member ( $buffer, $parameters)
   /**
    * Check if member is logged at queue
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `QueuesLogged` WHERE `Queue` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Queue"]) . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . (int) $parameters["Agent"]) . "'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `QueueMembers` WHERE `Queue` = " . (int) $parameters["Queue"] . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . (int) $parameters["Agent"]) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1878,7 +1882,7 @@ function queues_server_reconfig ( $buffer, $parameters)
   /**
    * Fetch all queues and send to server
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

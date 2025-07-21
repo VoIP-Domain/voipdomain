@@ -50,25 +50,22 @@ framework_add_hook ( "install_db", "authentication_install_db");
 function authentication_install_db ( $buffer, $parameters)
 {
   /**
-   * Add basic system tables data
-   */
-  install_add_db_data ( "Config", array (
-    array ( "Key" => "Authentication", "Data" => "{\"Status\":false,\"Background\":1,\"Password\":true}}")
-  ));
-
-  /**
    * Add basic system tables
    */
   install_add_db_table ( "AuthenticationCache", "CREATE TABLE `AuthenticationCache` (\n" .
+                                                "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
                                                 "  `Plugin` varchar(255) NOT NULL,\n" .
                                                 "  `Cookie` char(16) NOT NULL,\n" .
                                                 "  `State` char(32) NOT NULL,\n" .
                                                 "  `Expire` int(11) UNSIGNED NOT NULL,\n" .
                                                 "  `Callback` varchar(255),\n" .
-                                                "  UNIQUE KEY `AuthenticationPair` (`Cookie`, `State`)\n" .
-                                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Authentication proccess cache';\n");
+                                                "  UNIQUE KEY `AuthenticationPair` (`Tenant`,`Cookie`, `State`),\n" .
+                                                "  KEY `AuthencationCache_ibfk_1` (`Tenant`),\n" . 
+                                                "  CONSTRAINT `AuthenticationCache_ibfk_1` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" . 
+                                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Authentication proccess cache';\n", array ( "Tenants"));
   install_add_db_table ( "AuthenticationToken", "CREATE TABLE `AuthenticationToken` (\n" .
                                                 "  `Token` char(32) NOT NULL,\n" .
+                                                "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
                                                 "  `Plugin` varchar(255) NOT NULL,\n" .
                                                 "  `Email` varchar(255) DEFAULT NULL,\n" .
                                                 "  `IssueDate` datetime NOT NULL,\n" .
@@ -77,8 +74,10 @@ function authentication_install_db ( $buffer, $parameters)
                                                 "  `TokenData` text NOT NULL DEFAULT '',\n" .
                                                 "  `UserData` text NOT NULL DEFAULT '',\n" .
                                                 "  PRIMARY KEY (`Token`),\n" .
-                                                "  KEY `Email` (`Email`)\n" .
-                                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Authentication tokens';\n");
+                                                "  KEY `Email` (`Email`),\n" .
+                                                "  KEY `AuthencationToken_ibfk_1` (`Tenant`),\n" . 
+                                                "  CONSTRAINT `AuthenticationToken_ibfk_1` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" . 
+                                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Authentication tokens';\n", array ( "Tenants"));
 
   /**
    * Return structured data

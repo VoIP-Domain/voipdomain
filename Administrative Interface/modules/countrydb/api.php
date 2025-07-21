@@ -149,7 +149,7 @@ framework_add_api_call (
   "Read",
   "countries_search",
   array (
-    "permissions" => array ( "User", "Token"),
+    "permissions" => array ( "User", "Administrator", "Super-Administrator", "Token", "countries_search"),
     "title" => __ ( "Search countries"),
     "description" => __ ( "Search for countries database.")
   )
@@ -193,7 +193,11 @@ function countries_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -363,7 +367,7 @@ framework_add_api_call (
   "Read",
   "countries_view",
   array (
-    "permissions" => array ( "User", "Token"),
+    "permissions" => array ( "User", "Administrator", "Super-Administrator", "Token", "countries_view"),
     "title" => __ ( "View country"),
     "description" => __ ( "View a country information."),
     "parameters" => array (
@@ -453,7 +457,7 @@ function countries_view ( $buffer, $parameters)
   /**
    * Search country
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Countries` WHERE `Code` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Countries` WHERE `Code` = " . (int) $parameters["Code"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

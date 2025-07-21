@@ -39,22 +39,22 @@
 /**
  * Add basic framework hooks, with the relative function.
  */
-framework_add_path ( "/groups", "groups_search_page");
+framework_add_path ( "/groups", "groups_search_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "groups_search_page", "groups_search_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/groups/add", "groups_add_page");
+framework_add_path ( "/groups/add", "groups_add_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "groups_add_page", "groups_add_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/groups/:id/clone", "groups_clone_function");
+framework_add_path ( "/groups/:id/clone", "groups_clone_function", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "groups_clone_function", "groups_clone_function", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/groups/:id/view", "groups_view_page");
+framework_add_path ( "/groups/:id/view", "groups_view_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "groups_view_page", "groups_view_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/groups/:id/edit", "groups_edit_page");
+framework_add_path ( "/groups/:id/edit", "groups_edit_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "groups_edit_page", "groups_edit_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/groups/:id/report", "groups_report_page");
+framework_add_path ( "/groups/:id/report", "groups_report_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "groups_report_page", "groups_report_page", IN_HOOK_INSERT_FIRST);
 
 /**

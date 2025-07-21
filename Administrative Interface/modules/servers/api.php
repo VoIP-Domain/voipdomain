@@ -167,7 +167,7 @@ framework_add_api_call (
   "Read",
   "servers_search",
   array (
-    "permissions" => array ( "User", "servers_search"),
+    "permissions" => array ( "Administrator", "servers_search"),
     "title" => __ ( "Search servers"),
     "description" => __ ( "Search for system servers.")
   )
@@ -211,7 +211,11 @@ function servers_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -252,7 +256,7 @@ function servers_search ( $buffer, $parameters)
   /**
    * Search servers
    */
-  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `Servers`.`ID`, `Servers`.`Description`, `Servers`.`Address`, `Servers`.`Port`, COUNT(`Extensions`.`Range`) AS `Extensions` FROM `Servers` LEFT JOIN `Ranges` ON `Ranges`.`Server` = `Servers`.`ID` LEFT JOIN `Extensions` ON `Extensions`.`Range` = `Ranges`.`ID`" . ( ! empty ( $parameters["Filter"]) ? " WHERE `Servers`.`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " GROUP BY `Servers`.`ID` ORDER BY `Description`, `Address`, `Port`"))
+  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `Servers`.`ID`, `Servers`.`Description`, `Servers`.`Address`, `Servers`.`Port`, COUNT(`Extensions`.`Range`) AS `Extensions` FROM `Servers` LEFT JOIN `Ranges` ON `Ranges`.`Server` = `Servers`.`ID` LEFT JOIN `Extensions` ON `Extensions`.`Range` = `Ranges`.`ID` WHERE `Servers`.`Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND `Servers`.`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " GROUP BY `Servers`.`ID` ORDER BY `Description`, `Address`, `Port`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -268,7 +272,7 @@ function servers_search ( $buffer, $parameters)
     /**
      * Fetch server backups
      */
-    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT `Description`, `Address`, `Port` FROM `ServerBackup` WHERE `Server` = " . $_in["mysql"]["id"]->real_escape_string ( $result["ID"])))
+    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT `Description`, `Address`, `Port` FROM `ServerBackup` WHERE `Server` = " . (int) $result["ID"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -423,7 +427,7 @@ framework_add_api_call (
   "Read",
   "servers_view",
   array (
-    "permissions" => array ( "User", "servers_view"),
+    "permissions" => array ( "Administrator", "servers_view"),
     "title" => __ ( "View servers"),
     "description" => __ ( "Get a system server information."),
     "parameters" => array (
@@ -513,7 +517,7 @@ function servers_view ( $buffer, $parameters)
   /**
    * Search servers
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -527,7 +531,7 @@ function servers_view ( $buffer, $parameters)
   /**
    * Get server backup servers list
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Description`, `Address`, `Port` FROM `ServerBackup` WHERE `Server` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Description`, `Address`, `Port` FROM `ServerBackup` WHERE `Server` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -722,7 +726,7 @@ framework_add_api_call (
   "Create",
   "servers_add",
   array (
-    "permissions" => array ( "User", "servers_add"),
+    "permissions" => array ( "Administrator", "servers_add"),
     "title" => __ ( "Add servers"),
     "description" => __ ( "Add a new system server.")
   )
@@ -833,7 +837,7 @@ function servers_add ( $buffer, $parameters)
   /**
    * Check if server IP and port was not in use
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "' AND `Port` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Port"]) . "'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "' AND `Port` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Port"]) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -895,7 +899,7 @@ function servers_add ( $buffer, $parameters)
   /**
    * Add new server record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Servers` (`Description`, `Address`, `Port`, `NTP`, `TransfStart`, `TransfEnd`, `PublicKey`, `PrivateKey`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Port"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["NTP"])) . "', " . ( $parameters["Window"] ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . ":00'" : "NULL") . ", " . ( $parameters["Window"] ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Finish"]) . ":59'" : "NULL") . ", '" . $_in["mysql"]["id"]->real_escape_string ( $pubKey) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $privKey) . "')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Servers` (`Tenant`, `Description`, `Address`, `Port`, `NTP`, `TransfStart`, `TransfEnd`, `PublicKey`, `PrivateKey`) VALUES (" . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Port"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["NTP"])) . "', " . ( $parameters["Window"] ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . ":00'" : "NULL") . ", " . ( $parameters["Window"] ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Finish"]) . ":59'" : "NULL") . ", '" . $_in["mysql"]["id"]->real_escape_string ( $pubKey) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $privKey) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -919,7 +923,7 @@ function servers_add ( $buffer, $parameters)
       $pubKey = preg_replace ( "/\n$/m", "", $pubKey["key"]);
       unset ( $res);
 
-      if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `ServerBackup` (`Server`, `Description`, `Address`, `Port`, `PublicKey`, `PrivateKey`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $backupserver["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $backupserver["Address"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $backupserver["Port"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $pubKey) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $privKey) . "')"))
+      if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `ServerBackup` (`Server`, `Description`, `Address`, `Port`, `PublicKey`, `PrivateKey`) VALUES (" . (int) $parameters["ID"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $backupserver["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $backupserver["Address"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $backupserver["Port"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $pubKey) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $privKey) . "')"))
       {
         header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
         exit ();
@@ -1094,7 +1098,7 @@ framework_add_api_call (
   array ( "Modify", "Edit"),
   "servers_edit",
   array (
-    "permissions" => array ( "User", "servers_edit"),
+    "permissions" => array ( "Administrator", "servers_edit"),
     "title" => __ ( "Edit servers"),
     "description" => __ ( "Change a system server information.")
   )
@@ -1155,7 +1159,7 @@ function servers_edit ( $buffer, $parameters)
   /**
    * Check if server exist (could be removed by other user meanwhile)
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1220,7 +1224,7 @@ function servers_edit ( $buffer, $parameters)
   /**
    * Check if server IP and port was not in use
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "' AND `Port` = '" . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Port"]) . "' AND `ID` != " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "' AND `Port` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Port"]) . "' AND `ID` != " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1273,7 +1277,7 @@ function servers_edit ( $buffer, $parameters)
   /**
    * Change server record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Servers` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "', `Port` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Port"]) . "', `NTP` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["NTP"])) . "', `TransfStart` = " . ( $parameters["Window"] ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . ":00'" : "NULL") . ", `TransfEnd` = " . ( $parameters["Window"] ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Finish"]) . ":59'" : "NULL") . " WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ORIGINAL"]["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Servers` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "', `Port` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Port"]) . "', `NTP` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["NTP"])) . "', `TransfStart` = " . ( $parameters["Window"] ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . ":00'" : "NULL") . ", `TransfEnd` = " . ( $parameters["Window"] ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Finish"]) . ":59'" : "NULL") . " WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ORIGINAL"]["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1282,7 +1286,7 @@ function servers_edit ( $buffer, $parameters)
   /**
    * Fetch current server backups
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `ServerBackup` WHERE `Server` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ORIGINAL"]["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `ServerBackup` WHERE `Server` = " . (int) $parameters["ORIGINAL"]["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1307,7 +1311,7 @@ function servers_edit ( $buffer, $parameters)
         unset ( $backups[$bindex]);
         if ( $oldbackup["Description"] != $backup["Description"])
         {
-          if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `ServerBackup` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Description"]) . "' WHERE `Server` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ORIGINAL"]["ID"]) . " AND `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Address"]) . "' AND `Port` = '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Port"]) . "'"))
+          if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `ServerBackup` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Description"]) . "' WHERE `Server` = " . (int) $parameters["ORIGINAL"]["ID"] . " AND `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Address"]) . "' AND `Port` = '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Port"]) . "'"))
           {
             header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
             exit ();
@@ -1319,7 +1323,7 @@ function servers_edit ( $buffer, $parameters)
   }
   foreach ( $oldbackups as $oindex => $oldbackup)
   {
-    if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ServerBackup` WHERE `Server` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ORIGINAL"]["ID"]) . " AND `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $oldbackup["Address"]) . "' AND `Port` = '" . $_in["mysql"]["id"]->real_escape_string ( $oldbackup["Port"]) . "'"))
+    if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ServerBackup` WHERE `Server` = " . (int) $parameters["ORIGINAL"]["ID"] . " AND `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $oldbackup["Address"]) . "' AND `Port` = '" . $_in["mysql"]["id"]->real_escape_string ( $oldbackup["Port"]) . "'"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -1327,7 +1331,7 @@ function servers_edit ( $buffer, $parameters)
   }
   foreach ( $backups as $bindex => $backup)
   {
-    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `ServerBackup` (`Server`, `Description`, `Address`, `Port`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ORIGINAL"]["ID"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Address"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Port"]) . "')"))
+    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `ServerBackup` (`Server`, `Description`, `Address`, `Port`) VALUES (" . (int) $parameters["ORIGINAL"]["ID"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Address"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Port"]) . "')"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -1407,7 +1411,7 @@ framework_add_api_call (
   "Delete",
   "servers_remove",
   array (
-    "permissions" => array ( "User", "servers_remove"),
+    "permissions" => array ( "Administrator", "servers_remove"),
     "title" => __ ( "Remove servers"),
     "description" => __ ( "Remove a server from system.")
   )
@@ -1476,7 +1480,7 @@ function servers_remove ( $buffer, $parameters)
   /**
    * Check if server exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1490,7 +1494,7 @@ function servers_remove ( $buffer, $parameters)
   /**
    * Check if server has any active range
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Server` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Server` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1512,7 +1516,7 @@ function servers_remove ( $buffer, $parameters)
   /**
    * Remove server database record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1596,7 +1600,7 @@ framework_add_api_call (
   "Create",
   "servers_rebuild",
   array (
-    "permissions" => array ( "User", "servers_rebuild"),
+    "permissions" => array ( "Administrator", "servers_rebuild"),
     "title" => __ ( "Rebuild servers"),
     "description" => __ ( "Rebuild server configuration files."),
     "parameters" => array (
@@ -1639,7 +1643,7 @@ function servers_rebuild ( $buffer, $parameters)
   /**
    * Check if server exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1789,7 +1793,7 @@ framework_add_api_call (
   "Read",
   "servers_report",
   array (
-    "permissions" => array ( "User", "servers_report"),
+    "permissions" => array ( "Administrator", "servers_report"),
     "title" => __ ( "Servers report"),
     "description" => __ ( "Generate a server call's usage report.", true, false),
     "parameters" => array (
@@ -1890,7 +1894,7 @@ function servers_report ( $buffer, $parameters)
   /**
    * Get server information
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1904,7 +1908,7 @@ function servers_report ( $buffer, $parameters)
   /**
    * Get call records from database
    */
-  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `server` = " . $_in["mysql"]["id"]->real_escape_string ( $server["ID"]) . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `server` = " . (int) $server["ID"] . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1971,7 +1975,7 @@ framework_add_api_call (
   "Read",
   "servers_install_script",
   array (
-    "permissions" => array ( "User", "servers_install_script"),
+    "permissions" => array ( "Administrator", "servers_install_script"),
     "title" => __ ( "Server install script"),
     "description" => __ ( "Generate a server installation BASH script."),
     "parameters" => array (
@@ -2007,7 +2011,7 @@ function servers_install_script ( $buffer, $parameters)
   /**
    * Check if server exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

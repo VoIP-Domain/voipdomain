@@ -569,20 +569,20 @@ function tasks_return ( $buffer, $parameters)
     /**
      * Check if it's a grouped command
      */
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Group` FROM `GroupCommand` WHERE `Command` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Group` FROM `GroupCommand` WHERE `Command` = " . (int) $parameters["ID"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
     }
     if ( $result->num_rows != 0)
     {
-      if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `GroupedCommands` SET `Left` = `Left` - 1 WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $result->fetch_assoc ()["Group"])))
+      if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `GroupedCommands` SET `Left` = `Left` - 1 WHERE `ID` = " . (int) $result->fetch_assoc ()["Group"]))
       {
         header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
         exit ();
       }
     }
-    if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Commands` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . " AND `Server` = " . $_in["mysql"]["id"]->real_escape_string ( $_in["server"]["ID"])))
+    if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Commands` WHERE `ID` = " . (int) $parameters["ID"] . " AND `Server` = " . (int) $_in["session"]["Data"]["ID"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -592,7 +592,7 @@ function tasks_return ( $buffer, $parameters)
   /**
    * Check for unprocessed events in queue and resend
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Commands`.*, `Servers`.`Password` FROM `Commands`, `Servers` WHERE `Servers`.`ID` = `Commands`.`Server` AND `Commands`.`Server` = " . $_in["mysql"]["id"]->real_escape_string ( $_in["server"]["ID"]) . ( $parameters["ID"] != 0 ? " AND `Commands`.`ID` < " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) : "")))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Commands`.*, `Servers`.`Password` FROM `Commands`, `Servers` WHERE `Servers`.`ID` = `Commands`.`Server` AND `Commands`.`Server` = " . (int) $_in["session"]["Data"]["ID"] . ( $parameters["ID"] != 0 ? " AND `Commands`.`ID` < " . (int) $parameters["ID"] : "")))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -655,6 +655,12 @@ framework_add_hook (
           "description" => __ ( "The password of user to login."),
           "required" => true,
           "example" => __ ( "mypassword")
+        ),
+        "Domain" => array (
+          "type" => "string",
+          "description" => __ ( "The tenant domain of user to authenticate. If not provided, the server hostname will be used."),
+          "required" => false,
+          "example" => "voipdomain.io"
         ),
         "Code" => array (
           "type" => "string",
@@ -804,27 +810,79 @@ function user_login ( $buffer, $parameters)
   }
 
   /**
-   * Validate user into database
+   * Check for tenant domain
    */
-  if ( ! $result = $_in["mysql"]["id"]->query ( "SELECT * FROM `Users` WHERE `Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "'"))
-  {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
-  }
-  if ( ! $userdata = $result->fetch_assoc ())
+  if ( $parameters["Domain"] == "Multi-Tenant")
   {
     /**
-     * Call authentication failure plugin modules if exists
+     * Validate admin into database
      */
-    filters_call ( "authentication_failure");
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Admins` WHERE `Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "'"))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    if ( ! $userdata = $result->fetch_assoc ())
+    {
+      /**
+       * Call authentication failure plugin modules if exists
+       */
+      filters_call ( "authentication_failure");
+
+      /**
+       * And return error message
+       */
+      $data["Result"] = false;
+      $data["Message"] = __ ( "Invalid username and/or password.");
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+      return $data;
+    }
+    $tenant = array ();
+  } else {
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID` FROM `Tenants` WHERE `ID` = " . (int) get_tenant ( $parameters["Domain"])))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    if ( ! $tenant = $result->fetch_assoc ())
+    {
+      /**
+       * Call authentication failure plugin modules if exists
+       */
+      filters_call ( "authentication_failure");
+
+      /**
+       * And return error message
+       */
+      $data["Result"] = false;
+      $data["Message"] = __ ( "Invalid username and/or password.");
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+      return $data;
+    }
 
     /**
-     * And return error message
+     * Validate user into database
      */
-    $data["Result"] = false;
-    $data["Message"] = __ ( "Invalid username and/or password.");
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
-    return $data;
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Users` WHERE `Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "' AND `Tenant` = " . (int) $tenant["ID"]))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    if ( ! $userdata = $result->fetch_assoc ())
+    {
+      /**
+       * Call authentication failure plugin modules if exists
+       */
+      filters_call ( "authentication_failure");
+
+      /**
+       * And return error message
+       */
+      $data["Result"] = false;
+      $data["Message"] = __ ( "Invalid username and/or password.");
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+      return $data;
+    }
   }
 
   /**
@@ -849,7 +907,7 @@ function user_login ( $buffer, $parameters)
   /**
    * Check if user has second factor authentication
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `UserSFA` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $userdata["ID"]) . "' AND `Status` = 'Active'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `" . ( $parameters["Domain"] == "Multi-Tenant" ? "Admin" : "User") . "SFA` WHERE `UID` = " . (int) $userdata["ID"] . " AND `Status` = 'Active'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -858,7 +916,7 @@ function user_login ( $buffer, $parameters)
   {
     if ( array_key_exists ( $_in["general"]["cookie"] . "_sfa", $_COOKIE))
     {
-      if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `SFACache` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $userdata["ID"]) . "' AND `Key` = '" . $_in["mysql"]["id"]->real_escape_string ( $_COOKIE[$_in["general"]["cookie"] . "_sfa"]) . "'"))
+      if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `" . ( $parameters["Domain"] == "Multi-Tenant" ? "Admin" : "") . "SFACache` WHERE `UID` = " . (int) $userdata["ID"] . "' AND `Key` = '" . $_in["mysql"]["id"]->real_escape_string ( $_COOKIE[$_in["general"]["cookie"] . "_sfa"]) . "'"))
       {
         header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
         exit ();
@@ -867,7 +925,7 @@ function user_login ( $buffer, $parameters)
       {
         $ignoresfa = true;
       } else {
-        setcookie ( $_in["general"]["cookie"] . "_sfa", null, -1, "/");
+        setcookie ( $_in["general"]["cookie"] . "_" . ( $parameters["Domain"] == "Multi-Tenant" ? "adm" : "") . "sfa", null, -1, "/");
       }
     }
     if ( ! $ignoresfa)
@@ -894,12 +952,12 @@ function user_login ( $buffer, $parameters)
   if ( $parameters["Remember"])
   {
     $key = random_password ( 32);
-    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `SFACache` (`UID`, `Key`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $userdata["ID"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $key) . "')"))
+    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `" . ( $parameters["Domain"] == "Multi-Tenant" ? "Admin" : "") . "SFACache` (`UID`, `Key`) VALUES (" . (int) $userdata["ID"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $key) . "')"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
     }
-    setcookie ( $_in["general"]["cookie"] . "_sfa", $key, time () + 31536000, "/" . ( PHP_VERSION_ID < 70300 ? "; SameSite=Strict" : ""));
+    setcookie ( $_in["general"]["cookie"] . "_" . ( $parameters["Domain"] == "Multi-Tenant" ? "adm" : "") . "sfa", $key, time () + 31536000, "/" . ( PHP_VERSION_ID < 70300 ? "; SameSite=Strict" : ""));
   }
 
   /**
@@ -908,6 +966,7 @@ function user_login ( $buffer, $parameters)
   $_in["session"]["Authenticated"] = true;
   $_in["session"]["Method"] = "Session";
   $_in["session"]["Language"] = $userdata["Language"];
+  $_in["session"]["Tenant"] = array_key_exists ( "ID", $tenant) ? $tenant["ID"] : 0;
   $_in["session"]["Data"]["ID"] = $userdata["ID"];
   $_in["session"]["Data"]["Username"] = $userdata["Username"];
   $_in["session"]["Data"]["Name"] = $userdata["Name"];
@@ -937,7 +996,7 @@ function user_login ( $buffer, $parameters)
    * Create session at database
    */
   $SID = hash ( "sha256", uniqid ( "", true));
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Sessions` (`SID`, `User`, `LastSeen`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $SID) . "', " . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["ID"]) . ", " . $_in["mysql"]["id"]->real_escape_string ( time ()) . ")"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `" . ( $parameters["Domain"] == "Multi-Tenant" ? "Admin" : "") . "Sessions` (`SID`, `" . ( $parameters["Domain"] == "Multi-Tenant" ? "Admin" : "User") . "`, `LastSeen`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $SID) . "', " . (int) $_in["session"]["Data"]["ID"] . ", " . time () . ")"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -952,9 +1011,9 @@ function user_login ( $buffer, $parameters)
   }
 
   /**
-   * Start user session.
+   * Start user session
    */
-  setcookie ( $_in["general"]["cookie"], $SID, 0, "/");
+  setcookie ( $_in["general"]["cookie"] . ( $parameters["Domain"] == "Multi-Tenant" ? "_adm" : ""), $SID, 0, "/");
 
   /**
    * Execute finish hook if exist
@@ -1004,7 +1063,7 @@ framework_add_api_call (
   "Delete",
   "user_logout",
   array (
-    "permissions" => array ( "User"),
+    "permissions" => array ( "User", "Administrator", "Super-Administrator"),
     "title" => __ ( "Destroy system user session."),
     "description" => __ ( "Destroy the system user session.")
   )
@@ -1072,9 +1131,10 @@ function user_logout ( $buffer, $parameters)
   /**
    * Remove system cookie and destroy global configuration session information
    */
-  setcookie ( $_in["general"]["cookie"], null, -1, "/");
+  setcookie ( $_in["general"]["cookie"] . ( $_in["session"]["Tenant"] == 0 ? "_adm" : ""), null, -1, "/");
   $_in["session"]["Authenticated"] = false;
   $_in["session"]["Method"] = "";
+  $_in["session"]["Tenant"] = null;
   $_in["session"]["Language"] = $_in["general"]["language"];
   $_in["session"]["Data"] = array ();
   $_in["session"]["Permissions"] = array ();
@@ -1287,7 +1347,7 @@ framework_add_api_call (
   "Read",
   "dashboard_information",
   array (
-    "permissions" => array ( "User"),
+    "permissions" => array ( "User", "Administrator"),
     "title" => __ ( "System dashboard"),
     "description" => __ ( "Generate the system dashboard statistics.")
   )
@@ -1376,14 +1436,14 @@ function dashboard_information ( $page, $parameters)
   /**
    * Get ASR (Answer-Seizure Ratio)
    */
-  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `disposition` = 'ANSWERED' AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `disposition` = 'ANSWERED' AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   $asr = intval ( $count->fetch_assoc ()["Total"]);
   $count->free ();
-  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1395,7 +1455,7 @@ function dashboard_information ( $page, $parameters)
   /**
    * Get NER (Network Efficiency Ratio)
    */
-  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE ( `disposition` = 'ANSWERED' OR `disposition` = 'NO ANSWER' OR `disposition` = 'BUSY') AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND (`disposition` = 'ANSWERED' OR `disposition` = 'NO ANSWER' OR `disposition` = 'BUSY') AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1407,14 +1467,14 @@ function dashboard_information ( $page, $parameters)
   /**
    * Get SBR (Subscriber Busy Ratio)
    */
-  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `disposition` = 'BUSY' AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `disposition` = 'BUSY' AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   $sbr = intval ( $count->fetch_assoc ()["Total"]);
   $count->free ();
-  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE ( `disposition` = 'ANSWERED' OR `disposition` = 'BUSY') AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND (`disposition` = 'ANSWERED' OR `disposition` = 'BUSY') AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1426,14 +1486,14 @@ function dashboard_information ( $page, $parameters)
   /**
    * Get SCR (Short Calls Ratio)
    */
-  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `disposition` = 'ANSWERED' AND `billsec` <= 60 AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `disposition` = 'ANSWERED' AND `billsec` <= 60 AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   $scr = intval ( $count->fetch_assoc ()["Total"]);
   $count->free ();
-  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `disposition` = 'ANSWERED' AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `disposition` = 'ANSWERED' AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1445,7 +1505,7 @@ function dashboard_information ( $page, $parameters)
   /**
    * Get LCR (Long Calls Ratio)
    */
-  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `disposition` = 'ANSWERED' AND `billsec` >= 300 AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `disposition` = 'ANSWERED' AND `billsec` >= 300 AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1457,14 +1517,14 @@ function dashboard_information ( $page, $parameters)
   /**
    * Get allocations percentage
    */
-  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Extensions`"))
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   $total = intval ( $count->fetch_assoc ()["Total"]);
   $count->free ();
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1536,7 +1596,7 @@ framework_add_api_call (
   "Read",
   "calls_view",
   array (
-    "permissions" => array ( "User", "calls_view"),
+    "permissions" => array ( "Administrator", "calls_view"),
     "title" => __ ( "View call information"),
     "description" => __ ( "Get detailed information about a call."),
     "parameters" => array (
@@ -1617,7 +1677,7 @@ function calls_view ( $buffer, $parameters)
   /**
    * Check if call exist into database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `uniqueid` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . "'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `uniqueid` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1718,7 +1778,7 @@ framework_add_api_call (
   "Read",
   "calls_sipdump_view",
   array (
-    "permissions" => array ( "User", "calls_sipdump_view"),
+    "permissions" => array ( "Administrator", "calls_sipdump_view"),
     "title" => __ ( "View call SIP dump information"),
     "description" => __ ( "Get detailed SIP dump information about a call."),
     "parameters" => array (
@@ -1799,7 +1859,7 @@ function calls_sipdump_view ( $buffer, $parameters)
   /**
    * Check if call exist into database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `uniqueid` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . "'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `uniqueid` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1894,7 +1954,7 @@ framework_add_api_call (
   "Read",
   "calls_recording_view",
   array (
-    "permissions" => array ( "User", "calls_recording_view"),
+    "permissions" => array ( "Administrator", "calls_recording_view"),
     "title" => __ ( "View call recording information"),
     "description" => __ ( "Get recording information about a call."),
     "parameters" => array (
@@ -1975,7 +2035,7 @@ function calls_recording_view ( $buffer, $parameters)
   /**
    * Check if call exist into database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `uniqueid` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . "'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `uniqueid` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -2100,7 +2160,7 @@ framework_add_api_call (
   "Read",
   "fastsearch",
   array (
-    "permissions" => array ( "User", "fastsearch"),
+    "permissions" => array ( "User", "Administrator", "Super-Administrator", "fastsearch"),
     "title" => __ ( "Interface objects search."),
     "description" => __ ( "Search for all system objects (that's available at fastsearch)."),
     "parameters" => array (
@@ -2144,7 +2204,11 @@ function fastsearch ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -2218,5 +2282,38 @@ function fastsearch ( $buffer, $parameters)
    * Return structured data
    */
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
+}
+
+/**
+ * Implement tenant addition hook
+ */
+framework_add_hook ( "tenants_add_post", "config_tenant_add_post");
+
+/**
+ * Function to add default permissions settings to new tenant.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function config_tenant_add_post ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Add permissions settings
+   */
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Permissions', " . (int) $parameters["ID"] . ", '{\"Landline\":{\"Local\":\"y\",\"Interstate\":\"y\",\"International\":\"y\"},\"Mobile\":{\"Local\":\"y\",\"Interstate\":\"y\",\"International\":\"y\"},\"Marine\":{\"Local\":\"y\",\"Interstate\":\"y\",\"International\":\"y\"},\"Tollfree\":{\"Local\":\"y\",\"International\":\"y\"},\"PRN\":{\"Local\":\"n\",\"International\":\"n\"},\"Satellite\":{\"Local\":\"p\",\"International\":\"p\"}}')"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+
+  /**
+   * Return data to user
+   */
+  return $buffer;
 }
 ?>

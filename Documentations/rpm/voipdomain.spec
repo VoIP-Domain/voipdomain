@@ -1,5 +1,5 @@
 Name: voipdomain
-Version: 0.1.rc1
+Version: 0.2
 Release: 1%{?dist}
 Summary: Enterprise network VoIP solution
 License: GPLv3

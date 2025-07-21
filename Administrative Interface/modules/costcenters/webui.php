@@ -37,19 +37,19 @@
 /**
  * Add basic framework hooks, with the relative function.
  */
-framework_add_path ( "/costcenters", "costcenters_search_page");
+framework_add_path ( "/costcenters", "costcenters_search_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "costcenters_search_page", "costcenters_search_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/costcenters/add", "costcenters_add_page");
+framework_add_path ( "/costcenters/add", "costcenters_add_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "costcenters_add_page", "costcenters_add_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/costcenters/:id/clone", "costcenters_clone_function");
+framework_add_path ( "/costcenters/:id/clone", "costcenters_clone_function", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "costcenters_clone_function", "costcenters_clone_function", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/costcenters/:id/view", "costcenters_view_page");
+framework_add_path ( "/costcenters/:id/view", "costcenters_view_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "costcenters_view_page", "costcenters_view_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/costcenters/:id/edit", "costcenters_edit_page");
+framework_add_path ( "/costcenters/:id/edit", "costcenters_edit_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "costcenters_edit_page", "costcenters_edit_page", IN_HOOK_INSERT_FIRST);
 
 /**

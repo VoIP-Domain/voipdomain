@@ -38,7 +38,7 @@
 /**
  * Add basic framework hooks, with the relative function.
  */
-framework_add_path ( "/reports/graph/heat", "reports_graph_heat");
+framework_add_path ( "/reports/graph/heat", "reports_graph_heat", array ( "permissions" => array ( "User", "Administrator")));
 framework_add_hook ( "reports_graph_heat", "reports_graph_heat", IN_HOOK_INSERT_FIRST);
 
 /**
@@ -249,7 +249,7 @@ function reports_graph_heat ( $buffer, $parameters)
 /**
  * Add extensions list report page
  */
-framework_add_path ( "/reports/list", "extensions_list_report_page");
+framework_add_path ( "/reports/list", "extensions_list_report_page", array ( "permissions" => array ( "User", "Administrator")));
 framework_add_hook ( "extensions_list_report_page", "extensions_list_report_page", IN_HOOK_INSERT_FIRST);
 
 /**
@@ -393,7 +393,7 @@ function extensions_list_report_page ( $buffer, $parameters)
 /**
  * Add ranges list report page
  */
-framework_add_path ( "/reports/ranges", "ranges_list_report_page");
+framework_add_path ( "/reports/ranges", "ranges_list_report_page", array ( "permissions" => array ( "User", "Administrator")));
 framework_add_hook ( "ranges_list_report_page", "ranges_list_report_page", IN_HOOK_INSERT_FIRST);
 
 /**
@@ -517,7 +517,7 @@ function ranges_list_report_page ( $buffer, $parameters)
 /**
  * Add extensions activity list report page
  */
-framework_add_path ( "/reports/activity", "extensions_activity_report_page");
+framework_add_path ( "/reports/activity", "extensions_activity_report_page", array ( "permissions" => array ( "User", "Administrator")));
 framework_add_hook ( "extensions_activity_report_page", "extensions_activity_report_page", IN_HOOK_INSERT_FIRST);
 
 /**
@@ -631,7 +631,7 @@ function extensions_activity_report_page ( $buffer, $parameters)
 /**
  * Add financial cost center report page
  */
-framework_add_path ( "/reports/financial/costcenter", "costcenter_financial_report_page");
+framework_add_path ( "/reports/financial/costcenter", "costcenter_financial_report_page", array ( "permissions" => array ( "User", "Administrator")));
 framework_add_hook ( "costcenter_financial_report_page", "costcenter_financial_report_page", IN_HOOK_INSERT_FIRST);
 
 /**
@@ -846,7 +846,7 @@ function costcenter_financial_report_page ( $buffer, $parameters)
 /**
  * Add financial group report page
  */
-framework_add_path ( "/reports/financial/group", "group_financial_report_page");
+framework_add_path ( "/reports/financial/group", "group_financial_report_page", array ( "permissions" => array ( "User", "Administrator")));
 framework_add_hook ( "group_financial_report_page", "group_financial_report_page", IN_HOOK_INSERT_FIRST);
 
 /**
@@ -1061,7 +1061,7 @@ function group_financial_report_page ( $buffer, $parameters)
 /**
  * Add financial gateway report page
  */
-framework_add_path ( "/reports/financial/gateway", "gateway_financial_report_page");
+framework_add_path ( "/reports/financial/gateway", "gateway_financial_report_page", array ( "permissions" => array ( "User", "Administrator")));
 framework_add_hook ( "gateway_financial_report_page", "gateway_financial_report_page", IN_HOOK_INSERT_FIRST);
 
 /**
@@ -1252,8 +1252,8 @@ Cost; }}}\n" .
 /**
  * Server health page
  */
-framework_add_hook ( "health_page", "health_page");
-framework_add_path ( "/reports/status", "health_page");
+framework_add_path ( "/reports/status", "health_page", array ( "permissions" => array ( "User", "Administrator")));
+framework_add_hook ( "health_page", "health_page", IN_HOOK_INSERT_FIRST);
 
 /**
  * Function to draw a server health page to user.
@@ -1431,7 +1431,7 @@ function health_page ( $page, $parameters)
 /**
  * Add user received calls report page
  */
-framework_add_path ( "/reports/received/user", "user_calls_report_page");
+framework_add_path ( "/reports/received/user", "user_calls_report_page", array ( "permissions" => array ( "User", "Administrator")));
 framework_add_hook ( "user_calls_report_page", "user_calls_report_page", IN_HOOK_INSERT_FIRST);
 
 /**
@@ -1491,7 +1491,7 @@ function user_calls_report_page ( $buffer, $parameters)
 /**
  * Add group received calls report page
  */
-framework_add_path ( "/reports/received/group", "group_calls_report_page");
+framework_add_path ( "/reports/received/group", "group_calls_report_page", array ( "permissions" => array ( "User", "Administrator")));
 framework_add_hook ( "group_calls_report_page", "group_calls_report_page", IN_HOOK_INSERT_FIRST);
 
 /**
@@ -1551,7 +1551,7 @@ function group_calls_report_page ( $buffer, $parameters)
 /**
  * Add gateway received calls report page
  */
-framework_add_path ( "/reports/received/gateway", "gateway_calls_report_page");
+framework_add_path ( "/reports/received/gateway", "gateway_calls_report_page", array ( "permissions" => array ( "User", "Administrator")));
 framework_add_hook ( "gateway_calls_report_page", "gateway_calls_report_page", IN_HOOK_INSERT_FIRST);
 
 /**
@@ -1611,7 +1611,7 @@ function gateway_calls_report_page ( $buffer, $parameters)
 /**
  * Add system received calls report page
  */
-framework_add_path ( "/reports/received/all", "system_received_report_page");
+framework_add_path ( "/reports/received/all", "system_received_report_page", array ( "permissions" => array ( "User", "Administrator")));
 framework_add_hook ( "system_received_report_page", "system_received_report_page", IN_HOOK_INSERT_FIRST);
 
 /**
@@ -1674,7 +1674,7 @@ function system_received_report_page ( $buffer, $parameters)
 /**
  * Add user made calls report page
  */
-framework_add_path ( "/reports/made/user", "user_made_report_page");
+framework_add_path ( "/reports/made/user", "user_made_report_page", array ( "permissions" => array ( "User", "Administrator")));
 framework_add_hook ( "user_made_report_page", "user_made_report_page", IN_HOOK_INSERT_FIRST);
 
 /**
@@ -1734,7 +1734,7 @@ function user_made_report_page ( $buffer, $parameters)
 /**
  * Add group made calls report page
  */
-framework_add_path ( "/reports/made/group", "group_made_report_page");
+framework_add_path ( "/reports/made/group", "group_made_report_page", array ( "permissions" => array ( "User", "Administrator")));
 framework_add_hook ( "group_made_report_page", "group_made_report_page", IN_HOOK_INSERT_FIRST);
 
 /**
@@ -1794,7 +1794,7 @@ function group_made_report_page ( $buffer, $parameters)
 /**
  * Add gateway made calls report page
  */
-framework_add_path ( "/reports/made/gateway", "gateway_made_report_page");
+framework_add_path ( "/reports/made/gateway", "gateway_made_report_page", array ( "permissions" => array ( "User", "Administrator")));
 framework_add_hook ( "gateway_made_report_page", "gateway_made_report_page", IN_HOOK_INSERT_FIRST);
 
 /**
@@ -1854,7 +1854,7 @@ function gateway_made_report_page ( $buffer, $parameters)
 /**
  * Add system made calls report page
  */
-framework_add_path ( "/reports/made/all", "system_made_report_page");
+framework_add_path ( "/reports/made/all", "system_made_report_page", array ( "permissions" => array ( "User", "Administrator")));
 framework_add_hook ( "system_made_report_page", "system_made_report_page", IN_HOOK_INSERT_FIRST);
 
 /**
@@ -1917,7 +1917,7 @@ function system_made_report_page ( $buffer, $parameters)
 /**
  * Add consolidated extension calls report page
  */
-framework_add_path ( "/reports/consolidated/user", "consolidated_extensions_report_page");
+framework_add_path ( "/reports/consolidated/user", "consolidated_extensions_report_page", array ( "permissions" => array ( "User", "Administrator")));
 framework_add_hook ( "consolidated_extensions_report_page", "consolidated_extensions_report_page", IN_HOOK_INSERT_FIRST);
 
 /**
@@ -2155,7 +2155,7 @@ function consolidated_extensions_report_page ( $buffer, $parameters)
 /**
  * Add consolidated group calls report page
  */
-framework_add_path ( "/reports/consolidated/group", "consolidated_groups_report_page");
+framework_add_path ( "/reports/consolidated/group", "consolidated_groups_report_page", array ( "permissions" => array ( "User", "Administrator")));
 framework_add_hook ( "consolidated_groups_report_page", "consolidated_groups_report_page", IN_HOOK_INSERT_FIRST);
 
 /**
@@ -2391,7 +2391,7 @@ function consolidated_groups_report_page ( $buffer, $parameters)
 /**
  * Add consolidated gateway calls report page
  */
-framework_add_path ( "/reports/consolidated/gateway", "consolidated_gateways_report_page");
+framework_add_path ( "/reports/consolidated/gateway", "consolidated_gateways_report_page", array ( "permissions" => array ( "User", "Administrator")));
 framework_add_hook ( "consolidated_gateways_report_page", "consolidated_gateways_report_page", IN_HOOK_INSERT_FIRST);
 
 /**
@@ -2627,7 +2627,7 @@ function consolidated_gateways_report_page ( $buffer, $parameters)
 /**
  * Add consolidated server calls report page
  */
-framework_add_path ( "/reports/consolidated/server", "consolidated_servers_report_page");
+framework_add_path ( "/reports/consolidated/server", "consolidated_servers_report_page", array ( "permissions" => array ( "User", "Administrator")));
 framework_add_hook ( "consolidated_servers_report_page", "consolidated_servers_report_page", IN_HOOK_INSERT_FIRST);
 
 /**

@@ -51,7 +51,7 @@ framework_add_filter ( "get_ivrs", "get_ivrs");
  */
 function ivr_menu ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "project-diagram", "href" => "/ivrs", "text" => __ ( "IVRs"))));
+  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "project-diagram", "href" => "/ivrs", "text" => __ ( "IVRs"), "permissions" => array ( "Administrator"))));
 }
 
 /**
@@ -73,7 +73,7 @@ function get_ivrs ( $buffer, $parameters)
   $where = "";
   if ( array_key_exists ( "ID", $parameters))
   {
-    $where .= " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"]);
+    $where .= " AND `ID` = " . (int) $parameters["ID"];
   }
   if ( array_key_exists ( "Name", $parameters))
   {
@@ -88,7 +88,7 @@ function get_ivrs ( $buffer, $parameters)
    * Check into database if IVRs exists
    */
   $data = array ();
-  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `IVRs`" . ( ! empty ( $where) ? " WHERE" . substr ( $where, 4) : "")))
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `IVRs` WHERE `Tenant` = " . (int) get_tenant () . $where))
   {
     while ( $ivr = $result->fetch_assoc ())
     {

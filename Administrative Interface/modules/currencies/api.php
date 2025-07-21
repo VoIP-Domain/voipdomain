@@ -189,7 +189,7 @@ framework_add_api_call (
   "Read",
   "currencies_search",
   array (
-    "permissions" => array ( "User", "Token"),
+    "permissions" => array ( "User", "Administrator", "Super-Administrator", "Token", "currencies_search"),
     "title" => __ ( "Search currencies"),
     "description" => __ ( "Search for currencies database.")
   )
@@ -233,7 +233,11 @@ function currencies_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -450,7 +454,7 @@ framework_add_api_call (
   "Read",
   "currencies_view",
   array (
-    "permissions" => array ( "User", "Token"),
+    "permissions" => array ( "User", "Administrator", "Super-Administrator", "Token", "currencies_view"),
     "title" => __ ( "View currency"),
     "description" => __ ( "View a currency information."),
     "parameters" => array (

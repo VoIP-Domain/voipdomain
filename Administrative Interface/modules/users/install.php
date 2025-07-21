@@ -54,6 +54,7 @@ function users_install_db ( $buffer, $parameters)
    */
   install_add_db_table ( "Users", "CREATE TABLE `Users` (\n" .
                                   "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                  "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
                                   "  `Name` varchar(255) NOT NULL,\n" .
                                   "  `Username` varchar(50) NOT NULL,\n" .
                                   "  `Password` char(64) NOT NULL,\n" .
@@ -64,8 +65,10 @@ function users_install_db ( $buffer, $parameters)
                                   "  `Since` datetime NOT NULL,\n" .
                                   "  `Language` varchar(255) DEFAULT '',\n" .
                                   "  PRIMARY KEY (`ID`),\n" .
-                                  "  KEY `Username` (`Username`)\n" .
-                                  ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Administration users';\n");
+                                  "  UNIQUE KEY `Username` (`Tenant`, `Username`),\n" .
+                                  "  KEY `Users_ibfk_1` (`Tenant`),\n" .
+                                  "  CONSTRAINT `Users_ibfk_1` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" .
+                                  ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Administration users';\n", array ( "Tenants"));
   install_add_db_table ( "UserSFA", "CREATE TABLE `UserSFA` (\n" .
                                     "  `UID` bigint(20) unsigned NOT NULL,\n" .
                                     "  `Key` char(32) NOT NULL,\n" .
@@ -93,13 +96,6 @@ function users_install_db ( $buffer, $parameters)
   install_add_db_trigger ( "UserSFAInsert", "CREATE TRIGGER `UserSFAInsert` AFTER INSERT ON `UserSFA` FOR EACH ROW CALL UpdateCache('Users')");
   install_add_db_trigger ( "UserSFAUpdate", "CREATE TRIGGER `UserSFAUpdate` AFTER UPDATE ON `UserSFA` FOR EACH ROW CALL UpdateCache('Users')");
   install_add_db_trigger ( "UserSFADelete", "CREATE TRIGGER `UserSFADelete` AFTER DELETE ON `UserSFA` FOR EACH ROW CALL UpdateCache('Users')");
-
-  /**
-   * Add basic system data
-   */
-  install_add_db_data ( "Users", array (
-    array ( "Name" => "Administrator", "Username" => "admin", "Password" => "6eedcf62914377ce6c04d1cd39ed10bfcc41affd264da255715dbbbc9ee8dfdf", "Salt" => "d90171577077c7a5333a4032798343683b65190432d4dfb30edd8993e00b9411", "Iterations" => 40000, "Permissions" => "[\"Administrator\"]", "Email" => "admin@voipdomain.io", "Since" => date ( "Y-m-d H:i:s"), "Language" => "en_US")
-  ));
 
   /**
    * Return structured data

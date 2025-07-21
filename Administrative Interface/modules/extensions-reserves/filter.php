@@ -50,6 +50,6 @@ framework_add_filter ( "objects_types", "reserves_object");
  */
 function reserves_object ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "object" => "extension_reserve", "path" => "/extensions", "icon" => "lock", "label" => "warning", "text" => array ( "singular" => __ ( "Reserve"), "plural" => __ ( "Reserves")))));
+  return array_merge ( (array) $buffer, array ( array ( "object" => "extension_reserve", "type" => "reserve", "path" => "/extensions", "icon" => "lock", "label" => "warning", "text" => array ( "singular" => __ ( "Reserve"), "plural" => __ ( "Reserves")))));
 }
 ?>

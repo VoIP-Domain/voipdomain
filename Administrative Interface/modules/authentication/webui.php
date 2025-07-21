@@ -37,11 +37,11 @@
 /**
  * Add basic framework hooks, with the relative function.
  */
+framework_add_path ( "/config/authentication", "authentication_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "authentication_page", "authentication_page", IN_HOOK_INSERT_FIRST);
-framework_add_path ( "/config/authentication", "authentication_page");
 
-framework_add_hook ( "authentication_login_page_generate", "authentication_login_page_generate", IN_HOOK_INSERT_FIRST);
 framework_add_path ( "/auth", "authentication_login_page_generate");
+framework_add_hook ( "authentication_login_page_generate", "authentication_login_page_generate", IN_HOOK_INSERT_FIRST);
 
 /**
  * Function to create the authentication page code.
@@ -297,9 +297,14 @@ function authentication_login_page_generate ( $buffer, $parameters)
   global $_in;
 
   /**
+   * Get current tenant ID
+   */
+  $tenantid = get_tenant ( ! empty ( $parameters["Context"]) ? $parameters["Context"] : $_SERVER["HTTP_HOST"]);
+
+  /**
    * Get authentication config from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Key` = 'Authentication'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $tenantid . " AND `Key` = 'Authentication'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -313,7 +318,7 @@ function authentication_login_page_generate ( $buffer, $parameters)
   /**
    * Get authentication plugins from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Key` LIKE 'Authentication_%'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $tenantid . " AND `Key` LIKE 'Authentication_%'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -693,7 +698,7 @@ function authentication_login_page_generate ( $buffer, $parameters)
     $footer .= "      {\n";
     $footer .= "        type: 'POST',\n";
     $footer .= "        url: '/api/auth',\n";
-    $footer .= "        data: JSON.stringify ( { Username: $('#log_" . $usernamefieldname . "').val (), Password: $('#log_" . $passwordfieldname . "').val ()}),\n";
+    $footer .= "        data: JSON.stringify ( { Username: $('#log_" . $usernamefieldname . "').val (), Password: $('#log_" . $passwordfieldname . "').val (), Context: window.location.hostname}),\n";
     $footer .= "        headers: {\n";
     $footer .= "                   'X-HTTP-Method-Override': 'POST',\n";
     $footer .= "                   'Accept': 'application/json'\n";

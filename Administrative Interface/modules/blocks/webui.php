@@ -39,19 +39,19 @@
 /**
  * Add basic framework hooks, with the relative function.
  */
-framework_add_path ( "/blocks", "blocks_search_page");
+framework_add_path ( "/blocks", "blocks_search_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "blocks_search_page", "blocks_search_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/blocks/add", "blocks_add_page");
+framework_add_path ( "/blocks/add", "blocks_add_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "blocks_add_page", "blocks_add_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/blocks/:id/clone", "blocks_clone_function");
+framework_add_path ( "/blocks/:id/clone", "blocks_clone_function", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "blocks_clone_function", "blocks_clone_function", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/blocks/:id/view", "blocks_view_page");
+framework_add_path ( "/blocks/:id/view", "blocks_view_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "blocks_view_page", "blocks_view_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/blocks/:id/edit", "blocks_edit_page");
+framework_add_path ( "/blocks/:id/edit", "blocks_edit_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "blocks_edit_page", "blocks_edit_page", IN_HOOK_INSERT_FIRST);
 
 /**

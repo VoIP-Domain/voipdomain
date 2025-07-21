@@ -50,6 +50,6 @@ framework_add_filter ( "page_menu_registers", "sampleitems_menu");
  */
 function sampleitems_menu ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "flask", "href" => "/sampleitems", "text" => __ ( "Sample items"))));
+  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "flask", "href" => "/sampleitems", "text" => __ ( "Sample items"), "permissions" => array ( "User", "Administrator"))));
 }
 ?>

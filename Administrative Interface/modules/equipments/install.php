@@ -71,12 +71,8 @@ function equipments_install_db ( $buffer, $parameters)
                                        "  `Extensions` int(2) unsigned NOT NULL,\n" .
                                        "  `ShortcutsPerExtension` int(2) unsigned NOT NULL,\n" .
                                        "  `SupportedAudioCodecs` mediumblob NOT NULL,\n" .
-                                       "  `AudioCodecs` mediumblob NOT NULL,\n" .
                                        "  `SupportedVideoCodecs` mediumblob NOT NULL,\n" .
-                                       "  `VideoCodecs` mediumblob NOT NULL,\n" .
                                        "  `SupportedFirmwares` mediumblob NOT NULL,\n" .
-                                       "  `Active` boolean NOT NULL DEFAULT false,\n" .
-                                       "  `ExtraSettings` mediumblob NOT NULL,\n" .
                                        "  PRIMARY KEY (`ID`),\n" .
                                        "  UNIQUE KEY `UID` (`UID`),\n" .
                                        "  KEY `Vendor` (`Vendor`),\n" .
@@ -94,8 +90,8 @@ function equipments_install_db ( $buffer, $parameters)
    * Add basic system data
    */
   install_add_db_data ( "Equipments", array (
-    array ( "UID" => "webphone", "Vendor" => "VoIP Domain", "Model" => "Web Phone", "Type" => "WEBPHONE", "SupportLevel" => "Premium", "Description" => "Web based IP phone.", "Image" => "", "VendorLink" => "https://voipdomain.io/", "ModelLink" => "", "VideoSupport" => true, "AutoProvision" => false, "BLFSupport" => false, "Accounts" => 1, "Shortcuts" => 0, "Extensions" => 0, "ShortcutsPerExtension" => 0, "SupportedAudioCodecs" => "[\"OPUS\",\"ALAW\",\"ULAW\"]", "AudioCodecs" => "[\"OPUS\",\"ALAW\",\"ULAW\"]", "SupportedVideoCodecs" => "[\"VP8\",\"H264\"]", "VideoCodecs" => "[\"VP8\",\"H264\"]", "SupportedFirmwares" => "[]", "Active" => true, "ExtraSettings" => "[]"),
-    array ( "UID" => "softphone", "Vendor" => "VoIP Domain", "Model" => "SIP Phone", "Type" => "SOFTPHONE", "SupportLevel" => "Basic", "Description" => "Generic SIP phone.", "Image" => "", "VendorLink" => "https://voipdomain.io/", "ModelLink" => "", "VideoSupport" => true, "AutoProvision" => false, "BLFSupport" => false, "Accounts" => 1, "Shortcuts" => 0, "Extensions" => 0, "ShortcutsPerExtension" => 0, "SupportedAudioCodecs" => "[\"OPUS\",\"ALAW\",\"ULAW\",\"G722\",\"G729\",\"GSM\",\"ILBC\",\"G723\",\"G726\",\"G726AAL2\",\"EVS\",\"SPEEX\",\"SPEEX16\",\"SPEEX32\",\"SIREN7\",\"SIREN14\",\"ADPCM\",\"SILK8\",\"SILK12\",\"SILK16\",\"SILK24\",\"G729A\",\"G719\",\"SLIN\",\"SLIN12\",\"SLIN16\",\"SLIN24\",\"SLIN32\",\"SLIN44\",\"SLIN48\",\"SLIN96\",\"SLIN192\",\"LPC10\",\"AMR\",\"AMRWB\"]", "AudioCodecs" => "[\"OPUS\",\"ALAW\",\"ULAW\",\"G722\",\"G729\",\"GSM\",\"ILBC\",\"G723\",\"G726\",\"G726AAL2\"]", "SupportedVideoCodecs" => "[\"VP8\",\"H264\",\"H261\",\"H263\",\"H263P\",\"H264P\",\"H265\",\"VP9\",\"MPEG4\"]", "VideoCodecs" => "[\"VP8\",\"H263\",\"H264\",\"MPEG4\"]", "SupportedFirmwares" => "[]", "Active" => true, "ExtraSettings" => "[]")
+    array ( "UID" => "webphone", "Vendor" => "VoIP Domain", "Model" => "Web Phone", "Type" => "WEBPHONE", "SupportLevel" => "Premium", "Description" => "Web based IP phone.", "Image" => "", "VendorLink" => "https://voipdomain.io/", "ModelLink" => "", "VideoSupport" => true, "AutoProvision" => false, "BLFSupport" => false, "Accounts" => 1, "Shortcuts" => 0, "Extensions" => 0, "ShortcutsPerExtension" => 0, "SupportedAudioCodecs" => "[\"OPUS\",\"ALAW\",\"ULAW\"]", "SupportedVideoCodecs" => "[\"VP8\",\"H264\"]", "SupportedFirmwares" => "[]"),
+    array ( "UID" => "softphone", "Vendor" => "VoIP Domain", "Model" => "SIP Phone", "Type" => "SOFTPHONE", "SupportLevel" => "Basic", "Description" => "Generic SIP phone.", "Image" => "", "VendorLink" => "https://voipdomain.io/", "ModelLink" => "", "VideoSupport" => true, "AutoProvision" => false, "BLFSupport" => false, "Accounts" => 1, "Shortcuts" => 0, "Extensions" => 0, "ShortcutsPerExtension" => 0, "SupportedAudioCodecs" => "[\"OPUS\",\"ALAW\",\"ULAW\",\"G722\",\"G729\",\"GSM\",\"ILBC\",\"G723\",\"G726\",\"G726AAL2\",\"EVS\",\"SPEEX\",\"SPEEX16\",\"SPEEX32\",\"SIREN7\",\"SIREN14\",\"ADPCM\",\"SILK8\",\"SILK12\",\"SILK16\",\"SILK24\",\"G729A\",\"G719\",\"SLIN\",\"SLIN12\",\"SLIN16\",\"SLIN24\",\"SLIN32\",\"SLIN44\",\"SLIN48\",\"SLIN96\",\"SLIN192\",\"LPC10\",\"AMR\",\"AMRWB\"]", "SupportedVideoCodecs" => "[\"VP8\",\"H264\",\"H261\",\"H263\",\"H263P\",\"H264P\",\"H265\",\"VP9\",\"MPEG4\"]", "SupportedFirmwares" => "[]")
   ));
 
   /**

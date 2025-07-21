@@ -167,7 +167,11 @@ function users_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -208,7 +212,7 @@ function users_search ( $buffer, $parameters)
   /**
    * Search users
    */
-  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Name`, `Username`, `Email`, `Since` FROM `Users`" . ( ! empty ( $parameters["Filter"]) ? " WHERE `Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Username` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " ORDER BY `Name`, `Username`"))
+  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Name`, `Username`, `Email`, `Since` FROM `Users` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Username` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%')" : "") . " ORDER BY `Name`, `Username`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -414,7 +418,7 @@ function users_view ( $buffer, $parameters)
   /**
    * Search users
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Users`.*, `UserSFA`.`Key` FROM `Users` LEFT JOIN `UserSFA` ON `Users`.`ID` = `UserSFA`.`UID` AND `UserSFA`.`Status` = 'Active' WHERE `Users`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Users`.*, `UserSFA`.`Key` FROM `Users` LEFT JOIN `UserSFA` ON `Users`.`ID` = `UserSFA`.`UID` AND `UserSFA`.`Status` = 'Active' WHERE `Users`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Users`.`ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -641,7 +645,7 @@ function users_add ( $buffer, $parameters)
   /**
    * Check if user was already added
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Users` WHERE `Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Users` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -698,7 +702,7 @@ function users_add ( $buffer, $parameters)
   /**
    * Add new user record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Users` (`Name`, `Username`, `Password`, `Permissions`, `Email`, `Since`, `Salt`, `Iterations`, `Language`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "', '" . hash_pbkdf2 ( "sha256", $parameters["Password"], $parameters["Salt"], ( $_in["security"]["iterations"] != 0 ? $_in["security"]["iterations"] : 40000), 64) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Permissions"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Email"]) . "', NOW(), '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Salt"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( ( $_in["security"]["iterations"] != 0 ? $_in["security"]["iterations"] : 40000)) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Language"]) . "')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Users` (`Tenant`, `Name`, `Username`, `Password`, `Permissions`, `Email`, `Since`, `Salt`, `Iterations`, `Language`) VALUES (" . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "', '" . hash_pbkdf2 ( "sha256", $parameters["Password"], $parameters["Salt"], ( $_in["security"]["iterations"] != 0 ? $_in["security"]["iterations"] : 40000), 64) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Permissions"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Email"]) . "', NOW(), '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Salt"]) . "', " . (int) ( $_in["security"]["iterations"] != 0 ? $_in["security"]["iterations"] : 40000) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Language"]) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -911,7 +915,7 @@ function users_edit ( $buffer, $parameters)
   /**
    * Check if user was already in use
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Users` WHERE `Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "' AND `ID` != " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Users` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "' AND `ID` != " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -924,7 +928,7 @@ function users_edit ( $buffer, $parameters)
   /**
    * Check if user exist (could be removed by other user meanwhile)
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Users` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Users` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -983,7 +987,7 @@ function users_edit ( $buffer, $parameters)
   /**
    * Change user record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Users` SET `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', `Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "', `Permissions` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Permissions"])) . "', `Email` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Email"]) . "'" . ( ! empty ( $parameters["Password"]) ? ", `Password` = '" . hash_pbkdf2 ( "sha256", $parameters["Password"], $parameters["Salt"], ( $_in["security"]["iterations"] != 0 ? $_in["security"]["iterations"] : 40000), 64) . "', `Salt` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Salt"]) . "', `Iterations` = " . $_in["mysql"]["id"]->real_escape_string ( ( $_in["security"]["iterations"] != 0 ? $_in["security"]["iterations"] : 40000)) : "") . ", `Language` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Language"]) . "' WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Users` SET `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', `Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "', `Permissions` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Permissions"])) . "', `Email` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Email"]) . "'" . ( ! empty ( $parameters["Password"]) ? ", `Password` = '" . hash_pbkdf2 ( "sha256", $parameters["Password"], $parameters["Salt"], ( $_in["security"]["iterations"] != 0 ? $_in["security"]["iterations"] : 40000), 64) . "', `Salt` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Salt"]) . "', `Iterations` = " . (int) ( $_in["security"]["iterations"] != 0 ? $_in["security"]["iterations"] : 40000) : "") . ", `Language` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Language"]) . "' WHERE `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1123,7 +1127,7 @@ function users_remove ( $buffer, $parameters)
   /**
    * Check if user exists
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Users` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Users` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1145,7 +1149,7 @@ function users_remove ( $buffer, $parameters)
   /**
    * Remove user database record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Users` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Users` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1277,7 +1281,7 @@ function users_add_sfa ( $buffer, $parameters)
     /**
      * Check if user has a SFA
      */
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `UserSFA` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["ID"]) . "' AND `Status` = 'Active'"))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `UserSFA` WHERE `UID` = " . (int) $_in["session"]["Data"]["ID"] . " AND `Status` = 'Active'"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -1291,7 +1295,7 @@ function users_add_sfa ( $buffer, $parameters)
     /**
      * Remove any older SFA not active to the user
      */
-    if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `UserSFA` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["ID"]) . "' AND `Status` != 'Active'"))
+    if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `UserSFA` WHERE `UID` = " . (int) $_in["session"]["Data"]["ID"] . " AND `Status` != 'Active'"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -1305,7 +1309,7 @@ function users_add_sfa ( $buffer, $parameters)
     /**
      * Add new SFA with pending status
      */
-    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `UserSFA` (`UID`, `Key`, `Status`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["ID"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $key) . "', 'Pending')"))
+    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `UserSFA` (`UID`, `Key`, `Status`) VALUES (" . (int) $_in["session"]["Data"]["ID"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $key) . "', 'Pending')"))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -1320,7 +1324,7 @@ function users_add_sfa ( $buffer, $parameters)
   /**
    * The code was sent, validate it
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `UserSFA` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["ID"]) . "' AND `Status` = 'Pending'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `UserSFA` WHERE `UID` = " . (int) $_in["session"]["Data"]["ID"] . " AND `Status` = 'Pending'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1335,7 +1339,7 @@ function users_add_sfa ( $buffer, $parameters)
       /**
        * Promote key from Pending to Active
        */
-      if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `UserSFA` SET `Status` = 'Active' WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["ID"]) . "' AND `Key` = '" . $_in["mysql"]["id"]->real_escape_string ( $data["Key"]) . "'"))
+      if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `UserSFA` SET `Status` = 'Active' WHERE `UID` = " . (int) $_in["session"]["Data"]["ID"] . " AND `Key` = '" . $_in["mysql"]["id"]->real_escape_string ( $data["Key"]) . "'"))
       {
         header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
         exit ();
@@ -1412,7 +1416,7 @@ function users_remove_sfa ( $buffer, $parameters)
   /**
    * Check if user has a SFA
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `UserSFA` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["ID"]) . "' AND `Status` = 'Active'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `UserSFA` WHERE `UID` = " . (int) $_in["session"]["Data"]["ID"] . " AND `Status` = 'Active'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1426,7 +1430,7 @@ function users_remove_sfa ( $buffer, $parameters)
   /**
    * Remove any SFA cache to the user
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `UserSFA` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["ID"]) . "'"))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `UserSFA` WHERE `UID` = " . (int) $_in["session"]["Data"]["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1435,7 +1439,7 @@ function users_remove_sfa ( $buffer, $parameters)
   /**
    * Remove active SFA to the user
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `UserSFA` WHERE `UID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["ID"]) . "' AND `Status` = 'Active'"))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `UserSFA` WHERE `UID` = " . (int) $_in["session"]["Data"]["ID"] . " AND `Status` = 'Active'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

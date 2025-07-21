@@ -131,7 +131,7 @@ framework_add_api_call (
   "Read",
   "extensions_search",
   array (
-    "permissions" => array ( "User", "extensions_search"),
+    "permissions" => array ( "Administrator", "extensions_search"),
     "title" => __ ( "Search extensions"),
     "description" => __ ( "Search for system extensions.")
   )
@@ -175,7 +175,11 @@ function extensions_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -216,7 +220,7 @@ function extensions_search ( $buffer, $parameters)
   /**
    * Search extensions
    */
-  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Number`, `Description`, `Type` FROM `Extensions`" . ( ! empty ( $parameters["Filter"]) ? " WHERE (`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "')" : "") . ( ! empty ( $parameters["Except"]) ? ( ! empty ( $parameters["Filter"]) ? " AND" : " WHERE") . " `ID` != " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Except"]) : "") . ( ! empty ( $parameters["Type"]) ? ( ! empty ( $parameters["Filter"]) || ! empty ( $parameters["Except"]) ? " AND" : " WHERE") . " `Type` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "'" : "") . " ORDER BY `Description`, `Number`"))
+  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Number`, `Description`, `Type` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "')" : "") . ( ! empty ( $parameters["Except"]) ? " AND `ID` != " . (int) $parameters["Except"] : "") . ( ! empty ( $parameters["Type"]) ? " AND `Type` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "'" : "") . " ORDER BY `Description`, `Number`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -298,7 +302,7 @@ function extensions_fastsearch ( $buffer, $parameters)
   /**
    * Search extensions
    */
-  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Number`, `Description`, `Type` FROM `Extensions`" . ( ! empty ( $parameters["Filter"]) ? " WHERE `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "'" : "") . " ORDER BY `Number`, `Description`"))
+  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Number`, `Description`, `Type` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "')" : "") . " ORDER BY `Number`, `Description`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -373,7 +377,7 @@ framework_add_api_call (
   "Read",
   "extensions_view",
   array (
-    "permissions" => array ( "User", "extensions_view"),
+    "permissions" => array ( "Administrator", "extensions_view"),
     "title" => __ ( "View extensions"),
     "description" => __ ( "Get a system extension information."),
     "parameters" => array (
@@ -463,7 +467,7 @@ function extensions_view ( $buffer, $parameters)
   /**
    * Search extensions
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -546,7 +550,7 @@ framework_add_api_call (
   "Read",
   "extensions_inuse",
   array (
-    "permissions" => array ( "User", "extensions_inuse"),
+    "permissions" => array ( "Administrator", "extensions_inuse"),
     "title" => __ ( "Extension availability"),
     "description" => __ ( "Check if a system extension number is available."),
     "parameters" => array (
@@ -636,7 +640,7 @@ function extensions_inuse ( $buffer, $parameters)
   /**
    * Search extensions
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `Number` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Number` = " . (int) $parameters["Number"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -730,7 +734,7 @@ framework_add_api_call (
   "Read",
   "extensions_next_number",
   array (
-    "permissions" => array ( "User", "extensions_next_number"),
+    "permissions" => array ( "Administrator", "extensions_next_number"),
     "title" => __ ( "Next extension number"),
     "description" => __ ( "Find next available extension number.")
   )
@@ -812,7 +816,7 @@ function extensions_next_number ( $buffer, $parameters)
   /**
    * Get ranges for the required parameters
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Start`, `Finish` FROM `Ranges`" . ( $parameters["Range"] != 0 && $parameters["Server"] != 0 ? " WHERE `Server` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Server"]) . ( $parameters["Range"] != 0 ? " AND `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Range"]) : "") : "")))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Start`, `Finish` FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( $parameters["Range"] != 0 && $parameters["Server"] != 0 ? " AND `Server` = " . (int) $parameters["Server"] . ( $parameters["Range"] != 0 ? " AND `ID` = " . (int) $parameters["Range"] : "") : "")))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -822,7 +826,7 @@ function extensions_next_number ( $buffer, $parameters)
   {
     $ranges[$range["ID"]] = array ( "Start" => $range["Start"], "Finish" => $range["Finish"]);
   }
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Number`, `Range` FROM `Extensions` ORDER BY `Number`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Number`, `Range` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " ORDER BY `Number`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -951,7 +955,7 @@ framework_add_api_call (
   "Create",
   "extensions_add",
   array (
-    "permissions" => array ( "User", "extensions_add"),
+    "permissions" => array ( "Administrator", "extensions_add"),
     "title" => __ ( "Add extensions"),
     "description" => __ ( "Add a new system extension.")
   )
@@ -1028,7 +1032,7 @@ function extensions_add ( $buffer, $parameters)
    */
   if ( ! array_key_exists ( "Number", $data))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `Number` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Number"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Number` = " . (int) $parameters["Number"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -1116,7 +1120,7 @@ function extensions_add ( $buffer, $parameters)
   /**
    * Add new extension record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Extensions` (`Number`, `Description`, `Range`, `Type`) VALUES (" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Range"]["ID"]) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Extensions` (`Tenant`, `Number`, `Description`, `Range`, `Type`) VALUES (" . (int) $_in["session"]["Tenant"] . ", " . (int) $parameters["Number"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', " . (int) $parameters["Range"]["ID"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1179,7 +1183,7 @@ function extensions_add_abort ( $buffer, $parameters)
   /**
    * Remove new extension record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Extensions` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1257,7 +1261,7 @@ framework_add_api_call (
   array ( "Modify", "Edit"),
   "extensions_edit",
   array (
-    "permissions" => array ( "User", "extensions_edit"),
+    "permissions" => array ( "Administrator", "extensions_edit"),
     "title" => __ ( "Edit extensions"),
     "description" => __ ( "Edit a system extension.")
   )
@@ -1279,7 +1283,7 @@ function extensions_edit ( $buffer, $parameters)
   /**
    * First, we get actual extension from database to get extension type
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1333,7 +1337,7 @@ function extensions_edit ( $buffer, $parameters)
   /**
    * Get actual extension range from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ORIGINAL"]["Range"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ORIGINAL"]["Range"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1349,7 +1353,7 @@ function extensions_edit ( $buffer, $parameters)
    */
   if ( ! array_key_exists ( "Number", $data) && $parameters["ORIGINAL"]["Number"] != $parameters["Number"])
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `Number` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Number` = " . (int) $parameters["Number"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
@@ -1438,7 +1442,7 @@ function extensions_edit ( $buffer, $parameters)
   /**
    * Update extension database record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Extensions` SET `Number` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . ", `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "' WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Extensions` SET `Number` = " . (int) $parameters["Number"] . ", `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "' WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1506,7 +1510,7 @@ function extensions_edit_abort ( $buffer, $parameters)
   /**
    * Restore extension record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Extensions` SET `Number` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ORIGINAL"]["Number"]) . ", `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ORIGINAL"]["Description"]) . "' WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Extensions` SET `Number` = " . (int) $parameters["ORIGINAL"]["Number"] . ", `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ORIGINAL"]["Description"]) . "' WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1552,7 +1556,7 @@ framework_add_api_call (
   "Delete",
   "extensions_remove",
   array (
-    "permissions" => array ( "User", "extensions_remove"),
+    "permissions" => array ( "Administrator", "extensions_remove"),
     "title" => __ ( "Remove extensions"),
     "description" => __ ( "Remove a system extension.")
   )
@@ -1574,7 +1578,7 @@ function extensions_remove ( $buffer, $parameters)
   /**
    * First, we get actual extension from database to get extension type
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1675,7 +1679,7 @@ function extensions_remove ( $buffer, $parameters)
   /**
    * Remove extension database record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Extensions` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1785,7 +1789,7 @@ framework_add_api_call (
   "Read",
   "extensions_report",
   array (
-    "permissions" => array ( "User", "extensions_report"),
+    "permissions" => array ( "Administrator", "extensions_report"),
     "title" => __ ( "Extension report"),
     "description" => __ ( "Generate an extension call's usage report.", true, false),
     "parameters" => array (
@@ -1886,7 +1890,7 @@ function extensions_report ( $buffer, $parameters)
   /**
    * Get user extension information
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"])))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1900,7 +1904,7 @@ function extensions_report ( $buffer, $parameters)
   /**
    * Get call records from database
    */
-  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE ( `srcid` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . " OR `dstid` = " . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . ") AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
+  if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND (`srcid` = " . (int) $parameters["ID"] . " OR `dstid` = " . (int) $parameters["ID"] . ") AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -2141,7 +2145,11 @@ function extensions_webphone_list ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( array_key_exists ( "Fields", $parameters) && ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  {
+    $parameters["Fields"] = $parameters["function"]["DefaultFields"];
+  }
+  if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
     $data["Fields"] = __ ( "Fields contains invalid values.");
   }
@@ -2182,7 +2190,7 @@ function extensions_webphone_list ( $buffer, $parameters)
   /**
    * Search extensions
    */
-  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`ID`, `Extensions`.`Number`, `Extensions`.`Description`, `PhoneAccounts`.`Username` AS `Account`, `PhoneAccounts`.`Password`, `Profiles`.`Domain`, `Profiles`.`Language`, `Profiles`.`AreaCode`, `Profiles`.`Prefix`, `Profiles`.`TimeZone`, `Profiles`.`Offset`, `Countries`.`ISO3166-2` AS `Country`, `Servers`.`Address`, `Servers`.`Port` FROM `ExtensionPhone` LEFT JOIN `Extensions` ON `Extensions`.`ID` = `ExtensionPhone`.`Extension` LEFT JOIN `Ranges` ON `Ranges`.`ID` = `Extensions`.`Range` LEFT JOIN `PhoneAccounts` ON `PhoneAccounts`.`Extension` = `Extensions`.`ID` LEFT JOIN `Equipments` ON `Equipments`.`ID` = `PhoneAccounts`.`Equipment` LEFT JOIN `Groups` ON `Groups`.`ID` = `ExtensionPhone`.`Group` LEFT JOIN `Profiles` ON `Profiles`.`ID` = `Groups`.`Profile` LEFT JOIN `Countries` ON `Countries`.`Code` = `Profiles`.`Country` LEFT JOIN `Servers` ON `Servers`.`ID` = `Ranges`.`Server` WHERE `Equipments`.`UID` = 'webphone' AND `ExtensionPhone`.`Email` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["Email"]) . "'" . ( ! empty ( $parameters["Filter"]) ? " AND (`Extensions`.`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Extensions`.`Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "')" : "") . ( ! empty ( $parameters["Except"]) ? " AND `Extensions`.`ID` != " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Except"]) : "") . " ORDER BY `Number`, `Description`"))
+  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`ID`, `Extensions`.`Number`, `Extensions`.`Description`, `PhoneAccounts`.`Username` AS `Account`, `PhoneAccounts`.`Password`, `Profiles`.`Domain`, `Profiles`.`Language`, `Profiles`.`AreaCode`, `Profiles`.`Prefix`, `Profiles`.`TimeZone`, `Profiles`.`Offset`, `Countries`.`ISO3166-2` AS `Country`, `Servers`.`Address`, `Servers`.`Port` FROM `ExtensionPhone` LEFT JOIN `Extensions` ON `Extensions`.`ID` = `ExtensionPhone`.`Extension` LEFT JOIN `Ranges` ON `Ranges`.`ID` = `Extensions`.`Range` LEFT JOIN `PhoneAccounts` ON `PhoneAccounts`.`Extension` = `Extensions`.`ID` LEFT JOIN `Equipments` ON `Equipments`.`ID` = `PhoneAccounts`.`Equipment` LEFT JOIN `Groups` ON `Groups`.`ID` = `ExtensionPhone`.`Group` LEFT JOIN `Profiles` ON `Profiles`.`ID` = `Groups`.`Profile` LEFT JOIN `Countries` ON `Countries`.`Code` = `Profiles`.`Country` LEFT JOIN `Servers` ON `Servers`.`ID` = `Ranges`.`Server` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Equipments`.`UID` = 'webphone' AND `ExtensionPhone`.`Email` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["Email"]) . "'" . ( ! empty ( $parameters["Filter"]) ? " AND (`Extensions`.`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Extensions`.`Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "')" : "") . ( ! empty ( $parameters["Except"]) ? " AND `Extensions`.`ID` != " . (int) $parameters["Except"] : "") . " ORDER BY `Number`, `Description`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

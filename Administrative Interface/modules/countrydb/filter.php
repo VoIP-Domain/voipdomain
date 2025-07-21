@@ -59,7 +59,7 @@ function get_countries ( $buffer, $parameters)
   $where = "";
   if ( array_key_exists ( "Code", $parameters))
   {
-    $where .= " AND `Code` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["Code"]);
+    $where .= " AND `Code` = " . (int) $parameters["Code"];
   }
   if ( array_key_exists ( "Name", $parameters))
   {
@@ -75,11 +75,11 @@ function get_countries ( $buffer, $parameters)
   }
   if ( array_key_exists ( "RegionCode", $parameters))
   {
-    $where .= " AND `RegionCode` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["RegionCode"]);
+    $where .= " AND `RegionCode` = " . (int) $parameters["RegionCode"];
   }
   if ( array_key_exists ( "SubRegionCode", $parameters))
   {
-    $where .= " AND `SubRegionCode` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["SubRegionCode"]);
+    $where .= " AND `SubRegionCode` = " . (int) $parameters["SubRegionCode"];
   }
   if ( array_key_exists ( "ISO3166-2", $parameters))
   {

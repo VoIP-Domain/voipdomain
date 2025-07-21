@@ -37,22 +37,22 @@
 /**
  * Add basic framework hooks, with the relative function.
  */
-framework_add_path ( "/gateways", "gateways_search_page");
+framework_add_path ( "/gateways", "gateways_search_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "gateways_search_page", "gateways_search_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/gateways/add", "gateways_add_page");
+framework_add_path ( "/gateways/add", "gateways_add_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "gateways_add_page", "gateways_add_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/gateways/:id/clone", "gateways_clone_function");
+framework_add_path ( "/gateways/:id/clone", "gateways_clone_function", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "gateways_clone_function", "gateways_clone_function", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/gateways/:id/view", "gateways_view_page");
+framework_add_path ( "/gateways/:id/view", "gateways_view_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "gateways_view_page", "gateways_view_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/gateways/:id/edit", "gateways_edit_page");
+framework_add_path ( "/gateways/:id/edit", "gateways_edit_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "gateways_edit_page", "gateways_edit_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/gateways/:id/report", "gateways_report_page");
+framework_add_path ( "/gateways/:id/report", "gateways_report_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "gateways_report_page", "gateways_report_page", IN_HOOK_INSERT_FIRST);
 
 /**

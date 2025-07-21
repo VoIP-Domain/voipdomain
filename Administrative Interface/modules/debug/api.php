@@ -60,7 +60,7 @@ framework_add_api_call (
   "Read",
   "debug_ping",
   array (
-    "permissions" => array ( "User", "debug_ping"),
+    "permissions" => array ( "User", "Administrator", "Super-Administrator", "debug_ping"),
     "title" => __ ( "Debug ping/pong"),
     "description" => __ ( "Debug ping/pong messages.")
   )
@@ -171,7 +171,7 @@ framework_add_api_call (
   "Create",
   "debug_call_hook",
   array (
-    "permissions" => array ( "Administrator", "debug_call_hook"),
+    "permissions" => array ( "Administrator", "Super-Administrator", "debug_call_hook"),
     "title" => __ ( "Debug an internal hook"),
     "description" => __ ( "Debug an internal hook."),
     "parameters" => array (
@@ -378,7 +378,7 @@ framework_add_api_call (
   "Read",
   "debug_explain",
   array (
-    "permissions" => array ( "User", "debug_explain"),
+    "permissions" => array ( "User", "Administrator", "Super-Administrator", "debug_explain"),
     "title" => __ ( "Debug E.164 number"),
     "description" => __ ( "Debug/explain an E.164 number."),
     "parameters" => array (
@@ -507,7 +507,7 @@ framework_add_api_call (
   "Read",
   "debug_api_map",
   array (
-    "permissions" => array ( "Administrator", "debug_api_map"),
+    "permissions" => array ( "Administrator", "Super-Administrator", "debug_api_map"),
     "title" => __ ( "Generate API map"),
     "description" => __ ( "Dump all internal API structure three.")
   )
@@ -687,7 +687,7 @@ framework_add_api_call (
   "Read",
   "debug_api_export",
   array (
-    "permissions" => array ( "Administrator", "debug_api_export"),
+    "permissions" => array ( "Administrator", "Super-Administrator", "debug_api_export"),
     "title" => __ ( "Export API documentation"),
     "description" => __ ( "Generate an OpenAPI v3 API documentation JSON structure."),
     "parameters" => array (
@@ -910,6 +910,13 @@ function debug_api_export ( $buffer, $parameters)
               $permissions["SessionCookie"] = array ();
             }
             $permissions["SessionCookie"][] = __ ( "Administrator");
+            break;
+          case "Super-Administrator":
+            if ( ! array_key_exists ( "AdministrativeSessionCookie", $permissions))
+            {
+              $permissions["AdministrativeSessionCookie"] = array ();
+            }
+            $permissions["AdministrativeSessionCookie"][] = __ ( "Super-Administrator");
             break;
           case "Server":
             $paths[$newpath][$method]["security"][] = array ( "ServerAuthID" => array (), "ServerAuthPass" => array ());
@@ -1141,6 +1148,7 @@ function debug_api_export ( $buffer, $parameters)
     $data["components"]["securitySchemes"]["ApiKeyGET"] = array ( "type" => "apiKey", "name" => "token", "in" => "query");
     $data["components"]["securitySchemes"]["UserAuthToken"] = array ( "type" => "apiKey", "name" => $_in["general"]["cookie"] . "_authtoken", "in" => "cookie");
     $data["components"]["securitySchemes"]["SessionCookie"] = array ( "type" => "apiKey", "name" => $_in["general"]["cookie"], "in" => "cookie");
+    $data["components"]["securitySchemes"]["AdministrativeSessionCookie"] = array ( "type" => "apiKey", "name" => $_in["general"]["cookie"] . "_adm", "in" => "cookie");
     $data["components"]["securitySchemes"]["ServerAuthID"] = array ( "type" => "apiKey", "name" => "X-" . strtoupper ( $_in["general"]["cookie"]) . "-SID", "in" => "header");
     $data["components"]["securitySchemes"]["ServerAuthPass"] = array ( "type" => "apiKey", "name" => "X-" . strtoupper ( $_in["general"]["cookie"]) . "-SPWD", "in" => "header");
     $data["components"]["responses"] = array ();

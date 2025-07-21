@@ -118,6 +118,7 @@ function equipments_search_page ( $buffer, $parameters)
 /**
  * Function to generate the equipment view page code.
  *
+ * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
@@ -125,6 +126,8 @@ function equipments_search_page ( $buffer, $parameters)
  */
 function equipments_view_page ( $buffer, $parameters)
 {
+  global $_in;
+
   /**
    * Set page title
    */
@@ -149,7 +152,10 @@ function equipments_view_page ( $buffer, $parameters)
   /**
    * First, we call sub equipment view hook's to populate tabs
    */
-  $subpages = filters_call ( "equipments_view_subpages", array (), array ( "tabs" => array (), "js" => array ( "init" => array (), "onshow" => array ()), "html" => ""));
+  if ( ! in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
+  {
+    $subpages = filters_call ( "equipments_view_subpages", array (), array ( "tabs" => array (), "js" => array ( "init" => array (), "onshow" => array ()), "html" => ""));
+  }
 
   /**
    * Create page code
@@ -162,11 +168,17 @@ function equipments_view_page ( $buffer, $parameters)
   $output .= "    <li role=\"presentation\" class=\"active\" data-type=\"\"><a class=\"nav-tablink\" href=\"#equipment_view_tab_basic\">" . __ ( "Basic") . "</a></li>\n";
   $output .= "    <li role=\"presentation\" data-type=\"\"><a class=\"nav-tablink\" href=\"#equipment_view_tab_audio_codecs\">" . __ ( "Audio codecs") . "</a></li>\n";
   $output .= "    <li role=\"presentation\" data-type=\"\"><a class=\"nav-tablink\" href=\"#equipment_view_tab_video_codecs\">" . __ ( "Video codecs") . "</a></li>\n";
-  foreach ( $subpages["tabs"] as $tab => $tabinfo)
+  if ( ! in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
   {
-    $output .= "    <li role=\"presentation\" style=\"display: none\" data-type=\"" . $tabinfo["type"] . "\"><a class=\"nav-tablink\" href=\"#equipment_view_tab_" . $tab . "\">" . $tabinfo["label"] . "</a></li>\n";
+    foreach ( $subpages["tabs"] as $tab => $tabinfo)
+    {
+      $output .= "    <li role=\"presentation\" style=\"display: none\" data-type=\"" . $tabinfo["type"] . "\"><a class=\"nav-tablink\" href=\"#equipment_view_tab_" . $tab . "\">" . $tabinfo["label"] . "</a></li>\n";
+    }
   }
-  $output .= "    <li role=\"presentation\" data-type=\"\"><a class=\"nav-tablink\" href=\"#equipment_view_tab_firmwares\">" . __ ( "Firmwares") . "</a></li>\n";
+  if ( in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
+  {
+    $output .= "    <li role=\"presentation\" data-type=\"\"><a class=\"nav-tablink\" href=\"#equipment_view_tab_firmwares\">" . __ ( "Firmwares") . "</a></li>\n";
+  }
   $output .= "    <li role=\"presentation\" data-type=\"\"><a class=\"nav-tablink\" href=\"#equipment_view_tab_about\">" . __ ( "About") . "</a></li>\n";
   $output .= "  </ul>\n";
   $output .= "  <div class=\"tab-content\"><br />\n";
@@ -309,36 +321,59 @@ function equipments_view_page ( $buffer, $parameters)
   // Add equipment audio codecs selector
   $output .= "      <div class=\"form-group\">\n";
   $output .= "        <label for=\"equipment_view_audio_codecs\" class=\"control-label col-xs-2\">" . __ ( "Audio codecs") . "</label>\n";
-  $output .= "        <div class=\"col-xs-10 multiselect\">\n";
-  $output .= "          <div class=\"col-sm-5\">\n";
-  $output .= "            <select name=\"AvailableAudioCodecs\" id=\"equipment_view_audio_codecs\" class=\"form-control\" multiple=\"multiple\" disabled=\"disabled\">\n";
-  foreach ( get_defined_constants () as $key => $val)
+  if ( ! in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
   {
-    $codecs = array ();
-    if ( substr ( $key, 0, 15) == "VD_AUDIO_CODEC_")
+    $output .= "        <div class=\"col-xs-10 multiselect\">\n";
+    $output .= "          <div class=\"col-sm-5\">\n";
+    $output .= "            <select name=\"AvailableAudioCodecs\" id=\"equipment_view_audio_codecs\" class=\"form-control\" multiple=\"multiple\" disabled=\"disabled\">\n";
+    foreach ( get_defined_constants () as $key => $val)
     {
-      $codecs[substr ( $key, 15)] = $val;
+      $codecs = array ();
+      if ( substr ( $key, 0, 15) == "VD_AUDIO_CODEC_")
+      {
+        $codecs[substr ( $key, 15)] = $val;
+      }
+      asort ( $codecs);
+      foreach ( $codecs as $key => $val)
+      {
+        $output .= "              <option value=\"" . addslashes ( strip_tags ( $key)) . "\">" . addslashes ( strip_tags ( __ ( $val))) . "</option>\n";
+      }
     }
-    asort ( $codecs);
-    foreach ( $codecs as $key => $val)
-    {
-      $output .= "              <option value=\"" . addslashes ( strip_tags ( $key)) . "\">" . addslashes ( strip_tags ( __ ( $val))) . "</option>\n";
-    }
+    $output .= "            </select>\n";
+    $output .= "          </div>\n";
+    $output .= "          <div class=\"col-sm-2\">\n";
+    $output .= "            <button type=\"button\" id=\"equipment_view_audio_codecs_rightAll\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Enable all codecs") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-double-right\"></i></button>\n";
+    $output .= "            <button type=\"button\" id=\"equipment_view_audio_codecs_rightSelected\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Enable selected codec(s)") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-right\"></i></button>\n";
+    $output .= "            <button type=\"button\" id=\"equipment_view_audio_codecs_leftSelected\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Disable selected codec(s)") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-left\"></i></button>\n";
+    $output .= "            <button type=\"button\" id=\"equipment_view_audio_codecs_leftAll\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Disable all codecs") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-double-left\"></i></button>\n";
+    $output .= "            <button type=\"button\" id=\"equipment_view_audio_codecs_move_up\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Move codec up") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-up\"></i></button>\n";
+    $output .= "            <button type=\"button\" id=\"equipment_view_audio_codecs_move_down\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Move codec down") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-down\"></i></button>\n";
+    $output .= "          </div>\n";
+    $output .= "          <div class=\"col-sm-5\">\n";
+    $output .= "            <select name=\"AudioCodecs\" id=\"equipment_view_audio_codecs_to\" class=\"form-control\" multiple=\"multiple\" disabled=\"disabled\"></select>\n";
+    $output .= "          </div>\n";
+    $output .= "        </div>\n";
   }
-  $output .= "            </select>\n";
-  $output .= "          </div>\n";
-  $output .= "          <div class=\"col-sm-2\">\n";
-  $output .= "            <button type=\"button\" id=\"equipment_view_audio_codecs_rightAll\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Enable all codecs") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-double-right\"></i></button>\n";
-  $output .= "            <button type=\"button\" id=\"equipment_view_audio_codecs_rightSelected\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Enable selected codec(s)") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-right\"></i></button>\n";
-  $output .= "            <button type=\"button\" id=\"equipment_view_audio_codecs_leftSelected\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Disable selected codec(s)") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-left\"></i></button>\n";
-  $output .= "            <button type=\"button\" id=\"equipment_view_audio_codecs_leftAll\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Disable all codecs") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-double-left\"></i></button>\n";
-  $output .= "            <button type=\"button\" id=\"equipment_view_audio_codecs_move_up\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Move codec up") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-up\"></i></button>\n";
-  $output .= "            <button type=\"button\" id=\"equipment_view_audio_codecs_move_down\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Move codec down") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-down\"></i></button>\n";
-  $output .= "          </div>\n";
-  $output .= "          <div class=\"col-sm-5\">\n";
-  $output .= "            <select name=\"AudioCodecs\" id=\"equipment_view_audio_codecs_to\" class=\"form-control\" multiple=\"multiple\" disabled=\"disabled\"></select>\n";
-  $output .= "          </div>\n";
-  $output .= "        </div>\n";
+  if ( in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
+  {
+    $output .= "        <div class=\"col-xs-10\">\n";
+    $output .= "          <select name=\"AvailableAudioCodecs\" id=\"equipment_view_audio_codecs\" class=\"form-control\" multiple=\"multiple\" disabled=\"disabled\">\n";
+    foreach ( get_defined_constants () as $key => $val)
+    {
+      $codecs = array ();
+      if ( substr ( $key, 0, 15) == "VD_AUDIO_CODEC_")
+      {
+        $codecs[substr ( $key, 15)] = $val;
+      }
+      asort ( $codecs);
+      foreach ( $codecs as $key => $val)
+      {
+        $output .= "            <option value=\"" . addslashes ( strip_tags ( $key)) . "\">" . addslashes ( strip_tags ( __ ( $val))) . "</option>\n";
+      }
+    }
+    $output .= "          </select>\n";
+    $output .= "        </div>\n";
+  }
   $output .= "      </div>\n";
   $output .= "    </div>\n";
 
@@ -348,63 +383,92 @@ function equipments_view_page ( $buffer, $parameters)
   // Add equipment video codecs selector
   $output .= "      <div class=\"form-group\">\n";
   $output .= "        <label for=\"equipment_view_video_codecs\" class=\"control-label col-xs-2\">" . __ ( "Video codecs") . "</label>\n";
-  $output .= "        <div class=\"col-xs-10 multiselect\">\n";
-  $output .= "          <div class=\"col-sm-5\">\n";
-  $output .= "            <select name=\"AvailableVideoCodecs\" id=\"equipment_view_video_codecs\" class=\"form-control\" multiple=\"multiple\" disabled=\"disabled\">\n";
-  foreach ( get_defined_constants () as $key => $val)
+  if ( ! in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
   {
-    $codecs = array ();
-    if ( substr ( $key, 0, 15) == "VD_VIDEO_CODEC_")
+    $output .= "        <div class=\"col-xs-10 multiselect\">\n";
+    $output .= "          <div class=\"col-sm-5\">\n";
+    $output .= "            <select name=\"AvailableVideoCodecs\" id=\"equipment_view_video_codecs\" class=\"form-control\" multiple=\"multiple\" disabled=\"disabled\">\n";
+    foreach ( get_defined_constants () as $key => $val)
     {
-      $codecs[substr ( $key, 15)] = $val;
+      $codecs = array ();
+      if ( substr ( $key, 0, 15) == "VD_VIDEO_CODEC_")
+      {
+        $codecs[substr ( $key, 15)] = $val;
+      }
+      asort ( $codecs);
+      foreach ( $codecs as $key => $val)
+      {
+        $output .= "              <option value=\"" . addslashes ( strip_tags ( $key)) . "\">" . addslashes ( strip_tags ( __ ( $val))) . "</option>\n";
+      }
     }
-    asort ( $codecs);
-    foreach ( $codecs as $key => $val)
-    {
-      $output .= "              <option value=\"" . addslashes ( strip_tags ( $key)) . "\">" . addslashes ( strip_tags ( __ ( $val))) . "</option>\n";
-    }
+    $output .= "            </select>\n";
+    $output .= "          </div>\n";
+    $output .= "          <div class=\"col-sm-2\">\n";
+    $output .= "            <button type=\"button\" id=\"equipment_view_video_codecs_rightAll\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Enable all codecs") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-double-right\"></i></button>\n";
+    $output .= "            <button type=\"button\" id=\"equipment_view_video_codecs_rightSelected\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Enable selected codec(s)") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-right\"></i></button>\n";
+    $output .= "            <button type=\"button\" id=\"equipment_view_video_codecs_leftSelected\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Disable selected codec(s)") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-left\"></i></button>\n";
+    $output .= "            <button type=\"button\" id=\"equipment_view_video_codecs_leftAll\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Disable all codecs") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-double-left\"></i></button>\n";
+    $output .= "            <button type=\"button\" id=\"equipment_view_video_codecs_move_up\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Move codec up") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-up\"></i></button>\n";
+    $output .= "            <button type=\"button\" id=\"equipment_view_video_codecs_move_down\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Move codec down") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-down\"></i></button>\n";
+    $output .= "          </div>\n";
+    $output .= "          <div class=\"col-sm-5\">\n";
+    $output .= "            <select name=\"VideoCodecs\" id=\"equipment_view_video_codecs_to\" class=\"form-control\" multiple=\"multiple\" disabled=\"disabled\"></select>\n";
+    $output .= "          </div>\n";
+    $output .= "        </div>\n";
   }
-  $output .= "            </select>\n";
-  $output .= "          </div>\n";
-  $output .= "          <div class=\"col-sm-2\">\n";
-  $output .= "            <button type=\"button\" id=\"equipment_view_video_codecs_rightAll\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Enable all codecs") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-double-right\"></i></button>\n";
-  $output .= "            <button type=\"button\" id=\"equipment_view_video_codecs_rightSelected\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Enable selected codec(s)") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-right\"></i></button>\n";
-  $output .= "            <button type=\"button\" id=\"equipment_view_video_codecs_leftSelected\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Disable selected codec(s)") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-left\"></i></button>\n";
-  $output .= "            <button type=\"button\" id=\"equipment_view_video_codecs_leftAll\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Disable all codecs") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-double-left\"></i></button>\n";
-  $output .= "            <button type=\"button\" id=\"equipment_view_video_codecs_move_up\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Move codec up") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-up\"></i></button>\n";
-  $output .= "            <button type=\"button\" id=\"equipment_view_video_codecs_move_down\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Move codec down") . "\" disabled=\"disabled\"><i class=\"fa fa-angle-down\"></i></button>\n";
-  $output .= "          </div>\n";
-  $output .= "          <div class=\"col-sm-5\">\n";
-  $output .= "            <select name=\"VideoCodecs\" id=\"equipment_view_video_codecs_to\" class=\"form-control\" multiple=\"multiple\" disabled=\"disabled\"></select>\n";
-  $output .= "          </div>\n";
-  $output .= "        </div>\n";
+  if ( in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
+  {
+    $output .= "        <div class=\"col-xs-10\">\n";
+    $output .= "          <select name=\"AvailableVideoCodecs\" id=\"equipment_view_video_codecs\" class=\"form-control\" multiple=\"multiple\" disabled=\"disabled\">\n";
+    foreach ( get_defined_constants () as $key => $val)
+    {
+      $codecs = array ();
+      if ( substr ( $key, 0, 15) == "VD_VIDEO_CODEC_")
+      {
+        $codecs[substr ( $key, 15)] = $val;
+      }
+      asort ( $codecs);
+      foreach ( $codecs as $key => $val)
+      {
+        $output .= "            <option value=\"" . addslashes ( strip_tags ( $key)) . "\">" . addslashes ( strip_tags ( __ ( $val))) . "</option>\n";
+      }
+    }
+    $output .= "          </select>\n";
+    $output .= "        </div>\n";
+  }
   $output .= "      </div>\n";
   $output .= "    </div>\n";
 
   // Add equipment models tabs
-  foreach ( $subpages["tabs"] as $tab => $tabinfo)
+  if ( ! in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
   {
-    $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in\" id=\"equipment_view_tab_" . $tab . "\">\n";
-    $output .= $tabinfo["html"];
-    $output .= "    </div>\n";
+    foreach ( $subpages["tabs"] as $tab => $tabinfo)
+    {
+      $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in\" id=\"equipment_view_tab_" . $tab . "\">\n";
+      $output .= $tabinfo["html"];
+      $output .= "    </div>\n";
+    }
   }
 
   // Firmwares panel
-  $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in\" id=\"equipment_view_tab_firmwares\">\n";
+  if ( in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
+  {
+    $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in\" id=\"equipment_view_tab_firmwares\">\n";
 
-  // Add firmware template
-  $output .= "      <div class=\"form-group form-firmware firmware-_VERSION_ hidden\">\n";
-  $output .= "        <label class=\"control-label col-xs-2\">" . __ ( "Firmware") . " _VERSION_</label>\n";
-  $output .= "        <div class=\"col-xs-10 inputGroupContainer\">\n";
-  $output .= "          <div class=\"input-group form-firmware-file hidden\">\n";
-  $output .= "            <input type=\"text\" name=\"Firmware_Filename__X_\" class=\"form-control\" id=\"equipment_view_firmware__X__filename\" placeholder=\"" . __ ( "Firmware filename") . "\" disabled=\"disabled\" />\n";
-  $output .= "            <input type=\"text\" name=\"Firmware_SHA256__X_\" class=\"form-control\" id=\"equipment_view_firmware__X__sha256\" placeholder=\"" . __ ( "File content SHA256 hash") . "\" disabled=\"disabled\" />\n";
-  $output .= "            <input type=\"text\" name=\"Firmware_Size__X_\" class=\"form-control\" id=\"equipment_view_firmware__X__size\" placeholder=\"" . __ ( "File size") . "\" disabled=\"disabled\" />\n";
-  $output .= "            <span class=\"input-group-addon input-icon-button btn btn-_CLASS_\" data-toggle=\"tooltip\" data-placement=\"left\" title=\"_TITLE_\" disabled=\"disabled\"><i class=\"fa fa-_ICON_\"></i></span>\n";
-  $output .= "          </div>\n";
-  $output .= "        </div>\n";
-  $output .= "      </div>\n";
-  $output .= "    </div>\n";
+    // Add firmware template
+    $output .= "      <div class=\"form-group form-firmware firmware-_VERSION_ hidden\">\n";
+    $output .= "        <label class=\"control-label col-xs-2\">" . __ ( "Firmware") . " _VERSION_</label>\n";
+    $output .= "        <div class=\"col-xs-10 inputGroupContainer\">\n";
+    $output .= "          <div class=\"input-group form-firmware-file hidden\">\n";
+    $output .= "            <input type=\"text\" name=\"Firmware_Filename__X_\" class=\"form-control\" id=\"equipment_view_firmware__X__filename\" placeholder=\"" . __ ( "Firmware filename") . "\" disabled=\"disabled\" />\n";
+    $output .= "            <input type=\"text\" name=\"Firmware_SHA256__X_\" class=\"form-control\" id=\"equipment_view_firmware__X__sha256\" placeholder=\"" . __ ( "File content SHA256 hash") . "\" disabled=\"disabled\" />\n";
+    $output .= "            <input type=\"text\" name=\"Firmware_Size__X_\" class=\"form-control\" id=\"equipment_view_firmware__X__size\" placeholder=\"" . __ ( "File size") . "\" disabled=\"disabled\" />\n";
+    $output .= "            <span class=\"input-group-addon input-icon-button btn btn-_CLASS_\" data-toggle=\"tooltip\" data-placement=\"left\" title=\"_TITLE_\" disabled=\"disabled\"><i class=\"fa fa-_ICON_\"></i></span>\n";
+    $output .= "          </div>\n";
+    $output .= "        </div>\n";
+    $output .= "      </div>\n";
+    $output .= "    </div>\n";
+  }
 
   // About equipment panel
   $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in\" id=\"equipment_view_tab_about\">\n";
@@ -459,23 +523,29 @@ function equipments_view_page ( $buffer, $parameters)
   /**
    * Add other subpages html code
    */
-  $output .= $subpages["html"];
+  if ( ! in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
+  {
+    $output .= $subpages["html"];
+  }
 
   /**
    * Prepare onshow JavaScript code
    */
-  $onshow = "";
-  if ( sizeof ( $subpages["js"]["onshow"]) != 0)
+  if ( ! in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
   {
-    $onshow .= "  switch ( data.UID)\n";
-    $onshow .= "  {\n";
-    foreach ( $subpages["js"]["onshow"] as $type => $js)
+    $onshow = "";
+    if ( sizeof ( $subpages["js"]["onshow"]) != 0)
     {
-      $onshow .= "    case '" . $type . "':\n";
-      $onshow .= $js;
-      $onshow .= "      break;\n";
+      $onshow .= "  switch ( data.UID)\n";
+      $onshow .= "  {\n";
+      foreach ( $subpages["js"]["onshow"] as $type => $js)
+      {
+        $onshow .= "    case '" . $type . "':\n";
+        $onshow .= $js;
+        $onshow .= "      break;\n";
+      }
+      $onshow .= "  }\n";
     }
-    $onshow .= "  }\n";
   }
 
   /**
@@ -508,13 +578,6 @@ function equipments_view_page ( $buffer, $parameters)
               "      $(this).remove ();\n" .
               "    }\n" .
               "  });\n" .
-              "  for ( var index = data.AudioCodecs.length - 1; index >= 0; index--)\n" .
-              "  {\n" .
-              "    if ( $('#equipment_view_audio_codecs').find ( 'option[value=\"' + data.AudioCodecs[index] + '\"]').length == 1)\n" .
-              "    {\n" .
-              "      $('#equipment_view_audio_codecs').find ( 'option[value=\"' + data.AudioCodecs[index] + '\"]').detach ().prependTo ( $('#equipment_view_audio_codecs_to'));\n" .
-              "    }\n" .
-              "  }\n" .
               "  if ( ! data.VideoSupport)\n" .
               "  {\n" .
               "    $('a[href=\"#equipment_view_tab_video_codecs\"]').parent ().addClass ( 'disabled');\n" .
@@ -526,33 +589,46 @@ function equipments_view_page ( $buffer, $parameters)
               "        $(this).remove ();\n" .
               "      }\n" .
               "    });\n" .
-              "    for ( var index = data.VideoCodecs.length - 1; index >= 0; index--)\n" .
-              "    {\n" .
-              "      if ( $('#equipment_view_video_codecs').find ( 'option[value=\"' + data.VideoCodecs[index] + '\"]').length == 1)\n" .
-              "      {\n" .
-              "        $('#equipment_view_video_codecs').find ( 'option[value=\"' + data.VideoCodecs[index] + '\"]').detach ().prependTo ( $('#equipment_view_video_codecs_to'));\n" .
-              "      }\n" .
-              "    }\n" .
               "  }\n" .
-              "  if ( ! data.AutoProvision)\n" .
-              "  {\n" .
-              "    $('a[href=\"#equipment_view_tab_firmwares\"]').parent ().addClass ( 'disabled');\n" .
-              "  } else {\n" .
-              "    var id = 0;\n" .
-              "    for ( var index = data.SupportedFirmwares.length - 1; index >= 0; index--)\n" .
-              "    {\n" .
-              "      var formclass = 'firmware-' + data.SupportedFirmwares[index].Version.replace ( /\./g, '_').replace ( /[^a-zA-Z0-9_]/g, '');\n" .
-              "      $('<div class=\"form-group form-firmware ' + formclass + '\">' + $('#equipment_view_tab_firmwares div.form-firmware.hidden').html ().replace ( /_VERSION_/g, data.SupportedFirmwares[index].Version) + '</div>').insertAfter ( $('#equipment_view_tab_firmwares div.form-firmware.hidden')).removeClass ( 'hidden');\n" .
-              "      for ( var fileindex = data.SupportedFirmwares[index].Files.length - 1; fileindex >= 0; fileindex--)\n" .
-              "      {\n" .
-              "        $('<div class=\"input-group form-firmware-file form-firmware-file-' + id + '\">' + $('#equipment_view_tab_firmwares div.' + formclass + ' div.form-firmware-file.hidden').html ().replace ( /_X_/g, id).replace ( /_TITLE_/g, data.SupportedFirmwares[index].Files[fileindex].Available ? '" . __ ( "Available") . "' : '" . __ ( "Unavailable") . "').replace ( /_ICON_/g, data.SupportedFirmwares[index].Files[fileindex].Available ? 'check' : 'times').replace ( /_CLASS_/g, data.SupportedFirmwares[index].Files[fileindex].Available ? 'success' : 'danger') + '</div>').insertAfter ( $('#equipment_view_tab_firmwares div.' + formclass + ' div.form-firmware-file.hidden')).removeClass ( 'hidden').tooltip ( { container: 'body'});\n" .
-              "        $('#equipment_view_firmware_' + id + '_filename').val ( data.SupportedFirmwares[index].Files[fileindex].Filename);\n" .
-              "        $('#equipment_view_firmware_' + id + '_sha256').val ( data.SupportedFirmwares[index].Files[fileindex].SHA256);\n" .
-              "        $('#equipment_view_firmware_' + id + '_size').val ( data.SupportedFirmwares[index].Files[fileindex].Size);\n" .
-              "        id++;\n" .
-              "      }\n" .
-              "    }\n" .
-              "  }\n" .
+              ( in_array ( "Super-Administrator", $_in["session"]["Permissions"]) ?
+                "  if ( ! data.AutoProvision)\n" .
+                "  {\n" .
+                "    $('a[href=\"#equipment_view_tab_firmwares\"]').parent ().addClass ( 'disabled');\n" .
+                "  } else {\n" .
+                "    var id = 0;\n" .
+                "    for ( var index = data.SupportedFirmwares.length - 1; index >= 0; index--)\n" .
+                "    {\n" .
+                "      var formclass = 'firmware-' + data.SupportedFirmwares[index].Version.replace ( /\./g, '_').replace ( /[^a-zA-Z0-9_]/g, '');\n" .
+                "      $('<div class=\"form-group form-firmware ' + formclass + '\">' + $('#equipment_view_tab_firmwares div.form-firmware.hidden').html ().replace ( /_VERSION_/g, data.SupportedFirmwares[index].Version) + '</div>').insertAfter ( $('#equipment_view_tab_firmwares div.form-firmware.hidden')).removeClass ( 'hidden');\n" .
+                "      for ( var fileindex = data.SupportedFirmwares[index].Files.length - 1; fileindex >= 0; fileindex--)\n" .
+                "      {\n" .
+                "        $('<div class=\"input-group form-firmware-file form-firmware-file-' + id + '\">' + $('#equipment_view_tab_firmwares div.' + formclass + ' div.form-firmware-file.hidden').html ().replace ( /_X_/g, id).replace ( /_TITLE_/g, data.SupportedFirmwares[index].Files[fileindex].Available ? '" . __ ( "Available") . "' : '" . __ ( "Unavailable") . "').replace ( /_ICON_/g, data.SupportedFirmwares[index].Files[fileindex].Available ? 'check' : 'times').replace ( /_CLASS_/g, data.SupportedFirmwares[index].Files[fileindex].Available ? 'success' : 'danger') + '</div>').insertAfter ( $('#equipment_view_tab_firmwares div.' + formclass + ' div.form-firmware-file.hidden')).removeClass ( 'hidden').tooltip ( { container: 'body'});\n" .
+                "        $('#equipment_view_firmware_' + id + '_filename').val ( data.SupportedFirmwares[index].Files[fileindex].Filename);\n" .
+                "        $('#equipment_view_firmware_' + id + '_sha256').val ( data.SupportedFirmwares[index].Files[fileindex].SHA256);\n" .
+                "        $('#equipment_view_firmware_' + id + '_size').val ( data.SupportedFirmwares[index].Files[fileindex].Size);\n" .
+                "        id++;\n" .
+                "      }\n" .
+                "    }\n" .
+                "  }\n"
+                :
+                "  for ( var index = data.AudioCodecs.length - 1; index >= 0; index--)\n" .
+                "  {\n" .
+                "    if ( $('#equipment_view_audio_codecs').find ( 'option[value=\"' + data.AudioCodecs[index] + '\"]').length == 1)\n" .
+                "    {\n" .
+                "      $('#equipment_view_audio_codecs').find ( 'option[value=\"' + data.AudioCodecs[index] + '\"]').detach ().prependTo ( $('#equipment_view_audio_codecs_to'));\n" .
+                "    }\n" .
+                "  }\n" .
+                "  if ( data.VideoSupport)\n" .
+                "  {\n" .
+                "    for ( var index = data.VideoCodecs.length - 1; index >= 0; index--)\n" .
+                "    {\n" .
+                "      if ( $('#equipment_view_video_codecs').find ( 'option[value=\"' + data.VideoCodecs[index] + '\"]').length == 1)\n" .
+                "      {\n" .
+                "        $('#equipment_view_video_codecs').find ( 'option[value=\"' + data.VideoCodecs[index] + '\"]').detach ().prependTo ( $('#equipment_view_video_codecs_to'));\n" .
+                "      }\n" .
+                "    }\n" .
+                "  }\n"
+              ) .
               "  if ( data.Image != '')\n" .
               "  {\n" .
               "    $('#equipment_view_image').attr ( 'src', '/modules/equipments/images/' + data.Image);\n" .
@@ -594,9 +670,12 @@ function equipments_view_page ( $buffer, $parameters)
   /**
    * Add subpages view form JavaScript code
    */
-  foreach ( $subpages["js"]["init"] as $js)
+  if ( ! in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
   {
-    sys_addjs ( $js);
+    foreach ( $subpages["js"]["init"] as $js)
+    {
+      sys_addjs ( $js);
+    }
   }
 
   return $output;
@@ -604,7 +683,7 @@ function equipments_view_page ( $buffer, $parameters)
 
 /**
  * Function to generate the equipment configuration page code.
- *
+ * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
@@ -612,6 +691,8 @@ function equipments_view_page ( $buffer, $parameters)
  */
 function equipments_configure_page ( $buffer, $parameters)
 {
+  global $_in;
+
   /**
    * Set page title
    */
@@ -636,7 +717,10 @@ function equipments_configure_page ( $buffer, $parameters)
   /**
    * First, we call sub equipment configure hook's to populate tabs
    */
-  $subpages = filters_call ( "equipments_configure_subpages", array (), array ( "tabs" => array (), "js" => array ( "init" => array (), "onshow" => array ()), "html" => ""));
+  if ( ! in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
+  {
+    $subpages = filters_call ( "equipments_configure_subpages", array (), array ( "tabs" => array (), "js" => array ( "init" => array (), "onshow" => array ()), "html" => ""));
+  }
 
   /**
    * Create page code
@@ -649,11 +733,17 @@ function equipments_configure_page ( $buffer, $parameters)
   $output .= "    <li role=\"presentation\" class=\"active\" data-type=\"\"><a class=\"nav-tablink\" href=\"#equipment_configure_tab_basic\">" . __ ( "Basic") . "</a></li>\n";
   $output .= "    <li role=\"presentation\" data-type=\"\"><a class=\"nav-tablink\" href=\"#equipment_configure_tab_audio_codecs\">" . __ ( "Audio codecs") . "</a></li>\n";
   $output .= "    <li role=\"presentation\" data-type=\"\"><a class=\"nav-tablink\" href=\"#equipment_configure_tab_video_codecs\">" . __ ( "Video codecs") . "</a></li>\n";
-  foreach ( $subpages["tabs"] as $tab => $tabinfo)
+  if ( ! in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
   {
-    $output .= "    <li role=\"presentation\" style=\"display: none\" data-type=\"" . $tabinfo["type"] . "\"><a class=\"nav-tablink\" href=\"#equipment_configure_tab_" . $tab . "\">" . $tabinfo["label"] . "</a></li>\n";
+    foreach ( $subpages["tabs"] as $tab => $tabinfo)
+    {
+      $output .= "    <li role=\"presentation\" style=\"display: none\" data-type=\"" . $tabinfo["type"] . "\"><a class=\"nav-tablink\" href=\"#equipment_configure_tab_" . $tab . "\">" . $tabinfo["label"] . "</a></li>\n";
+    }
   }
-  $output .= "    <li role=\"presentation\" data-type=\"\"><a class=\"nav-tablink\" href=\"#equipment_configure_tab_firmwares\">" . __ ( "Firmwares") . "</a></li>\n";
+  if ( in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
+  {
+    $output .= "    <li role=\"presentation\" data-type=\"\"><a class=\"nav-tablink\" href=\"#equipment_configure_tab_firmwares\">" . __ ( "Firmwares") . "</a></li>\n";
+  }
   $output .= "    <li role=\"presentation\" data-type=\"\"><a class=\"nav-tablink\" href=\"#equipment_configure_tab_about\">" . __ ( "About") . "</a></li>\n";
   $output .= "  </ul>\n";
   $output .= "  <div class=\"tab-content\"><br />\n";
@@ -787,36 +877,59 @@ function equipments_configure_page ( $buffer, $parameters)
   // Add equipment audio codecs selector
   $output .= "      <div class=\"form-group\">\n";
   $output .= "        <label for=\"equipment_configure_audio_codecs\" class=\"control-label col-xs-2\">" . __ ( "Audio codecs") . "</label>\n";
-  $output .= "        <div class=\"col-xs-10 multiselect\">\n";
-  $output .= "          <div class=\"col-sm-5\">\n";
-  $output .= "            <select name=\"AvailableAudioCodecs\" id=\"equipment_configure_audio_codecs\" class=\"form-control\" multiple=\"multiple\">\n";
-  foreach ( get_defined_constants () as $key => $val)
+  if ( ! in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
   {
-    $codecs = array ();
-    if ( substr ( $key, 0, 15) == "VD_AUDIO_CODEC_")
+    $output .= "        <div class=\"col-xs-10 multiselect\">\n";
+    $output .= "          <div class=\"col-sm-5\">\n";
+    $output .= "            <select name=\"AvailableAudioCodecs\" id=\"equipment_configure_audio_codecs\" class=\"form-control\" multiple=\"multiple\">\n";
+    foreach ( get_defined_constants () as $key => $val)
     {
-      $codecs[substr ( $key, 15)] = $val;
+      $codecs = array ();
+      if ( substr ( $key, 0, 15) == "VD_AUDIO_CODEC_")
+      {
+        $codecs[substr ( $key, 15)] = $val;
+      }
+      asort ( $codecs);
+      foreach ( $codecs as $key => $val)
+      {
+        $output .= "              <option value=\"" . addslashes ( strip_tags ( $key)) . "\">" . addslashes ( strip_tags ( __ ( $val))) . "</option>\n";
+      }
     }
-    asort ( $codecs);
-    foreach ( $codecs as $key => $val)
-    {
-      $output .= "              <option value=\"" . addslashes ( strip_tags ( $key)) . "\">" . addslashes ( strip_tags ( __ ( $val))) . "</option>\n";
-    }
+    $output .= "            </select>\n";
+    $output .= "          </div>\n";
+    $output .= "          <div class=\"col-sm-2\">\n";
+    $output .= "            <button type=\"button\" id=\"equipment_configure_audio_codecs_rightAll\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Enable all codecs") . "\"><i class=\"fa fa-angle-double-right\"></i></button>\n";
+    $output .= "            <button type=\"button\" id=\"equipment_configure_audio_codecs_rightSelected\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Enable selected codec(s)") . "\"><i class=\"fa fa-angle-right\"></i></button>\n";
+    $output .= "            <button type=\"button\" id=\"equipment_configure_audio_codecs_leftSelected\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Disable selected codec(s)") . "\"><i class=\"fa fa-angle-left\"></i></button>\n";
+    $output .= "            <button type=\"button\" id=\"equipment_configure_audio_codecs_leftAll\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Disable all codecs") . "\"><i class=\"fa fa-angle-double-left\"></i></button>\n";
+    $output .= "            <button type=\"button\" id=\"equipment_configure_audio_codecs_move_up\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Move codec up") . "\"><i class=\"fa fa-angle-up\"></i></button>\n";
+    $output .= "            <button type=\"button\" id=\"equipment_configure_audio_codecs_move_down\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Move codec down") . "\"><i class=\"fa fa-angle-down\"></i></button>\n";
+    $output .= "          </div>\n";
+    $output .= "          <div class=\"col-sm-5\">\n";
+    $output .= "            <select name=\"AudioCodecs\" id=\"equipment_configure_audio_codecs_to\" class=\"form-control\" multiple=\"multiple\"></select>\n";
+    $output .= "          </div>\n";
+    $output .= "        </div>\n";
   }
-  $output .= "            </select>\n";
-  $output .= "          </div>\n";
-  $output .= "          <div class=\"col-sm-2\">\n";
-  $output .= "            <button type=\"button\" id=\"equipment_configure_audio_codecs_rightAll\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Enable all codecs") . "\"><i class=\"fa fa-angle-double-right\"></i></button>\n";
-  $output .= "            <button type=\"button\" id=\"equipment_configure_audio_codecs_rightSelected\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Enable selected codec(s)") . "\"><i class=\"fa fa-angle-right\"></i></button>\n";
-  $output .= "            <button type=\"button\" id=\"equipment_configure_audio_codecs_leftSelected\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Disable selected codec(s)") . "\"><i class=\"fa fa-angle-left\"></i></button>\n";
-  $output .= "            <button type=\"button\" id=\"equipment_configure_audio_codecs_leftAll\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Disable all codecs") . "\"><i class=\"fa fa-angle-double-left\"></i></button>\n";
-  $output .= "            <button type=\"button\" id=\"equipment_configure_audio_codecs_move_up\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Move codec up") . "\"><i class=\"fa fa-angle-up\"></i></button>\n";
-  $output .= "            <button type=\"button\" id=\"equipment_configure_audio_codecs_move_down\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Move codec down") . "\"><i class=\"fa fa-angle-down\"></i></button>\n";
-  $output .= "          </div>\n";
-  $output .= "          <div class=\"col-sm-5\">\n";
-  $output .= "            <select name=\"AudioCodecs\" id=\"equipment_configure_audio_codecs_to\" class=\"form-control\" multiple=\"multiple\"></select>\n";
-  $output .= "          </div>\n";
-  $output .= "        </div>\n";
+  if ( in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
+  {
+    $output .= "        <div class=\"col-xs-10\">\n";
+    $output .= "          <select name=\"AvailableAudioCodecs\" id=\"equipment_configure_audio_codecs\" class=\"form-control\" multiple=\"multiple\" disabled=\"disabled\">\n";
+    foreach ( get_defined_constants () as $key => $val)
+    {
+      $codecs = array ();
+      if ( substr ( $key, 0, 15) == "VD_AUDIO_CODEC_")
+      {
+        $codecs[substr ( $key, 15)] = $val;
+      }
+      asort ( $codecs);
+      foreach ( $codecs as $key => $val)
+      {
+        $output .= "            <option value=\"" . addslashes ( strip_tags ( $key)) . "\">" . addslashes ( strip_tags ( __ ( $val))) . "</option>\n";
+      }
+    }
+    $output .= "          </select>\n";
+    $output .= "        </div>\n";
+  }
   $output .= "      </div>\n";
   $output .= "    </div>\n";
 
@@ -826,64 +939,93 @@ function equipments_configure_page ( $buffer, $parameters)
   // Add equipment video codecs selector
   $output .= "      <div class=\"form-group\">\n";
   $output .= "        <label for=\"equipment_configure_video_codecs\" class=\"control-label col-xs-2\">" . __ ( "Video codecs") . "</label>\n";
-  $output .= "        <div class=\"col-xs-10 multiselect\">\n";
-  $output .= "          <div class=\"col-sm-5\">\n";
-  $output .= "            <select name=\"AvailableVideoCodecs\" id=\"equipment_configure_video_codecs\" class=\"form-control\" multiple=\"multiple\">\n";
-  foreach ( get_defined_constants () as $key => $val)
+  if ( ! in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
   {
-    $codecs = array ();
-    if ( substr ( $key, 0, 15) == "VD_VIDEO_CODEC_")
+    $output .= "        <div class=\"col-xs-10 multiselect\">\n";
+    $output .= "          <div class=\"col-sm-5\">\n";
+    $output .= "            <select name=\"AvailableVideoCodecs\" id=\"equipment_configure_video_codecs\" class=\"form-control\" multiple=\"multiple\">\n";
+    foreach ( get_defined_constants () as $key => $val)
     {
-      $codecs[substr ( $key, 15)] = $val;
+      $codecs = array ();
+      if ( substr ( $key, 0, 15) == "VD_VIDEO_CODEC_")
+      {
+        $codecs[substr ( $key, 15)] = $val;
+      }
+      asort ( $codecs);
+      foreach ( $codecs as $key => $val)
+      {
+        $output .= "              <option value=\"" . addslashes ( strip_tags ( $key)) . "\">" . addslashes ( strip_tags ( __ ( $val))) . "</option>\n";
+      }
     }
-    asort ( $codecs);
-    foreach ( $codecs as $key => $val)
-    {
-      $output .= "              <option value=\"" . addslashes ( strip_tags ( $key)) . "\">" . addslashes ( strip_tags ( __ ( $val))) . "</option>\n";
-    }
+    $output .= "            </select>\n";
+    $output .= "          </div>\n";
+    $output .= "          <div class=\"col-sm-2\">\n";
+    $output .= "            <button type=\"button\" id=\"equipment_configure_video_codecs_rightAll\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Enable all codecs") . "\"><i class=\"fa fa-angle-double-right\"></i></button>\n";
+    $output .= "            <button type=\"button\" id=\"equipment_configure_video_codecs_rightSelected\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Enable selected codec(s)") . "\"><i class=\"fa fa-angle-right\"></i></button>\n";
+    $output .= "            <button type=\"button\" id=\"equipment_configure_video_codecs_leftSelected\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Disable selected codec(s)") . "\"><i class=\"fa fa-angle-left\"></i></button>\n";
+    $output .= "            <button type=\"button\" id=\"equipment_configure_video_codecs_leftAll\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Disable all codecs") . "\"><i class=\"fa fa-angle-double-left\"></i></button>\n";
+    $output .= "            <button type=\"button\" id=\"equipment_configure_video_codecs_move_up\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Move codec up") . "\"><i class=\"fa fa-angle-up\"></i></button>\n";
+    $output .= "            <button type=\"button\" id=\"equipment_configure_video_codecs_move_down\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Move codec down") . "\"><i class=\"fa fa-angle-down\"></i></button>\n";
+    $output .= "          </div>\n";
+    $output .= "          <div class=\"col-sm-5\">\n";
+    $output .= "            <select name=\"VideoCodecs\" id=\"equipment_configure_video_codecs_to\" class=\"form-control\" multiple=\"multiple\"></select>\n";
+    $output .= "          </div>\n";
+    $output .= "        </div>\n";
   }
-  $output .= "            </select>\n";
-  $output .= "          </div>\n";
-  $output .= "          <div class=\"col-sm-2\">\n";
-  $output .= "            <button type=\"button\" id=\"equipment_configure_video_codecs_rightAll\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Enable all codecs") . "\"><i class=\"fa fa-angle-double-right\"></i></button>\n";
-  $output .= "            <button type=\"button\" id=\"equipment_configure_video_codecs_rightSelected\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Enable selected codec(s)") . "\"><i class=\"fa fa-angle-right\"></i></button>\n";
-  $output .= "            <button type=\"button\" id=\"equipment_configure_video_codecs_leftSelected\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Disable selected codec(s)") . "\"><i class=\"fa fa-angle-left\"></i></button>\n";
-  $output .= "            <button type=\"button\" id=\"equipment_configure_video_codecs_leftAll\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Disable all codecs") . "\"><i class=\"fa fa-angle-double-left\"></i></button>\n";
-  $output .= "            <button type=\"button\" id=\"equipment_configure_video_codecs_move_up\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Move codec up") . "\"><i class=\"fa fa-angle-up\"></i></button>\n";
-  $output .= "            <button type=\"button\" id=\"equipment_configure_video_codecs_move_down\" class=\"btn btn-block\" data-toggle=\"tooltip\" data-placement=\"top\" title=\"" . __ ( "Move codec down") . "\"><i class=\"fa fa-angle-down\"></i></button>\n";
-  $output .= "          </div>\n";
-  $output .= "          <div class=\"col-sm-5\">\n";
-  $output .= "            <select name=\"VideoCodecs\" id=\"equipment_configure_video_codecs_to\" class=\"form-control\" multiple=\"multiple\"></select>\n";
-  $output .= "          </div>\n";
-  $output .= "        </div>\n";
+  if ( in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
+  {
+    $output .= "        <div class=\"col-xs-10\">\n";
+    $output .= "          <select name=\"AvailableVideoCodecs\" id=\"equipment_configure_video_codecs\" class=\"form-control\" multiple=\"multiple\" disabled=\"disabled\">\n";
+    foreach ( get_defined_constants () as $key => $val)
+    {
+      $codecs = array ();
+      if ( substr ( $key, 0, 15) == "VD_VIDEO_CODEC_")
+      {
+        $codecs[substr ( $key, 15)] = $val;
+      }
+      asort ( $codecs);
+      foreach ( $codecs as $key => $val)
+      {
+        $output .= "            <option value=\"" . addslashes ( strip_tags ( $key)) . "\">" . addslashes ( strip_tags ( __ ( $val))) . "</option>\n";
+      }
+    }
+    $output .= "          </select>\n";
+    $output .= "        </div>\n";
+  }
   $output .= "      </div>\n";
   $output .= "    </div>\n";
 
   // Add equipment model tabs
-  foreach ( $subpages["tabs"] as $tab => $tabinfo)
+  if ( ! in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
   {
-    $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in\" id=\"equipment_configure_tab_" . $tab . "\">\n";
-    $output .= $tabinfo["html"];
-    $output .= "    </div>\n";
+    foreach ( $subpages["tabs"] as $tab => $tabinfo)
+    {
+      $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in\" id=\"equipment_configure_tab_" . $tab . "\">\n";
+      $output .= $tabinfo["html"];
+      $output .= "    </div>\n";
+    }
   }
 
   // Firmwares panel
-  $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in\" id=\"equipment_configure_tab_firmwares\">\n";
+  if ( in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
+  {
+    $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in\" id=\"equipment_configure_tab_firmwares\">\n";
 
-  // Add firmware template
-  $output .= "      <div class=\"form-group form-firmware firmware-_VERSION_ hidden\">\n";
-  $output .= "        <label class=\"control-label col-xs-2\">" . __ ( "Firmware") . " _VERSION_</label>\n";
-  $output .= "        <div class=\"col-xs-10 inputGroupContainer\">\n";
-  $output .= "          <div class=\"input-group form-firmware-file hidden\">\n";
-  $output .= "            <input type=\"text\" name=\"Firmware_Filename__X_\" class=\"form-control firmware-filename\" id=\"equipment_configure_firmware__X__filename\" placeholder=\"" . __ ( "Firmware filename") . "\" disabled=\"disabled\" />\n";
-  $output .= "            <input type=\"file\" name=\"Firmware_File__X_\" class=\"hidden firmware-file\" id=\"equipment_configure_firmware__X__file\" />\n";
-  $output .= "            <input type=\"text\" name=\"Firmware_SHA256__X_\" class=\"form-control firmware-sha256\" id=\"equipment_configure_firmware__X__sha256\" placeholder=\"" . __ ( "File content SHA256 hash") . "\" disabled=\"disabled\" />\n";
-  $output .= "            <input type=\"text\" name=\"Firmware_Size__X_\" class=\"form-control firmware-size\" id=\"equipment_configure_firmware__X__size\" placeholder=\"" . __ ( "File size") . "\" disabled=\"disabled\" />\n";
-  $output .= "            <span class=\"input-group-addon input-icon-button btn btn-_CLASS_ ladda-button\" data-style=\"zoom-in\" data-spinner-size=\"20px\" data-toggle=\"tooltip\" data-placement=\"left\" title=\"_TITLE_\"><i class=\"fa fa-_ICON_\"></i></span>\n";
-  $output .= "          </div>\n";
-  $output .= "        </div>\n";
-  $output .= "      </div>\n";
-  $output .= "    </div>\n";
+    // Add firmware template
+    $output .= "      <div class=\"form-group form-firmware firmware-_VERSION_ hidden\">\n";
+    $output .= "        <label class=\"control-label col-xs-2\">" . __ ( "Firmware") . " _VERSION_</label>\n";
+    $output .= "        <div class=\"col-xs-10 inputGroupContainer\">\n";
+    $output .= "          <div class=\"input-group form-firmware-file hidden\">\n";
+    $output .= "            <input type=\"text\" name=\"Firmware_Filename__X_\" class=\"form-control firmware-filename\" id=\"equipment_configure_firmware__X__filename\" placeholder=\"" . __ ( "Firmware filename") . "\" disabled=\"disabled\" />\n";
+    $output .= "            <input type=\"file\" name=\"Firmware_File__X_\" class=\"hidden firmware-file\" id=\"equipment_configure_firmware__X__file\" />\n";
+    $output .= "            <input type=\"text\" name=\"Firmware_SHA256__X_\" class=\"form-control firmware-sha256\" id=\"equipment_configure_firmware__X__sha256\" placeholder=\"" . __ ( "File content SHA256 hash") . "\" disabled=\"disabled\" />\n";
+    $output .= "            <input type=\"text\" name=\"Firmware_Size__X_\" class=\"form-control firmware-size\" id=\"equipment_configure_firmware__X__size\" placeholder=\"" . __ ( "File size") . "\" disabled=\"disabled\" />\n";
+    $output .= "            <span class=\"input-group-addon input-icon-button btn btn-_CLASS_ ladda-button\" data-style=\"zoom-in\" data-spinner-size=\"20px\" data-toggle=\"tooltip\" data-placement=\"left\" title=\"_TITLE_\"><i class=\"fa fa-_ICON_\"></i></span>\n";
+    $output .= "          </div>\n";
+    $output .= "        </div>\n";
+    $output .= "      </div>\n";
+    $output .= "    </div>\n";
+  }
 
   // About equipment panel
   $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in\" id=\"equipment_configure_tab_about\">\n";
@@ -928,8 +1070,14 @@ function equipments_configure_page ( $buffer, $parameters)
   $output .= "  <div class=\"form-group\">\n";
   $output .= "    <div class=\"col-xs-2\"></div>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
-  $output .= "      <a class=\"btn btn-default\" href=\"/equipments\" alt=\"\">" . __ ( "Cancel") . "</a>\n";
-  $output .= "      <button class=\"btn btn-primary edit ladda-button\" data-style=\"expand-left\">" . __ ( "Change") . "</button>\n";
+  if ( in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
+  {
+    $output .= "      <a class=\"btn btn-default\" href=\"/equipments\" alt=\"\">" . __ ( "Return") . "</a>\n";
+    $output .= "      <button class=\"btn btn-primary edit hidden\" />\n";
+  } else {
+    $output .= "      <a class=\"btn btn-default\" href=\"/equipments\" alt=\"\">" . __ ( "Cancel") . "</a>\n";
+    $output .= "      <button class=\"btn btn-primary edit ladda-button\" data-style=\"expand-left\">" . __ ( "Change") . "</button>\n";
+  }
   $output .= "    </div>\n";
   $output .= "  </div>\n";
 
@@ -939,42 +1087,51 @@ function equipments_configure_page ( $buffer, $parameters)
   /**
    * Add firmware remove confirmation modal code
    */
-  $output .= "<div id=\"equipment_firmware_remove\" class=\"modal fade\" role=\"dialog\" aria-labelledby=\"equipment_firmware_remove\" aria-hidden=\"true\">\n";
-  $output .= "  <div class=\"modal-dialog\">\n";
-  $output .= "    <div class=\"modal-content\">\n";
-  $output .= "      <div class=\"modal-header\">\n";
-  $output .= "        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n";
-  $output .= "        <h3 class=\"modal-title\">" . __ ( "Firmware remove") . "</h3>\n";
-  $output .= "      </div>\n";
-  $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are sure you want to remove the firmware file %s?"), "<strong><span id=\"equipment_firmware_remove_filename\"></span></strong>") . "</p></div>\n";
-  $output .= "      <div class=\"modal-footer\">\n";
-  $output .= "        <button class=\"btn\" data-dismiss=\"modal\">" . __ ( "Cancel") . "</button>\n";
-  $output .= "        <button class=\"btn btn-primary del ladda-button\" data-style=\"expand-left\">" . __ ( "Remove") . "</button>\n";
-  $output .= "      </div>\n";
-  $output .= "    </div>\n";
-  $output .= "  </div>\n";
-  $output .= "</div>\n";
+  if ( in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
+  {
+    $output .= "<div id=\"equipment_firmware_remove\" class=\"modal fade\" role=\"dialog\" aria-labelledby=\"equipment_firmware_remove\" aria-hidden=\"true\">\n";
+    $output .= "  <div class=\"modal-dialog\">\n";
+    $output .= "    <div class=\"modal-content\">\n";
+    $output .= "      <div class=\"modal-header\">\n";
+    $output .= "        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n";
+    $output .= "        <h3 class=\"modal-title\">" . __ ( "Firmware remove") . "</h3>\n";
+    $output .= "      </div>\n";
+    $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are sure you want to remove the firmware file %s?"), "<strong><span id=\"equipment_firmware_remove_filename\"></span></strong>") . "</p></div>\n";
+    $output .= "      <div class=\"modal-footer\">\n";
+    $output .= "        <button class=\"btn\" data-dismiss=\"modal\">" . __ ( "Cancel") . "</button>\n";
+    $output .= "        <button class=\"btn btn-primary del ladda-button\" data-style=\"expand-left\">" . __ ( "Remove") . "</button>\n";
+    $output .= "      </div>\n";
+    $output .= "    </div>\n";
+    $output .= "  </div>\n";
+    $output .= "</div>\n";
+  }
 
   /**
    * Add other subpages html code
    */
-  $output .= $subpages["html"];
+  if ( ! in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
+  {
+    $output .= $subpages["html"];
+  }
 
   /**
    * Prepare onshow JavaScript code
    */
-  $onshow = "";
-  if ( sizeof ( $subpages["js"]["onshow"]) != 0)
+  if ( ! in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
   {
-    $onshow .= "  switch ( data.UID)\n";
-    $onshow .= "  {\n";
-    foreach ( $subpages["js"]["onshow"] as $model => $js)
+    $onshow = "";
+    if ( sizeof ( $subpages["js"]["onshow"]) != 0)
     {
-      $onshow .= "    case '" . $model . "':\n";
-      $onshow .= $js;
-      $onshow .= "      break;\n";
+      $onshow .= "  switch ( data.UID)\n";
+      $onshow .= "  {\n";
+      foreach ( $subpages["js"]["onshow"] as $model => $js)
+      {
+        $onshow .= "    case '" . $model . "':\n";
+        $onshow .= $js;
+        $onshow .= "      break;\n";
+      }
+      $onshow .= "  }\n";
     }
-    $onshow .= "  }\n";
   }
 
   /**
@@ -1007,13 +1164,6 @@ function equipments_configure_page ( $buffer, $parameters)
               "      $(this).remove ();\n" .
               "    }\n" .
               "  });\n" .
-              "  for ( var index = data.AudioCodecs.length - 1; index >= 0; index--)\n" .
-              "  {\n" .
-              "    if ( $('#equipment_configure_audio_codecs').find ( 'option[value=\"' + data.AudioCodecs[index] + '\"]').length == 1)\n" .
-              "    {\n" .
-              "      $('#equipment_configure_audio_codecs').find ( 'option[value=\"' + data.AudioCodecs[index] + '\"]').detach ().prependTo ( $('#equipment_configure_audio_codecs_to'));\n" .
-              "    }\n" .
-              "  }\n" .
               "  if ( ! data.VideoSupport)\n" .
               "  {\n" .
               "    $('a[href=\"#equipment_configure_tab_video_codecs\"]').parent ().addClass ( 'disabled');\n" .
@@ -1025,33 +1175,47 @@ function equipments_configure_page ( $buffer, $parameters)
               "        $(this).remove ();\n" .
               "      }\n" .
               "    });\n" .
-              "    for ( var index = data.VideoCodecs.length - 1; index >= 0; index--)\n" .
-              "    {\n" .
-              "      if ( $('#equipment_configure_video_codecs').find ( 'option[value=\"' + data.VideoCodecs[index] + '\"]').length == 1)\n" .
-              "      {\n" .
-              "        $('#equipment_configure_video_codecs').find ( 'option[value=\"' + data.VideoCodecs[index] + '\"]').detach ().prependTo ( $('#equipment_configure_video_codecs_to'));\n" .
-              "      }\n" .
-              "    }\n" .
-              "  }\n" .
-              "  if ( ! data.AutoProvision)\n" .
-              "  {\n" .
-              "    $('a[href=\"#equipment_configure_tab_firmwares\"]').parent ().addClass ( 'disabled');\n" .
-              "  } else {\n" .
-              "    var id = 0;\n" .
-              "    for ( var index = data.SupportedFirmwares.length - 1; index >= 0; index--)\n" .
-              "    {\n" .
-              "      var formclass = 'firmware-' + data.SupportedFirmwares[index].Version.replace ( /\./g, '_').replace ( /[^a-zA-Z0-9_]/g, '');\n" .
-              "      $('<div class=\"form-group form-firmware ' + formclass + '\">' + $('#equipment_configure_tab_firmwares div.form-firmware.hidden').html ().replace ( /_VERSION_/g, data.SupportedFirmwares[index].Version) + '</div>').insertAfter ( $('#equipment_configure_tab_firmwares div.form-firmware.hidden')).data ( 'firmware_version', data.SupportedFirmwares[index].Version).data ( 'firmware_priority', data.SupportedFirmwares[index].Priority).data ( 'firmware_available', data.SupportedFirmwares[index].Available).data ( 'firmware_files', data.SupportedFirmwares[index].Files).removeClass ( 'hidden');\n" .
-              "      for ( var fileindex = data.SupportedFirmwares[index].Files.length - 1; fileindex >= 0; fileindex--)\n" .
-              "      {\n" .
-              "        $('<div class=\"input-group form-firmware-file form-firmware-file-' + id + '\">' + $('#equipment_configure_tab_firmwares div.' + formclass + ' div.form-firmware-file.hidden').html ().replace ( /_X_/g, id).replace ( /_TITLE_/g, data.SupportedFirmwares[index].Files[fileindex].Available ? '" . __ ( "Remove firmware") . "' : '" . __ ( "Upload firmware") . "').replace ( /_ICON_/g, data.SupportedFirmwares[index].Files[fileindex].Available ? 'times' : 'file-upload').replace ( /_CLASS_/g, data.SupportedFirmwares[index].Files[fileindex].Available ? 'success btn-removefile' : 'primary btn-uploadfile') + '</div>').insertAfter ( $('#equipment_configure_tab_firmwares div.' + formclass + ' div.form-firmware-file.hidden')).data ( 'firmware_version', data.SupportedFirmwares[index].Version).data ( 'file_name', data.SupportedFirmwares[index].Files[fileindex].Filename).data ( 'file_sha', data.SupportedFirmwares[index].Files[fileindex].SHA256).data ( 'file_size', data.SupportedFirmwares[index].Files[fileindex].Size).data ( 'file_available', data.SupportedFirmwares[index].Files[fileindex].Available).removeClass ( 'hidden').tooltip ( { container: 'body'});\n" .
-              "        $('#equipment_configure_firmware_' + id + '_filename').val ( data.SupportedFirmwares[index].Files[fileindex].Filename);\n" .
-              "        $('#equipment_configure_firmware_' + id + '_sha256').val ( data.SupportedFirmwares[index].Files[fileindex].SHA256);\n" .
-              "        $('#equipment_configure_firmware_' + id + '_size').val ( data.SupportedFirmwares[index].Files[fileindex].Size);\n" .
-              "        id++;\n" .
-              "      }\n" .
-              "    }\n" .
-              "  }\n" .
+	      "  }\n" .
+              ( in_array ( "Super-Administrator", $_in["session"]["Permissions"]) ?
+                "  if ( ! data.AutoProvision)\n" .
+                "  {\n" .
+                "    $('a[href=\"#equipment_configure_tab_firmwares\"]').parent ().addClass ( 'disabled');\n" .
+                "  } else {\n" .
+                "    var id = 0;\n" .
+                "    for ( var index = data.SupportedFirmwares.length - 1; index >= 0; index--)\n" .
+                "    {\n" .
+                "      var formclass = 'firmware-' + data.SupportedFirmwares[index].Version.replace ( /\./g, '_').replace ( /[^a-zA-Z0-9_]/g, '');\n" .
+                "      $('<div class=\"form-group form-firmware ' + formclass + '\">' + $('#equipment_configure_tab_firmwares div.form-firmware.hidden').html ().replace ( /_VERSION_/g, data.SupportedFirmwares[index].Version) + '</div>').insertAfter ( $('#equipment_configure_tab_firmwares div.form-firmware.hidden')).data ( 'firmware_version', data.SupportedFirmwares[index].Version).data ( 'firmware_priority', data.SupportedFirmwares[index].Priority).data ( 'firmware_available', data.SupportedFirmwares[index].Available).data ( 'firmware_files', data.SupportedFirmwares[index].Files).removeClass ( 'hidden');\n" .
+                "      for ( var fileindex = data.SupportedFirmwares[index].Files.length - 1; fileindex >= 0; fileindex--)\n" .
+                "      {\n" .
+                "        $('<div class=\"input-group form-firmware-file form-firmware-file-' + id + '\">' + $('#equipment_configure_tab_firmwares div.' + formclass + ' div.form-firmware-file.hidden').html ().replace ( /_X_/g, id).replace ( /_TITLE_/g, data.SupportedFirmwares[index].Files[fileindex].Available ? '" . __ ( "Remove firmware") . "' : '" . __ ( "Upload firmware") . "').replace ( /_ICON_/g, data.SupportedFirmwares[index].Files[fileindex].Available ? 'times' : 'file-upload').replace ( /_CLASS_/g, data.SupportedFirmwares[index].Files[fileindex].Available ? 'success btn-removefile' : 'primary btn-uploadfile') + '</div>').insertAfter ( $('#equipment_configure_tab_firmwares div.' + formclass + ' div.form-firmware-file.hidden')).data ( 'firmware_version', data.SupportedFirmwares[index].Version).data ( 'file_name', data.SupportedFirmwares[index].Files[fileindex].Filename).data ( 'file_sha', data.SupportedFirmwares[index].Files[fileindex].SHA256).data ( 'file_size', data.SupportedFirmwares[index].Files[fileindex].Size).data ( 'file_available', data.SupportedFirmwares[index].Files[fileindex].Available).removeClass ( 'hidden').tooltip ( { container: 'body'});\n" .
+                "        $('#equipment_configure_firmware_' + id + '_filename').val ( data.SupportedFirmwares[index].Files[fileindex].Filename);\n" .
+                "        $('#equipment_configure_firmware_' + id + '_sha256').val ( data.SupportedFirmwares[index].Files[fileindex].SHA256);\n" .
+                "        $('#equipment_configure_firmware_' + id + '_size').val ( data.SupportedFirmwares[index].Files[fileindex].Size);\n" .
+"/*\n" .   print_r ( $_in, true) . "*/\n" .
+                "        id++;\n" .
+                "      }\n" .
+                "    }\n" .
+                "  }\n"
+                :
+                "  for ( var index = data.AudioCodecs.length - 1; index >= 0; index--)\n" .
+                "  {\n" .
+                "    if ( $('#equipment_configure_audio_codecs').find ( 'option[value=\"' + data.AudioCodecs[index] + '\"]').length == 1)\n" .
+                "    {\n" .
+                "      $('#equipment_configure_audio_codecs').find ( 'option[value=\"' + data.AudioCodecs[index] + '\"]').detach ().prependTo ( $('#equipment_configure_audio_codecs_to'));\n" .
+                "    }\n" .
+                "  }\n" .
+                "  if ( data.VideoSupport)\n" .
+                "  {\n" .
+                "    for ( var index = data.VideoCodecs.length - 1; index >= 0; index--)\n" .
+                "    {\n" .
+                "      if ( $('#equipment_configure_video_codecs').find ( 'option[value=\"' + data.VideoCodecs[index] + '\"]').length == 1)\n" .
+                "      {\n" .
+                "        $('#equipment_configure_video_codecs').find ( 'option[value=\"' + data.VideoCodecs[index] + '\"]').detach ().prependTo ( $('#equipment_configure_video_codecs_to'));\n" .
+                "      }\n" .
+                "    }\n" .
+                "  }\n"
+              ) .
               "  if ( data.Image != '')\n" .
               "  {\n" .
               "    $('#equipment_configure_about_image').attr ( 'src', '/modules/equipments/images/' + data.Image);\n" .
@@ -1069,117 +1233,119 @@ function equipments_configure_page ( $buffer, $parameters)
               "  $('#equipment_configure_form ul.nav-pages').find ( 'li[data-type=\'' + data.UID + '\']').css ( 'display', 'block');\n" .
               $onshow .
               "});\n" .
-              "$('#equipment_configure_tab_firmwares').on ( 'click', '.btn-uploadfile', function ( event)\n" .
-              "{\n" .
-              "  event && event.preventDefault ();\n" .
-              "  $(this).parent ().find ( 'input:file').trigger ( 'click');\n" .
-              "});\n" .
-              "$('#equipment_configure_tab_firmwares').on ( 'click', '.btn-removefile', function ( event)\n" .
-              "{\n" .
-              "  event && event.preventDefault ();\n" .
-              "  $('#equipment_firmware_remove').data ( 'firmware', $(this).parent ());\n" .
-              "  $('#equipment_firmware_remove button.del').prop ( 'disabled', false);\n" .
-              "  $('#equipment_firmware_remove_filename').html ( $(this).parent ().find ( 'input.firmware-filename').val ());\n" .
-              "  $('#equipment_firmware_remove').modal ( 'show');\n" .
-              "});\n" .
-              "$('#equipment_firmware_remove button.del').on ( 'click', function ( event)\n" .
-              "{\n" .
-              "  event && event.preventDefault ();\n" .
-              "  var l = Ladda.create ( this);\n" .
-              "  l.start ();\n" .
-              "  VoIP.rest ( '/equipments/' + encodeURIComponent ( VoIP.parameters.id) + '/firmware/' + encodeURIComponent ( $('#equipment_firmware_remove_filename').html ()), 'DELETE').done ( function ( data, textStatus, jqXHR)\n" .
-              "  {\n" .
-              "    $('#equipment_firmware_remove').modal ( 'hide');\n" .
-              "    new PNotify ( { title: '" . __ ( "Equipment configuration") . "', text: '" . __ ( "Firmware removed successfully!") . "', type: 'success'});\n" .
-              "    var firmware = $('#equipment_firmware_remove').data ( 'firmware');\n" .
-              "    $(firmware).find ( 'input.firmware-file').val ( '');\n" .
-              "    $(firmware).find ( '.btn-removefile').removeClass ( 'btn-success btn-removefile').addClass ( 'btn-primary btn-uploadfile').attr ( 'data-original-title', '" . __ ( "Upload firmware") . "').find ( 'i').removeClass ( 'fa-times').addClass ( 'fa-file-upload');\n" .
-              "    VoIP.rest ( '/equipments/' + encodeURIComponent ( VoIP.parameters.id), 'GET').done ( function ( data, textStatus, jqXHR)\n" .
-              "    {\n" .
-              "      if ( $('#equipment_configure_active').is ( ':checked') != data.Active && ! data.Active)\n" .
-              "      {\n" .
-              "        new PNotify ( { title: '" . __ ( "Equipment configuration") . "', text: '" . __ ( "Equipment automatically deactivated!") . "', type: 'info'});\n" .
-              "        $('#equipment_configure_active').bootstrapToggle ( 'enable').bootstrapToggle ( 'off').bootstrapToggle ( 'disable');\n" .
-              "      }\n" .
-              "    });\n" .
-              "  }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
-              "  {\n" .
-              "    new PNotify ( { title: '" . __ ( "Equipment configuration") . "', text: '" . __ ( "Error removing firmware!") . "', type: 'error'});\n" .
-              "  }).then ( function ()\n" .
-              "  {\n" .
-              "    l.stop ();\n" .
-              "  });\n" .
-              "});\n" .
-              "$('#equipment_configure_tab_firmwares').on ( 'change', 'input[type=\"file\"]', function ( event)\n" .
-              "{\n" .
-              "  event && event.preventDefault ();\n" .
-              "  if ( $(this).val () == '')\n" .
-              "  {\n" .
-              "    return;\n" .
-              "  }\n" .
-              "  var that = this;\n" .
-              "  $(this).parent ().find ( '.btn-uploadfile').tooltip ( 'hide');\n" .
-              "  var button = $(this).parent ().find ( '.btn-uploadfile')[0];\n" .
-              "  var l = Ladda.create ( button);\n" .
-              "  l.start ();\n" .
-              "  $(button).attr ( 'disabled', 'disabled');\n" .
-              "  var fr = new FileReader ();\n" .
-              "  fr.onload = function ()\n" .
-              "  {\n" .
-              "    that.filecontent = btoa ( fr.result);\n" .
-              "  }\n" .
-              "  fr.readAsBinaryString ( this.files[0]);\n" .
-              "  new Promise ( ( resolve, reject) =>\n" .
-              "  {\n" .
-              "    var fr = new FileReader ();\n" .
-              "    fr.onload = () =>\n" .
-              "    {\n" .
-              "      resolve ( fr.result);\n" .
-              "    };\n" .
-              "    fr.readAsArrayBuffer ( that.files[0]);\n" .
-              "  }).then ( function ( result)\n" .
-              "  {\n" .
-              "    result = new Uint8Array ( result);\n" .
-              "    return window.crypto.subtle.digest ( 'SHA-256', result);\n" .
-              "  }).then ( function ( result)\n" .
-              "  {\n" .
-              "    result = new Uint8Array ( result);\n" .
-              "    var resulthex = Uint8ArrayToHexString ( result);\n" .
-              "    if ( resulthex != $(that).parent ().find ( 'input.firmware-sha256').val () || that.files[0].size != $(that).parent ().find ( 'input.firmware-size').val ())\n" .
-              "    {\n" .
-              "      $(that).val ( '');\n" .
-              "      new PNotify ( { title: '" . __ ( "Equipment configuration") . "', text: '" . __ ( "File didn't match required firmware content!") . "', type: 'error'});\n" .
-              "      $(button).removeAttr ( 'disabled');\n" .
-              "      l.stop ();\n" .
-              "    } else {\n" .
-              "      VoIP.rest ( '/equipments/' + encodeURIComponent ( VoIP.parameters.id) + '/firmware', 'POST', { Filename: $(that).parent ().find ( 'input.firmware-filename').val (), SHA256: $(that).parent ().find ( 'input.firmware-sha256').val (), Size: $(that).parent ().find ( 'input.firmware-size').val (), FileContent: that.filecontent}).done ( function ( data, textStatus, jqXHR)\n" .
-              "      {\n" .
-              "        new PNotify ( { title: '" . __ ( "Equipment configuration") . "', text: '" . __ ( "Firmware successfully uploaded!") . "', type: 'success'});\n" .
-              "        if ( $('#equipment_configure_active').is ( ':checked') != data.Active && data.Active)\n" .
-              "        {\n" .
-              "          new PNotify ( { title: '" . __ ( "Equipment configuration") . "', text: '" . __ ( "Equipment automatically activated!") . "', type: 'info'});\n" .
-              "          $('#equipment_configure_active').bootstrapToggle ( 'enable').bootstrapToggle ( 'on').bootstrapToggle ( 'disable');\n" .
-              "        }\n" .
-              "        $(that).parent ().find ( '.btn-uploadfile').removeClass ( 'btn-primary btn-uploadfile').addClass ( 'btn-success btn-removefile').attr ( 'data-original-title', '" . __ ( "Remove firmware") . "').find ( 'i').removeClass ( 'fa-file-upload').addClass ( 'fa-times');\n" .
-              "      }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
-              "      {\n" .
-              "        try\n" .
-              "        {\n" .
-              "          var jsonresult = JSON.parse ( jqXHR.responseText);\n" .
-              "        } catch ( e) {\n" .
-              "          var jsonresult = [];\n" .
-              "        }\n" .
-              "        $(that).parent ().find ( 'input.firmware-filename').data ( 'popover', $(that).parent ().find ( 'input.firmware-filename').popover ( { placement: 'auto top', content: jsonresult.Filename, trigger: 'manual'}).popover ( 'show'));\n" .
-              "        $(that).parent ().find ( 'input.firmware-filename').addClass ( 'alert-danger');\n" .
-              "        new PNotify ( { title: '" . __ ( "Equipment configuration") . "', text: '" . __ ( "Cannot upload firmware file!") . "', type: 'error'});\n" .
-              "      }).then ( function ()\n" .
-              "      {\n" .
-              "        $(button).removeAttr ( 'disabled');\n" .
-              "        l.stop ();\n" .
-              "      });\n" .
-              "    }\n" .
-              "  });\n" .
-              "});\n" .
+              ( in_array ( "Super-Administrator", $_in["session"]["Permissions"]) ?
+                "$('#equipment_configure_tab_firmwares').on ( 'click', '.btn-uploadfile', function ( event)\n" .
+                "{\n" .
+                "  event && event.preventDefault ();\n" .
+                "  $(this).parent ().find ( 'input:file').trigger ( 'click');\n" .
+                "});\n" .
+                "$('#equipment_configure_tab_firmwares').on ( 'click', '.btn-removefile', function ( event)\n" .
+                "{\n" .
+                "  event && event.preventDefault ();\n" .
+                "  $('#equipment_firmware_remove').data ( 'firmware', $(this).parent ());\n" .
+                "  $('#equipment_firmware_remove button.del').prop ( 'disabled', false);\n" .
+                "  $('#equipment_firmware_remove_filename').html ( $(this).parent ().find ( 'input.firmware-filename').val ());\n" .
+                "  $('#equipment_firmware_remove').modal ( 'show');\n" .
+                "});\n" .
+                "$('#equipment_firmware_remove button.del').on ( 'click', function ( event)\n" .
+                "{\n" .
+                "  event && event.preventDefault ();\n" .
+                "  var l = Ladda.create ( this);\n" .
+                "  l.start ();\n" .
+                "  VoIP.rest ( '/equipments/' + encodeURIComponent ( VoIP.parameters.id) + '/firmware/' + encodeURIComponent ( $('#equipment_firmware_remove_filename').html ()), 'DELETE').done ( function ( data, textStatus, jqXHR)\n" .
+                "  {\n" .
+                "    $('#equipment_firmware_remove').modal ( 'hide');\n" .
+                "    new PNotify ( { title: '" . __ ( "Equipment configuration") . "', text: '" . __ ( "Firmware removed successfully!") . "', type: 'success'});\n" .
+                "    var firmware = $('#equipment_firmware_remove').data ( 'firmware');\n" .
+                "    $(firmware).find ( 'input.firmware-file').val ( '');\n" .
+                "    $(firmware).find ( '.btn-removefile').removeClass ( 'btn-success btn-removefile').addClass ( 'btn-primary btn-uploadfile').attr ( 'data-original-title', '" . __ ( "Upload firmware") . "').find ( 'i').removeClass ( 'fa-times').addClass ( 'fa-file-upload');\n" .
+                "    VoIP.rest ( '/equipments/' + encodeURIComponent ( VoIP.parameters.id), 'GET').done ( function ( data, textStatus, jqXHR)\n" .
+                "    {\n" .
+                "      if ( $('#equipment_configure_active').is ( ':checked') != data.Active && ! data.Active)\n" .
+                "      {\n" .
+                "        new PNotify ( { title: '" . __ ( "Equipment configuration") . "', text: '" . __ ( "Equipment automatically deactivated!") . "', type: 'info'});\n" .
+                "        $('#equipment_configure_active').bootstrapToggle ( 'enable').bootstrapToggle ( 'off').bootstrapToggle ( 'disable');\n" .
+                "      }\n" .
+                "    });\n" .
+                "  }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
+                "  {\n" .
+                "    new PNotify ( { title: '" . __ ( "Equipment configuration") . "', text: '" . __ ( "Error removing firmware!") . "', type: 'error'});\n" .
+                "  }).then ( function ()\n" .
+                "  {\n" .
+                "    l.stop ();\n" .
+                "  });\n" .
+                "});\n" .
+                "$('#equipment_configure_tab_firmwares').on ( 'change', 'input[type=\"file\"]', function ( event)\n" .
+                "{\n" .
+                "  event && event.preventDefault ();\n" .
+                "  if ( $(this).val () == '')\n" .
+                "  {\n" .
+                "    return;\n" .
+                "  }\n" .
+                "  var that = this;\n" .
+                "  $(this).parent ().find ( '.btn-uploadfile').tooltip ( 'hide');\n" .
+                "  var button = $(this).parent ().find ( '.btn-uploadfile')[0];\n" .
+                "  var l = Ladda.create ( button);\n" .
+                "  l.start ();\n" .
+                "  $(button).attr ( 'disabled', 'disabled');\n" .
+                "  var fr = new FileReader ();\n" .
+                "  fr.onload = function ()\n" .
+                "  {\n" .
+                "    that.filecontent = btoa ( fr.result);\n" .
+                "  }\n" .
+                "  fr.readAsBinaryString ( this.files[0]);\n" .
+                "  new Promise ( ( resolve, reject) =>\n" .
+                "  {\n" .
+                "    var fr = new FileReader ();\n" .
+                "    fr.onload = () =>\n" .
+                "    {\n" .
+                "      resolve ( fr.result);\n" .
+                "    };\n" .
+                "    fr.readAsArrayBuffer ( that.files[0]);\n" .
+                "  }).then ( function ( result)\n" .
+                "  {\n" .
+                "    result = new Uint8Array ( result);\n" .
+                "    return window.crypto.subtle.digest ( 'SHA-256', result);\n" .
+                "  }).then ( function ( result)\n" .
+                "  {\n" .
+                "    result = new Uint8Array ( result);\n" .
+                "    var resulthex = Uint8ArrayToHexString ( result);\n" .
+                "    if ( resulthex != $(that).parent ().find ( 'input.firmware-sha256').val () || that.files[0].size != $(that).parent ().find ( 'input.firmware-size').val ())\n" .
+                "    {\n" .
+                "      $(that).val ( '');\n" .
+                "      new PNotify ( { title: '" . __ ( "Equipment configuration") . "', text: '" . __ ( "File didn't match required firmware content!") . "', type: 'error'});\n" .
+                "      $(button).removeAttr ( 'disabled');\n" .
+                "      l.stop ();\n" .
+                "    } else {\n" .
+                "      VoIP.rest ( '/equipments/' + encodeURIComponent ( VoIP.parameters.id) + '/firmware', 'POST', { Filename: $(that).parent ().find ( 'input.firmware-filename').val (), SHA256: $(that).parent ().find ( 'input.firmware-sha256').val (), Size: $(that).parent ().find ( 'input.firmware-size').val (), FileContent: that.filecontent}).done ( function ( data, textStatus, jqXHR)\n" .
+                "      {\n" .
+                "        new PNotify ( { title: '" . __ ( "Equipment configuration") . "', text: '" . __ ( "Firmware successfully uploaded!") . "', type: 'success'});\n" .
+                "        if ( $('#equipment_configure_active').is ( ':checked') != data.Active && data.Active)\n" .
+                "        {\n" .
+                "          new PNotify ( { title: '" . __ ( "Equipment configuration") . "', text: '" . __ ( "Equipment automatically activated!") . "', type: 'info'});\n" .
+                "          $('#equipment_configure_active').bootstrapToggle ( 'enable').bootstrapToggle ( 'on').bootstrapToggle ( 'disable');\n" .
+                "        }\n" .
+                "        $(that).parent ().find ( '.btn-uploadfile').removeClass ( 'btn-primary btn-uploadfile').addClass ( 'btn-success btn-removefile').attr ( 'data-original-title', '" . __ ( "Remove firmware") . "').find ( 'i').removeClass ( 'fa-file-upload').addClass ( 'fa-times');\n" .
+                "      }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
+                "      {\n" .
+                "        try\n" .
+                "        {\n" .
+                "          var jsonresult = JSON.parse ( jqXHR.responseText);\n" .
+                "        } catch ( e) {\n" .
+                "          var jsonresult = [];\n" .
+                "        }\n" .
+                "        $(that).parent ().find ( 'input.firmware-filename').data ( 'popover', $(that).parent ().find ( 'input.firmware-filename').popover ( { placement: 'auto top', content: jsonresult.Filename, trigger: 'manual'}).popover ( 'show'));\n" .
+                "        $(that).parent ().find ( 'input.firmware-filename').addClass ( 'alert-danger');\n" .
+                "        new PNotify ( { title: '" . __ ( "Equipment configuration") . "', text: '" . __ ( "Cannot upload firmware file!") . "', type: 'error'});\n" .
+                "      }).then ( function ()\n" .
+                "      {\n" .
+                "        $(button).removeAttr ( 'disabled');\n" .
+                "        l.stop ();\n" .
+                "      });\n" .
+                "    }\n" .
+                "  });\n" .
+                "});\n"
+              : "") .
               "$('.btn-vendorlink').on ( 'click', function ( event)\n" .
               "{\n" .
               "  event && event.preventDefault ();\n" .
@@ -1214,14 +1380,17 @@ function equipments_configure_page ( $buffer, $parameters)
               "                 VoIP.path.call ( '/equipments', true);\n" .
               "               }\n" .
               "  }\n" .
-              "});");
+              "});\n");
 
   /**
    * Add subpages configure form JavaScript code
    */
-  foreach ( $subpages["js"]["init"] as $js)
+  if ( ! in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
   {
-    sys_addjs ( $js);
+    foreach ( $subpages["js"]["init"] as $js)
+    {
+      sys_addjs ( $js);
+    }
   }
 
   return $output;

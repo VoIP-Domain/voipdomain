@@ -54,6 +54,7 @@ function profiles_install_db ( $buffer, $parameters)
    */
   install_add_db_table ( "Profiles", "CREATE TABLE `Profiles` (\n" .
                                      "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                     "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
                                      "  `Description` varchar(255) NOT NULL,\n" .
                                      "  `Domain` varchar(255) NOT NULL,\n" .
                                      "  `Country` int(2) unsigned NOT NULL,\n" .
@@ -70,9 +71,11 @@ function profiles_install_db ( $buffer, $parameters)
                                      "  PRIMARY KEY (`ID`),\n" .
                                      "  KEY `Profiles_ibfk_1` (`Country`),\n" .
                                      "  KEY `Profiles_ibfk_2` (`NGGW`),\n" .
+                                     "  KEY `Profiles_ibfk_3` (`Tenant`),\n" . 
                                      "  CONSTRAINT `Profiles_ibfk_1` FOREIGN KEY (`Country`) REFERENCES `Countries` (`Code`) ON UPDATE CASCADE,\n" .
-                                     "  CONSTRAINT `Profiles_ibfk_2` FOREIGN KEY (`NGGW`) REFERENCES `Gateways` (`ID`) ON UPDATE CASCADE\n" .
-                                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extension profiles';\n", array ( "Countries", "Gateways"));
+                                     "  CONSTRAINT `Profiles_ibfk_2` FOREIGN KEY (`NGGW`) REFERENCES `Gateways` (`ID`) ON UPDATE CASCADE,\n" .
+                                     "  CONSTRAINT `Profiles_ibfk_3` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" . 
+                                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extension profiles';\n", array ( "Countries", "Gateways", "Tenants"));
 
   /**
    * Add basic system triggers

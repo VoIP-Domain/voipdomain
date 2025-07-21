@@ -54,6 +54,7 @@ function groups_install_db ( $buffer, $parameters)
    */
   install_add_db_table ( "Groups", "CREATE TABLE `Groups` (\n" .
                                    "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                   "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
                                    "  `Description` varchar(255) NOT NULL,\n" .
                                    "  `CostCenter` bigint(20) unsigned NOT NULL,\n" .
                                    "  `Profile` bigint(20) unsigned NOT NULL,\n" .
@@ -61,9 +62,11 @@ function groups_install_db ( $buffer, $parameters)
                                    "  KEY `Description` (`Description`),\n" .
                                    "  KEY `Groups_ibfk_1` (`CostCenter`),\n" .
                                    "  KEY `Groups_ibfk_2` (`Profile`),\n" .
+                                   "  KEY `Groups_ibfk_3` (`Tenant`),\n" . 
                                    "  CONSTRAINT `Groups_ibfk_1` FOREIGN KEY (`CostCenter`) REFERENCES `CostCenters` (`ID`) ON UPDATE CASCADE,\n" .
-                                   "  CONSTRAINT `Groups_ibfk_2` FOREIGN KEY (`Profile`) REFERENCES `Profiles` (`ID`) ON UPDATE CASCADE\n" .
-                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Group of extensions';\n", array ( "CostCenters", "Profiles"));
+                                   "  CONSTRAINT `Groups_ibfk_2` FOREIGN KEY (`Profile`) REFERENCES `Profiles` (`ID`) ON UPDATE CASCADE,\n" .
+                                   "  CONSTRAINT `Agents_ibfk_3` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" . 
+                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Group of extensions';\n", array ( "CostCenters", "Profiles", "Tenants"));
 
   /**
    * Add basic system triggers

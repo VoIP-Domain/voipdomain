@@ -39,19 +39,19 @@
 /**
  * Add basic framework hooks, with the relative function.
  */
-framework_add_path ( "/exceptions", "exceptions_search_page");
+framework_add_path ( "/exceptions", "exceptions_search_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "exceptions_search_page", "exceptions_search_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/exceptions/add", "exceptions_add_page");
+framework_add_path ( "/exceptions/add", "exceptions_add_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "exceptions_add_page", "exceptions_add_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/exceptions/:id/clone", "exceptions_clone_function");
+framework_add_path ( "/exceptions/:id/clone", "exceptions_clone_function", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "exceptions_clone_function", "exceptions_clone_function", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/exceptions/:id/view", "exceptions_view_page");
+framework_add_path ( "/exceptions/:id/view", "exceptions_view_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "exceptions_view_page", "exceptions_view_page", IN_HOOK_INSERT_FIRST);
 
-framework_add_path ( "/exceptions/:id/edit", "exceptions_edit_page");
+framework_add_path ( "/exceptions/:id/edit", "exceptions_edit_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "exceptions_edit_page", "exceptions_edit_page", IN_HOOK_INSERT_FIRST);
 
 /**
