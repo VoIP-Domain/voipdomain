@@ -103,6 +103,7 @@ i18n_add ( "The system range was removed.");
 i18n_add ( "Remove a system range.");
 i18n_add ( "Invalid range ID.");
 i18n_add ( "Range cloning");
+i18n_add ( "The number length must have %d digits.");
 
 /**
  * Add Brazilian Portuguese support
@@ -173,4 +174,5 @@ i18n_add ( "The system range was removed.", "A faixa do sistema foi removida.", 
 i18n_add ( "Remove a system range.", "Remover uma faixa do sistema.", "pt_BR");
 i18n_add ( "Invalid range ID.", "ID de faixa inválido.", "pt_BR");
 i18n_add ( "Range cloning", "Clonagem de faixa", "pt_BR");
+i18n_add ( "The number length must have %d digits.", "O tamanho do número deve ter %d dígitos.", "pt_BR");
 ?>

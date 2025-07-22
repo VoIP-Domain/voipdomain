@@ -182,6 +182,7 @@ i18n_add ( "File didn't match required firmware content!");
 i18n_add ( "Firmware successfully uploaded!");
 i18n_add ( "Equipment automatically activated!");
 i18n_add ( "Cannot upload firmware file!");
+i18n_add ( "The equipment firmware filename.");
 
 /**
  * Add Brazilian Portuguese support
@@ -331,4 +332,5 @@ i18n_add ( "File didn't match required firmware content!", "Arquivo não contém
 i18n_add ( "Firmware successfully uploaded!", "Firmware adicionada com sucesso!", "pt_BR");
 i18n_add ( "Equipment automatically activated!", "Equipamento ativado automaticamente!", "pt_BR");
 i18n_add ( "Cannot upload firmware file!", "Não foi possível enviar arquivo de firmware!", "pt_BR");
+i18n_add ( "The equipment firmware filename.", "O nome do arquivo da firmware do equipamento.", "pt_BR");
 ?>

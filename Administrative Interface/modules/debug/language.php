@@ -118,6 +118,7 @@ i18n_add ( "Debug ping/pong hook");
 i18n_add ( "Debug ping/pong");
 i18n_add ( "Debug ping/pong messages.");
 i18n_add ( "callback ( 'variables')");
+i18n_add ( "Super-Administrator");
 
 /**
  * Add Brazilian Portuguese support
@@ -203,4 +204,5 @@ i18n_add ( "Debug ping/pong hook", "Gancho de depuração ping/pong", "pt_BR");
 i18n_add ( "Debug ping/pong", "Depuração ping/pong", "pt_BR");
 i18n_add ( "Debug ping/pong messages.", "Mensagens de depuração ping/pong.", "pt_BR");
 i18n_add ( "callback ( 'variables')", "callback ( 'variáveis')", "pt_BR");
+i18n_add ( "Super-Administrator", "Super-Administrador", "pt_BR");
 ?>
