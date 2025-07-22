@@ -120,7 +120,7 @@ function multitenant_install_db ( $buffer, $parameters)
    * Add basic system data
    */
   install_add_db_data ( "Admins", array (
-    array ( "Name" => "Administrator", "Username" => "admin", "Password" => "6eedcf62914377ce6c04d1cd39ed10bfcc41affd264da255715dbbbc9ee8dfdf", "Salt" => "d90171577077c7a5333a4032798343683b65190432d4dfb30edd8993e00b9411", "Iterations" => 40000, "Permissions" => "[\"Administrator\"]", "Email" => "admin@voipdomain.io", "Since" => date ( "Y-m-d H:i:s"), "Language" => "en_US")
+    array ( "Name" => "Administrator", "Username" => "admin", "Password" => "6eedcf62914377ce6c04d1cd39ed10bfcc41affd264da255715dbbbc9ee8dfdf", "Salt" => "d90171577077c7a5333a4032798343683b65190432d4dfb30edd8993e00b9411", "Iterations" => 40000, "Permissions" => "[]", "Email" => "admin@voipdomain.io", "Since" => date ( "Y-m-d H:i:s"), "Language" => "en_US")
   ));
 
   /**

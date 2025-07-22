@@ -253,7 +253,8 @@ if ( array_key_exists ( $_in["general"]["cookie"] . "_adm", $_COOKIE))
   }
   if ( ! $session = $result->fetch_assoc ())
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 401 Unauthorized");
+    setcookie ( $_in["general"]["cookie"], null, -1, "/");
+    echo framework_call ( "multitenant_login_page_generate", array ( "message" => __ ( "Session expired.")));
     exit ();
   }
 
@@ -370,7 +371,8 @@ if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE))
   }
   if ( ! $session = $result->fetch_assoc ())
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 401 Unauthorized");
+    setcookie ( $_in["general"]["cookie"], null, -1, "/");
+    echo framework_call ( "login_page_generate", array ( "message" => __ ( "Session expired.")));
     exit ();
   }
 
