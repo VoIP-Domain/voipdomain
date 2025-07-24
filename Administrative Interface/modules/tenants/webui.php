@@ -54,6 +54,11 @@ function multitenant_login_page_generate ( $buffer, $parameters)
   global $_in;
 
   /**
+   * Ensure to clear any existing cookie
+   */
+  setcookie ( $_in["general"]["cookie"] . "_adm", null, -1, "/");
+
+  /**
    * If login autocomplete are turned off, generate random string for username and password fields, to avoid browsers autocomplete.
    */
   if ( ! $_in["security"]["loginformautocomplete"])

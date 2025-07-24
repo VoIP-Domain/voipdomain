@@ -224,7 +224,7 @@ function tenants_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || ( is_array ( $parameters["Fields"]) && sizeof ( $parameters["Fields"]) == 0))
   {
     $parameters["Fields"] = $parameters["function"]["DefaultFields"];
   }
@@ -656,6 +656,7 @@ framework_add_hook (
           "type" => "string",
           "description" => __ ( "The domain of the tenant."),
           "required" => true,
+          "pattern" => "/^(([A-Za-z0-9]+)([\.])){1,}([A-Za-z0-9]*)$/",
           "example" => __ ( "example.com")
         ),
         "Country" => array (
@@ -799,7 +800,7 @@ function tenants_add ( $buffer, $parameters)
   {
     $data["Domain"] = __ ( "The tenant domain is required.");
   }
-  if ( ! array_key_exists ( "Domain", $data) && ! preg_match ( "/^([A-Za-z0-9-]+)([\.]{1})([A-Za-z0-9]+)([\.]{0,1})([A-Za-z0-9]*)$/i", $parameters["Domain"]))
+  if ( ! array_key_exists ( "Domain", $data) && ! preg_match ( "/^(([A-Za-z0-9]+)([\.])){1,}([A-Za-z0-9]*)$/i", $parameters["Domain"]))
   {
     $data["Domain"] = __ ( "The tenant domain must be valid.");
   }

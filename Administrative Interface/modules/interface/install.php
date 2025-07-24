@@ -113,6 +113,26 @@ framework_add_hook (
   "install_populate",
   IN_HOOK_NULL,
   array (
+    "requests" => array (
+      "type" => "object",
+      "properties" => array (
+        "Hostname" => array (
+          "type" => "string",
+          "description" => __ ( "The hostname of the MySQL server."),
+          "example" => "127.0.0.1"
+        ),
+        "Username" => array (
+          "type" => "string",
+          "description" => __ ( "The username of a super user of MySQL server."),
+          "example" => "root"
+        ),
+        "Password" => array (
+          "type" => "password",
+          "description" => __ ( "The username of a super user of MySQL server."),
+          "example" => __ ( "A_v3ry.sECure,p4ssw0rD")
+        )
+      )
+    ),
     "response" => array (
       200 => array (
         "description" => __ ( "An object with database installation results."),
@@ -202,14 +222,15 @@ function install_populate ( $buffer, $parameters)
   {
     $_in["mysql"] = array ();
   }
-  $_in["mysql"]["hostname"] = $parameters["Hostname"];
+  $_in["mysql"]["hostname"] = $parameters["Hostname"] . ( ! empty ( $_in["mysql"]["port"]) ? ":" . $_in["mysql"]["port"] : "");
   $_in["mysql"]["username"] = $parameters["Username"];
   $_in["mysql"]["password"] = $parameters["Password"];
+  $_in["mysql"]["database"] = "";
 
   /**
    * Check database server connection
    */
-  $_in["mysql"]["id"] = @new mysqli ( $_in["mysql"]["hostname"] . ( ! empty ( $_in["mysql"]["port"]) ? ":" . $_in["mysql"]["port"] : ""), $_in["mysql"]["username"], $_in["mysql"]["password"], $_in["mysql"]["database"]);
+  $_in["mysql"]["id"] = @new mysqli ( $_in["mysql"]["hostname"], $_in["mysql"]["username"], $_in["mysql"]["password"], $_in["mysql"]["database"]);
   if ( $_in["mysql"]["id"]->connect_errno)
   {
     $return["Username"] = __ ( "Username or password invalid.");

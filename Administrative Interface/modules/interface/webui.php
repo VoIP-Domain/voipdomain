@@ -63,20 +63,20 @@ function page_menu ( $structure, $indent = "")
       {
         $entry["permissions"] = explode ( ",", $entry["permissions"]);
       }
-    }
-    if ( sizeof ( $entry["permissions"]) != 0)
-    {
-      $allow = false;
-      foreach ( $entry["permissions"] as $permission)
+      if ( sizeof ( $entry["permissions"]) != 0)
       {
-        if ( in_array ( $permission, $_in["session"]["Permissions"]))
+        $allow = false;
+        foreach ( $entry["permissions"] as $permission)
         {
-          $allow = true;
+          if ( in_array ( $permission, $_in["session"]["Permissions"]))
+          {
+            $allow = true;
+          }
         }
-      }
-      if ( ! $allow)
-      {
-        continue;
+        if ( ! $allow)
+        {
+          continue;
+        }
       }
     }
     if ( ! array_key_exists ( "group", $entry))
@@ -1622,6 +1622,11 @@ function login_page_generate ( $buffer, $parameters)
   global $_in;
 
   /**
+   * Ensure to clear any existing cookie
+   */
+  setcookie ( $_in["general"]["cookie"], null, -1, "/");
+
+  /**
    * If login autocomplete are turned off, generate random string for username and password fields, to avoid browsers autocomplete.
    */
   if ( ! $_in["security"]["loginformautocomplete"])
@@ -2278,7 +2283,6 @@ function install_page_generate ( $buffer, $parameters)
   }
   $body .= "    </div>\n";
   $body .= "  </div>\n";
-  $body .= "  <div class=\"background\"><img src=\"/img/bg-install.jpg\" alt=\"\"></div>\n";
   $body .= "  <div id=\"page1\" class=\"install-block\">\n";
   $body .= "    <div class=\"install-top\">\n";
   $body .= "      <h1>" . ( ! empty ( $_in["general"]["title"]) ? strip_tags ( $_in["general"]["title"]) : "") . "</h1>\n";
