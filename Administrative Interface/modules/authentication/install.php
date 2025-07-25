@@ -71,8 +71,8 @@ function authentication_install_db ( $buffer, $parameters)
                                                 "  `IssueDate` datetime NOT NULL,\n" .
                                                 "  `LastSeen` datetime NOT NULL,\n" .
                                                 "  `Expires` datetime NOT NULL,\n" .
-                                                "  `TokenData` text NOT NULL DEFAULT '',\n" .
-                                                "  `UserData` text NOT NULL DEFAULT '',\n" .
+                                                "  `TokenData` text NOT NULL,\n" .
+                                                "  `UserData` text NOT NULL,\n" .
                                                 "  PRIMARY KEY (`Token`),\n" .
                                                 "  KEY `Email` (`Email`),\n" .
                                                 "  KEY `AuthencationToken_ibfk_1` (`Tenant`),\n" . 

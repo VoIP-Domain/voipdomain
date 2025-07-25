@@ -145,13 +145,25 @@ which will receive events from the administrative interface to change Asterisk
 configurations and provide basic system intelligence such as LCR.
 
 Once everything is installed, you'll need to create the main system database and
-populate it with MariaDB install script found in docs/voipdomain.sqldump.
+populate it with MariaDB. Configuring the web server pointing to the
+Administrative Interface, you'll access the installation procedure. The
+installation will be done in three steps:
 
-When starting the system, the default user will be "admin", with password
-"admin".
+1) Permission check:
+   - This will check if `/etc/voipdomain` is a directory and if it's writable by
+     the web server user. Usually when running with NGiNX, the user `nginx`
+     should be used.
+   - If there's no `/etc/voipdomain/webserver.conf` file.
+2) Populate the database:
+   - This step you'll provide the database server hostname, user and password.
+     System will create the user `vd`@`localhost` with a secure password and
+     will populate the database `vd`.
+3) System will provide you the default username and password. Usually it's
+   username "admin" and password "admin". This is the multi-tenant
+   super-administrator credentials. You should change the password immediatelly.
 
-To configure the system, you'll need to create a basic tree of objects, in the
-following sequence:
+Access the multi-tenant interface and create your first tenant. On each created
+tenant, you'll need to create a basic tree of objects, in the following sequence:
 
 1) Server
 2) Gateway (you can create a dummy one if needed to test the system)

@@ -63,8 +63,8 @@ function profiles_install_db ( $buffer, $parameters)
                                      "  `AreaCode` smallint(2) unsigned NOT NULL,\n" .
                                      "  `Prefix` smallint(1) unsigned NOT NULL,\n" .
                                      "  `NGGW` bigint(20) unsigned NOT NULL,\n" .
-                                     "  `DefaultGW` text DEFAULT '',\n" .
-                                     "  `BlockedGW` text DEFAULT '',\n" .
+                                     "  `DefaultGW` text,\n" .
+                                     "  `BlockedGW` text,\n" .
                                      "  `Language` varchar(5) NOT NULL DEFAULT 'en_US',\n" .
                                      "  `MOH` int(10) unsigned DEFAULT NULL,\n" .
                                      "  `EmergencyShortcut` boolean NOT NULL DEFAULT false,\n" .

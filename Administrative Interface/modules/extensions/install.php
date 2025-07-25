@@ -69,8 +69,8 @@ function extensions_install_db ( $buffer, $parameters)
                                        ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extensions';\n", array ( "Ranges", "Tenants"));
   install_add_db_table ( "ExtensionActivity", "CREATE TABLE `ExtensionActivity` (\n" .
                                               "  `UID` bigint(20) unsigned NOT NULL,\n" .
-                                              "  `LastDialed` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',\n" .
-                                              "  `LastReceived` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',\n" .
+                                              "  `LastDialed` datetime NOT NULL,\n" .
+                                              "  `LastReceived` datetime NOT NULL,\n" .
                                               "  PRIMARY KEY (`UID`),\n" .
                                               "  KEY `ExtensionActivity_ibfk_1` (`UID`),\n" . 
                                               "  CONSTRAINT `ExtensionActivity_ibfk_1` FOREIGN KEY (`UID`) REFERENCES `Extensions` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" .

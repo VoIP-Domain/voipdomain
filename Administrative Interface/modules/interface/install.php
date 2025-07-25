@@ -403,7 +403,7 @@ function install_populate ( $buffer, $parameters)
    */
   install_add_db_table ( "Cache", "CREATE TABLE `Cache` (\n" .
                                   "  `Table` varchar(255) NOT NULL,\n" .
-                                  "  `Updated` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',\n" .
+                                  "  `Updated` datetime NOT NULL,\n" .
                                   "  PRIMARY KEY (`Table`)\n" .
                                   ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Internal database table cache timers';\n");
   install_add_db_table ( "Config", "CREATE TABLE `Config` (\n" .
@@ -435,41 +435,41 @@ function install_populate ( $buffer, $parameters)
                                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Installed plugins information';\n");
   install_add_db_table ( "cdr", "CREATE TABLE `cdr` (\n" .
                                 "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
-                                "  `calldate` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',\n" .
-                                "  `clid` varchar(80) NOT NULL DEFAULT '',\n" .
-                                "  `src` varchar(80) NOT NULL DEFAULT '',\n" .
-                                "  `dst` varchar(80) NOT NULL DEFAULT '',\n" .
-                                "  `dcontext` varchar(80) NOT NULL DEFAULT '',\n" .
-                                "  `channel` varchar(80) NOT NULL DEFAULT '',\n" .
-                                "  `dstchannel` varchar(80) NOT NULL DEFAULT '',\n" .
-                                "  `lastapp` varchar(80) NOT NULL DEFAULT '',\n" .
-                                "  `lastdata` varchar(80) NOT NULL DEFAULT '',\n" .
-                                "  `duration` int(11) unsigned NOT NULL DEFAULT '0',\n" .
-                                "  `billsec` int(11) unsigned NOT NULL DEFAULT '0',\n" .
-                                "  `disposition` varchar(45) NOT NULL DEFAULT '',\n" .
-                                "  `amaflags` int(11) unsigned NOT NULL DEFAULT '0',\n" .
-                                "  `accountcode` varchar(20) NOT NULL DEFAULT '',\n" .
-                                "  `userfield` varchar(255) NOT NULL DEFAULT '',\n" .
-                                "  `uniqueid` varchar(32) NOT NULL DEFAULT '',\n" .
-                                "  `linkedid` varchar(32) NOT NULL DEFAULT '',\n" .
-                                "  `sequence` varchar(32) NOT NULL DEFAULT '',\n" .
-                                "  `peeraccount` varchar(32) NOT NULL DEFAULT '',\n" .
-                                "  `server` int(11) unsigned NOT NULL DEFAULT '0',\n" .
-                                "  `sourcetype` smallint(2) unsigned NOT NULL DEFAULT '0',\n" .
-                                "  `calltype` smallint(2) unsigned NOT NULL DEFAULT '0',\n" .
-                                "  `gateway` int(11) unsigned NOT NULL DEFAULT '0',\n" .
+                                "  `calldate` datetime NOT NULL,\n" .
+                                "  `clid` varchar(80) NOT NULL,\n" .
+                                "  `src` varchar(80) NOT NULL,\n" .
+                                "  `dst` varchar(80) NOT NULL,\n" .
+                                "  `dcontext` varchar(80) NOT NULL,\n" .
+                                "  `channel` varchar(80) NOT NULL,\n" .
+                                "  `dstchannel` varchar(80) NOT NULL,\n" .
+                                "  `lastapp` varchar(80) NOT NULL,\n" .
+                                "  `lastdata` varchar(80) NOT NULL,\n" .
+                                "  `duration` int(11) unsigned NOT NULL DEFAULT 0,\n" .
+                                "  `billsec` int(11) unsigned NOT NULL DEFAULT 0,\n" .
+                                "  `disposition` varchar(45) NOT NULL,\n" .
+                                "  `amaflags` int(11) unsigned NOT NULL DEFAULT 0,\n" .
+                                "  `accountcode` varchar(20) NOT NULL,\n" .
+                                "  `userfield` varchar(255) NOT NULL,\n" .
+                                "  `uniqueid` varchar(32) NOT NULL,\n" .
+                                "  `linkedid` varchar(32) NOT NULL,\n" .
+                                "  `sequence` varchar(32) NOT NULL,\n" .
+                                "  `peeraccount` varchar(32) NOT NULL,\n" .
+                                "  `server` int(11) unsigned NOT NULL DEFAULT 0,\n" .
+                                "  `sourcetype` smallint(2) unsigned NOT NULL DEFAULT 0,\n" .
+                                "  `calltype` smallint(2) unsigned NOT NULL DEFAULT 0,\n" .
+                                "  `gateway` int(11) unsigned NOT NULL DEFAULT 0,\n" .
                                 "  `value` double(10,6) unsigned DEFAULT NULL,\n" .
                                 "  `processed` boolean NOT NULL DEFAULT false,\n" .
-                                "  `nativecodec` varchar(64) NOT NULL DEFAULT '',\n" .
-                                "  `readcodec` varchar(64) NOT NULL DEFAULT '',\n" .
-                                "  `writecodec` varchar(64) NOT NULL DEFAULT '',\n" .
-                                "  `QOS` text NOT NULL DEFAULT '',\n" .
+                                "  `nativecodec` varchar(64) NOT NULL,\n" .
+                                "  `readcodec` varchar(64) NOT NULL,\n" .
+                                "  `writecodec` varchar(64) NOT NULL,\n" .
+                                "  `QOS` text NOT NULL,\n" .
                                 "  `WhoHungUp` enum('Caller','Called'),\n" .
                                 "  `monitor` varchar(255) NOT NULL DEFAULT '',\n" .
                                 "  `userfieldextra` varchar(255) DEFAULT NULL,\n" .
                                 "  `insertdate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n" .
                                 "  `SIPID` varchar(255) DEFAULT '',\n" .
-                                "  `flags` text NOT NULL DEFAULT '',\n" .
+                                "  `flags` text NOT NULL,\n" .
                                 "  `srcid` int(10) unsigned DEFAULT NULL,\n" .
                                 "  `dstid` int(10) unsigned DEFAULT NULL,\n" .
                                 "  `ccid` int(10) unsigned DEFAULT NULL,\n" .
