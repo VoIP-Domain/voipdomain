@@ -172,7 +172,7 @@ framework_add_api_call (
   "Read",
   "equipments_search",
   array (
-    "permissions" => array ( "Administrator", "Super-Administrator", "equipments_search"),
+    "permissions" => array ( "User", "Administrator", "Super-Administrator", "equipments_search"),
     "title" => __ ( "Search equipments"),
     "description" => __ ( "Search for system equipments.")
   )
@@ -216,7 +216,7 @@ function equipments_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || ( is_array ( $parameters["Fields"]) && sizeof ( $parameters["Fields"]) == 0))
   {
     $parameters["Fields"] = $parameters["function"]["DefaultFields"];
   }
@@ -650,7 +650,11 @@ function equipments_view ( $buffer, $parameters)
       exit ();
     }
   } else {
-    $tenantsettings = array ();
+    $tenantsettings = array (
+      "AudioCodecs" => "[]",
+      "VideoCodecs" => "[]",
+      "ExtraSettings" => "[]"
+    );
   }
 
   /**

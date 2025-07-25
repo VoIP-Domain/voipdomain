@@ -73,6 +73,7 @@ function equipments_install_db ( $buffer, $parameters)
                                        "  `SupportedAudioCodecs` mediumblob NOT NULL,\n" .
                                        "  `SupportedVideoCodecs` mediumblob NOT NULL,\n" .
                                        "  `SupportedFirmwares` mediumblob NOT NULL,\n" .
+                                       "  `Active` boolean NOT NULL DEFAULT false,\n" .
                                        "  PRIMARY KEY (`ID`),\n" .
                                        "  UNIQUE KEY `UID` (`UID`),\n" .
                                        "  KEY `Vendor` (`Vendor`),\n" .

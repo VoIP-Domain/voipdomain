@@ -2799,7 +2799,7 @@ function error_5xx ( $errno, $message)
     echo "            let updown = [800, -800];\n";
     echo "            let randomY = updown[Math.floor ( Math.random () * updown.length)];\n";
     echo "            let randomX = Math.floor ( Math.random () * 1000) - 1000;\n";
-    echo "            elem.style.transform = 'translate(${randomX}px, ${randomY}px) rotate(-540deg)';\n";
+    echo "            elem.style.transform = 'translate(\${randomX}px, \${randomY}px) rotate(-540deg)';\n";
     echo "            elem.style.transition = 'transform 1s ease, opacity 2s';\n";
     echo "            elem.style.opacity = '0';\n";
     echo "            counter--;\n";

@@ -645,7 +645,7 @@ function equipments_view_page ( $buffer, $parameters)
               "    $('.btn-modellink').removeAttr ( 'disabled');\n" .
               "  }\n" .
               "  $('#equipment_view_form ul.nav-pages').find ( 'li[data-type=\'' + data.UID + '\']').css ( 'display', 'block');\n" .
-              $onshow .
+	      ( in_array ( "Super-Administrator", $_in["session"]["Permissions"]) ? "" : $onshow) .
               "});\n" .
               "$('.btn-vendorlink').on ( 'click', function ( e)\n" .
               "{\n" .
@@ -1231,7 +1231,7 @@ function equipments_configure_page ( $buffer, $parameters)
               "    $('.btn-modellink').removeAttr ( 'disabled');\n" .
               "  }\n" .
               "  $('#equipment_configure_form ul.nav-pages').find ( 'li[data-type=\'' + data.UID + '\']').css ( 'display', 'block');\n" .
-              $onshow .
+	      ( in_array ( "Super-Administrator", $_in["session"]["Permissions"]) ? "" : $onshow) .
               "});\n" .
               ( in_array ( "Super-Administrator", $_in["session"]["Permissions"]) ?
                 "$('#equipment_configure_tab_firmwares').on ( 'click', '.btn-uploadfile', function ( event)\n" .
