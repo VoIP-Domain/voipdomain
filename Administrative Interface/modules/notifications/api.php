@@ -163,7 +163,7 @@ function notifications_events_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || ( is_array ( $parameters["Fields"]) && sizeof ( $parameters["Fields"]) == 0))
   {
     $parameters["Fields"] = $parameters["function"]["DefaultFields"];
   }
@@ -612,7 +612,7 @@ function notifications_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || ( is_array ( $parameters["Fields"]) && sizeof ( $parameters["Fields"]) == 0))
   {
     $parameters["Fields"] = $parameters["function"]["DefaultFields"];
   }

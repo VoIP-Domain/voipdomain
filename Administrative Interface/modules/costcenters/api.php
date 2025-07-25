@@ -148,7 +148,7 @@ function costcenters_search ( $buffer, $parameters)
    * Check for modifications time
    */
   check_table_modification ( "CostCenters");
-  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || ( is_array ( $parameters["Fields"]) && sizeof ( $parameters["Fields"]) == 0))
   {
     $parameters["Fields"] = $parameters["function"]["DefaultFields"];
   }

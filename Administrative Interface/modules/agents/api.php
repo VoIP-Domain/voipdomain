@@ -169,7 +169,7 @@ function agents_search ( $buffer, $parameters)
   {
     $data["Code"] = __ ( "Code must have four digit numbers.");
   }
-  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || ( is_array ( $parameters["Fields"]) && sizeof ( $parameters["Fields"]) == 0))
   {
     $parameters["Fields"] = $parameters["function"]["DefaultFields"];
   }

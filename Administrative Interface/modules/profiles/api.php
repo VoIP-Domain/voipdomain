@@ -174,7 +174,7 @@ function profiles_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || ( is_array ( $parameters["Fields"]) && sizeof ( $parameters["Fields"]) == 0))
   {
     $parameters["Fields"] = $parameters["function"]["DefaultFields"];
   }
@@ -925,7 +925,7 @@ function profiles_add ( $buffer, $parameters)
    * If provided some gateway, check if exists
    */
   $gateways = array ();
-  if ( array_key_exists ( "Gateways", $parameters) && sizeof ( $parameters["Gateways"]) != 0)
+  if ( array_key_exists ( "Gateways", $parameters) && is_array ( $parameters["Gateways"]) && sizeof ( $parameters["Gateways"]) != 0)
   {
     foreach ( $parameters["Gateways"] as $gateway)
     {
@@ -948,7 +948,7 @@ function profiles_add ( $buffer, $parameters)
    * If provided some blocked gateway, check if exists
    */
   $blockeds = array ();
-  if ( array_key_exists ( "Blockeds", $parameters) && sizeof ( $parameters["Blockeds"]) != 0)
+  if ( array_key_exists ( "Blockeds", $parameters) && is_array ( $parameters["Blockeds"]) && sizeof ( $parameters["Blockeds"]) != 0)
   {
     foreach ( $parameters["Blockeds"] as $gateway)
     {
@@ -1400,7 +1400,7 @@ function profiles_edit ( $buffer, $parameters)
    * If provided some gateway, check if exists
    */
   $gateways = array ();
-  if ( array_key_exists ( "Gateways", $parameters) && sizeof ( $parameters["Gateways"]) != 0)
+  if ( array_key_exists ( "Gateways", $parameters) && is_array ( $parameters["Gateways"]) && sizeof ( $parameters["Gateways"]) != 0)
   {
     foreach ( $parameters["Gateways"] as $gateway)
     {
@@ -1421,7 +1421,7 @@ function profiles_edit ( $buffer, $parameters)
    * If provided some blocked gateway, check if exists
    */
   $blockeds = array ();
-  if ( array_key_exists ( "Blockeds", $parameters) && sizeof ( $parameters["Blockeds"]) != 0)
+  if ( array_key_exists ( "Blockeds", $parameters) && is_array ( $parameters["Blockeds"]) && sizeof ( $parameters["Blockeds"]) != 0)
   {
     foreach ( $parameters["Blockeds"] as $gateway)
     {

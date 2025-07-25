@@ -148,7 +148,7 @@ function tokens_permissions_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || ( is_array ( $parameters["Fields"]) && sizeof ( $parameters["Fields"]) == 0))
   {
     $parameters["Fields"] = $parameters["function"]["DefaultFields"];
   }
@@ -358,7 +358,7 @@ function tokens_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || ( is_array ( $parameters["Fields"]) && sizeof ( $parameters["Fields"]) == 0))
   {
     $parameters["Fields"] = $parameters["function"]["DefaultFields"];
   }
@@ -828,7 +828,7 @@ function tokens_add ( $buffer, $parameters)
       $data["Permissions"] = __ ( "Invalid permission.");
     }
   }
-  if ( ! array_key_exists ( "Permissions", $data) && sizeof ( $parameters["Permissions"]) == 0)
+  if ( ! array_key_exists ( "Permissions", $data) && is_array ( $parameters["Permissions"]) && sizeof ( $parameters["Permissions"]) == 0)
   {
     $data["Permissions"] = __ ( "At least one permission is required.");
   }
@@ -1105,7 +1105,7 @@ function tokens_edit ( $buffer, $parameters)
       $data["Permissions"] = __ ( "Invalid permission.");
     }
   }
-  if ( ! array_key_exists ( "Permissions", $data) && sizeof ( $parameters["Permissions"]) == 0)
+  if ( ! array_key_exists ( "Permissions", $data) && is_array ( $parameters["Permissions"]) && sizeof ( $parameters["Permissions"]) == 0)
   {
     $data["Permissions"] = __ ( "At least one permission is required.");
   }
