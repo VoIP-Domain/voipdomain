@@ -414,7 +414,7 @@ if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE))
     if ( $_in["general"]["timeout"] > 0 && $session["LastSeen"] + $_in["general"]["timeout"] < time ())
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 401 Unauthorized");
-      setcookie ( $_in["general"]["cookie"], null, -1, "/");
+      setcookie ( $_in["general"]["cookie"], "", -1, "/");
       echo json_encode ( array ( "event" => "session_timeout"));
       exit ();
     }
@@ -472,7 +472,7 @@ if ( array_key_exists ( $_in["general"]["cookie"] . "_adm", $_COOKIE))
     if ( $_in["general"]["timeout"] > 0 && $session["LastSeen"] + $_in["general"]["timeout"] < time ())
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 401 Unauthorized");
-      setcookie ( $_in["general"]["cookie"] . "_adm", null, -1, "/");
+      setcookie ( $_in["general"]["cookie"] . "_adm", "", -1, "/");
       echo json_encode ( array ( "event" => "session_timeout"));
       exit ();
     }

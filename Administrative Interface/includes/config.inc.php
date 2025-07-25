@@ -91,6 +91,7 @@ $_in["version"] = "1.0";
  * Initialize session variables
  */
 $_in["session"] = array ();
+$_in["session"]["Impersonate"] = NULL;
 $_in["session"]["Authenticated"] = false;
 $_in["session"]["Method"] = NULL;
 $_in["session"]["Tenant"] = NULL;

@@ -232,7 +232,7 @@ if ( $_SERVER["HTTP_HOST"] == $_in["general"]["masterhostname"])
 {
   $loginpage = "multitenant_login_page_generate";
 }
-if ( $_SERVER["HTTP_HOST"] == $_in["general"]["authhostname"])
+if ( array_key_exists ( "authhostname", $_in["general"]) && $_SERVER["HTTP_HOST"] == $_in["general"]["authhostname"])
 {
   $loginpage = "authentication_page_generate";
 }
@@ -253,7 +253,7 @@ if ( array_key_exists ( $_in["general"]["cookie"] . "_adm", $_COOKIE))
   }
   if ( ! $session = $result->fetch_assoc ())
   {
-    setcookie ( $_in["general"]["cookie"], null, -1, "/");
+    setcookie ( $_in["general"]["cookie"], "", -1, "/");
     echo framework_call ( "multitenant_login_page_generate", array ( "message" => __ ( "Session expired.")));
     exit ();
   }
@@ -323,7 +323,7 @@ if ( array_key_exists ( $_in["general"]["cookie"] . "_adm", $_COOKIE))
     {
       echo json_encode ( array ( "event" => "session_timeout"));
     } else {
-      setcookie ( $_in["general"]["cookie"], null, -1, "/");
+      setcookie ( $_in["general"]["cookie"], "", -1, "/");
       echo framework_call ( "multitenant_login_page_generate", array ( "message" => __ ( "Session expired.")));
     }
     exit ();
@@ -371,7 +371,7 @@ if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE))
   }
   if ( ! $session = $result->fetch_assoc ())
   {
-    setcookie ( $_in["general"]["cookie"], null, -1, "/");
+    setcookie ( $_in["general"]["cookie"], "", -1, "/");
     echo framework_call ( "login_page_generate", array ( "message" => __ ( "Session expired.")));
     exit ();
   }
@@ -441,7 +441,7 @@ if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE))
     {
       echo json_encode ( array ( "event" => "session_timeout"));
     } else {
-      setcookie ( $_in["general"]["cookie"], null, -1, "/");
+      setcookie ( $_in["general"]["cookie"], "", -1, "/");
       echo framework_call ( "login_page_generate", array ( "message" => __ ( "Session expired.")));
     }
     exit ();
