@@ -1524,7 +1524,7 @@ function dashboard_information ( $page, $parameters)
   }
   $total = intval ( $count->fetch_assoc ()["Total"]);
   $count->free ();
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Start`, `Finish` FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1535,7 +1535,12 @@ function dashboard_information ( $page, $parameters)
     $ranges += $range["Finish"] - $range["Start"];
   }
   $result->free ();
-  $data["Allocation"] = array ( "Percent" => round (( $total * 100) / $ranges), "Value" => $total, "Total" => $ranges);
+  if ( ! $ranges)
+  {
+    $data["Allocation"] = array ( "Percent" => 0, "Value" => $total, "Total" => $ranges);
+  } else {
+    $data["Allocation"] = array ( "Percent" => round (( $total * 100) / $ranges), "Value" => $total, "Total" => $ranges);
+  }
 
   /**
    * Call post hook if exist
