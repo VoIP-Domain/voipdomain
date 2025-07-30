@@ -821,16 +821,19 @@ function tokens_add ( $buffer, $parameters)
   {
     $data["Access"] = __ ( "The access CIDR provided is invalid.");
   }
-  foreach ( $parameters["Permissions"] as $key => $value)
-  {
-    if ( ! array_key_exists ( $value, $_api["permissions"]))
-    {
-      $data["Permissions"] = __ ( "Invalid permission.");
-    }
-  }
-  if ( ! array_key_exists ( "Permissions", $data) && is_array ( $parameters["Permissions"]) && sizeof ( $parameters["Permissions"]) == 0)
+  if ( ! array_key_exists ( "Permissions", $parameters) || ( is_array ( $parameters["Permissions"]) && sizeof ( $parameters["Permissions"]) == 0))
   {
     $data["Permissions"] = __ ( "At least one permission is required.");
+  }
+  if ( ! array_key_exists ( "Permissions", $data))
+  {
+    foreach ( $parameters["Permissions"] as $key => $value)
+    {
+      if ( ! array_key_exists ( $value, $_api["permissions"]))
+      {
+        $data["Permissions"] = __ ( "Invalid permission.");
+      }
+    }
   }
   if ( empty ( $parameters["Validity"]))
   {

@@ -1983,11 +1983,11 @@ function __ ( $text, $strip = true, $slashes = true, $context = "")
   }
   if ( $strip)
   {
-    $return = strip_tags ( $return);
+    $return = strip_tags ( $return ? $return : "");
   }
   if ( $slashes)
   {
-    $return = addslashes ( $return);
+    $return = addslashes ( $return ? $return : "");
   }
   return $return;
 }

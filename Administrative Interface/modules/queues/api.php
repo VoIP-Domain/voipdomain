@@ -424,7 +424,7 @@ function queues_view ( $buffer, $parameters)
    * Format data
    */
   $queue["StrategyTextEN"] = $_in["queuestypes"][$queue["Strategy"]];
-  $queue["StrategyText"] = __ ( $data["StrategyTextEN"]);
+  $queue["StrategyText"] = __ ( $queue["StrategyTextEN"]);
   $data = api_filter_entry ( array ( "Description", "Name", "Strategy", "StrategyTextEN", "StrategyText"), $queue);
 
   /**

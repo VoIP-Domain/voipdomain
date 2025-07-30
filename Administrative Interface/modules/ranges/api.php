@@ -602,7 +602,7 @@ function ranges_add ( $buffer, $parameters)
     exit ();
   }
   $createnumberslength = false;
-  if ( ! $numberslength = $result->fetch_assoc ()["Data"])
+  if ( $result->num_rows != 1 || ! $numberslength = $result->fetch_assoc ()["Data"])
   {
     $createnumberslength = true;
     $numberslength = strlen ( (string) $parameters["Start"]);

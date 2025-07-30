@@ -246,8 +246,8 @@ function ivr_operator_filter_start ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "AutoAnswer" => (boolean) array_key_exists ( "Properties", $parameters) && array_key_exists ( "AutoAnswer", $parameters["Properties"]) ? $parameters["Properties"]["AutoAnswer"] : false, "Delay" => (int) array_key_exists ( "Properties", $parameters) && array_key_exists ( "Delay", $parameters["Properties"]) ? $parameters["Properties"]["Delay"] : 0), "Outputs" => array ( "output"));
-  if ( ! array_key_exists ( "Properties", $parameters) || ! array_key_exists ( "AutoAnswer", $parameters["Properties"]))
+  $data = array ( "Errors" => array (), "Properties" => array ( "AutoAnswer" => (boolean) array_key_exists ( "AutoAnswer", $parameters["Properties"]) ? $parameters["Properties"]["AutoAnswer"] : false, "Delay" => (int) array_key_exists ( "Delay", $parameters["Properties"]) ? $parameters["Properties"]["Delay"] : 0), "Outputs" => array ( "output"));
+  if ( ! array_key_exists ( "AutoAnswer", $parameters["Properties"]))
   {
     $data["Errors"]["AutoAnswer"] = __ ( "AutoAnswer field is required.");
   }
@@ -255,15 +255,15 @@ function ivr_operator_filter_start ( $buffer, $parameters)
   {
     $data["Errors"]["AutoAnswer"] = __ ( "AutoAnswer must be true or false.");
   }
-  if ( array_key_exists ( "Properties", $parameters) && array_key_exists ( "AutoAnswer", $parameters["Properties"]) && (boolean) $parameters["Properties"]["AutoAnswer"] == true && ! array_key_exists ( "Delay", $parameters["Properties"]))
+  if ( array_key_exists ( "AutoAnswer", $parameters["Properties"]) && (boolean) $parameters["Properties"]["AutoAnswer"] == true && ! array_key_exists ( "Delay", $parameters["Properties"]))
   {
     $data["Errors"]["Delay"] = __ ( "Delay is required when Auto Start is enabled.");
   }
-  if ( $data["Properties"]["AutoAnswer"] && ! array_key_exists ( "Delay", $data["Errors"]) && array_key_exists ( "Properties", $parameters) && array_key_exists ( "Delay", $parameters["Properties"]) && $parameters["Properties"]["Delay"] != (int) $parameters["Properties"]["Delay"])
+  if ( $data["Properties"]["AutoAnswer"] && ! array_key_exists ( "Delay", $data["Errors"]) && array_key_exists ( "Delay", $parameters["Properties"]) && $parameters["Properties"]["Delay"] != (int) $parameters["Properties"]["Delay"])
   {
     $data["Errors"]["Delay"] = __ ( "Delay must be a number.");
   }
-  if ( ! array_key_exists ( "Outputs", $parameters) || ! is_array ( $parameters["Outputs"]) || sizeof ( $parameters["Outputs"]) != 1)
+  if ( ! is_array ( $parameters["Outputs"]) || sizeof ( $parameters["Outputs"]) != 1)
   {
     $data["Errors"]["Outputs"] = __ ( "Operator must have an output.");
   } else {
@@ -393,7 +393,7 @@ function ivr_operator_filter_wait ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => $parameters["Properties"]["Description"], "Time" => (int) $parameters["Properties"]["Time"]), "Outputs" => array ( "output"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Time" => (int) array_key_exists ( "Time", $parameters["Properties"]) ? $parameters["Properties"]["Time"] : 0), "Outputs" => array ( "output"));
   if ( ! array_key_exists ( "Time", $parameters["Properties"]))
   {
     $data["Errors"]["Time"] = __ ( "Time field is required.");
@@ -566,12 +566,12 @@ function ivr_operator_filter_time ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => $parameters["Properties"]["Description"], "Conditions" => array ()), "Outputs" => array ( "other"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Conditions" => array ()), "Outputs" => array ( "other"));
   if ( ! array_key_exists ( "Conditions", $parameters["Properties"]))
   {
     $data["Errors"]["Conditions"] = __ ( "At least one condition is required.");
   }
-  if ( ! array_key_exists ( "Conditions", $data["Errors"]) && ! is_array ( $parameters["Properties"]["Conditions"]))
+  if ( ! array_key_exists ( "Conditions", $data["Errors"]) && array_key_exists ( "Conditions", $parameters["Properties"]) && ! is_array ( $parameters["Properties"]["Conditions"]))
   {
     $data["Errors"]["Conditions"] = __ ( "Conditions must be an array.");
   }
@@ -605,7 +605,7 @@ function ivr_operator_filter_time ( $buffer, $parameters)
       }
     }
   }
-  if ( sizeof ( $parameters["Outputs"]) != sizeof ( $parameters["Properties"]["Conditions"]) + 1)
+  if ( sizeof ( $parameters["Outputs"]) != ( array_key_exists ( "Conditions", $parameters["Properties"]) && is_array ( $parameters["Properties"]["Conditions"]) ? sizeof ( $parameters["Properties"]["Conditions"]) : 0) + 1)
   {
     $data["Errors"]["Outputs"] = __ ( "Operator must have an output for each condition plus the other output.");
   } else {
@@ -721,7 +721,7 @@ function ivr_operator_filter_date ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => $parameters["Properties"]["Description"], "Conditions" => array ()), "Outputs" => array ( "other"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Conditions" => array ()), "Outputs" => array ( "other"));
   if ( ! array_key_exists ( "Conditions", $parameters["Properties"]))
   {
     $data["Errors"]["Conditions"] = __ ( "At least one condition is required.");
@@ -760,7 +760,7 @@ function ivr_operator_filter_date ( $buffer, $parameters)
       }
     }
   }
-  if ( sizeof ( $parameters["Outputs"]) != sizeof ( $parameters["Properties"]["Conditions"]) + 1)
+  if ( sizeof ( $parameters["Outputs"]) != ( array_key_exists ( "Conditions", $parameters["Properties"]) && is_array ( $parameters["Properties"]["Conditions"]) ? sizeof ( $parameters["Properties"]["Conditions"]) : 0) + 1)
   {
     $data["Errors"]["Outputs"] = __ ( "Operator must have an output for each condition plus the other output.");
   } else {
@@ -905,12 +905,12 @@ function ivr_operator_filter_play ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => $parameters["Properties"]["Description"], "File" => (int) $parameters["Properties"]["File"]), "Outputs" => array ( "output"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "File" => (int) array_key_exists ( "File", $parameters["Properties"]) ? $parameters["Properties"]["File"] : 0), "Outputs" => array ( "output"));
   if ( ! array_key_exists ( "File", $parameters["Properties"]))
   {
     $data["Errors"]["File"] = __ ( "Filename is required.");
   }
-  $file = filters_call ( "get_audios", array ( "ID" => (int) $parameters["Properties"]["File"]));
+  $file = filters_call ( "get_audios", array ( "ID" => (int) array_key_exists ( "File", $parameters["Properties"]) ? $parameters["Properties"]["File"] : 0));
   if ( sizeof ( $file) == 1)
   {
     $data["Properties"]["Filename"] = "audio-" . $file[0]["ID"] . "/" . $file[0]["Filename"];
@@ -990,7 +990,7 @@ function ivr_operator_filter_record ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => $parameters["Properties"]["Description"], "Filename" => $parameters["Properties"]["Filename"]), "Outputs" => array ( "output"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Filename" => array_key_exists ( "Filename", $parameters["Properties"]) ? $parameters["Properties"]["Filename"] : ""), "Outputs" => array ( "output"));
   if ( ! array_key_exists ( "Filename", $parameters["Properties"]))
   {
     $data["Errors"]["Filename"] = __ ( "Filename is required.");
@@ -1070,7 +1070,7 @@ function ivr_operator_filter_stop ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => $parameters["Properties"]["Description"], "Discard" => (boolean) $parameters["Properties"]["Discard"]), "Outputs" => array ( "output"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Discard" => (boolean) array_key_exists ( "Discard", $parameters["Properties"]) ? $parameters["Properties"]["Discard"] : false), "Outputs" => array ( "output"));
   if ( ! array_key_exists ( "Discard", $parameters["Properties"]))
   {
     $data["Errors"]["Discard"] = __ ( "Option Discard is required.");
@@ -1169,7 +1169,7 @@ function ivr_operator_filter_read ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => $parameters["Properties"]["Description"], "Variable" => $parameters["Properties"]["Variable"], "Digits" => (int) $parameters["Properties"]["Digits"], "Timeout" => $parameters["Properties"]["Timeout"], "Echo" => (boolean) $parameters["Properties"]["Echo"]), "Outputs" => array ( "ok", "timedout"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Variable" => array_key_exists ( "Variable", $parameters["Properties"]) ? $parameters["Properties"]["Variable"] : "", "Digits" => (int) array_key_exists ( "Digits", $parameters["Properties"]) ? $parameters["Properties"]["Digits"] : 0, "Timeout" => array_key_exists ( "Timeout", $parameters["Properties"]) ? $parameters["Properties"]["Timeout"] : 0, "Echo" => (boolean) array_key_exists ( "Echo", $parameters["Properties"]) ? $parameters["Properties"]["Echo"] : false), "Outputs" => array ( "ok", "timedout"));
   if ( ! array_key_exists ( "Variable", $parameters["Properties"]))
   {
     $data["Errors"]["Variable"] = __ ( "Variable is required.");
@@ -1393,7 +1393,7 @@ function ivr_operator_filter_menu ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => $parameters["Properties"]["Description"], "Variable" => $parameters["Properties"]["Variable"], "File" => (int) $parameters["Properties"]["File"], "InvalidFile" => (int) $parameters["Properties"]["InvalidFile"], "Echo" => (boolean) $parameters["Properties"]["Echo"], "Timeout" => (int) $parameters["Properties"]["Timeout"], "Retries" => (int) $parameters["Properties"]["Retries"], "Option0" => (boolean) $parameters["Properties"]["Option0"], "Option1" => (boolean) $parameters["Properties"]["Option1"], "Option2" => (boolean) $parameters["Properties"]["Option2"], "Option3" => (boolean) $parameters["Properties"]["Option3"], "Option4" => (boolean) $parameters["Properties"]["Option4"], "Option5" => (boolean) $parameters["Properties"]["Option5"], "Option6" => (boolean) $parameters["Properties"]["Option6"], "Option7" => (boolean) $parameters["Properties"]["Option7"], "Option8" => (boolean) $parameters["Properties"]["Option8"], "Option9" => (boolean) $parameters["Properties"]["Option9"], "OptionA" => (boolean) $parameters["Properties"]["OptionA"], "OptionS" => (boolean) $parameters["Properties"]["OptionS"]), "Outputs" => array ( "timedout"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters) ? $parameters["Properties"]["Description"] : "", "Variable" => array_key_exists ( "Variable", $parameters) ? $parameters["Properties"]["Variable"] : "", "File" => (int) array_key_exists ( "File", $parameters) ? $parameters["Properties"]["File"] : 0, "InvalidFile" => (int) array_key_exists ( "InvalidFile", $parameters) ? $parameters["Properties"]["InvalidFile"] : 0, "Echo" => (boolean) array_key_exists ( "Echo", $parameters) ? $parameters["Properties"]["Echo"] : false, "Timeout" => (int) array_key_exists ( "Timeout", $parameters) ? $parameters["Properties"]["Timeout"] : 0, "Retries" => (int) array_key_exists ( "Retries", $parameters) ? $parameters["Properties"]["Retries"] : 0, "Option0" => (boolean) array_key_exists ( "Option0", $parameters) ? $parameters["Properties"]["Option0"] : false, "Option1" => (boolean) array_key_exists ( "Option1", $parameters) ? $parameters["Properties"]["Option1"] : false, "Option2" => (boolean) array_key_exists ( "Option2", $parameters) ? $parameters["Properties"]["Option2"] : false, "Option3" => (boolean) array_key_exists ( "Option3", $parameters) ? $parameters["Properties"]["Option3"] : false, "Option4" => (boolean) array_key_exists ( "Option4", $parameters) ? $parameters["Properties"]["Option4"] : false, "Option5" => (boolean) array_key_exists ( "Option5", $parameters) ? $parameters["Properties"]["Option5"] : false, "Option6" => (boolean) array_key_exists ( "Option6", $parameters) ? $parameters["Properties"]["Option6"] : false, "Option7" => (boolean) array_key_exists ( "Option7", $parameters) ? $parameters["Properties"]["Option7"] : false, "Option8" => (boolean) array_key_exists ( "Option8", $parameters) ? $parameters["Properties"]["Option8"] : false, "Option9" => (boolean) array_key_exists ( "Option9", $parameters) ? $parameters["Properties"]["Option9"] : false, "OptionA" => (boolean) array_key_exists ( "OptionA", $parameters) ? $parameters["Properties"]["OptionA"] : false, "OptionS" => (boolean) array_key_exists ( "OptionS", $parameters) ? $parameters["Properties"]["OptionS"] : false), "Outputs" => array ( "timedout"));
   if ( ! array_key_exists ( "Variable", $parameters["Properties"]))
   {
     $data["Errors"]["Variable"] = __ ( "Variable is required.");
@@ -1410,7 +1410,7 @@ function ivr_operator_filter_menu ( $buffer, $parameters)
   {
     $data["Errors"]["File"] = __ ( "Filename is required.");
   }
-  $file = filters_call ( "get_audios", array ( "ID" => (int) $parameters["Properties"]["File"]));
+  $file = filters_call ( "get_audios", array ( "ID" => (int) array_key_exists ( "File", $parameters) ? $parameters["Properties"]["File"] : 0));
   if ( sizeof ( $file) == 1)
   {
     $data["Properties"]["Filename"] = "audio-" . $file[0]["ID"] . "/" . $file[0]["Filename"];
@@ -1559,7 +1559,7 @@ function ivr_operator_filter_menu ( $buffer, $parameters)
   {
     $data["Errors"]["OptionS"] = __ ( "OptionS must be true or false.");
   }
-  if ( ! $parameters["Properties"]["Option0"] && ! $parameters["Properties"]["Option1"] && ! $parameters["Properties"]["Option2"] && ! $parameters["Properties"]["Option3"] && ! $parameters["Properties"]["Option4"] && ! $parameters["Properties"]["Option5"] && ! $parameters["Properties"]["Option6"] && ! $parameters["Properties"]["Option7"] && ! $parameters["Properties"]["Option8"] && ! $parameters["Properties"]["Option9"] && ! $parameters["Properties"]["OptionA"] && ! $parameters["Properties"]["OptionS"])
+  if ( ! $data["Properties"]["Option0"] && ! $data["Properties"]["Option1"] && ! $data["Properties"]["Option2"] && ! $data["Properties"]["Option3"] && ! $data["Properties"]["Option4"] && ! $data["Properties"]["Option5"] && ! $data["Properties"]["Option6"] && ! $data["Properties"]["Option7"] && ! $data["Properties"]["Option8"] && ! $data["Properties"]["Option9"] && ! $data["Properties"]["OptionA"] && ! $data["Properties"]["OptionS"])
   {
     $data["Errors"]["Option0"] = __ ( "At least one option must be enabled.");
   }
@@ -1729,7 +1729,7 @@ function ivr_operator_filter_router ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => $parameters["Properties"]["Description"], "Variable" => $parameters["Properties"]["Variable"], "Conditions" => array ()), "Outputs" => array ( "true", "false"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Variable" => array_key_exists ( "Variable", $parameters["Properties"]) ? $parameters["Properties"]["Variable"] : "", "Conditions" => array ()), "Outputs" => array ( "true", "false"));
   if ( ! array_key_exists ( "Variable", $parameters["Properties"]))
   {
     $data["Errors"]["Variable"] = __ ( "Variable is required.");
@@ -1858,7 +1858,7 @@ function ivr_operator_filter_setvar ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => $parameters["Properties"]["Description"], "Variable" => $parameters["Properties"]["Variable"], "Value" => $parameters["Properties"]["Value"]), "Outputs" => array ( "output"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Variable" => array_key_exists ( "Variable", $parameters["Properties"]) ? $parameters["Properties"]["Variable"] : "", "Value" => array_key_exists ( "Value", $parameters["Properties"]) ? $parameters["Properties"]["Value"] : ""), "Outputs" => array ( "output"));
   if ( ! array_key_exists ( "Variable", $parameters["Properties"]))
   {
     $data["Errors"]["Variable"] = __ ( "Variable is required.");
@@ -1952,7 +1952,7 @@ function ivr_operator_filter_dial ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => $parameters["Properties"]["Description"], "Destination" => $parameters["Properties"]["Destination"], "Timeout" => (int) $parameters["Properties"]["Timeout"]), "Outputs" => array ( "ok", "timedout", "busy", "refused"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Timeout" => (int) array_key_exists ( "Timeout", $parameters["Properties"]) ? $parameters["Properties"]["Timeout"] : 0), "Outputs" => array ( "ok", "timedout", "busy", "refused"));
   if ( ! array_key_exists ( "Destination", $parameters["Properties"]))
   {
     $data["Errors"]["Destination"] = __ ( "Destination is required.");
@@ -2083,7 +2083,7 @@ function ivr_operator_filter_script ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => $parameters["Properties"]["Description"], "Name" => basename ( $parameters["Properties"]["Name"]), "Variable" => $parameters["Properties"]["Variable"], "Parameters" => $parameters["Properties"]["Parameters"]), "Outputs" => array ( "output"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Variable" => array_key_exists ( "Variable", $parameters["Properties"]) ? $parameters["Properties"]["Variable"] : "", "Parameters" => array_key_exists ( "Parameters", $parameters["Properties"]) ? $parameters["Properties"]["Parameters"] : array ()), "Outputs" => array ( "output"));
   if ( ! array_key_exists ( "Name", $parameters["Properties"]) || ! $parameters["Properties"]["Name"])
   {
     $data["Errors"]["Name"] = __ ( "Name is required.");
@@ -2092,11 +2092,11 @@ function ivr_operator_filter_script ( $buffer, $parameters)
   {
     $data["Errors"]["Name"] = __ ( "Name cannot contain a directory.");
   }
-  if ( $parameters["Properties"]["Variable"] && ! preg_match ( "/^[a-z0-9_]+$/", $parameters["Properties"]["Variable"]))
+  if ( $data["Properties"]["Variable"] && ! preg_match ( "/^[a-z0-9_]+$/", $data["Properties"]["Variable"]))
   {
     $data["Errors"]["Variable"] = __ ( "Variable must have only lowercase letters, numbers and underscore.");
   }
-  if ( ! array_key_exists ( "Variable", $data["Errors"]) && strlen ( $parameters["Properties"]["Variable"]) > 128)
+  if ( ! array_key_exists ( "Variable", $data["Errors"]) && strlen ( $data["Properties"]["Variable"]) > 128)
   {
     $data["Errors"]["Variable"] = __ ( "Variable cannot have more than 128 digits.");
   }
@@ -2183,7 +2183,7 @@ function ivr_operator_filter_email ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => $parameters["Properties"]["Description"], "To" => $parameters["Properties"]["To"], "Subject" => $parameters["Properties"]["Subject"], "Body" => $parameters["Properties"]["Body"]), "Outputs" => array ( "output"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "To" => array_key_exists ( "To", $parameters["Properties"]) ? $parameters["Properties"]["To"] : "", "Subject" => array_key_exists ( "Subject", $parameters["Properties"]) ? $parameters["Properties"]["Subject"] : "", "Body" => array_key_exists ( "Body", $parameters["Properties"]) ? $parameters["Properties"]["Body"] : ""), "Outputs" => array ( "output"));
   if ( ! array_key_exists ( "To", $parameters["Properties"]) || ! $parameters["Properties"]["To"])
   {
     $data["Errors"]["To"] = __ ( "To is required.");
@@ -2732,7 +2732,7 @@ function ivrs_add ( $buffer, $parameters)
     $workflow = array ();
     if ( framework_has_hook ( "ivr_operator_filter_" . $operator["Operator"]))
     {
-      $operatorfilter = framework_call ( "ivr_operator_filter_" . $operator["Operator"], $operator, false, array ( "Errors" => array (), "Parameters" => array (), "Outputs" => array ()));
+      $operatorfilter = framework_call ( "ivr_operator_filter_" . $operator["Operator"], array_merge_recursive ( array ( "Properties" => array (), "Inputs" => array (), "Output" => array ()), $operator), false, array ( "Errors" => array (), "Parameters" => array (), "Outputs" => array ()));
       if ( sizeof ( $operatorfilter["Errors"]) != 0)
       {
         $data["op_" . $id] = $operatorfilter["Errors"];
@@ -2986,7 +2986,7 @@ function ivrs_edit ( $buffer, $parameters)
     $workflow = array ();
     if ( framework_has_hook ( "ivr_operator_filter_" . $operator["Operator"]))
     {
-      $operatorfilter = framework_call ( "ivr_operator_filter_" . $operator["Operator"], $operator, false, array ( "Errors" => array (), "Parameters" => array (), "Outputs" => array ()));
+      $operatorfilter = framework_call ( "ivr_operator_filter_" . $operator["Operator"], array_merge_recursive ( array ( "Properties" => array (), "Inputs" => array (), "Output" => array ()), $operator), false, array ( "Errors" => array (), "Parameters" => array (), "Outputs" => array ()));
       if ( sizeof ( $operatorfilter["Errors"]) != 0)
       {
         $data["op_" . $id] = $operatorfilter["Errors"];
