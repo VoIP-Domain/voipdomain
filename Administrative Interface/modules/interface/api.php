@@ -925,7 +925,7 @@ function user_login ( $buffer, $parameters)
       {
         $ignoresfa = true;
       } else {
-        setcookie ( $_in["general"]["cookie"] . "_" . ( $parameters["Domain"] == "Multi-Tenant" ? "adm" : "") . "sfa", null, -1, "/");
+        setcookie ( $_in["general"]["cookie"] . "_" . ( $parameters["Domain"] == "Multi-Tenant" ? "adm" : "") . "sfa", "", -1, "/");
       }
     }
     if ( ! $ignoresfa)
@@ -1131,7 +1131,7 @@ function user_logout ( $buffer, $parameters)
   /**
    * Remove system cookie and destroy global configuration session information
    */
-  setcookie ( $_in["general"]["cookie"] . ( $_in["session"]["Tenant"] == 0 ? "_adm" : ""), null, -1, "/");
+  setcookie ( $_in["general"]["cookie"] . ( $_in["session"]["Tenant"] == 0 ? "_adm" : ""), "", -1, "/");
   $_in["session"]["Authenticated"] = false;
   $_in["session"]["Method"] = "";
   $_in["session"]["Tenant"] = null;

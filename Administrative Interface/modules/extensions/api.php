@@ -794,8 +794,8 @@ function extensions_next_number ( $buffer, $parameters)
   /**
    * Sanitize received parameters
    */
-  $parameters["Server"] = (int) $parameters["Server"];
-  $parameters["Range"] = (int) $parameters["Range"];
+  $parameters["Server"] = (int) array_key_exists ( "Server", $parameters) ? $parameters["Server"] : 0;
+  $parameters["Range"] = (int) array_key_exists ( "Range", $parameters) ? $parameters["Range"] : 0;
 
   /**
    * Call sanitize hook if exist

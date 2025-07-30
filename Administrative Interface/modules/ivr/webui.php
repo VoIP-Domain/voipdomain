@@ -201,7 +201,7 @@ function ivrs_add_page ( $buffer, $parameters)
   sys_addcss ( array ( "name" => "bootstrap-toggle", "src" => "/vendors/bootstrap-toggle/css/bootstrap-toggle.css", "dep" => array ( "bootstrap")));
   foreach ( $_in["ivr"]["operators"] as $operator)
   {
-    if ( $operator["requiredcss"])
+    if ( array_key_exists ( "requiredcss", $operator) && is_array ( $operator["requiredcss"]) && sizeof ( $operator["requiredcss"]) != 0)
     {
       foreach ( $operator["requiredcss"] as $css)
       {
@@ -221,7 +221,7 @@ function ivrs_add_page ( $buffer, $parameters)
   sys_addjs ( array ( "name" => "bootstrap-toggle", "src" => "/vendors/bootstrap-toggle/js/bootstrap-toggle.js", "dep" => array ()));
   foreach ( $_in["ivr"]["operators"] as $operator)
   {
-    if ( $operator["requiredjs"])
+    if ( array_key_exists ( "requiredjs", $operator) && is_array ( $operator["requiredjs"]) && sizeof ( $operator["requiredjs"]) != 0)
     {
       foreach ( $operator["requiredjs"] as $js)
       {
@@ -417,7 +417,7 @@ function ivrs_add_page ( $buffer, $parameters)
                     "});\n");
       }
 
-      if ( $operator["validation"])
+      if ( array_key_exists ( "validation", $operator) && ! empty ( $operator["validation"]))
       {
         sys_addjs ( "$('#workflow-dialog-" . $operator["name"] . "').on ( 'validate', function ( e)\n" .
                     "{\n" .
@@ -430,7 +430,7 @@ function ivrs_add_page ( $buffer, $parameters)
     }
 
     // Modular workflow javascript codes
-    if ( $operator["javascript"])
+    if ( array_key_exists ( "javascript", $operator) && ! empty ( $operator["javascript"]))
     {
       sys_addjs ( $operator["javascript"]);
     }

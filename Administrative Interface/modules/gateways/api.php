@@ -1336,12 +1336,12 @@ function gateways_add ( $buffer, $parameters)
   $routes = array ();
   foreach ( $parameters["Routes"] as $key => $value)
   {
-    if ( ! $value["Route"])
+    if ( ! array_key_exists ( "Route", $value) || empty ( $value["Route"]))
     {
       $data["Route_" . (int) $value["Reference"]] = __ ( "The route pattern is required.");
       continue;
     }
-    if ( ! $value["Cost"])
+    if ( ! array_key_exists ( "Cost", $value) || $value["Cost"] != (float) $value["Cost"])
     {
       $data["Cost_" . (int) $value["Reference"]] = __ ( "The route cost is required.");
       continue;
@@ -1379,7 +1379,7 @@ function gateways_add ( $buffer, $parameters)
     {
       $data["Number"] = __ ( "The informed number is invalid.");
     }
-    $parameters["Number"] = $number["Number"]["CallFormats"]["International"];
+    $parameters["Number"] = array_key_exists ( "Number", $number) && array_key_exists ( "CallFormats", $number["Number"]) && array_key_exists ( "International", $number["Number"]["CallFormats"]) ? $number["Number"]["CallFormats"]["International"] : $parameters["Number"];
   }
 
   /**
@@ -1463,7 +1463,7 @@ function gateways_add ( $buffer, $parameters)
    */
   if ( $parameters["Active"])
   {
-    $notify = array ( "ID" => $parameters["ID"], "Description" => $parameters["Description"], "Domain" => $_in["general"]["domain"], "Username" => $parameters["Username"], "Password" => $parameters["Password"], "Address" => $parameters["Address"], "Port" => $parameters["Port"], "Qualify" => $parameters["Qualify"], "NAT" => $parameters["NAT"], "RPID" => $parameters["RPID"], "Config" => $parameters["Config"], "Number" => str_replace ( " ", "", $parameters["Number"]), "Type" => $parameters["Type"], "Priority" => $parameters["Priority"], "Currency" => $parameters["Code"], "Routes" => $parameters["Routes"], "Translations" => $parameters["Translations"], "Discard" => $parameters["Discard"], "Minimum" => $parameters["Minimum"], "Fraction" => $parameters["Fraction"]);
+    $notify = array ( "ID" => $parameters["ID"], "Description" => $parameters["Description"], "Domain" => $_in["general"]["domain"], "Username" => $parameters["Username"], "Password" => $parameters["Password"], "Address" => $parameters["Address"], "Port" => $parameters["Port"], "Qualify" => $parameters["Qualify"], "NAT" => $parameters["NAT"], "RPID" => $parameters["RPID"], "Config" => $parameters["Config"], "Number" => str_replace ( " ", "", $parameters["Number"]), "Type" => $parameters["Type"], "Priority" => $parameters["Priority"], "Currency" => $parameters["Currency"], "Routes" => $parameters["Routes"], "Translations" => $parameters["Translations"], "Discard" => $parameters["Discard"], "Minimum" => $parameters["Minimum"], "Fraction" => $parameters["Fraction"]);
     if ( framework_has_hook ( "gateways_add_notify"))
     {
       $notify = framework_call ( "gateways_add_notify", $parameters, false, $notify);

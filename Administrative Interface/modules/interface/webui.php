@@ -990,10 +990,10 @@ function call_report_page_generate ( $buffer, $parameters)
   /**
    * Create page code
    */
-  if ( $parameters["Filters"])
+  if ( array_key_exists ( "Filter", $parameters))
   {
     $buffer .= "<div class=\"container\">\n";
-    if ( $parameters["FiltersOverwrite"])
+    if ( array_key_exists ( "FiltersOverwrite", $parameters) && ! empty ( $parameters["FiltersOverwrite"]))
     {
       $buffer .= $parameters["Filters"];
     } else {
@@ -1279,7 +1279,7 @@ function call_report_page_generate ( $buffer, $parameters)
    */
   sys_addjs ( "$('#call_view_server,#call_view_type,#call_view_cc,#call_view_gateway,#call_view_whohungup').select2 ();\n" .
               "$('#start,#end').mask ( '00/00/0000 00:00');\n" .
-              $parameters["JS"]["Start"] .
+              ( array_key_exists ( "JS", $parameters) && array_key_exists ( "Start", $parameters["JS"]) ? $parameters["JS"]["Start"] : "").
               "$('#filter').on ( 'keyup', function ( e)\n" .
               "{\n" .
               "  $('#report').data ( 'dt').search ( $(this).val ()).draw ();\n" .
@@ -1536,9 +1536,9 @@ function call_report_page_generate ( $buffer, $parameters)
               "  {\n" .
               "    $('#start').val ( moment ( moment().subtract ( 30, 'days')).format ( '" . __ ( "MM/DD/YYYY LTS") . "'));\n" .
               "    $('#end').val ( moment ().format ( '" . __ ( "MM/DD/YYYY LTS") . "')).focus ();\n" .
-              $parameters["JS"]["StartFilters"] .
+              ( array_key_exists ( "JS", $parameters) && array_key_exists ( "StartFilters", $parameters["JS"]) ? $parameters["JS"]["StartFilters"] : "").
               "    $('#report').data ( 'dt').clear ().draw ().responsive.recalc ();\n" .
-              "    $('#" . ( $parameters["JS"] && $parameters["JS"]["Focus"] ? $parameters["JS"]["Focus"] : "end") . "').focus ();\n" .
+              "    $('#" . ( array_key_exists ( "JS", $parameters) && array_key_exists ( "Focus", $parameters["JS"]) ? $parameters["JS"]["Focus"] : "end") . "').focus ();\n" .
               "    return;\n" .
               "  }\n" .
               "  if ( data && 'Start' in data)\n" .
@@ -1549,7 +1549,7 @@ function call_report_page_generate ( $buffer, $parameters)
               "  {\n" .
               "    $('#end').val ( moment ( data.End).format ( '" . __ ( "MM/DD/YYYY LTS") . "'));\n" .
               "  }\n" .
-              $parameters["JS"]["Filters"] .
+              ( array_key_exists ( "JS", $parameters) && array_key_exists ( "Filters", $parameters["JS"]) ? $parameters["JS"]["Filters"] : "").
               "  if ( $('#start').val () == '')\n" .
               "  {\n" .
               "    $('#start').alerts ( 'add', { message: '" . __ ( "The start date is required.") . "'});\n" .
@@ -1558,12 +1558,12 @@ function call_report_page_generate ( $buffer, $parameters)
               "  {\n" .
               "    $('#end').alerts ( 'add', { message: '" . __ ( "The finish date is required.") . "'});\n" .
               "  }\n" .
-              $parameters["JS"]["CheckFilters"] .
-              "  if ( " . ( $parameters["JS"]["CheckIf"] ? $parameters["JS"]["CheckIf"] : "$('#start').val () == '' || $('#end').val () == ''") . ")\n" .
+              ( array_key_exists ( "JS", $parameters) && array_key_exists ( "CheckFilters", $parameters["JS"]) ? $parameters["JS"]["CheckFilters"] : "").
+              "  if ( " . ( array_key_exists ( "JS", $parameters) && array_key_exists ( "CheckIf", $parameters["JS"]) ? $parameters["JS"]["CheckIf"] : "$('#start').val () == '' || $('#end').val () == ''") . ")\n" .
               "  {\n" .
               "    return false;\n" .
               "  }\n" .
-              "  $.hashForm ( 'set', { data: " . ( $parameters["HashForm"] ? $parameters["HashForm"] : "{ Start: moment ( $('#start').val (), 'L LTS').isValid () ? moment ( $('#start').val (), 'L LTS').utc ().format () : '', End: moment ( $('#end').val (), 'L LTS').isValid () ? moment ( $('#end').val (), 'L LTS').utc ().format () : ''}") . "});\n" .
+              "  $.hashForm ( 'set', { data: " . ( array_key_exists ( "HashForm", $parameters) ? $parameters["HashForm"] : "{ Start: moment ( $('#start').val (), 'L LTS').isValid () ? moment ( $('#start').val (), 'L LTS').utc ().format () : '', End: moment ( $('#end').val (), 'L LTS').isValid () ? moment ( $('#end').val (), 'L LTS').utc ().format () : ''}") . "});\n" .
               "  var table = $('#report').data ( 'dt');\n" .
               "  table.processing ( true);\n" .
               "  VoIP.rest ( " . $parameters["Endpoint"]["URL"] . ", '" . $parameters["Endpoint"]["Method"] . "', " . $parameters["Endpoint"]["Parameters"] . ").done ( function ( data, textStatus, jqXHR)\n" .
@@ -1573,7 +1573,7 @@ function call_report_page_generate ( $buffer, $parameters)
               "    {\n" .
               "      data[x].Details = '';\n" .
               "      data[x].NULL = '';\n" .
-              $parameters["DataFilter"] .
+              ( array_key_exists ( "DataFilter", $parameters) ? $parameters["DataFilter"] : "").
               "    }\n" .
               "    table.rows.add ( data);\n" .
               "    table.draw ().responsive.recalc ();\n" .
@@ -1624,7 +1624,7 @@ function login_page_generate ( $buffer, $parameters)
   /**
    * Ensure to clear any existing cookie
    */
-  setcookie ( $_in["general"]["cookie"], null, -1, "/");
+  setcookie ( $_in["general"]["cookie"], "", -1, "/");
 
   /**
    * If login autocomplete are turned off, generate random string for username and password fields, to avoid browsers autocomplete.

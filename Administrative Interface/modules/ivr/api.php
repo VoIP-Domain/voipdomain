@@ -246,8 +246,8 @@ function ivr_operator_filter_start ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "AutoAnswer" => (boolean) $parameters["Properties"]["AutoAnswer"], "Delay" => (int) $parameters["Properties"]["Delay"]), "Outputs" => array ( "output"));
-  if ( ! array_key_exists ( "AutoAnswer", $parameters["Properties"]))
+  $data = array ( "Errors" => array (), "Properties" => array ( "AutoAnswer" => (boolean) array_key_exists ( "Properties", $parameters) && array_key_exists ( "AutoAnswer", $parameters["Properties"]) ? $parameters["Properties"]["AutoAnswer"] : false, "Delay" => (int) array_key_exists ( "Properties", $parameters) && array_key_exists ( "Delay", $parameters["Properties"]) ? $parameters["Properties"]["Delay"] : 0), "Outputs" => array ( "output"));
+  if ( ! array_key_exists ( "Properties", $parameters) || ! array_key_exists ( "AutoAnswer", $parameters["Properties"]))
   {
     $data["Errors"]["AutoAnswer"] = __ ( "AutoAnswer field is required.");
   }
@@ -255,15 +255,15 @@ function ivr_operator_filter_start ( $buffer, $parameters)
   {
     $data["Errors"]["AutoAnswer"] = __ ( "AutoAnswer must be true or false.");
   }
-  if ( $parameters["Properties"]["AutoAnswer"] && ! array_key_exists ( "Delay", $parameters["Properties"]))
+  if ( array_key_exists ( "Properties", $parameters) && array_key_exists ( "AutoAnswer", $parameters["Properties"]) && (boolean) $parameters["Properties"]["AutoAnswer"] == true && ! array_key_exists ( "Delay", $parameters["Properties"]))
   {
     $data["Errors"]["Delay"] = __ ( "Delay is required when Auto Start is enabled.");
   }
-  if ( $parameters["Properties"]["AutoAnswer"] && ! array_key_exists ( "Delay", $data["Errors"]) && $parameters["Properties"]["Delay"] != (int) $parameters["Properties"]["Delay"])
+  if ( $data["Properties"]["AutoAnswer"] && ! array_key_exists ( "Delay", $data["Errors"]) && array_key_exists ( "Properties", $parameters) && array_key_exists ( "Delay", $parameters["Properties"]) && $parameters["Properties"]["Delay"] != (int) $parameters["Properties"]["Delay"])
   {
     $data["Errors"]["Delay"] = __ ( "Delay must be a number.");
   }
-  if ( sizeof ( $parameters["Outputs"]) != 1)
+  if ( ! array_key_exists ( "Outputs", $parameters) || ! is_array ( $parameters["Outputs"]) || sizeof ( $parameters["Outputs"]) != 1)
   {
     $data["Errors"]["Outputs"] = __ ( "Operator must have an output.");
   } else {
@@ -2338,7 +2338,7 @@ function ivrs_search ( $buffer, $parameters)
    * Validate received parameters
    */
   $data = array ();
-  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || sizeof ( $parameters["Fields"]) == 0)
+  if ( ! array_key_exists ( "Fields", $parameters) || $parameters["Fields"] == "" || ( is_array ( $parameters["Fields"]) && sizeof ( $parameters["Fields"]) == 0))
   {
     $parameters["Fields"] = $parameters["function"]["DefaultFields"];
   }
