@@ -881,8 +881,26 @@ function framework_page_generate ( $content)
    */
   if ( $_in["general"]["debug"] == true)
   {
-    $footer .= "                  console.log ( 'jQuery.loader order:');\n";
-    $footer .= "                  console.log ( $.loader.order);\n";
+    $footer .= "                  console.groupCollapsed ( 'jQuery.loader order:');\n";
+    $footer .= "                  console.groupCollapsed ( 'CSS:');\n";
+    $footer .= "                  for ( const key in $.loader.order.css)\n";
+    $footer .= "                  {\n";
+    $footer .= "                    if ( $.loader.order.css.hasOwnProperty ( key))\n";
+    $footer .= "                    {\n";
+    $footer .= "                      console.log ( $.loader.order.css[key].slice ( 4));\n";
+    $footer .= "                    }\n";
+    $footer .= "                  }\n";
+    $footer .= "                  console.groupEnd ();\n";
+    $footer .= "                  console.groupCollapsed ( 'JS:');\n";
+    $footer .= "                  for ( const key in $.loader.order.js)\n";
+    $footer .= "                  {\n";
+    $footer .= "                    if ( $.loader.order.js.hasOwnProperty ( key))\n";
+    $footer .= "                    {\n";
+    $footer .= "                      console.log ( $.loader.order.js[key].slice ( 3));\n";
+    $footer .= "                    }\n";
+    $footer .= "                  }\n";
+    $footer .= "                  console.groupEnd ();\n";
+    $footer .= "                  console.groupEnd ();\n";
   }
 
   /**
