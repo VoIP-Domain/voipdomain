@@ -733,7 +733,7 @@ framework_add_hook (
     ),
     "response" => array (
       201 => array (
-        "description" => __ ( "New system tenanted added successfully.")
+        "description" => __ ( "New system tenant added successfully." )
       ),
       422 => array (
         "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),

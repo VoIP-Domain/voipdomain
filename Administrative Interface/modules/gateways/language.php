@@ -210,7 +210,7 @@ i18n_add ( "Currency");
 i18n_add ( "Cost (US$/m)");
 i18n_add ( "Select the gateway currency");
 i18n_add ( "Gateway cloning");
-i18n_add ( "Error requesting gateway data!");
+i18n_add ( "Error retrieving gateway data!");
 
 /**
  * Add Brazilian Portuguese support
@@ -388,5 +388,5 @@ i18n_add ( "Currency", "Moeda", "pt_BR");
 i18n_add ( "Cost (US$/m)", "Custo (R$/m)", "pt_BR");
 i18n_add ( "Select the gateway currency", "Selecione a moeda do gateway", "pt_BR");
 i18n_add ( "Gateway cloning", "Clonagem de gateway", "pt_BR");
-i18n_add ( "Error requesting gateway data!", "Erro ao requisitar informações do gateway!", "pt_BR");
+i18n_add ( "Error retrieving gateway data!", "Erro ao requisitar informações do gateway!", "pt_BR");
 ?>

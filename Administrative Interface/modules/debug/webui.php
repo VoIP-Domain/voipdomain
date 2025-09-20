@@ -776,7 +776,7 @@ function debug_e164 ( $buffer, $parameters)
               "    $('#debug_e164_result').jsonViewer ( data, { collapsed: false, withQuotes: true});\n" .
               "  }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "  {\n" .
-              "    new PNotify ( { title: '" . __ ( "E.164 debug") . "', text: '" . __ ( "Error requesting number debug!") . "', type: 'error'});\n" .
+              "    new PNotify ( { title: '" . __ ( "E.164 debug") . "', text: '" . __ ( "Error retrieving number debug!") . "', type: 'error'});\n" .
               "  });\n" .
               "});\n");
 

@@ -311,7 +311,7 @@ function queues_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Queue cloning") . "', text: '" . __ ( "Error requesting queue data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Queue cloning") . "', text: '" . __ ( "Error retrieving queue data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -497,7 +497,7 @@ function queues_edit_page ( $buffer, $parameters)
               "  $('#queue_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Queue edition") . "', text: '" . __ ( "Error requesting queue data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Queue edition") . "', text: '" . __ ( "Error retrieving queue data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#queue_edit_form').alerts ( 'form',\n" .
               "{\n" .

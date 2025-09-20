@@ -52,17 +52,6 @@ function authentication_install_db ( $buffer, $parameters)
   /**
    * Add basic system tables
    */
-  install_add_db_table ( "AuthenticationCache", "CREATE TABLE `AuthenticationCache` (\n" .
-                                                "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
-                                                "  `Plugin` varchar(255) NOT NULL,\n" .
-                                                "  `Cookie` char(16) NOT NULL,\n" .
-                                                "  `State` char(32) NOT NULL,\n" .
-                                                "  `Expire` int(11) UNSIGNED NOT NULL,\n" .
-                                                "  `Callback` varchar(255),\n" .
-                                                "  UNIQUE KEY `AuthenticationPair` (`Tenant`,`Cookie`, `State`),\n" .
-                                                "  KEY `AuthencationCache_ibfk_1` (`Tenant`),\n" . 
-                                                "  CONSTRAINT `AuthenticationCache_ibfk_1` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" . 
-                                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Authentication proccess cache';\n", array ( "Tenants"));
   install_add_db_table ( "AuthenticationToken", "CREATE TABLE `AuthenticationToken` (\n" .
                                                 "  `Token` char(32) NOT NULL,\n" .
                                                 "  `Tenant` bigint(20) unsigned NOT NULL,\n" .

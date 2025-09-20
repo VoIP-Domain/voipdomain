@@ -1130,7 +1130,7 @@ framework_add_hook (
             "Header_X" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The provided extra HTTP header name are invalid.")
+              "example" => __ ( "The provided extra HTTP header name is invalid.")
             ),
             "Value_X" => array (
               "type" => "string",
@@ -1222,7 +1222,7 @@ function notifications_add ( $buffer, $parameters)
   {
     if ( ! preg_match ( "/^[0-9A-Za-z!#%&'_`\-\$\*\+\.\^\|]+$/", $value["Header"]))
     {
-      $data["Header_" . $value["Reference"]] = __ ( "The provided extra HTTP header name are invalid.");
+      $data["Header_" . $value["Reference"]] = __ ( "The provided extra HTTP header name is invalid.");
       continue;
     }
     if ( empty ( $value["Value"]))
@@ -1465,7 +1465,7 @@ framework_add_hook (
             "Header_X" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The provided extra HTTP header name are invalid.")
+              "example" => __ ( "The provided extra HTTP header name is invalid.")
             ),
             "Value_X" => array (
               "type" => "string",
@@ -1561,7 +1561,7 @@ function notifications_edit ( $buffer, $parameters)
   {
     if ( ! preg_match ( "/^[0-9A-Za-z!#%&'_`\-\$\*\+\.\^\|]+$/", $value["Header"]))
     {
-      $data["Header_" . $value["Reference"]] = __ ( "The provided extra HTTP header name are invalid.");
+      $data["Header_" . $value["Reference"]] = __ ( "The provided extra HTTP header name is invalid.");
       continue;
     }
     if ( empty ( $value["Value"]))

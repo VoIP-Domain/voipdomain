@@ -228,7 +228,7 @@ function reports_graph_heat ( $buffer, $parameters)
               "      $('li.tui-chart-chartExportMenu-head').html ( '" . __ ( "Export to") . "');\n" .
               "    }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "    {\n" .
-              "      new PNotify ( { title: '" . __ ( "Heat map graph") . "', text: '" . __ ( "Error requesting information!") . "', type: 'error'});\n" .
+              "      new PNotify ( { title: '" . __ ( "Heat map graph") . "', text: '" . __ ( "Error retrieving information!") . "', type: 'error'});\n" .
               "    });\n" .
               "  });\n" .
               "} ());\n");
@@ -1412,7 +1412,7 @@ function health_page ( $page, $parameters)
               "    $('#health_storage_total').html ( data.Storage.Total);\n" .
               "  }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "  {\n" .
-              "    new PNotify ( { title: '" . __ ( "Server health") . "', text: '" . __ ( "Error requesting information!") . "', type: 'error'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Server health") . "', text: '" . __ ( "Error retrieving information!") . "', type: 'error'});\n" .
               "  }).always ( function ()\n" .
               "  {\n" .
               "    if ( $('#refresh').val () != '')\n" .

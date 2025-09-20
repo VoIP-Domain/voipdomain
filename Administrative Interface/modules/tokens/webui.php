@@ -115,7 +115,7 @@ function tokens_search_page ( $buffer, $parameters)
   $output .= "        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n";
   $output .= "        <h3 class=\"modal-title\">" . __ ( "Remove tokens") . "</h3>\n";
   $output .= "      </div>\n";
-  $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are sure you want to remove the token %s (expires %s)?"), "<span id=\"token_delete_description\"></span>", "<span id=\"token_delete_validity\"></span>") . "</p><input type=\"hidden\" id=\"token_delete_id\" value=\"\"></div>\n";
+  $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are you sure you want to remove token %s (expires %s)?"), "<span id=\"token_delete_description\"></span>", "<span id=\"token_delete_validity\"></span>") . "</p><input type=\"hidden\" id=\"token_delete_id\" value=\"\"></div>\n";
   $output .= "      <div class=\"modal-footer\">\n";
   $output .= "        <button class=\"btn\" data-dismiss=\"modal\">" . __ ( "Cancel") . "</button>\n";
   $output .= "        <button class=\"btn btn-primary del ladda-button\" data-style=\"expand-left\">" . __ ( "Remove") . "</button>\n";
@@ -395,7 +395,7 @@ function tokens_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Token cloning") . "', text: '" . __ ( "Error requesting token data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Token cloning") . "', text: '" . __ ( "Error retrieving token data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -529,14 +529,14 @@ function tokens_view_page ( $buffer, $parameters)
               "  document.execCommand ( 'copy');\n" .
               "  $(target).removeAttr ( 'readonly').attr ( 'disabled', 'disabled');\n" .
               "  $(this).focus ();\n" .
-              "  new PNotify ( { title: '" . __ ( "Token view") . "', text: '" . __ ( "Token copyed to clipboard!") . "', type: 'success'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Token view") . "', text: '" . __ ( "Token copied to clipboard!") . "', type: 'success'});\n" .
               "});\n" .
               "VoIP.rest ( '/tokens/' + encodeURIComponent ( VoIP.parameters.id), 'GET').done ( function ( data, textStatus, jqXHR)\n" .
               "{\n" .
               "  $('#token_view_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Token view") . "', text: '" . __ ( "Error requesting token data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Token view") . "', text: '" . __ ( "Error retrieving token data!") . "', type: 'error'});\n" .
               "});\n");
 
   return $output;
@@ -708,7 +708,7 @@ function tokens_edit_page ( $buffer, $parameters)
               "  $('#token_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Token edition") . "', text: '" . __ ( "Error requesting token data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Token edition") . "', text: '" . __ ( "Error retrieving token data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#token_edit_form').alerts ( 'form',\n" .
               "{\n" .

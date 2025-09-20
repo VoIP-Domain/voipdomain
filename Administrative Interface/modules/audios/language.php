@@ -57,7 +57,7 @@ i18n_add ( "Edit audio");
 i18n_add ( "Error adding audio!");
 i18n_add ( "Error changing audio file!");
 i18n_add ( "Error removing audio file!");
-i18n_add ( "Error requesting audio file data!");
+i18n_add ( "Error retrieving audio file data!");
 i18n_add ( "Error viewing audio file!");
 i18n_add ( "File");
 i18n_add ( "Filename");
@@ -105,7 +105,7 @@ i18n_add ( "The mime type of the audio file.");
 i18n_add ( "Clear file");
 i18n_add ( "Invalid audio ID.");
 i18n_add ( "Audio cloning");
-i18n_add ( "Error requesting audio data!");
+i18n_add ( "Error retrieving audio data!");
 
 /**
  * Add Brazilian Portuguese support
@@ -130,7 +130,7 @@ i18n_add ( "Edit audio", "Editar áudio", "pt_BR");
 i18n_add ( "Error adding audio!", "Erro ao adicionar áudio!", "pt_BR");
 i18n_add ( "Error changing audio file!", "Erro alterando arquivo de áudio!", "pt_BR");
 i18n_add ( "Error removing audio file!", "Erro removendo arquivo de áudio!", "pt_BR");
-i18n_add ( "Error requesting audio file data!", "Erro ao requisitar informações do arquivo de áudio!", "pt_BR");
+i18n_add ( "Error retrieving audio file data!", "Erro ao requisitar informações do arquivo de áudio!", "pt_BR");
 i18n_add ( "Error viewing audio file!", "Erro visualizando arquivo de áudio!", "pt_BR");
 i18n_add ( "File", "Arquivo", "pt_BR");
 i18n_add ( "Filename", "Nome do arquivo", "pt_BR");
@@ -178,5 +178,5 @@ i18n_add ( "The mime type of the audio file.", "O tipo de mime do arquivo de áu
 i18n_add ( "Clear file", "Limpar arquivo", "pt_BR");
 i18n_add ( "Invalid audio ID.", "ID de áudio inválido.", "pt_BR");
 i18n_add ( "Audio cloning", "Clonagem de áudio", "pt_BR");
-i18n_add ( "Error requesting audio data!", "Erro requisitando dados do áudio!", "pt_BR");
+i18n_add ( "Error retrieving audio data!", "Erro requisitando dados do áudio!", "pt_BR");
 ?>

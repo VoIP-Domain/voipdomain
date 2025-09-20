@@ -114,7 +114,7 @@ function users_search_page ( $buffer, $parameters)
   $output .= "        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n";
   $output .= "        <h3 class=\"modal-title\">" . __ ( "User removal") . "</h3>\n";
   $output .= "      </div>\n";
-  $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are sure you want to remove the user %s (%s)?"), "<span id=\"user_delete_name\"></span>", "<span id=\"user_delete_username\"></span>") . "</p><input type=\"hidden\" id=\"user_delete_id\" value=\"\"></div>\n";
+  $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are you sure you want to remove user %s (%s)?"), "<span id=\"user_delete_name\"></span>", "<span id=\"user_delete_username\"></span>") . "</p><input type=\"hidden\" id=\"user_delete_id\" value=\"\"></div>\n";
   $output .= "      <div class=\"modal-footer\">\n";
   $output .= "        <button class=\"btn\" data-dismiss=\"modal\">" . __ ( "Cancel") . "</button>\n";
   $output .= "        <button class=\"btn btn-primary del ladda-button\" data-style=\"expand-left\">" . __ ( "Remove") . "</button>\n";
@@ -221,7 +221,7 @@ function users_add_page ( $buffer, $parameters)
   $output .= "    </div>\n";
   $output .= "  </div>\n";
 
-  // Add user email field
+  // Add user e-mail field
   $output .= "  <div class=\"form-group\">\n";
   $output .= "    <label for=\"user_add_email\" class=\"control-label col-xs-2\">" . __ ( "E-mail") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
@@ -366,7 +366,7 @@ function users_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "User cloning") . "', text: '" . __ ( "Error requesting user data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "User cloning") . "', text: '" . __ ( "Error retrieving user data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -424,7 +424,7 @@ function users_view_page ( $buffer, $parameters)
   $output .= "    </div>\n";
   $output .= "  </div>\n";
 
-  // Add user email field
+  // Add user e-mail field
   $output .= "  <div class=\"form-group\">\n";
   $output .= "    <label for=\"user_view_email\" class=\"control-label col-xs-2\">" . __ ( "E-mail") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
@@ -493,7 +493,7 @@ function users_view_page ( $buffer, $parameters)
               "  $('#user_view_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "User visualization") . "', text: '" . __ ( "Error requesting user data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "User visualization") . "', text: '" . __ ( "Error retrieving user data!") . "', type: 'error'});\n" .
               "});\n");
 
   return $output;
@@ -555,7 +555,7 @@ function users_edit_page ( $buffer, $parameters)
   $output .= "    </div>\n";
   $output .= "  </div>\n";
 
-  // Add user email field
+  // Add user e-mail field
   $output .= "  <div class=\"form-group\">\n";
   $output .= "    <label for=\"user_edit_email\" class=\"control-label col-xs-2\">" . __ ( "E-mail") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
@@ -633,14 +633,14 @@ function users_edit_page ( $buffer, $parameters)
   $output .= "      <div class=\"modal-body\">\n";
   $output .= "        <img src=\"/img/sfa.png\" alt=\"\" class=\"dt-right\">\n";
   $output .= "        <p>" . __ ( "Follow the steps below to set up the second factor authentication app") . ":</p>\n";
-  $output .= "        <p><strong>1) " . __ ( "Download a two-step authenticator app.") . "</strong> " . __ ( "The apps below are the recommended one, but any authentication app also works.") . "</p>\n";
+  $output .= "        <p><strong>1) " . __ ( "Download a two-step authenticator app.") . "</strong> " . __ ( "The apps below are recommended, but any authentication app will work.") . "</p>\n";
   $output .= "        <p>\n";
   $output .= "          <i class=\"fab fa-apple\"></i> " . __ ( "iOS devices") . ": <a href=\"https://itunes.apple.com/us/app/authy/id494168017\" target=\"_blank\">Authy</a><br />\n";
   $output .= "          <i class=\"fab fa-android\"></i> " . __ ( "Android devices") . ": <a href=\"https://play.google.com/store/apps/details?id=com.authy.authy\" target=\"_blank\">Authy</a><br />\n";
   $output .= "          <i class=\"fab fa-windows\"></i> " . __ ( "Windows devices") . ": <a href=\"https://www.microsoft.com/p/authenticator/9wzdncrfj3rj\" target=\"_blank\">Microsoft Authenticator</a>\n";
-  $output .= "        <p><strong>2) " . __ ( "Scan the below QR Code with your authenticator app.") . "</strong> " . __ ( "Or enter the key code below.") . "</p>\n";
+  $output .= "        <p><strong>2) " . __ ( "Scan the below QR Code with your authenticator app.") . "</strong> " . __ ( "Or enter the key below.") . "</p>\n";
   $output .= "        <div class=\"dt-center\"><div id=\"user_edit_sfa_activate_qrcode\" width=\"200\" height=\"200\"></div><strong><br />" . __ ( "Key") . "</strong>: <code id=\"user_edit_sfa_activate_key\" title=\"" . __ ( "Key") . "\" aria-label=\"" . __ ( "Key") . "\"></code></div>\n";
-  $output .= "        <p><label for=\"user_edit_sfa_activate_code\"><strong>3)</strong> " . __ ( "Enter the 6 digit verification code from the app") . ":</label> <input type=\"text\" id=\"user_edit_sfa_activate_code\" value=\"\" maxlength=\"6\" size=\"6\" autocomplete=\"off\" autocapitalize=\"none\" autocorrect=\"none\" spellcheck=\"false\"></p>\n";
+  $output .= "        <p><label for=\"user_edit_sfa_activate_code\"><strong>3)</strong> " . __ ( "Enter the 6-digit verification code from the app") . ":</label> <input type=\"text\" id=\"user_edit_sfa_activate_code\" value=\"\" maxlength=\"6\" size=\"6\" autocomplete=\"off\" autocapitalize=\"none\" autocorrect=\"none\" spellcheck=\"false\"></p>\n";
   $output .= "      </div>\n";
   $output .= "      <div class=\"modal-footer\">\n";
   $output .= "        <button class=\"btn btn-primary ladda-button\" id=\"user_edit_sfa_activate_button\" data-style=\"expand-left\">" . __ ( "Activate") . "</button>\n";
@@ -822,7 +822,7 @@ function users_edit_page ( $buffer, $parameters)
               "  $('#user_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "User edition") . "', text: '" . __ ( "Error requesting user data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "User edition") . "', text: '" . __ ( "Error retrieving user data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#user_edit_form').alerts ( 'form',\n" .
               "{\n" .

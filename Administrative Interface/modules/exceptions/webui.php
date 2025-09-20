@@ -293,7 +293,7 @@ function exceptions_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Exception cloning") . "', text: '" . __ ( "Error requesting exception data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Exception cloning") . "', text: '" . __ ( "Error retrieving exception data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -441,7 +441,7 @@ function exceptions_edit_page ( $buffer, $parameters)
               "  $('#exception_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Exception edition") . "', text: '" . __ ( "Error requesting exception data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Exception edition") . "', text: '" . __ ( "Error retrieving exception data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#exception_edit_form').alerts ( 'form',\n" .
               "{\n" .

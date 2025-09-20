@@ -84,7 +84,7 @@ framework_add_hook (
               "Email" => array (
                 "type" => "string",
                 "format" => "email",
-                "description" => __ ( "The email of the user."),
+                "description" => __ ( "The e-mail of the user."),
                 "example" => __ ( "john.doe@voipdomain.io")
               ),
               "Since" => array (
@@ -279,7 +279,7 @@ framework_add_hook (
             "Email" => array (
               "type" => "string",
               "format" => "email",
-              "description" => __ ( "The email of the user."),
+              "description" => __ ( "The e-mail of the user."),
               "example" => __ ( "john.doe@voipdomain.io")
             ),
             "Language" => array (
@@ -322,7 +322,7 @@ framework_add_hook (
     )
   )
 );
-framework_add_permission ( "users_view", __ ( "View users information"));
+framework_add_permission ( "users_view", __ ( "View user information"));
 framework_add_api_call (
   "/users/:ID",
   "Read",
@@ -485,7 +485,7 @@ framework_add_hook (
         ),
         "Email" => array (
           "type" => "email",
-          "description" => __ ( "The email of the user."),
+          "description" => __ ( "The e-mail of the user."),
           "required" => true,
           "example" => __ ( "johndoe@voipdomain.io")
         ),
@@ -541,7 +541,7 @@ framework_add_hook (
             "Email" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The informed e-mail is invalid.")
+              "example" => __ ( "The provided e-mail is invalid.")
             ),
             "Password" => array (
               "type" => "string",
@@ -551,12 +551,12 @@ framework_add_hook (
             "Confirmation" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The passwords didn't match.", true, false)
+              "example" => __ ( "The passwords do not match.", true, false)
             ),
             "Language" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The select language are invalid.")
+              "example" => __ ( "The selected language is invalid.")
             )
           )
         )
@@ -618,7 +618,7 @@ function users_add ( $buffer, $parameters)
   }
   if ( ! empty ( $parameters["Email"]) && ! validate_email ( $parameters["Email"]))
   {
-    $data["Email"] = __ ( "The informed e-mail is invalid.");
+    $data["Email"] = __ ( "The provided e-mail is invalid.");
   }
   if ( empty ( $parameters["Password"]))
   {
@@ -630,7 +630,7 @@ function users_add ( $buffer, $parameters)
   }
   if ( ! empty ( $parameters["Password"]) && ! empty ( $parameters["Confirmation"]) && $parameters["Password"] != $parameters["Confirmation"])
   {
-    $data["Confirmation"] = __ ( "The passwords didn't match.");
+    $data["Confirmation"] = __ ( "The passwords do not match.");
   }
   if ( $parameters["Language"] == "default")
   {
@@ -638,7 +638,7 @@ function users_add ( $buffer, $parameters)
   } else {
     if ( ! array_key_exists ( $parameters["Language"], $_in["languages"]))
     {
-      $data["Language"] = __ ( "The select language are invalid.");
+      $data["Language"] = __ ( "The selected language is invalid.");
     }
   }
 
@@ -759,7 +759,7 @@ framework_add_hook (
         ),
         "Email" => array (
           "type" => "email",
-          "description" => __ ( "The email of the user."),
+          "description" => __ ( "The e-mail of the user."),
           "required" => true,
           "example" => __ ( "johndoe@voipdomain.io")
         ),
@@ -815,7 +815,7 @@ framework_add_hook (
             "Email" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The informed e-mail is invalid.")
+              "example" => __ ( "The provided e-mail is invalid.")
             ),
             "Password" => array (
               "type" => "string",
@@ -825,12 +825,12 @@ framework_add_hook (
             "Confirmation" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The passwords didn't match.", true, false)
+              "example" => __ ( "The passwords do not match.", true, false)
             ),
             "Language" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The select language are invalid.")
+              "example" => __ ( "The selected language is invalid.")
             )
           )
         )
@@ -892,7 +892,7 @@ function users_edit ( $buffer, $parameters)
   }
   if ( ! empty ( $parameters["Email"]) && ! validate_email ( $parameters["Email"]))
   {
-    $data["Email"] = __ ( "The informed e-mail is invalid.");
+    $data["Email"] = __ ( "The provided e-mail is invalid.");
   }
   if ( ! empty ( $parameters["Password"]) && empty ( $parameters["Confirmation"]))
   {
@@ -900,7 +900,7 @@ function users_edit ( $buffer, $parameters)
   }
   if ( ! empty ( $parameters["Password"]) && ! empty ( $parameters["Confirmation"]) && $parameters["Password"] != $parameters["Confirmation"])
   {
-    $data["Confirmation"] = __ ( "The passwords didn't match.");
+    $data["Confirmation"] = __ ( "The passwords do not match.");
   }
   if ( $parameters["Language"] == "default")
   {
@@ -908,7 +908,7 @@ function users_edit ( $buffer, $parameters)
   } else {
     if ( ! array_key_exists ( $parameters["Language"], $_in["languages"]))
     {
-      $data["Language"] = __ ( "The select language are invalid.");
+      $data["Language"] = __ ( "The selected language is invalid.");
     }
   }
 

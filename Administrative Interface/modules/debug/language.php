@@ -53,7 +53,7 @@ i18n_add ( "duplicated internationalization entries");
 i18n_add ( "E.164 debug");
 i18n_add ( "E.164 number debug");
 i18n_add ( "Error processing object creating parameters.");
-i18n_add ( "Error requesting number debug!");
+i18n_add ( "Error retrieving number debug!");
 i18n_add ( "Export API documentation");
 i18n_add ( "extension dump");
 i18n_add ( "filter dump");
@@ -139,7 +139,7 @@ i18n_add ( "duplicated internationalization entries", "entradas de internacional
 i18n_add ( "E.164 debug", "Depurar E.164", "pt_BR");
 i18n_add ( "E.164 number debug", "Depurar número E.164", "pt_BR");
 i18n_add ( "Error processing object creating parameters.", "Erro processando parâmetros de criação do objeto.", "pt_BR");
-i18n_add ( "Error requesting number debug!", "Erro requisitando depuração de número!", "pt_BR");
+i18n_add ( "Error retrieving number debug!", "Erro requisitando depuração de número!", "pt_BR");
 i18n_add ( "Export API documentation", "Exportar documentação da API", "pt_BR");
 i18n_add ( "extension dump", "exportar extensão", "pt_BR");
 i18n_add ( "filter dump", "filtrar exportação", "pt_BR");

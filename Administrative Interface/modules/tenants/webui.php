@@ -524,7 +524,7 @@ function tenants_search_page ( $buffer, $parameters)
   $output .= "        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n";
   $output .= "        <h3 class=\"modal-title\">" . __ ( "Remove tenant") . "</h3>\n";
   $output .= "      </div>\n";
-  $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are sure you want to remove the tenant %s (%s)?"), "<span id=\"tenant_delete_name\"></span>", "<span id=\"tenant_delete_domain\"></span>") . "</p><input type=\"hidden\" id=\"tenant_delete_id\" value=\"\"></div>\n";
+  $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are you sure you want to remove tenant %s (%s)?"), "<span id=\"tenant_delete_name\"></span>", "<span id=\"tenant_delete_domain\"></span>") . "</p><input type=\"hidden\" id=\"tenant_delete_id\" value=\"\"></div>\n";
   $output .= "      <div class=\"modal-footer\">\n";
   $output .= "        <button class=\"btn\" data-dismiss=\"modal\">" . __ ( "Cancel") . "</button>\n";
   $output .= "        <button class=\"btn btn-primary del ladda-button\" data-style=\"expand-left\">" . __ ( "Remove") . "</button>\n";
@@ -1781,7 +1781,7 @@ function tenants_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Tenant cloning") . "', text: '" . __ ( "Error requesting tenant data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Tenant cloning") . "', text: '" . __ ( "Error retrieving tenant data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -4083,7 +4083,7 @@ function tenants_edit_page ( $buffer, $parameters)
               "  $('#tenant_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Tenant edition") . "', text: '" . __ ( "Error requesting tenant data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Tenant edition") . "', text: '" . __ ( "Error retrieving tenant data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#tenant_edit_form').alerts ( 'form',\n" .
               "{\n" .

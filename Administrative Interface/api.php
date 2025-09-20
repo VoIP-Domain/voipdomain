@@ -522,7 +522,7 @@ if ( array_key_exists ( $_in["general"]["cookie"] . "_adm", $_COOKIE))
 $apiRoutes = array ( "POST" => "create", "GET" => "read", "PUT" => "update", "DELETE" => "delete", "PATCH" => "modify", "OPTIONS" => "help", "HEAD" => "test", "TRACE" => "trace", "COPY" => "copy", "PURGE" => "purge", "LINK" => "link", "UNLINK" => "unlink");
 
 /**
- * Respect Google recomendation for X-HTTP-Method-Override header
+ * Respect Google recommendation for X-HTTP-Method-Override header
  */
 if ( array_key_exists ( "HTTP_X_HTTP_METHOD_OVERRIDE", $_SERVER))
 {
@@ -652,7 +652,7 @@ if ( $inputRoute == "help")
   ksort ( $allow);
 
   /**
-   * Check if any method was found, othewise it's a not found
+   * Check if any method was found, otherwise it's a not found
    */
   if ( sizeof ( $allow) == 1)
   {
@@ -769,7 +769,7 @@ if ( empty ( $outputFormat))
 if ( ! array_key_exists ( $outputFormat, $apiResponseFormats))
 {
   // Trigger an error, invalid route requested!
-  header ( $_SERVER["SERVER_PROTOCOL"] . " 406 Not Aceptable");
+  header ( $_SERVER["SERVER_PROTOCOL"] . " 406 Not Acceptable");
   exit ();
 }
 

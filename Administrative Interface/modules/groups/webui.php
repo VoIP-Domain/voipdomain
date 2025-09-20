@@ -312,7 +312,7 @@ function groups_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Group cloning") . "', text: '" . __ ( "Error requesting group data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Group cloning") . "', text: '" . __ ( "Error retrieving group data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -484,7 +484,7 @@ function groups_edit_page ( $buffer, $parameters)
               "  $('#group_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Group edition") . "', text: '" . __ ( "Error requesting group data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Group edition") . "', text: '" . __ ( "Error retrieving group data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#group_edit_form').alerts ( 'form',\n" .
               "{\n" .

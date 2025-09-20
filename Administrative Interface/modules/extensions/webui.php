@@ -459,7 +459,7 @@ function extensions_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Extension cloning") . "', text: '" . __ ( "Error requesting extension data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Extension cloning") . "', text: '" . __ ( "Error retrieving extension data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -768,7 +768,7 @@ function extensions_edit_page ( $buffer, $parameters)
               "  $('#extension_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Extension edition") . "', text: '" . __ ( "Error requesting extension data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Extension edition") . "', text: '" . __ ( "Error retrieving extension data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#extension_edit_form').alerts ( 'form',\n" .
               "{\n" .

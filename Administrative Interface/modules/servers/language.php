@@ -53,7 +53,7 @@ i18n_add ( "Server address");
 i18n_add ( "till");
 i18n_add ( "Server addition");
 i18n_add ( "servers addition");
-i18n_add ( "Error requesting data from server!");
+i18n_add ( "Error retrieving data from server!");
 i18n_add ( "Error adding server!");
 i18n_add ( "Server added successfully!");
 i18n_add ( "Server edition");
@@ -166,7 +166,7 @@ i18n_add ( "Missing end date.");
 i18n_add ( "NTP server");
 i18n_add ( "Add server");
 i18n_add ( "Server cloning");
-i18n_add ( "Error requesting server data!");
+i18n_add ( "Error retrieving server data!");
 
 /**
  * Add Brazilian Portuguese support
@@ -187,7 +187,7 @@ i18n_add ( "Server address", "Endereço do servidor", "pt_BR");
 i18n_add ( "till", "até", "pt_BR");
 i18n_add ( "Server addition", "Adição de servidor", "pt_BR");
 i18n_add ( "servers addition", "adição de servidores", "pt_BR");
-i18n_add ( "Error requesting data from server!", "Erro ao requisitar dados do servidor!", "pt_BR");
+i18n_add ( "Error retrieving data from server!", "Erro ao requisitar dados do servidor!", "pt_BR");
 i18n_add ( "Error adding server!", "Erro ao adicionar o servidor!", "pt_BR");
 i18n_add ( "Server added successfully!", "Servidor adicionado com sucesso!", "pt_BR");
 i18n_add ( "Server edition", "Edição de servidor", "pt_BR");
@@ -300,5 +300,5 @@ i18n_add ( "Missing end date.", "Data de término obrigatória.", "pt_BR");
 i18n_add ( "NTP server", "Servidor NTP", "pt_BR");
 i18n_add ( "Add server", "Adicionar servidor", "pt_BR");
 i18n_add ( "Server cloning", "Clonagem de servidor", "pt_BR");
-i18n_add ( "Error requesting server data!", "Erro ao requisitar dados do servidor!", "pt_BR");
+i18n_add ( "Error retrieving server data!", "Erro ao requisitar dados do servidor!", "pt_BR");
 ?>

@@ -1389,7 +1389,7 @@ function call_report_page_generate ( $buffer, $parameters)
               "      }\n" .
               "    }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "    {\n" .
-              "      new PNotify ( { title: '" . __ ( "Call view") . "', text: '" . __ ( "Error requesting call information!") . "', type: 'error'});\n" .
+              "      new PNotify ( { title: '" . __ ( "Call view") . "', text: '" . __ ( "Error retrieving call information!") . "', type: 'error'});\n" .
               "    }).always ( function ()\n" .
               "    {\n" .
               "      l1.stop ();\n" .
@@ -1408,7 +1408,7 @@ function call_report_page_generate ( $buffer, $parameters)
               "      }\n" .
               "    }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "    {\n" .
-              "      new PNotify ( { title: '" . __ ( "Call view") . "', text: '" . __ ( "Error requesting call information!") . "', type: 'error'});\n" .
+              "      new PNotify ( { title: '" . __ ( "Call view") . "', text: '" . __ ( "Error retrieving call information!") . "', type: 'error'});\n" .
               "    }).always ( function ()\n" .
               "    {\n" .
               "      l2.stop ();\n" .
@@ -1541,7 +1541,7 @@ function call_report_page_generate ( $buffer, $parameters)
               "  {\n" .
               "    var data = JSON.parse ( atob ( $(this).data ( 'call')));\n" .
               "  } catch ( e) {\n" .
-              "    new PNotify ( { title: '" . __ ( "Call view") . "', text: '" . __ ( "Error requesting call information!") . "', type: 'error'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Call view") . "', text: '" . __ ( "Error retrieving call information!") . "', type: 'error'});\n" .
               "    return;\n" .
               "  }\n" .
               "  $('#call_view_form').trigger ( 'fill', data);\n" .
@@ -2804,7 +2804,7 @@ function dashboard_page ( $page, $parameters)
               "    $('#dashboard_allocation_total').html ( data.Allocation.Total);\n" .
               "  }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "  {\n" .
-              "    new PNotify ( { title: '" . __ ( "Dashboard") . "', text: '" . __ ( "Error requesting statistics!") . "', type: 'error'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Dashboard") . "', text: '" . __ ( "Error retrieving statistics!") . "', type: 'error'});\n" .
               "  });\n" .
               "}).trigger ( 'update');\n");
 

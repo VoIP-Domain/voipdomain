@@ -1363,7 +1363,7 @@ function equipments_configure_page ( $buffer, $parameters)
               "  $('#equipment_configure_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Equipment configuration") . "', text: '" . __ ( "Error requesting equipment data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Equipment configuration") . "', text: '" . __ ( "Error retrieving equipment data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#equipment_configure_form').alerts ( 'form',\n" .
               "{\n" .

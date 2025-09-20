@@ -782,12 +782,12 @@ framework_add_function_documentation (
                   "Transhipments" => array (
                     "type" => "string",
                     "description" => __ ( "The text description of this field error."),
-                    "example" => __ ( "One or more informed transhipment are invalid.")
+                    "example" => __ ( "One or more informed transhipment is invalid.")
                   ),
                   "Hints" => array (
                     "type" => "string",
                     "description" => __ ( "The text description of this field error."),
-                    "example" => __ ( "One or more informed hint are invalid.")
+                    "example" => __ ( "One or more informed hint is invalid.")
                   ),
                   "Account_X_Type" => array (
                     "type" => "string",
@@ -1147,12 +1147,12 @@ framework_add_function_documentation (
                   "Transhipments" => array (
                     "type" => "string",
                     "description" => __ ( "The text description of this field error."),
-                    "example" => __ ( "One or more informed transhipment are invalid.")
+                    "example" => __ ( "One or more informed transhipment is invalid.")
                   ),
                   "Hints" => array (
                     "type" => "string",
                     "description" => __ ( "The text description of this field error."),
-                    "example" => __ ( "One or more informed hint are invalid.")
+                    "example" => __ ( "One or more informed hint is invalid.")
                   ),
                   "Account_X_Type" => array (
                     "type" => "string",
@@ -1724,7 +1724,7 @@ function extensions_phone_validate ( $buffer, $parameters)
       }
       if ( $result->num_rows != 1)
       {
-        $buffer["Captures"] = __ ( "One or more informed capture groups are invalid.");
+        $buffer["Captures"] = __ ( "One or more informed capture groups is invalid.");
         break;
       }
     }
@@ -1742,7 +1742,7 @@ function extensions_phone_validate ( $buffer, $parameters)
     }
     if ( $result->num_rows == 0)
     {
-      $buffer["Transhipments"] = __ ( "One or more informed transhipment are invalid.");
+      $buffer["Transhipments"] = __ ( "One or more informed transhipment is invalid.");
     }
   }
 
@@ -1758,7 +1758,7 @@ function extensions_phone_validate ( $buffer, $parameters)
     }
     if ( $result->num_rows == 0)
     {
-      $buffer["Hints"] = __ ( "One or more informed hint are invalid.");
+      $buffer["Hints"] = __ ( "One or more informed hint is invalid.");
     }
   }
 

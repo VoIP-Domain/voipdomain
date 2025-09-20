@@ -605,7 +605,7 @@ function servers_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Server cloning") . "', text: '" . __ ( "Error requesting server data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Server cloning") . "', text: '" . __ ( "Error retrieving server data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -1084,7 +1084,7 @@ function servers_edit_page ( $buffer, $parameters)
               "  $('#server_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Server edition") . "', text: '" . __ ( "Error requesting data from server!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Server edition") . "', text: '" . __ ( "Error retrieving data from server!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#server_edit_form').alerts ( 'form',\n" .
               "{\n" .

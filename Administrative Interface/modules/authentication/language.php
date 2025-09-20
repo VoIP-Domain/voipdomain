@@ -38,10 +38,10 @@
  * Add basic language structure (english)
  */
 i18n_add ( "An object containing system authentication information.");
-i18n_add ( "If the authentication endpoint is enabled.");
-i18n_add ( "The authentication page background image.");
-i18n_add ( "If the extension password will be accepted to authenticate user.");
-i18n_add ( "A list of authentication plugins with their specific configuration.");
+i18n_add ( "Whether the authentication endpoint is enabled.");
+i18n_add ( "Background image for the authentication page.");
+i18n_add ( "Whether the extension password may be used to authenticate the user.");
+i18n_add ( "List of authentication plugins and their specific configurations.");
 i18n_add ( "View system authentication information");
 i18n_add ( "View authentication");
 i18n_add ( "View system authentication information.");
@@ -63,8 +63,8 @@ i18n_add ( "Error changing configurations!");
 i18n_add ( "Authentication successfully changed!");
 i18n_add ( "Error retrieving configurations!");
 i18n_add ( "OR AUTHENTICATE USING");
-i18n_add ( "The username of user to authenticate.");
-i18n_add ( "The password of user to authenticate.");
+i18n_add ( "Username of the user to authenticate.");
+i18n_add ( "Password of the user to authenticate.");
 i18n_add ( "New user authentication token created successfully.");
 i18n_add ( "System authentication token cookie.");
 i18n_add ( "The status of authentication token creation request.");
@@ -76,16 +76,16 @@ i18n_add ( "Error authenticating user.");
 i18n_add ( "User authenticated!");
 i18n_add ( "AUTHENTICATE USING");
 i18n_add ( "Loading");
-i18n_add ( "The tenant domain of user to authenticate. If not provided, the server hostname will be used.");
+i18n_add ( "Tenant domain of the user to authenticate. If omitted, the server hostname is used.");
 
 /**
  * Add Brazilian Portuguese support
  */
 i18n_add ( "An object containing system authentication information.", "Um objeto contento informações de autenticação do sistema.", "pt_BR");
-i18n_add ( "If the authentication endpoint is enabled.", "Se o endpoint de autenticação está habilitado.", "pt_BR");
-i18n_add ( "The authentication page background image.", "A imagem de fundo da página de autenticação.", "pt_BR");
-i18n_add ( "If the extension password will be accepted to authenticate user.", "Se a senha da extensão será aceita para autenticar o usuário.", "pt_BR");
-i18n_add ( "A list of authentication plugins with their specific configuration.", "Lista de plugins de autenticação com suas respectivas configurações.", "pt_BR");
+i18n_add ( "Whether the authentication endpoint is enabled.", "Se o endpoint de autenticação está habilitado.", "pt_BR");
+i18n_add ( "Background image for the authentication page.", "A imagem de fundo da página de autenticação.", "pt_BR");
+i18n_add ( "Whether the extension password may be used to authenticate the user.", "Se a senha da extensão será aceita para autenticar o usuário.", "pt_BR");
+i18n_add ( "List of authentication plugins and their specific configurations.", "Lista de plugins de autenticação com suas respectivas configurações.", "pt_BR");
 i18n_add ( "View system authentication information", "Visualizar informações de autenticação do sistema", "pt_BR");
 i18n_add ( "View authentication", "Visualizar autenticação", "pt_BR");
 i18n_add ( "View system authentication information.", "Visualizar informações de autenticação do sistema.", "pt_BR");
@@ -107,8 +107,8 @@ i18n_add ( "Error changing configurations!", "Erro alterando configurações!", 
 i18n_add ( "Authentication successfully changed!", "Autenticação alterada com sucesso!", "pt_BR");
 i18n_add ( "Error retrieving configurations!", "Erro recuperando informações!", "pt_BR");
 i18n_add ( "OR AUTHENTICATE USING", "OU AUTENTIQUE UTILIZANDO", "pt_BR");
-i18n_add ( "The username of user to authenticate.", "O nome do usuário a ser autenticado.", "pt_BR");
-i18n_add ( "The password of user to authenticate.", "A senha do usuário a ser autenticado.", "pt_BR");
+i18n_add ( "Username of the user to authenticate.", "O nome do usuário a ser autenticado.", "pt_BR");
+i18n_add ( "Password of the user to authenticate.", "A senha do usuário a ser autenticado.", "pt_BR");
 i18n_add ( "New user authentication token created successfully.", "Nova token de autenticação do usuário criada com sucesso.", "pt_BR");
 i18n_add ( "System authentication token cookie.", "Cookie de autenticação de token do sistema.", "pt_BR");
 i18n_add ( "The status of authentication token creation request.", "O estado da requisição de criação de token de autenticação.", "pt_BR");
@@ -120,5 +120,5 @@ i18n_add ( "Error authenticating user.", "Erro autenticando usuário.", "pt_BR")
 i18n_add ( "User authenticated!", "Usuário autenticado!", "pt_BR");
 i18n_add ( "AUTHENTICATE USING", "AUTENTIQUE UTILIZANDO", "pt_BR");
 i18n_add ( "Loading", "Carregando", "pt_BR");
-i18n_add ( "The tenant domain of user to authenticate. If not provided, the server hostname will be used.", "O domínio do tenant do usuário a ser autenticado. Se não informado, o nome do servidor será utilizado.", "pt_BR");
+i18n_add ( "Tenant domain of the user to authenticate. If omitted, the server hostname is used.", "O domínio do tenant do usuário a ser autenticado. Se não informado, o nome do servidor será utilizado.", "pt_BR");
 ?>

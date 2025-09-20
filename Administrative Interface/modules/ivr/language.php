@@ -402,7 +402,7 @@ i18n_add ( "Destination email");
 i18n_add ( "Message body");
 i18n_add ( "required field.");
 i18n_add ( "IVR cloning");
-i18n_add ( "Error requesting IVR data!");
+i18n_add ( "Error retrieving IVR data!");
 
 /**
  * Add Brazilian Portuguese support
@@ -772,5 +772,5 @@ i18n_add ( "Destination email", "Destino do email", "pt_BR");
 i18n_add ( "Message body", "Corpo da mensagem", "pt_BR");
 i18n_add ( "required field.", "campo obrigatório.", "pt_BR");
 i18n_add ( "IVR cloning", "Clonagem de URA", "pt_BR");
-i18n_add ( "Error requesting IVR data!", "Erro ao requisitar dados da URA!", "pt_BR");
+i18n_add ( "Error retrieving IVR data!", "Erro ao requisitar dados da URA!", "pt_BR");
 ?>

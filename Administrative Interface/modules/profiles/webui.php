@@ -1398,7 +1398,7 @@ function profiles_add_page ( $buffer, $parameters)
               "    }\n" .
               "  }\n" .
               "} else {\n" .
-              "  new PNotify ( { title: '" . __ ( "Profile addition") . "', text: '" . __ ( "Error requesting gateways!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Profile addition") . "', text: '" . __ ( "Error retrieving gateways!") . "', type: 'error'});\n" .
               "}\n" .
               "$('#profile_add_form').alerts ( 'form',\n" .
               "{\n" .
@@ -1496,7 +1496,7 @@ function profiles_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Profile cloning") . "', text: '" . __ ( "Error requesting profile data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Profile cloning") . "', text: '" . __ ( "Error retrieving profile data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -3442,7 +3442,7 @@ function profiles_edit_page ( $buffer, $parameters)
               "    }\n" .
               "  }\n" .
               "} else {\n" .
-              "  new PNotify ( { title: '" . __ ( "Profile edition") . "', text: '" . __ ( "Error requesting gateways!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Profile edition") . "', text: '" . __ ( "Error retrieving gateways!") . "', type: 'error'});\n" .
               "}\n" .
               "$('#profile_edit_form').on ( 'fill', function ( event, data)\n" .
               "{\n" .
@@ -3488,7 +3488,7 @@ function profiles_edit_page ( $buffer, $parameters)
               "  $('#profile_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Profile edition") . "', text: '" . __ ( "Error requesting data from profile!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Profile edition") . "', text: '" . __ ( "Error retrieving data from profile!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#profile_edit_form').alerts ( 'form',\n" .
               "{\n" .

@@ -938,7 +938,7 @@ function profiles_add ( $buffer, $parameters)
       {
         $gateways[] = $gateway;
       } else {
-        $data["Gateways"] = __ ( "One or more gateways are invalid.");
+        $data["Gateways"] = __ ( "One or more gateways is invalid.");
       }
     }
   }
@@ -961,7 +961,7 @@ function profiles_add ( $buffer, $parameters)
       {
         $blockeds[] = $gateway;
       } else {
-        $data["Blockeds"] = __ ( "One or more blocked gateways are invalid.");
+        $data["Blockeds"] = __ ( "One or more blocked gateways is invalid.");
       }
     }
   }

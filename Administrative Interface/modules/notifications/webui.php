@@ -423,7 +423,7 @@ function notifications_add_page ( $buffer, $parameters)
               "      });\n" .
               "    }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "    {\n" .
-              "      new PNotify ( { title: '" . __ ( "Notification addition") . "', text: '" . __ ( "Error requesting notification structure data!") . "', type: 'error'});\n" .
+              "      new PNotify ( { title: '" . __ ( "Notification addition") . "', text: '" . __ ( "Error retrieving notification structure data!") . "', type: 'error'});\n" .
               "    });\n" .
               "  }\n" .
               "}).trigger ( 'change');\n" .
@@ -637,7 +637,7 @@ function notifications_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Notification cloning") . "', text: '" . __ ( "Error requesting notification data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Notification cloning") . "', text: '" . __ ( "Error retrieving notification data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -896,7 +896,7 @@ function notifications_view_page ( $buffer, $parameters)
               "  $('#notification_view_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Notification view") . "', text: '" . __ ( "Error requesting notification data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Notification view") . "', text: '" . __ ( "Error retrieving notification data!") . "', type: 'error'});\n" .
               "});\n");
 
   return $output;
@@ -1146,7 +1146,7 @@ function notifications_edit_page ( $buffer, $parameters)
               "      });\n" .
               "    }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "    {\n" .
-              "      new PNotify ( { title: '" . __ ( "Notification edition") . "', text: '" . __ ( "Error requesting notification structure data!") . "', type: 'error'});\n" .
+              "      new PNotify ( { title: '" . __ ( "Notification edition") . "', text: '" . __ ( "Error retrieving notification structure data!") . "', type: 'error'});\n" .
               "    });\n" .
               "  }\n" .
               "});\n" .
@@ -1283,7 +1283,7 @@ function notifications_edit_page ( $buffer, $parameters)
               "  $('#notification_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Notification edition") . "', text: '" . __ ( "Error requesting notification data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Notification edition") . "', text: '" . __ ( "Error retrieving notification data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#notification_edit_form').alerts ( 'form',\n" .
               "{\n" .

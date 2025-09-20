@@ -115,7 +115,7 @@ function ranges_search_page ( $buffer, $parameters)
   $output .= "        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n";
   $output .= "        <h3 class=\"modal-title\">" . __ ( "Range removal") . "</h3>\n";
   $output .= "      </div>\n";
-  $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are sure you want to remove the range %s (from %s to %s)?"), "<span id=\"range_delete_description\"></span>", "<span id=\"range_delete_start\"></span>", "<span id=\"range_delete_finish\"></span>") . "</p><input type=\"hidden\" id=\"range_delete_id\" value=\"\"></div>\n";
+  $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are you sure you want to remove range %s (from %s to %s)?"), "<span id=\"range_delete_description\"></span>", "<span id=\"range_delete_start\"></span>", "<span id=\"range_delete_finish\"></span>") . "</p><input type=\"hidden\" id=\"range_delete_id\" value=\"\"></div>\n";
   $output .= "      <div class=\"modal-footer\">\n";
   $output .= "        <button class=\"btn\" data-dismiss=\"modal\">" . __ ( "Cancel") . "</button>\n";
   $output .= "        <button class=\"btn btn-primary del ladda-button\" data-style=\"expand-left\">" . __ ( "Remove") . "</button>\n";
@@ -319,7 +319,7 @@ function ranges_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Range cloning") . "', text: '" . __ ( "Error requesting range data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Range cloning") . "', text: '" . __ ( "Error retrieving range data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -510,7 +510,7 @@ function ranges_edit_page ( $buffer, $parameters)
               "  $('#range_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Range edition") . "', text: '" . __ ( "Error requesting range data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Range edition") . "', text: '" . __ ( "Error retrieving range data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#range_edit_form').alerts ( 'form',\n" .
               "{\n" .

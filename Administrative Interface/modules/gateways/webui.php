@@ -760,7 +760,7 @@ function gateways_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Gateway cloning") . "', text: '" . __ ( "Error requesting gateway data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Gateway cloning") . "', text: '" . __ ( "Error retrieving gateway data!") . "', type: 'error'});\n" .
               "});\n");
 }
 

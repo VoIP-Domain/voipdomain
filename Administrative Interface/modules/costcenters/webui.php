@@ -290,7 +290,7 @@ function costcenters_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Cost center cloning") . "', text: '" . __ ( "Error requesting cost center data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Cost center cloning") . "', text: '" . __ ( "Error retrieving cost center data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -438,7 +438,7 @@ function costcenters_edit_page ( $buffer, $parameters)
               "  $('#costcenter_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Cost center edition") . "', text: '" . __ ( "Error requesting cost center data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Cost center edition") . "', text: '" . __ ( "Error retrieving cost center data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#costcenter_edit_form').alerts ( 'form',\n" .
               "{\n" .

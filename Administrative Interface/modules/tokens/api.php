@@ -695,7 +695,7 @@ framework_add_hook (
           "example" => "192.168.0.0/16"
         ),
         "Permissions" => array (
-          "description" => __ ( "An array containing all system permissions token."),
+          "description" => __ ( "An array containing all system permission tokens."),
           "type" => "array",
           "items" => array (
             "type" => "string"
@@ -752,7 +752,7 @@ framework_add_hook (
             "Language" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The select language are invalid.")
+              "example" => __ ( "The selected language is invalid.")
             )
           )
         )
@@ -858,7 +858,7 @@ function tokens_add ( $buffer, $parameters)
   } else {
     if ( ! array_key_exists ( $parameters["Language"], $_in["languages"]))
     {
-      $data["Language"] = __ ( "The select language are invalid.");
+      $data["Language"] = __ ( "The selected language is invalid.");
     }
   }
 
@@ -966,7 +966,7 @@ framework_add_hook (
           "example" => "192.168.0.0/16"
         ),
         "Permissions" => array (
-          "description" => __ ( "An array containing all system permissions token."),
+          "description" => __ ( "An array containing all system permission tokens."),
           "type" => "array",
           "items" => array (
             "type" => "string"
@@ -1023,7 +1023,7 @@ framework_add_hook (
             "Language" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The select language are invalid.")
+              "example" => __ ( "The selected language is invalid.")
             )
           )
         )
@@ -1122,7 +1122,7 @@ function tokens_edit ( $buffer, $parameters)
   } else {
     if ( ! array_key_exists ( $parameters["Language"], $_in["languages"]))
     {
-      $data["Language"] = __ ( "The select language are invalid.");
+      $data["Language"] = __ ( "The selected language is invalid.");
     }
   }
 

@@ -382,7 +382,7 @@ function audios_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Audio cloning") . "', text: '" . __ ( "Error requesting audio data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Audio cloning") . "', text: '" . __ ( "Error retrieving audio data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -530,7 +530,7 @@ function audios_edit_page ( $buffer, $parameters)
               "  $('#audio_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Audio file edition") . "', text: '" . __ ( "Error requesting audio file data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Audio file edition") . "', text: '" . __ ( "Error retrieving audio file data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#audio_edit_file').on ( 'change', function ( e)\n" .
               "{\n" .

@@ -57,7 +57,7 @@ i18n_add ( "External calls (With cost)");
 i18n_add ( "Mobile calls");
 i18n_add ( "Interstate calls");
 i18n_add ( "International calls");
-i18n_add ( "Error requesting information!");
+i18n_add ( "Error retrieving information!");
 i18n_add ( "extensions listing");
 i18n_add ( "Name");
 i18n_add ( "Group");
@@ -271,7 +271,7 @@ i18n_add ( "External calls (With cost)", "Ligações externas (Com custo)", "pt_
 i18n_add ( "Mobile calls", "Ligações para celulares", "pt_BR");
 i18n_add ( "Interstate calls", "Ligações interurbanas", "pt_BR");
 i18n_add ( "International calls", "Ligações internacionais", "pt_BR");
-i18n_add ( "Error requesting information!", "Erro ao requisitar informações!", "pt_BR");
+i18n_add ( "Error retrieving information!", "Erro ao requisitar informações!", "pt_BR");
 i18n_add ( "extensions listing", "listagem de ramais", "pt_BR");
 i18n_add ( "Name", "Nome", "pt_BR");
 i18n_add ( "Group", "Grupo", "pt_BR");

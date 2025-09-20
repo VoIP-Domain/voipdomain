@@ -311,7 +311,7 @@ function agents_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Agent cloning") . "', text: '" . __ ( "Error requesting agent data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Agent cloning") . "', text: '" . __ ( "Error retrieving agent data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -488,7 +488,7 @@ function agents_edit_page ( $buffer, $parameters)
               "  $('#agent_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Agent edition") . "', text: '" . __ ( "Error requesting agent data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Agent edition") . "', text: '" . __ ( "Error retrieving agent data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#agent_edit_form').alerts ( 'form',\n" .
               "{\n" .

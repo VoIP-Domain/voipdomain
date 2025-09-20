@@ -521,7 +521,7 @@ framework_add_hook (
             "Start" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The range start is greater than finish.")
+              "example" => __ ( "The range start is greater than the finish.")
             ),
             "Finish" => array (
               "type" => "string",
@@ -590,7 +590,7 @@ function ranges_add ( $buffer, $parameters)
   }
   if ( ! array_key_exists ( "Start", $data) && ! array_key_exists ( "Finish", $data) && $parameters["Start"] > $parameters["Finish"])
   {
-    $data["Start"] = __ ( "The range start is greater than finish.");
+    $data["Start"] = __ ( "The range start is greater than the finish.");
   }
 
   /**
@@ -640,7 +640,7 @@ function ranges_add ( $buffer, $parameters)
     }
     if ( $result->num_rows != 0)
     {
-      $data["Start"] = __ ( "Values override existing range.");
+      $data["Start"] = __ ( "Values overlap an existing range.");
     }
   }
 
@@ -797,7 +797,7 @@ framework_add_hook (
             "Start" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The range start is greater than finish.")
+              "example" => __ ( "The range start is greater than the finish.")
             ),
             "Finish" => array (
               "type" => "string",
@@ -866,7 +866,7 @@ function ranges_edit ( $buffer, $parameters)
   }
   if ( ! array_key_exists ( "Start", $data) && ! array_key_exists ( "Finish", $data) && $parameters["Start"] > $parameters["Finish"])
   {
-    $data["Start"] = __ ( "The range start is greater than finish.");
+    $data["Start"] = __ ( "The range start is greater than the finish.");
   }
 
   /**
@@ -929,7 +929,7 @@ function ranges_edit ( $buffer, $parameters)
     }
     if ( $result->num_rows != 0)
     {
-      $data["Start"] = __ ( "Values override existing range.");
+      $data["Start"] = __ ( "Values overlap an existing range.");
     }
   }
 

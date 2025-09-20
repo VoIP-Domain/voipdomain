@@ -292,7 +292,7 @@ function blocks_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Block cloning") . "', text: '" . __ ( "Error requesting block data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Block cloning") . "', text: '" . __ ( "Error retrieving block data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -440,7 +440,7 @@ function blocks_edit_page ( $buffer, $parameters)
               "  $('#block_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Block edition") . "', text: '" . __ ( "Error requesting block data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Block edition") . "', text: '" . __ ( "Error retrieving block data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#block_edit_form').alerts ( 'form',\n" .
               "{\n" .

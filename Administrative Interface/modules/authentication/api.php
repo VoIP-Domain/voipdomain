@@ -51,17 +51,17 @@ framework_add_hook (
           "properties" => array (
             "Status" => array (
               "type" => "boolean",
-              "description" => __ ( "If the authentication endpoint is enabled."),
+              "description" => __ ( "Whether the authentication endpoint is enabled."),
               "example" => true
             ),
             "Background" => array (
               "type" => "integer",
-              "description" => __ ( "The authentication page background image."),
+              "description" => __ ( "Background image for the authentication page."),
               "example" => 1
             ),
             "Password" => array (
               "type" => "boolean",
-              "description" => __ ( "If the extension password will be accepted to authenticate user."),
+              "description" => __ ( "Whether the extension password may be used to authenticate the user."),
               "example" => true
             ),
             "Plugins" => array (
@@ -70,7 +70,7 @@ framework_add_hook (
                 "name" => "Plugins",
                 "wrapped" => true
               ),
-              "description" => __ ( "A list of authentication plugins with their specific configuration."),
+              "description" => __ ( "List of authentication plugins and their specific configurations." ),
               "items" => array (
                 "anyOf" => array ()
               )
@@ -208,19 +208,19 @@ framework_add_hook (
       "properties" => array (
         "Status" => array (
           "type" => "boolean",
-          "description" => __ ( "If the authentication endpoint is enabled."),
+          "description" => __ ( "Whether the authentication endpoint is enabled."),
           "required" => true,
           "example" => true
         ),
         "Background" => array (
           "type" => "integer",
-          "description" => __ ( "The authentication page background image."),
+          "description" => __ ( "Background image for the authentication page."),
           "required" => true,
           "example" => 1
         ),
         "Password" => array (
           "type" => "boolean",
-          "description" => __ ( "If the extension password will be accepted to authenticate user."),
+          "description" => __ ( "Whether the extension password may be used to authenticate the user."),
           "required" => true,
           "example" => true
         ),
@@ -230,7 +230,7 @@ framework_add_hook (
             "name" => "Plugins",
             "wrapped" => true
           ),
-          "description" => __ ( "A list of authentication plugins with their specific configuration."),
+          "description" => __ ( "List of authentication plugins and their specific configurations."),
           "required" => false,
           "items" => array (
             "anyOf" => array ()
@@ -404,19 +404,19 @@ framework_add_hook (
       "properties" => array (
         "Username" => array (
           "type" => "string",
-          "description" => __ ( "The username of user to authenticate."),
+          "description" => __ ( "Username of the user to authenticate."),
           "required" => true,
           "example" => "1001"
         ),
         "Password" => array (
           "type" => "password",
-          "description" => __ ( "The password of user to authenticate."),
+          "description" => __ ( "Password of the user to authenticate."),
           "required" => true,
           "example" => __ ( "mypassword")
         ),
         "Context" => array (
           "type" => "string",
-          "description" => __ ( "The tenant domain of user to authenticate. If not provided, the server hostname will be used."),
+          "description" => __ ( "Tenant domain of the user to authenticate. If omitted, the server hostname is used."),
           "required" => false,
           "example" => "voipdomain.io"
         )
@@ -635,7 +635,7 @@ function authentication_password ( $buffer, $parameters)
    * Return OK
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . ( $callback ? $callback : "/auth") . "?Message=" . urlencode ( __ ( "User authenticated!")) . "&MessageType=info");
+  header ( "Location: /auth?Message=" . urlencode ( __ ( "User authenticated!")) . "&MessageType=info");
   return $buffer;
 }
 

@@ -70,7 +70,7 @@ i18n_add ( "Error adding notification!");
 i18n_add ( "Notification added successfully!");
 i18n_add ( "notifications view");
 i18n_add ( "Notification view");
-i18n_add ( "Error requesting notification data!");
+i18n_add ( "Error retrieving notification data!");
 i18n_add ( "notifications edition");
 i18n_add ( "Notification edition");
 i18n_add ( "Error changing notification!");
@@ -153,7 +153,7 @@ i18n_add ( "The value to be sent with the special header.");
 i18n_add ( "If the system must relax SSL certificate validation if using HTTPS.");
 i18n_add ( "The date of validity to this notification in YYYY-MM-DD format.");
 i18n_add ( "New system notification added successfully.");
-i18n_add ( "The provided extra HTTP header name are invalid.");
+i18n_add ( "The provided extra HTTP header name is invalid.");
 i18n_add ( "The provided extra HTTP header value cannot be empty.");
 i18n_add ( "Add a new system notification.");
 i18n_add ( "The system notification was successfully updated.");
@@ -161,7 +161,7 @@ i18n_add ( "Change a system notification information.");
 i18n_add ( "The system notification was removed.");
 i18n_add ( "Remove a notification from system.");
 i18n_add ( "Variable name");
-i18n_add ( "Error requesting notification structure data!");
+i18n_add ( "Error retrieving notification structure data!");
 i18n_add ( "Notification cloning");
 
 /**
@@ -200,7 +200,7 @@ i18n_add ( "Error adding notification!", "Erro ao adicionar notificação!", "pt
 i18n_add ( "Notification added successfully!", "Notificação adicionado com sucesso!", "pt_BR");
 i18n_add ( "notifications view", "visualização de notificações", "pt_BR");
 i18n_add ( "Notification view", "Visualização de notificação", "pt_BR");
-i18n_add ( "Error requesting notification data!", "Erro ao requisitar dados da notificação!", "pt_BR");
+i18n_add ( "Error retrieving notification data!", "Erro ao requisitar dados da notificação!", "pt_BR");
 i18n_add ( "notifications edition", "edição de notificações", "pt_BR");
 i18n_add ( "Notification edition", "Edição de notificação", "pt_BR");
 i18n_add ( "Error changing notification!", "Erro ao alterar notificação!", "pt_BR");
@@ -283,7 +283,7 @@ i18n_add ( "The value to be sent with the special header.", "O valor a ser envia
 i18n_add ( "If the system must relax SSL certificate validation if using HTTPS.", "Se o sistema deve desconsiderar a validação do certificado SSL quando utilizado HTTPS.", "pt_BR");
 i18n_add ( "The date of validity to this notification in YYYY-MM-DD format.", "A data de validade desta notificação no formato AAAA-MM-DD.", "pt_BR");
 i18n_add ( "New system notification added successfully.", "Nova notificação do sistema adicionada com sucesso.", "pt_BR");
-i18n_add ( "The provided extra HTTP header name are invalid.", "O nome do cabeçalho HTTP adicional informado é inválido.", "pt_BR");
+i18n_add ( "The provided extra HTTP header name is invalid.", "O nome do cabeçalho HTTP adicional informado é inválido.", "pt_BR");
 i18n_add ( "The provided extra HTTP header value cannot be empty.", "O nome do cabeçalho HTTP adicional não pode ser vazio.", "pt_BR");
 i18n_add ( "Add a new system notification.", "Adicionar uma nova notificação do sistema.", "pt_BR");
 i18n_add ( "The system notification was successfully updated.", "A notificação do sistema foi atualizada com sucesso.", "pt_BR");
@@ -291,6 +291,6 @@ i18n_add ( "Change a system notification information.", "Altera informações da
 i18n_add ( "The system notification was removed.", "A notificação do sistema foi removida.", "pt_BR");
 i18n_add ( "Remove a notification from system.", "Remover a notificação do sistema.", "pt_BR");
 i18n_add ( "Variable name", "Nome da variável", "pt_BR");
-i18n_add ( "Error requesting notification structure data!", "Erro ao requisitar dados da estrutura da notificiação!", "pt_BR");
+i18n_add ( "Error retrieving notification structure data!", "Erro ao requisitar dados da estrutura da notificiação!", "pt_BR");
 i18n_add ( "Notification cloning", "Clonagem de notificação", "pt_BR");
 ?>
