@@ -24,13 +24,14 @@
                            INSTALL HOW-TO
                          --==============--
 
-The VoIP Domain system need a series of requirements to work. The developer of
-this software uses RHEL as main Linux system to all the servers (or the server,
-if you want to run everything together).
+The VoIP Domain system has a set of requirements that must be met before it can
+run. The software was developed primarily on RHEL, which is therefore the
+recommended Linux distribution for every server (or for a single all-in-one
+server if you prefer).
 
-The requirements to the main administration interface will be:
+Requirements for the main administration interface:
 
-* NGiNX server (http://nginx.org/)
+* NGiNX web server (https://nginx.org/)
 * MariaDB server (https://mariadb.org/)
 * PHP (at least version 5.5.0) with PHP-FPM support
   (https://www.php.net/manual/en/install.fpm.php) and the following modules:
@@ -64,19 +65,19 @@ The requirements to the main administration interface will be:
 * PHP Gearman PECL module (https://pecl.php.net/package/gearman)
 
 You can run the administrative interface on a small Virtual Machine or low-cost
-server. The administrative interface doesn't need to be active 100% of the time,
-as Asterisk servers managed by the system doesn't depend on the administrative
-interface to work. Any offline data (such as billing, LCR, etc) can be done
-locally on the Asterisk servers and therefore sent to the administrative
-interface.
+server. The administrative interface does not need to be online 100% of the
+time, as the Asterisk servers managed by the system do not depend on the
+administrative interface to work. Any off-line tasks (such as billing, LCR, and
+similar) can be processed locally on the Asterisk servers and later synchronized
+with the administrative interface.
 
-The administrative interface will be used to configure your telephony environment
-and provide usage reports.
+The administrative interface is used to configure your telephony environment and
+provide usage reports.
 
 To configure PHP-FPM and NGiNX, you can refer to the examples in the docs
 directory.
 
-The requirements to the control daemons will be:
+Requirements for the control daemons:
 
 * PHP (at least version 5.5.0) with cli and the following modules:
   - SimpleXML
@@ -110,7 +111,7 @@ Asterisk monitor daemon on the same machine as your Asterisk server, to avoid
 missing events in case of network problems. The router daemon can run on the same
 server as the administrative interface.
 
-The requirements to the Asterisk servers will be:
+Requirements for the Asterisk servers:
 
 * Asterisk (at least version 20.0.0)
 * MariaDB server (https://mariadb.org/)
@@ -147,7 +148,7 @@ configurations and provide basic system intelligence such as LCR.
 Once everything is installed, you'll need to create the main system database and
 populate it with MariaDB. Configuring the web server pointing to the
 Administrative Interface, you'll access the installation procedure. The
-installation will be done in three steps:
+installation is completed in three steps:
 
 1) Permission check:
    - This will check if `/etc/voipdomain` is a directory and if it's writable by
@@ -155,12 +156,12 @@ installation will be done in three steps:
      should be used.
    - If there's no `/etc/voipdomain/webserver.conf` file.
 2) Populate the database:
-   - This step you'll provide the database server hostname, user and password.
+   - In this step you provide the database-server host name, user, and password.
      System will create the user `vd`@`localhost` with a secure password and
      will populate the database `vd`.
 3) System will provide you the default username and password. Usually it's
    username "admin" and password "admin". This is the multi-tenant
-   super-administrator credentials. You should change the password immediatelly.
+   super-administrator credentials. You should change the password immediately.
 
 Access the multi-tenant interface and create your first tenant. On each created
 tenant, you'll need to create a basic tree of objects, in the following sequence:

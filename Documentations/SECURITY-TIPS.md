@@ -25,12 +25,12 @@
   Asterisk Security Tips
 --======================--
 
-- Avoid keep your Asterisk server visible to the Internet;
-- Never use an IP phone with valid Internet address, you'll probably have default passwords and other security flaws;
-- If you really need to keep an Asterisk server visible at Internet, be sure to:
+- Avoid keeping your Asterisk server exposed to the Internet.
+- Never use an IP phone with a public Internet address; it will likely have default passwords and other security flaws.
+- If you really need to expose an Asterisk server to the Internet, be sure to:
   * Use strong passwords (at least 8 characters, lower and upper case letters, numbers and special characters);
   * Change your user passwords periodically (every 2 to 3 months at most);
-  * Prefer to enable only TLS port, and enforce use of SRTP;
-  * Try to block call's to unusual destinations.
-- At sip.conf under the general section, use "alwaysauthreject = yes". This setting make's Asterisk reply with authentication error insted of not found even if peer didn't exist;
-- Think about use Fail2Ban to block address that make many requests with invalid password.
+  * Prefer to enable only the TLS port and enforce the use of SRTP;
+  * Try to block calls to unusual destinations.
+- In `sip.conf` under the `[general]` section, set `alwaysauthreject = yes`. This setting makes Asterisk reply with an authentication error instead of “not found”, even when the peer does not exist.
+- Consider using Fail2Ban to block addresses that make repeated requests with an invalid password.

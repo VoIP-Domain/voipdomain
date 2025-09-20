@@ -70,3 +70,9 @@ A) All API calls will receive an array as parameter, with the structure:
        "routevars" => **Variables from hook options**
      )
    )
+
+Q) My number doesn't appear in the hunt-group select box!
+A) The extension type list is filtered to include only the types present in the global `$_in["hunts"]` configuration.
+
+Q) Is there any way to execute code when installing, upgrading, or removing a plugin?
+A) Yes, there are hooks available for this purpose.
