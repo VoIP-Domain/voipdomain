@@ -260,7 +260,7 @@ framework_add_hook (
             "Password" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The provided password enabled field is not valid.")
+              "example" => __ ( "The provided password-enabled field is not valid.")
             )
           )
         )
@@ -315,7 +315,7 @@ function authentication_edit ( $buffer, $parameters)
   }
   if ( ! array_key_exists ( "Password", $parameters))
   {
-    $data["Password"] = __ ( "The provided password enabled field is not valid.");
+    $data["Password"] = __ ( "The provided password-enabled field is not valid.");
   }
 
   /**
@@ -404,19 +404,19 @@ framework_add_hook (
       "properties" => array (
         "Username" => array (
           "type" => "string",
-          "description" => __ ( "Username of the user to authenticate."),
+          "description" => __ ( "Username of the user to be authenticated."),
           "required" => true,
           "example" => "1001"
         ),
         "Password" => array (
           "type" => "password",
-          "description" => __ ( "Password of the user to authenticate."),
+          "description" => __ ( "Password of the user to be authenticated."),
           "required" => true,
           "example" => __ ( "mypassword")
         ),
         "Context" => array (
           "type" => "string",
-          "description" => __ ( "Tenant domain of the user to authenticate. If omitted, the server hostname is used."),
+          "description" => __ ( "Tenant domain of the user to be authenticated. If omitted, the server hostname is used."),
           "required" => false,
           "example" => "voipdomain.io"
         )

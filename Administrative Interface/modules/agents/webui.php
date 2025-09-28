@@ -154,11 +154,11 @@ function agents_search_page ( $buffer, $parameters)
               "  VoIP.rest ( '/agents/' + encodeURIComponent ( $('#agent_delete_id').val ()), 'DELETE').done ( function ( data, textStatus, jqXHR)\n" .
               "  {\n" .
               "    $('#agent_delete').modal ( 'hide');\n" .
-              "    new PNotify ( { title: '" . __ ( "Agent removal") . "', text: '" . __ ( "Agent removed successfully!") . "', type: 'success'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Remove agent") . "', text: '" . __ ( "Agent removed successfully!") . "', type: 'success'});\n" .
               "    $('#agent_delete_id').data ( 'dtrow').remove ().draw ();\n" .
               "  }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "  {\n" .
-              "    new PNotify ( { title: '" . __ ( "Agent removal") . "', text: '" . __ ( "Error removing agent!") . "', type: 'error'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Remove agent") . "', text: '" . __ ( "Error removing agent!") . "', type: 'error'});\n" .
               "  }).always ( function ()\n" .
               "  {\n" .
               "    l.stop ();\n" .

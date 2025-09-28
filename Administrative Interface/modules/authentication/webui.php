@@ -112,7 +112,7 @@ function authentication_page ( $output, $parameters)
   $output .= "      <div class=\"form-group\">\n";
   $output .= "        <label for=\"authentication_background\" class=\"control-label col-xs-2\">" . __ ( "Background") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
-  $output .= "          <select name=\"Background\" id=\"authentication_background\" class=\"form-control\" data-placeholder=\"" . __ ( "Select the authentication page background") . "\">\n";
+  $output .= "          <select name=\"Background\" id=\"authentication_background\" class=\"form-control\" data-placeholder=\"" . __ ( "Select a background for the authentication page") . "\">\n";
   $output .= "            <option value=\"1\">Computer Lockdown (Blue Coat Photos)</option>\n";
   $output .= "            <option value=\"2\">Genova Liguria (gnuckx select1)</option>\n";
   $output .= "            <option value=\"3\">My Mark (Dwayne Bent)</option>\n";

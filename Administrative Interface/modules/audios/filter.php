@@ -51,7 +51,7 @@ framework_add_filter ( "get_audios", "get_audios");
  */
 function audios_menu ( $buffer, $parameters)
 {
-  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "file-audio", "href" => "/audios", "text" => __ ( "Audios"), "permissions" => array ( "Administrator"))));
+  return array_merge ( (array) $buffer, array ( array ( "type" => "entry", "icon" => "file-audio", "href" => "/audios", "text" => __ ( "Audio files"), "permissions" => array ( "Administrator"))));
 }
 
 /**
