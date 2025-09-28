@@ -86,7 +86,7 @@ framework_add_hook (
               ),
               "Name" => array (
                 "type" => "string",
-                "description" => __ ( "The queue name keywork of the queue."),
+                "description" => __ ( "The name keyword of the queue."),
                 "example" => __ ( "helpdesk")
               ),
               "Strategy" => array (
@@ -275,7 +275,7 @@ framework_add_hook (
             ),
             "Name" => array (
               "type" => "string",
-              "description" => __ ( "The queue name keywork of the queue."),
+              "description" => __ ( "The name keyword of the queue."),
               "example" => __ ( "helpdesk")
             ),
             "Strategy" => array (
@@ -500,7 +500,7 @@ framework_add_hook (
             "Name" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The name could only contain lower case characters, numbers, hifen and dot.")
+              "example" => __ ( "The name can contain only lowercase letters, numbers, hyphen and dot.")
             ),
             "Strategy" => array (
               "type" => "string",
@@ -561,7 +561,7 @@ function queues_add ( $buffer, $parameters)
   }
   if ( ! array_key_exists ( "Name", $data) && $parameters["Name"] != preg_replace ( "/[^a-z0-9\-\.]/", "", $parameters["Name"]))
   {
-    $data["Name"] = __ ( "The name could only contain lower case characters, numbers, hifen and dot.");
+    $data["Name"] = __ ( "The name can contain only lowercase letters, numbers, hyphen and dot.");
   }
   if ( empty ( $parameters["Strategy"]))
   {
@@ -716,7 +716,7 @@ framework_add_hook (
             "Name" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The name could only contain lower case characters, numbers, hifen and dot.")
+              "example" => __ ( "The name can contain only lowercase letters, numbers, hyphen and dot.")
             ),
             "Strategy" => array (
               "type" => "string",
@@ -737,7 +737,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "queues_edit"),
     "title" => __ ( "Edit queues"),
-    "description" => __ ( "Change a queue information.")
+    "description" => __ ( "Change queue information.")
   )
 );
 
@@ -777,7 +777,7 @@ function queues_edit ( $buffer, $parameters)
   }
   if ( ! array_key_exists ( "Name", $data) && $parameters["Name"] != preg_replace ( "/[^a-z0-9\-\.]/", "", $parameters["Name"]))
   {
-    $data["Name"] = __ ( "The name could only contain lower case characters, numbers, hifen and dot.");
+    $data["Name"] = __ ( "The name can contain only lowercase letters, numbers, hyphen and dot.");
   }
   if ( empty ( $parameters["Strategy"]))
   {
@@ -1192,7 +1192,7 @@ function queues_join_member ( $buffer, $parameters)
   }
   if ( $result->num_rows != 0)
   {
-    $data["Queue"] = __ ( "The provided agent is already logged at this queue.");
+    $data["Queue"] = __ ( "The provided agent is already logged in to this queue.");
   }
 
   /**
@@ -1393,7 +1393,7 @@ function queues_leave_member ( $buffer, $parameters)
   }
   if ( $result->num_rows != 0)
   {
-    $data["Queue"] = __ ( "The provided agent are not logged at this queue.");
+    $data["Queue"] = __ ( "The provided agent is not logged in to this queue.");
   }
 
   /**
@@ -1594,7 +1594,7 @@ function queues_pause_member ( $buffer, $parameters)
   }
   if ( $result->num_rows != 0)
   {
-    $data["Queue"] = __ ( "The provided agent are not logged at this queue.");
+    $data["Queue"] = __ ( "The provided agent is not logged in to this queue.");
   }
 
   /**
@@ -1786,7 +1786,7 @@ function queues_resume_member ( $buffer, $parameters)
   }
   if ( $result->num_rows != 0)
   {
-    $data["Queue"] = __ ( "The provided agent are not logged at this queue.");
+    $data["Queue"] = __ ( "The provided agent is not logged in to this queue.");
   }
 
   /**

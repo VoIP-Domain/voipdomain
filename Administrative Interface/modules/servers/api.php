@@ -392,13 +392,13 @@ framework_add_hook (
             ),
             "Start" => array (
               "type" => "time",
-              "description" => __ ( "If transfer window are enabled, the start time of the window."),
+              "description" => __ ( "If transfer window is enabled, the start time of the window."),
               "pattern" => "/^([0-1][0-9]|2[0-3]):([0-5][0-9])$/",
               "example" => "00:00"
             ),
             "Finish" => array (
               "type" => "time",
-              "description" => __ ( "If transfer window are enabled, the finish time of the window."),
+              "description" => __ ( "If transfer window is enabled, the finish time of the window."),
               "pattern" => "/^([0-1][0-9]|2[0-3]):([0-5][0-9])$/",
               "example" => "06:00"
             )
@@ -668,13 +668,13 @@ framework_add_hook (
         ),
         "Start" => array (
           "type" => "string",
-          "description" => __ ( "If transfer window are enabled, the start time of the window."),
+          "description" => __ ( "If transfer window is enabled, the start time of the window."),
           "pattern" => "/^([0-1][0-9]|2[0-3]):([0-5][0-9])$/",
           "example" => "00:00"
         ),
         "Finish" => array (
           "type" => "string",
-          "description" => __ ( "If transfer window are enabled, the finish time of the window."),
+          "description" => __ ( "If transfer window is enabled, the finish time of the window."),
           "pattern" => "/^([0-1][0-9]|2[0-3]):([0-5][0-9])$/",
           "example" => "06:00"
         )
@@ -707,12 +707,12 @@ framework_add_hook (
             "Start" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The start hour is required when transfer window are enabled.")
+              "example" => __ ( "The start hour is required when the transfer window is enabled.")
             ),
             "Finish" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The finish hour is required when transfer window are enabled.")
+              "example" => __ ( "The finish hour is required when the transfer window is enabled.")
             )
           )
         )
@@ -827,11 +827,11 @@ function servers_add ( $buffer, $parameters)
    */
   if ( array_key_exists ( "Window", $parameters) && (boolean) $parameters["Window"] && empty ( $parameters["Start"]))
   {
-    $data["Start"] = __ ( "The start hour is required when transfer window are enabled.");
+    $data["Start"] = __ ( "The start hour is required when the transfer window is enabled.");
   }
   if ( array_key_exists ( "Window", $parameters) && (boolean) $parameters["Window"] && empty ( $parameters["Finish"]))
   {
-    $data["Finish"] = __ ( "The finish hour is required when transfer window are enabled.");
+    $data["Finish"] = __ ( "The finish hour is required when the transfer window is enabled.");
   }
 
   /**
@@ -1040,13 +1040,13 @@ framework_add_hook (
         ),
         "Start" => array (
           "type" => "string",
-          "description" => __ ( "If transfer window are enabled, the start time of the window."),
+          "description" => __ ( "If transfer window is enabled, the start time of the window."),
           "pattern" => "/^([0-1][0-9]|2[0-3]):([0-5][0-9])$/",
           "example" => "00:00"
         ),
         "Finish" => array (
           "type" => "string",
-          "description" => __ ( "If transfer window are enabled, the finish time of the window."),
+          "description" => __ ( "If transfer window is enabled, the finish time of the window."),
           "pattern" => "/^([0-1][0-9]|2[0-3]):([0-5][0-9])$/",
           "example" => "06:00"
         )
@@ -1079,12 +1079,12 @@ framework_add_hook (
             "Start" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The start hour is required when transfer window are enabled.")
+              "example" => __ ( "The start hour is required when the transfer window is enabled.")
             ),
             "Finish" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The finish hour is required when transfer window are enabled.")
+              "example" => __ ( "The finish hour is required when the transfer window is enabled.")
             )
           )
         )
@@ -1214,11 +1214,11 @@ function servers_edit ( $buffer, $parameters)
    */
   if ( array_key_exists ( "Window", $parameters) && (boolean) $parameters["Window"] && ! array_key_exists ( "Start", $parameters))
   {
-    $data["Start"] = __ ( "The start hour is required.when transfer window are enabled.");
+    $data["Start"] = __ ( "The start hour is required when the transfer window is enabled.");
   }
   if ( array_key_exists ( "Window", $parameters) && (boolean) $parameters["Window"] && ! array_key_exists ( "Finish", $parameters))
   {
-    $data["Finish"] = __ ( "The finish hour is required.when transfer window are enabled.");
+    $data["Finish"] = __ ( "The finish hour is required when the transfer window is enabled.");
   }
 
   /**
@@ -1568,7 +1568,7 @@ framework_add_hook (
       "properties" => array (
         "Clean" => array (
           "type" => "boolean",
-          "description" => __ ( "Force the server to wipe current configuration before rebuild configuration files."),
+          "description" => __ ( "Force the server to wipe the current configuration before rebuilding configuration files."),
           "default" => false,
           "example" => true
         )
@@ -1576,7 +1576,7 @@ framework_add_hook (
     ),
     "response" => array (
       200 => array (
-        "description" => __ ( "The system server was successfully rebuilded.")
+        "description" => __ ( "The system server was successfully rebuilt.")
       ),
       422 => array (
         "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),

@@ -2265,7 +2265,7 @@ framework_add_hook (
               ),
               "Uses" => array (
                 "type" => "integer",
-                "description" => __ ( "How many times this IVR are in use into the system."),
+                "description" => __ ( "How many times this IVR is in use in the system."),
                 "example" => 3
               )
             )
@@ -2709,7 +2709,7 @@ function ivrs_add ( $buffer, $parameters)
   }
   if ( ! array_key_exists ( "Name", $data) && $parameters["Name"] != preg_replace ( "/[^a-z0-9\-\.]/", "", $parameters["Name"]))
   {
-    $data["Name"] = __ ( "The name could only contain lower case characters, numbers, hifen and dot.");
+    $data["Name"] = __ ( "The name can contain only lowercase letters, numbers, hyphen and dot.");
   }
   $parameters["Description"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["Description"])));
   if ( empty ( $parameters["Description"]))
@@ -2966,7 +2966,7 @@ function ivrs_edit ( $buffer, $parameters)
   }
   if ( ! array_key_exists ( "Name", $data) && $parameters["Name"] != preg_replace ( "/[^a-z0-9\-\.]/", "", $parameters["Name"]))
   {
-    $data["Name"] = __ ( "The name could only contain lower case characters, numbers, hifen and dot.");
+    $data["Name"] = __ ( "The name can contain only lowercase letters, numbers, hyphen and dot.");
   }
   $parameters["Description"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["Description"])));
   if ( empty ( $parameters["Description"]))

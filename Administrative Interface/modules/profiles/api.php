@@ -101,7 +101,7 @@ framework_add_hook (
               ),
               "InUse" => array (
                 "type" => "boolean",
-                "description" => __ ( "If the profile are in use at some server."),
+                "description" => __ ( "Indicates whether the profile is in use by any server."),
                 "example" => true
               )
             )

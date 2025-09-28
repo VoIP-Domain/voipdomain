@@ -38,7 +38,7 @@
  * Add basic language structure (english)
  */
 i18n_add ( "Add audio");
-i18n_add ( "Are sure you want to remove the audio %s (%s)?");
+i18n_add ( "Are you sure you want to remove the audio %s (%s)?");
 i18n_add ( "Audio description");
 i18n_add ( "audio editing");
 i18n_add ( "Audio file added successfully!");
@@ -111,7 +111,7 @@ i18n_add ( "Error retrieving audio data!");
  * Add Brazilian Portuguese support
  */
 i18n_add ( "Add audio", "Adicionar áudio", "pt_BR");
-i18n_add ( "Are sure you want to remove the audio %s (%s)?", "Você tem certeza que deseja remover o áudio %s (%s)?", "pt_BR");
+i18n_add ( "Are you sure you want to remove the audio %s (%s)?", "Você tem certeza que deseja remover o áudio %s (%s)?", "pt_BR");
 i18n_add ( "Audio description", "Descrição do áudio", "pt_BR");
 i18n_add ( "audio editing", "edição de áudio", "pt_BR");
 i18n_add ( "Audio file added successfully!", "Arquivo de áudio adicionado com sucesso!", "pt_BR");

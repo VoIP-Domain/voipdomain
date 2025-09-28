@@ -92,7 +92,7 @@ i18n_add ( "Plugin removed successfully!");
 i18n_add ( "plugins");
 i18n_add ( "Search plugins");
 i18n_add ( "Status");
-i18n_add ( "Are sure you want to remove the plugin %s (%s)?");
+i18n_add ( "Are you sure you want to remove the plugin %s (%s)?");
 i18n_add ( "Invalid plugin extension.");
 i18n_add ( "Add...");
 i18n_add ( "Error toggling plugin!");
@@ -337,7 +337,7 @@ i18n_add ( "Plugin removed successfully!", "Plugin removido com sucesso!", "pt_B
 i18n_add ( "plugins", "plugins", "pt_BR");
 i18n_add ( "Search plugins", "Pesquisar plugins", "pt_BR");
 i18n_add ( "Status", "Estado", "pt_BR");
-i18n_add ( "Are sure you want to remove the plugin %s (%s)?", "Você tem certeza que deseja remover o plugin %s (%s)?", "pt_BR");
+i18n_add ( "Are you sure you want to remove the plugin %s (%s)?", "Você tem certeza que deseja remover o plugin %s (%s)?", "pt_BR");
 i18n_add ( "Invalid plugin extension.", "Extensão do plugin inválida.", "pt_BR");
 i18n_add ( "Add...", "Adicionar..", "pt_BR");
 i18n_add ( "Error toggling plugin!", "Erro ao habilitar/desabilitar plugin!", "pt_BR");

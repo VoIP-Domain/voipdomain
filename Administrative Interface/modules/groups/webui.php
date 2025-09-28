@@ -119,7 +119,7 @@ function groups_search_page ( $buffer, $parameters)
   $output .= "        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n";
   $output .= "        <h3 class=\"modal-title\">" . __ ( "Group remove") . "</h3>\n";
   $output .= "      </div>\n";
-  $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are sure you want to remove the group %s (%s)?"), "<span id=\"group_delete_description\"></span>", "<span id=\"group_delete_costcenter\"></span>") . "</p><input type=\"hidden\" id=\"group_delete_id\" value=\"\"></div>\n";
+  $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are you sure you want to remove the group %s (%s)?"), "<span id=\"group_delete_description\"></span>", "<span id=\"group_delete_costcenter\"></span>") . "</p><input type=\"hidden\" id=\"group_delete_id\" value=\"\"></div>\n";
   $output .= "      <div class=\"modal-footer\">\n";
   $output .= "        <button class=\"btn\" data-dismiss=\"modal\">" . __ ( "Cancel") . "</button>\n";
   $output .= "        <button class=\"btn btn-primary del ladda-button\" data-style=\"expand-left\">" . __ ( "Remove") . "</button>\n";

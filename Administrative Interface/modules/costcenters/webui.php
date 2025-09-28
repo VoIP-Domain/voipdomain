@@ -114,7 +114,7 @@ function costcenters_search_page ( $buffer, $parameters)
   $output .= "        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n";
   $output .= "        <h3 class=\"modal-title\">" . __ ( "Remove cost center") . "</h3>\n";
   $output .= "      </div>\n";
-  $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are sure you want to remove the cost center %s (%s)?"), "<span id=\"costcenter_delete_description\"></span>", "<span id=\"costcenter_delete_code\"></span>") . "</p><input type=\"hidden\" id=\"costcenter_delete_id\" value=\"\"></div>\n";
+  $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are you sure you want to remove the cost center %s (%s)?"), "<span id=\"costcenter_delete_description\"></span>", "<span id=\"costcenter_delete_code\"></span>") . "</p><input type=\"hidden\" id=\"costcenter_delete_id\" value=\"\"></div>\n";
   $output .= "      <div class=\"modal-footer\">\n";
   $output .= "        <button class=\"btn\" data-dismiss=\"modal\">" . __ ( "Cancel") . "</button>\n";
   $output .= "        <button class=\"btn btn-primary del ladda-button\" data-style=\"expand-left\">" . __ ( "Remove") . "</button>\n";

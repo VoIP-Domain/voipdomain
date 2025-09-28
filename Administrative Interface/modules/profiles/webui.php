@@ -115,7 +115,7 @@ function profiles_search_page ( $buffer, $parameters)
   $output .= "        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n";
   $output .= "        <h3 class=\"modal-title\">" . __ ( "Remove profile") . "</h3>\n";
   $output .= "      </div>\n";
-  $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are sure you want to remove the profile %s?"), "<span id=\"profile_delete_description\"></span>") . "</p><input type=\"hidden\" id=\"profile_delete_id\" value=\"\"></div>\n";
+  $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are you sure you want to remove the profile %s?"), "<span id=\"profile_delete_description\"></span>") . "</p><input type=\"hidden\" id=\"profile_delete_id\" value=\"\"></div>\n";
   $output .= "      <div class=\"modal-footer\">\n";
   $output .= "        <button class=\"btn\" data-dismiss=\"modal\">" . __ ( "Cancel") . "</button>\n";
   $output .= "        <button class=\"btn btn-primary del ladda-button\" data-style=\"expand-left\">" . __ ( "Remove") . "</button>\n";
@@ -1179,7 +1179,7 @@ function profiles_add_page ( $buffer, $parameters)
   $output .= "      <div class=\"form-group\">\n";
   $output .= "        <label for=\"profile_add_nggw\" class=\"control-label col-xs-2\">" . __ ( "Non geographic gateway") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
-  $output .= "          <select name=\"NGGW\" id=\"profile_add_nggw\" class=\"form-control\" data-placeholder=\"" . __ ( "Gateway to non geographic calls") . "\"><option value=\"\"></option></select>\n";
+  $output .= "          <select name=\"NGGW\" id=\"profile_add_nggw\" class=\"form-control\" data-placeholder=\"" . __ ( "Gateway to non-geographic calls") . "\"><option value=\"\"></option></select>\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";
 
@@ -2096,7 +2096,7 @@ function profiles_view_page ( $buffer, $parameters)
   $output .= "      <div class=\"form-group\">\n";
   $output .= "        <label for=\"profile_view_nggw\" class=\"control-label col-xs-2\">" . __ ( "Non geographic gateway") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
-  $output .= "          <select name=\"NGGW\" id=\"profile_view_nggw\" class=\"form-control\" data-placeholder=\"" . __ ( "Gateway to non geographic calls") . "\" disabled=\"disabled\"></select>\n";
+  $output .= "          <select name=\"NGGW\" id=\"profile_view_nggw\" class=\"form-control\" data-placeholder=\"" . __ ( "Gateway to non-geographic calls") . "\" disabled=\"disabled\"></select>\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";
 
@@ -3230,7 +3230,7 @@ function profiles_edit_page ( $buffer, $parameters)
   $output .= "      <div class=\"form-group\">\n";
   $output .= "        <label for=\"profile_edit_nggw\" class=\"control-label col-xs-2\">" . __ ( "Non geographic gateway") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
-  $output .= "          <select name=\"NGGW\" id=\"profile_edit_nggw\" class=\"form-control\" data-placeholder=\"" . __ ( "Gateway to non geographic calls") . "\"><option value=\"\"></option></select>\n";
+  $output .= "          <select name=\"NGGW\" id=\"profile_edit_nggw\" class=\"form-control\" data-placeholder=\"" . __ ( "Gateway to non-geographic calls") . "\"><option value=\"\"></option></select>\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";
 

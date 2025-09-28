@@ -119,7 +119,7 @@ function servers_search_page ( $buffer, $parameters)
   $output .= "        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n";
   $output .= "        <h3 class=\"modal-title\">" . __ ( "Rebuild server") . "</h3>\n";
   $output .= "      </div>\n";
-  $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are sure you want to rebuild the server %s?"), "<span id=\"server_rebuild_description\"></span>") . "</p><input type=\"hidden\" id=\"server_rebuild_id\" value=\"\"><br /><span id=\"server_rebuild_serverlist\"></span><br /><input type=\"checkbox\" id=\"server_rebuild_clean\" class=\"noauto\" /> <label for=\"server_rebuild_clean\">" . __ ( "Clear all server configuration files first (CAUTION)!") . "</label></div>\n";
+  $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are you sure you want to rebuild the server %s?"), "<span id=\"server_rebuild_description\"></span>") . "</p><input type=\"hidden\" id=\"server_rebuild_id\" value=\"\"><br /><span id=\"server_rebuild_serverlist\"></span><br /><input type=\"checkbox\" id=\"server_rebuild_clean\" class=\"noauto\" /> <label for=\"server_rebuild_clean\">" . __ ( "Clear all server configuration files first (CAUTION)!") . "</label></div>\n";
   $output .= "      <div class=\"modal-footer\">\n";
   $output .= "        <button class=\"btn\" data-dismiss=\"modal\">" . __ ( "Cancel") . "</button>\n";
   $output .= "        <button class=\"btn btn-success rebuild ladda-button\" data-style=\"expand-left\">" . __ ( "Rebuild") . "</button>\n";
@@ -138,7 +138,7 @@ function servers_search_page ( $buffer, $parameters)
   $output .= "        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n";
   $output .= "        <h3 class=\"modal-title\">" . __ ( "Remove server") . "</h3>\n";
   $output .= "      </div>\n";
-  $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are sure you want to remove the server %s (%s)?"), "<span id=\"server_delete_description\"></span>", "<span id=\"server_delete_address\"></span>") . "</p><input type=\"hidden\" id=\"server_delete_id\" value=\"\"></div>\n";
+  $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are you sure you want to remove the server %s (%s)?"), "<span id=\"server_delete_description\"></span>", "<span id=\"server_delete_address\"></span>") . "</p><input type=\"hidden\" id=\"server_delete_id\" value=\"\"></div>\n";
   $output .= "      <div class=\"modal-footer\">\n";
   $output .= "        <button class=\"btn\" data-dismiss=\"modal\">" . __ ( "Cancel") . "</button>\n";
   $output .= "        <button class=\"btn btn-primary del ladda-button\" data-style=\"expand-left\">" . __ ( "Remove") . "</button>\n";
@@ -233,7 +233,7 @@ function servers_search_page ( $buffer, $parameters)
               "  VoIP.rest ( '/servers/' + encodeURIComponent ( $('#server_rebuild_id').val ()) + '/rebuild', 'POST', { Clean: $('#server_rebuild_clean').prop ( 'checked')}).done ( function ( data, textStatus, jqXHR)\n" .
               "  {\n" .
               "    $('#server_rebuild').modal ( 'hide');\n" .
-              "    new PNotify ( { title: '" . __ ( "Server rebuild") . "', text: '" . __ ( "Server rebuilded successfully!") . "', type: 'success'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Server rebuild") . "', text: '" . __ ( "Server rebuilt successfully!") . "', type: 'success'});\n" .
               "  }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "  {\n" .
               "    new PNotify ( { title: '" . __ ( "Server rebuild") . "', text: '" . __ ( "Error rebuilding server!") . "', type: 'error'});\n" .
