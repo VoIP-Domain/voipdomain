@@ -1716,7 +1716,7 @@ function ivrs_edit_page ( $buffer, $parameters)
               "    formData.Workflow.Links.push ( link);\n" .
               "  }\n" .
               "  $('#ivr_edit_form').data ( 'formData', formData);\n" .
-              "});" .
+              "});\n" .
               "\n" .
               "$('#ivr_edit_form').on ( 'fill', function ( event, data)\n" .
               "{\n" .
