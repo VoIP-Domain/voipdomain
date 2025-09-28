@@ -497,7 +497,7 @@ framework_add_hook (
         ),
         "Confirmation" => array (
           "type" => "password",
-          "description" => __ ( "The confirmation of the user password."),
+          "description" => __ ( "The confirmation of the user's password."),
           "required" => true,
           "example" => __ ( "mypassword")
         ),
@@ -771,7 +771,7 @@ framework_add_hook (
         ),
         "Confirmation" => array (
           "type" => "password",
-          "description" => __ ( "The confirmation of the user password."),
+          "description" => __ ( "The confirmation of the user's password."),
           "required" => true,
           "example" => __ ( "mypassword")
         ),
@@ -838,15 +838,15 @@ framework_add_hook (
     )
   )
 );
-framework_add_permission ( "users_edit", __ ( "Edit users"));
+framework_add_permission ( "users_edit", __ ( "Edit user"));
 framework_add_api_call (
   "/users/:ID",
   array ( "Modify", "Edit"),
   "users_edit",
   array (
     "permissions" => array ( "Administrator", "users_edit"),
-    "title" => __ ( "Edit users"),
-    "description" => __ ( "Change a system user information.")
+    "title" => __ ( "Edit user"),
+    "description" => __ ( "Change a system user's information.")
   )
 );
 
@@ -1233,7 +1233,7 @@ framework_add_hook (
         )
       ),
       423 => array (
-        "description" => __ ( "User has already a second factor authentication activated.")
+        "description" => __ ( "User already has second factor authentication activated.")
       )
     )
   )

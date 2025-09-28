@@ -184,7 +184,7 @@ function users_add_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Users"));
-  sys_set_subtitle ( __ ( "users addition"));
+  sys_set_subtitle ( __ ( "add user"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Users"), "link" => "/users"),
     2 => array ( "title" => __ ( "Add"))
@@ -366,7 +366,7 @@ function users_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "User cloning") . "', text: '" . __ ( "Error retrieving user data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Clone user") . "', text: '" . __ ( "Error retrieving user data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -387,7 +387,7 @@ function users_view_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Users"));
-  sys_set_subtitle ( __ ( "users visualization"));
+  sys_set_subtitle ( __ ( "view user"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Users"), "link" => "/users"),
     2 => array ( "title" => __ ( "View"))
@@ -516,7 +516,7 @@ function users_edit_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Users"));
-  sys_set_subtitle ( __ ( "users edition"));
+  sys_set_subtitle ( __ ( "edit user"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Users"), "link" => "/users"),
     2 => array ( "title" => __ ( "Edit"))
@@ -632,13 +632,13 @@ function users_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
   $output .= "      <div class=\"modal-body\">\n";
   $output .= "        <img src=\"/img/sfa.png\" alt=\"\" class=\"dt-right\">\n";
-  $output .= "        <p>" . __ ( "Follow the steps below to set up the second factor authentication app") . ":</p>\n";
-  $output .= "        <p><strong>1) " . __ ( "Download a two-step authenticator app.") . "</strong> " . __ ( "The apps below are recommended, but any authentication app will work.") . "</p>\n";
+  $output .= "        <p>" . __ ( "Follow the steps below to set up a second factor authentication app") . ":</p>\n";
+  $output .= "        <p><strong>1) " . __ ( "Download a two-factor authenticator app.") . "</strong> " . __ ( "The apps below are recommended, but any authentication app will work.") . "</p>\n";
   $output .= "        <p>\n";
   $output .= "          <i class=\"fab fa-apple\"></i> " . __ ( "iOS devices") . ": <a href=\"https://itunes.apple.com/us/app/authy/id494168017\" target=\"_blank\">Authy</a><br />\n";
   $output .= "          <i class=\"fab fa-android\"></i> " . __ ( "Android devices") . ": <a href=\"https://play.google.com/store/apps/details?id=com.authy.authy\" target=\"_blank\">Authy</a><br />\n";
   $output .= "          <i class=\"fab fa-windows\"></i> " . __ ( "Windows devices") . ": <a href=\"https://www.microsoft.com/p/authenticator/9wzdncrfj3rj\" target=\"_blank\">Microsoft Authenticator</a>\n";
-  $output .= "        <p><strong>2) " . __ ( "Scan the below QR Code with your authenticator app.") . "</strong> " . __ ( "Or enter the key below.") . "</p>\n";
+  $output .= "        <p><strong>2) " . __ ( "Scan the QR Code below with your authenticator app.") . "</strong> " . __ ( "Or enter the key below.") . "</p>\n";
   $output .= "        <div class=\"dt-center\"><div id=\"user_edit_sfa_activate_qrcode\" width=\"200\" height=\"200\"></div><strong><br />" . __ ( "Key") . "</strong>: <code id=\"user_edit_sfa_activate_key\" title=\"" . __ ( "Key") . "\" aria-label=\"" . __ ( "Key") . "\"></code></div>\n";
   $output .= "        <p><label for=\"user_edit_sfa_activate_code\"><strong>3)</strong> " . __ ( "Enter the 6-digit verification code from the app") . ":</label> <input type=\"text\" id=\"user_edit_sfa_activate_code\" value=\"\" maxlength=\"6\" size=\"6\" autocomplete=\"off\" autocapitalize=\"none\" autocorrect=\"none\" spellcheck=\"false\"></p>\n";
   $output .= "      </div>\n";
@@ -660,7 +660,7 @@ function users_edit_page ( $buffer, $parameters)
   $output .= "        <h3 class=\"modal-title\">" . __ ( "Second factor authentication") . "</h3>\n";
   $output .= "      </div>\n";
   $output .= "      <div class=\"modal-body\">\n";
-  $output .= "        <p><strong>" . __ ( "Warning") . ":</strong> " . __ ( "Disabling the second factor authentication will destroy your key. You will need to setup another key to re-enable it.") ."</p>\n";
+  $output .= "        <p><strong>" . __ ( "Warning") . ":</strong> " . __ ( "Disabling second factor authentication will destroy your key. You will need to set up another key to re-enable it.") ."</p>\n";
   $output .= "      </div>\n";
   $output .= "      <div class=\"modal-footer\">\n";
   $output .= "        <button class=\"btn btn-danger ladda-button\" id=\"user_edit_sfa_remove_button\" data-style=\"expand-left\">" . __ ( "Disable") . "</button>\n";
@@ -822,7 +822,7 @@ function users_edit_page ( $buffer, $parameters)
               "  $('#user_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "User edition") . "', text: '" . __ ( "Error retrieving user data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Edit user") . "', text: '" . __ ( "Error retrieving user data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#user_edit_form').alerts ( 'form',\n" .
               "{\n" .
@@ -831,7 +831,7 @@ function users_edit_page ( $buffer, $parameters)
               "    URL: '/users/' + VoIP.parameters.id,\n" .
               "    method: 'PATCH',\n" .
               "    button: $('button.edit'),\n" .
-              "    title: '" . __ ( "User edition") . "',\n" .
+              "    title: '" . __ ( "Edit user") . "',\n" .
               "    fail: '" . __ ( "Error changing user!") . "',\n" .
               "    success: '" . __ ( "User changed successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
