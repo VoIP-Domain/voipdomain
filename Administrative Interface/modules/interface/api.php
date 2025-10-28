@@ -1016,6 +1016,11 @@ function user_login ( $buffer, $parameters)
   setcookie ( $_in["general"]["cookie"] . ( $parameters["Domain"] == "Multi-Tenant" ? "_adm" : ""), $SID, 0, "/");
 
   /**
+   * Call authentication success filter
+   */
+  filters_call ( "authentication_success");
+
+  /**
    * Execute finish hook if exist
    */
   if ( framework_has_hook ( "user_login_finish"))

@@ -231,7 +231,7 @@ function avatar_user_get ( $buffer, $parameters)
   /**
    * Search for user avatar
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `UserAvatar`.`Avatar` FROM `UserAvatar` LEFT JOIN `Users` ON `UserAvatar`.`User` = `Users`.`ID` WHERE `Users`.`Tenant` = " . (int) get_tenant () . " AND `Users`.`Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "'"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `UserAvatar`.`Avatar` FROM `UserAvatar` LEFT JOIN `Users` ON `UserAvatar`.`User` = `Users`.`ID` WHERE `Users`.`Tenant` = " . (int) get_tenant ( $_SERVER["HTTP_HOST"]) . " AND `Users`.`Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
