@@ -62,6 +62,7 @@ var VoIP = ( function ()
   var token = '';
   var defaultcurrency = '';
   var i18ndata = {};
+  var cache = {};
 
   // About this library:
   this.about = {
@@ -939,6 +940,15 @@ var VoIP = ( function ()
     }
 
     /**
+     * Check for cached content
+     */
+    var cachekey = '/api' + path + ( typeof data !== 'undefined' ? JSON.stringify ( data) : '');
+    if ( route == 'GET' && cache.hasOwnProperty ( cachekey))
+    {
+      myheaders['If-Modified-Since'] = cache[cachekey]["DateTime"];
+    }
+
+    /**
      * Non-asynchronous call (block browser processing)
      */
     if ( async === false)
@@ -959,6 +969,23 @@ var VoIP = ( function ()
                     },
         success: function ( data, textStatus, jqXHR)
                  {
+                   if ( this.type == 'POST' && this.headers['X-HTTP-Method-Override'] == 'GET')
+                   {
+                     var cachekey = this.url + ( this.data ? this.data : '');
+                     if ( jqXHR.status == '304')
+                     {
+                       data = cache[cachekey]['Data'];
+                       console.log ( 'Cached data used on request.');
+                     }
+                     if ( jqXHR.status == '200' && jqXHR.getResponseHeader ( 'Last-Modified'))
+                     {
+                       cache[cachekey] = new Array ();
+                       cache[cachekey]['Data'] = data;
+                       cache[cachekey]['DateTime'] = jqXHR.getResponseHeader ( 'Last-Modified');
+                       console.log ( 'Request cached.');
+                     }
+                   }
+
                    result = {
                      result: data,
                      API: {
@@ -1056,6 +1083,26 @@ var VoIP = ( function ()
                  document.dump_vd_debug ( { endpoint: path, route: route, data: data, sentHeaders: sentHeaders, result: { result: jsonresult, API: { status: 'error', content: jqXHR.responseText, statusCode: jqXHR.statusCode ().status, statusText: jqXHR.statusCode ().statusText, headers: jqXHR.getAllResponseHeaders ()}}});
                }
              }
+    }).then ( function ( data, statusText, jqXHR)
+    {
+      if ( this.type == 'POST' && this.headers['X-HTTP-Method-Override'] == 'GET')
+      {
+        var cachekey = this.url + ( this.data ? this.data : '');
+        if ( jqXHR.status == '304')
+        {
+          data = cache[cachekey]['Data'];
+          console.log ( 'Cached data used on request.');
+        }
+        if ( jqXHR.status == '200' && jqXHR.getResponseHeader ( 'Last-Modified'))
+        {
+          cache[cachekey] = new Array ();
+          cache[cachekey]['Data'] = data;
+          cache[cachekey]['DateTime'] = jqXHR.getResponseHeader ( 'Last-Modified');
+          console.log ( 'Request cached.');
+        }
+      }
+
+      return data;
     });
   }
 
