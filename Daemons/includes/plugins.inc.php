@@ -72,6 +72,10 @@ if ( ! array_key_exists ( "functions", $_plugins) || ! $_plugins["functions"])
 {
   $_plugins["functions"] = array ();
 }
+if ( ! array_key_exists ( "deferred_hooks", $_plugins) || ! is_array ( $_plugins["deferred_hooks"]))
+{
+  $_plugins["deferred_hooks"] = array ();
+}
 
 /**
  * Define variables
@@ -133,7 +137,7 @@ function framework_add_hook ( $hook, $function, $options = 0, $documentation = a
   } else {
     $_plugins["functions"][$function] = is_array ( $documentation) ? $documentation : array ();
   }
-  $_plugins["map"][$function] = $_in["module"];
+  $_plugins["map"][$function] = is_array ( $_in) && array_key_exists ( "module", $_in) ? $_in["module"] : "";
 }
 
 /**
@@ -212,12 +216,12 @@ function framework_add_hook_at ( $hook, $function, $reference, $options = IN_HOO
     framework_error ( "VoIP Domain Framework: Function \"" . $function . "\" already exist at hook \"" . $hook . "\"");
     return;
   }
-  if ( ! in_array ( $reference, $_plugins["hooks"][$hook]))
+  if ( ! array_key_exists ( $hook, $_plugins["hooks"]) || ! is_array ( $_plugins["hooks"][$hook]) || ! in_array ( $reference, $_plugins["hooks"][$hook]))
   {
-    framework_error ( "VoIP Domain Framework: Reference function \"" . $reference . "\" doesn't exist at hook \"" . $hook . "\"");
+    $_plugins["deferred_hooks"][] = array ( "hook" => $hook, "function" => $function, "reference" => $reference, "options" => $options, "module" => is_array ( $_in) && array_key_exists ( "module", $_in) ? $_in["module"] : "");
     return;
   }
-  $_plugins["map"][$function] = $_in["module"];
+  $_plugins["map"][$function] = is_array ( $_in) && array_key_exists ( "module", $_in) ? $_in["module"] : "";
   if ( $options & IN_HOOK_REPLACE)
   {
     $_plugins["hooks"][$hook][array_search ( $reference, $_plugins["hooks"][$hook], true)] = $function;
@@ -229,6 +233,58 @@ function framework_add_hook_at ( $hook, $function, $reference, $options = IN_HOO
   } else {
     array_splice ( $_plugins["hooks"][$hook], array_search ( $reference, $_plugins["hooks"][$hook], true) + 1, 0, $function);
   }
+}
+
+/**
+ * Function to resolve deferred hook registrations. This must be called after
+ * all modules have been loaded. It processes the deferred queue in multiple
+ * passes until all references are resolved or no further progress can be made.
+ *
+ * @global array $_plugins The main plugin system variable
+ * @return void
+ */
+function framework_resolve_deferred_hooks ()
+{
+  global $_plugins;
+
+  $max_passes = 10;
+  $pass = 0;
+  while ( sizeof ( $_plugins["deferred_hooks"]) > 0 && $pass < $max_passes)
+  {
+    $pass++;
+    $remaining = array ();
+    foreach ( $_plugins["deferred_hooks"] as $entry)
+    {
+      if ( ! array_key_exists ( $entry["hook"], $_plugins["hooks"]) || ! is_array ( $_plugins["hooks"][$entry["hook"]]) || ! in_array ( $entry["reference"], $_plugins["hooks"][$entry["hook"]]))
+      {
+        $remaining[] = $entry;
+        continue;
+      }
+      if ( in_array ( $entry["function"], $_plugins["hooks"][$entry["hook"]]))
+      {
+        continue;
+      }
+      $_plugins["map"][$entry["function"]] = $entry["module"];
+      if ( $entry["options"] & IN_HOOK_REPLACE)
+      {
+        $_plugins["hooks"][$entry["hook"]][array_search ( $entry["reference"], $_plugins["hooks"][$entry["hook"]], true)] = $entry["function"];
+      } else if ( $entry["options"] & IN_HOOK_INSERT_BEFORE) {
+        array_splice ( $_plugins["hooks"][$entry["hook"]], array_search ( $entry["reference"], $_plugins["hooks"][$entry["hook"]], true), 0, $entry["function"]);
+      } else {
+        array_splice ( $_plugins["hooks"][$entry["hook"]], array_search ( $entry["reference"], $_plugins["hooks"][$entry["hook"]], true) + 1, 0, $entry["function"]);
+      }
+    }
+    if ( sizeof ( $remaining) == sizeof ( $_plugins["deferred_hooks"]))
+    {
+      break;
+    }
+    $_plugins["deferred_hooks"] = $remaining;
+  }
+  foreach ( $_plugins["deferred_hooks"] as $entry)
+  {
+    framework_error ( "VoIP Domain Framework: Deferred hook resolution failed - reference function \"" . $entry["reference"] . "\" doesn't exist at hook \"" . $entry["hook"] . "\" for function \"" . $entry["function"] . "\"");
+  }
+  $_plugins["deferred_hooks"] = array ();
 }
 
 /**
@@ -433,7 +489,7 @@ function framework_call ( $hook, $parameters = array (), $output = false, $buffe
 function framework_error ( $message, $level = E_USER_NOTICE)
 {
   $caller = @next ( debug_backtrace ());
-  trigger_error ( $message . " in <strong>" . $caller["file"] . "</strong> on line <strong>" . $caller["line"] . "</strong> with error handler", $level);
+  trigger_error ( $message . " in " . $caller["file"] . " on line " . $caller["line"] . " with error handler", $level);
 }
 
 /**
@@ -453,5 +509,71 @@ function is_loaded ( $module, $type)
     }
   }
   return false;
+}
+
+/**
+ * Register shared plugin configuration handlers used by all daemons.
+ */
+framework_add_hook ( "plugin_config_sync", "plugin_config_sync_handler");
+framework_add_hook ( "plugin_config_remove", "plugin_config_remove_handler");
+
+/**
+ * Handle plugin configuration sync — writes plugin config to datadir.
+ *
+ * @param string $buffer Buffer from plugin system
+ * @param array $parameters Parameters with Plugin, Filename, Content (base64) keys
+ * @return array
+ */
+function plugin_config_sync_handler ( $buffer, $parameters)
+{
+  global $_in;
+
+  if ( ! array_key_exists ( "Plugin", $parameters) || ! array_key_exists ( "Filename", $parameters) || ! array_key_exists ( "Content", $parameters))
+  {
+    return array ( "code" => 406, "message" => "Missing parameters for config sync.");
+  }
+
+  $datadir = array_key_exists ( "general", $_in) && ! empty ( $_in["general"]["datadir"]) ? rtrim ( $_in["general"]["datadir"], "/") : "/var/lib/voipdomain/data";
+  if ( ! is_dir ( $datadir) && ! @mkdir ( $datadir, 0750, true))
+  {
+    return array ( "code" => 500, "message" => "Cannot create datadir.");
+  }
+
+  $filepath = $datadir . "/" . basename ( $parameters["Filename"]);
+  $content = base64_decode ( $parameters["Content"]);
+
+  if ( @file_put_contents ( $filepath, $content) === false)
+  {
+    return array ( "code" => 500, "message" => "Failed to write config file: " . $filepath);
+  }
+
+  return array ( "code" => 200, "message" => "Plugin config synced.");
+}
+
+/**
+ * Handle plugin configuration removal — deletes plugin config from datadir.
+ *
+ * @param string $buffer Buffer from plugin system
+ * @param array $parameters Parameters with Plugin, Filename keys
+ * @return array
+ */
+function plugin_config_remove_handler ( $buffer, $parameters)
+{
+  global $_in;
+
+  if ( ! array_key_exists ( "Plugin", $parameters) || ! array_key_exists ( "Filename", $parameters))
+  {
+    return array ( "code" => 406, "message" => "Missing parameters for config remove.");
+  }
+
+  $datadir = array_key_exists ( "general", $_in) && ! empty ( $_in["general"]["datadir"]) ? rtrim ( $_in["general"]["datadir"], "/") : "/var/lib/voipdomain/data";
+  $filepath = $datadir . "/" . basename ( $parameters["Filename"]);
+
+  if ( is_file ( $filepath))
+  {
+    @unlink ( $filepath);
+  }
+
+  return array ( "code" => 200, "message" => "Plugin config removed.");
 }
 ?>

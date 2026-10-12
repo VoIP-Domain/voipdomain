@@ -191,6 +191,7 @@ function ivrs_add_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "IVR"), "link" => "/ivrs"),
     2 => array ( "title" => __ ( "Add"))
   ));
+  sys_set_menu_highlight ( "/ivrs");
 
   /**
    * Add page CSS requirements
@@ -236,7 +237,7 @@ function ivrs_add_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"ivr_add_form\">\n";
 
   // Add IVR name field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"ivr_add_name\" class=\"control-label col-xs-2\">" . __ ( "Name") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Name\" class=\"form-control\" id=\"ivr_add_name\" placeholder=\"" . __ ( "IVR name") . "\" />\n";
@@ -244,7 +245,7 @@ function ivrs_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add IVR description field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"ivr_add_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"ivr_add_description\" placeholder=\"" . __ ( "IVR description") . "\" />\n";
@@ -255,25 +256,34 @@ function ivrs_add_page ( $buffer, $parameters)
   $output .= "  <div class=\"form-group\">\n";
   $output .= "    <label class=\"control-label col-xs-2\">" . __ ( "Actions") . "</label>\n";
   $output .= "    <div class=\"col-xs-10 workflow-itens\">\n";
-  foreach ( $_in["ivr"]["operators"] as $operator)
+  $ivr_groups = array ( "default" => __ ( "Conditions"), "info" => __ ( "Navigation"), "success" => __ ( "Audio"), "primary" => __ ( "Call Control"), "warning" => __ ( "Integration"), "danger" => __ ( "Endpoints"));
+  foreach ( $ivr_groups as $style => $label)
   {
-    $inputs = array ( "input" => __ ( "In"));
-    if ( ! is_array ( $operator["outputs"]))
+    $group_ops = array_filter ( $_in["ivr"]["operators"], function ( $op) use ( $style) { return $op["style"] == $style; });
+    if ( empty ( $group_ops)) continue;
+    $output .= "      <div class=\"workflow-group workflow-group-" . $style . "\">\n";
+    $output .= "        <span class=\"workflow-group-label btn-" . $style . "\">" . $label . "</span>\n";
+    foreach ( $group_ops as $operator)
     {
-      $outputs = array ();
-      if ( $operator["outputs"] == 1)
+      $inputs = array ( "input" => __ ( "In"));
+      if ( ! is_array ( $operator["outputs"]))
       {
-        $outputs["output"] = __ ( "Out");
-      } else {
-        for ( $x = 0; $x < $operator["outputs"]; $x++)
+        $outputs = array ();
+        if ( $operator["outputs"] == 1)
         {
-          $outputs["output_" . $x] = __ ( "Out") . " " . ( $x + 1);
+          $outputs["output"] = __ ( "Out");
+        } else {
+          for ( $x = 0; $x < $operator["outputs"]; $x++)
+          {
+            $outputs["output_" . $x] = __ ( "Out") . " " . ( $x + 1);
+          }
         }
+      } else {
+        $outputs = $operator["outputs"];
       }
-    } else {
-      $outputs = $operator["outputs"];
+      $output .= "        <span class=\"workflow-element dlg-" . $operator["name"] . " btn btn-" . $operator["style"] .  "\" data-name=\"" . $operator["name"] . "\" data-inputs=\"" . base64_encode ( json_encode ( $inputs)) . "\" data-outputs=\"" . base64_encode ( json_encode ( $outputs)) . "\"" . ( $operator["modal"] ? " data-modal=\"" . $operator["name"] . "\"" : "") . "><i class=\"fa fa-" . $operator["icon"] . "\"></i> " . __ ( $operator["title"]) . "</span>\n";
     }
-    $output .= "      <span class=\"workflow-element dlg-" . $operator["name"] . " btn btn-" . $operator["style"] .  "\" data-name=\"" . $operator["name"] . "\" data-inputs=\"" . base64_encode ( json_encode ( $inputs)) . "\" data-outputs=\"" . base64_encode ( json_encode ( $outputs)) . "\"" . ( $operator["modal"] ? " data-modal=\"" . $operator["name"] . "\"" : "") . "><i class=\"fa fa-" . $operator["icon"] . "\"></i> " . __ ( $operator["title"]) . "</span>\n";
+    $output .= "      </div>\n";
   }
   $output .= "    </div>\n";
   $output .= "  </div>\n";
@@ -283,6 +293,8 @@ function ivrs_add_page ( $buffer, $parameters)
   $output .= "    <div class=\"workflow_container\">\n";
   $output .= "      <div id=\"ivr_add_workflow\" class=\"workflow\"></div>\n";
   $output .= "      <div class=\"workflow_controls\">\n";
+  $output .= "        <i class=\"fa fa-undo disabled\" data-mode=\"undo\" title=\"" . __ ( "Undo last action") . "\"></i>\n";
+  $output .= "        <i class=\"fa fa-redo disabled\" data-mode=\"redo\" title=\"" . __ ( "Redo last action") . "\"></i>\n";
   $output .= "        <i class=\"fa fa-search-minus\" data-mode=\"zoomin\" title=\"" . __ ( "Zoom out") . "\"></i>\n";
   $output .= "        <i class=\"fa fa-home\" data-mode=\"reset\" title=\"" . __ ( "Zoom to fit") . "\"></i>\n";
   $output .= "        <i class=\"fa fa-search-plus\" data-mode=\"zoomout\" title=\"" . __ ( "Zoom in") . "\"></i>\n";
@@ -444,6 +456,83 @@ function ivrs_add_page ( $buffer, $parameters)
               "var container = flowchart.parent ();\n" .
               "var currentOperatorId = null;\n" .
               "\n" .
+              "var undoStack = [];\n" .
+              "var redoStack = [];\n" .
+              "var undoIgnore = false;\n" .
+              "var lastState = null;\n" .
+              "var undoDebounce = null;\n" .
+              "\n" .
+              "function ivrSerializeState ()\n" .
+              "{\n" .
+              "  var raw = flowchart.flowchart ( 'getDataRef');\n" .
+              "  var state = { operators: {}, links: {} };\n" .
+              "  for ( var id in raw.operators)\n" .
+              "  {\n" .
+              "    if ( ! raw.operators.hasOwnProperty ( id)) continue;\n" .
+              "    var op = raw.operators[id];\n" .
+              "    state.operators[id] = { top: op.top, left: op.left, properties: JSON.parse ( JSON.stringify ( op.properties)) };\n" .
+              "  }\n" .
+              "  for ( var id in raw.links)\n" .
+              "  {\n" .
+              "    if ( ! raw.links.hasOwnProperty ( id)) continue;\n" .
+              "    var lk = raw.links[id];\n" .
+              "    state.links[id] = { fromOperator: lk.fromOperator, fromConnector: lk.fromConnector, fromSubConnector: lk.fromSubConnector, toOperator: lk.toOperator, toConnector: lk.toConnector, toSubConnector: lk.toSubConnector };\n" .
+              "  }\n" .
+              "  return JSON.stringify ( state);\n" .
+              "}\n" .
+              "\n" .
+              "function ivrUndoSnapshot ()\n" .
+              "{\n" .
+              "  if ( undoIgnore) return;\n" .
+              "  if ( undoDebounce !== null)\n" .
+              "  {\n" .
+              "    clearTimeout ( undoDebounce);\n" .
+              "  }\n" .
+              "  undoDebounce = setTimeout ( function ()\n" .
+              "  {\n" .
+              "    undoDebounce = null;\n" .
+              "    var currentState = ivrSerializeState ();\n" .
+              "    if ( lastState !== null && currentState !== lastState)\n" .
+              "    {\n" .
+              "      undoStack.push ( lastState);\n" .
+              "      redoStack = [];\n" .
+              "    }\n" .
+              "    lastState = currentState;\n" .
+              "    ivrUndoUpdateButtons ();\n" .
+              "  }, 0);\n" .
+              "}\n" .
+              "\n" .
+              "function ivrUndoUpdateButtons ()\n" .
+              "{\n" .
+              "  var controls = $('#ivr_add_form .workflow_controls');\n" .
+              "  controls.find ( '[data-mode=\"undo\"]').toggleClass ( 'disabled', undoStack.length < 1);\n" .
+              "  controls.find ( '[data-mode=\"redo\"]').toggleClass ( 'disabled', redoStack.length < 1);\n" .
+              "}\n" .
+              "\n" .
+              "function ivrUndo ()\n" .
+              "{\n" .
+              "  if ( undoStack.length < 1) return;\n" .
+              "  redoStack.push ( ivrSerializeState ());\n" .
+              "  var state = JSON.parse ( undoStack.pop ());\n" .
+              "  undoIgnore = true;\n" .
+              "  flowchart.flowchart ( 'setData', state);\n" .
+              "  undoIgnore = false;\n" .
+              "  lastState = ivrSerializeState ();\n" .
+              "  ivrUndoUpdateButtons ();\n" .
+              "}\n" .
+              "\n" .
+              "function ivrRedo ()\n" .
+              "{\n" .
+              "  if ( redoStack.length < 1) return;\n" .
+              "  undoStack.push ( ivrSerializeState ());\n" .
+              "  var state = JSON.parse ( redoStack.pop ());\n" .
+              "  undoIgnore = true;\n" .
+              "  flowchart.flowchart ( 'setData', state);\n" .
+              "  undoIgnore = false;\n" .
+              "  lastState = ivrSerializeState ();\n" .
+              "  ivrUndoUpdateButtons ();\n" .
+              "}\n" .
+              "\n" .
               "var cx = flowchart.width () / 2;\n" .
               "var cy = flowchart.height () / 2;\n" .
               "\n" .
@@ -456,8 +545,15 @@ function ivrs_add_page ( $buffer, $parameters)
               "$('#ivr_add_form .workflow_controls i').on ( 'click', function ( e)\n" .
               "{\n" .
               "  e && e.preventDefault ();\n" .
+              "  if ( $(this).hasClass ( 'disabled')) return;\n" .
               "  switch ( $(this).data ( 'mode'))\n" .
               "  {\n" .
+              "    case 'undo':\n" .
+              "      ivrUndo ();\n" .
+              "      break;\n" .
+              "    case 'redo':\n" .
+              "      ivrRedo ();\n" .
+              "      break;\n" .
               "    case 'delete':\n" .
               "      if ( flowchart.flowchart ( 'getSelectedOperatorId') != 'start')\n" .
               "      {\n" .
@@ -483,6 +579,20 @@ function ivrs_add_page ( $buffer, $parameters)
               "        animate: true\n" .
               "      });\n" .
               "      break;\n" .
+              "  }\n" .
+              "});\n" .
+              "\n" .
+              "$(document).on ( 'keydown.ivrundo', function ( e)\n" .
+              "{\n" .
+              "  if ( ( e.ctrlKey || e.metaKey) && e.key === 'z' && ! e.shiftKey)\n" .
+              "  {\n" .
+              "    e.preventDefault ();\n" .
+              "    ivrUndo ();\n" .
+              "  }\n" .
+              "  if ( ( e.ctrlKey || e.metaKey) && ( e.key === 'y' || ( e.key === 'z' && e.shiftKey)))\n" .
+              "  {\n" .
+              "    e.preventDefault ();\n" .
+              "    ivrRedo ();\n" .
               "  }\n" .
               "});\n" .
               "\n" .
@@ -530,8 +640,16 @@ function ivrs_add_page ( $buffer, $parameters)
               "  onLinkCreate: function ( linkId, linkData)\n" .
               "                {\n" .
               "                  return linkData.fromOperator != linkData.toOperator;\n" .
-              "                }\n" .
+              "                },\n" .
+              "  onAfterChange: function ( changeType)\n" .
+              "                 {\n" .
+              "                   ivrUndoSnapshot ();\n" .
+              "                 }\n" .
               "}).panzoom ( 'reset');\n" .
+              "undoStack = [];\n" .
+              "redoStack = [];\n" .
+              "lastState = ivrSerializeState ();\n" .
+              "ivrUndoUpdateButtons ();\n" .
               "\n" .
               "flowchart.parent ().siblings ( '.delete_selected_button').click ( function ()\n" .
               "{\n" .
@@ -673,7 +791,37 @@ function ivrs_add_page ( $buffer, $parameters)
               "    onsuccess: function ()\n" .
               "               {\n" .
               "                 VoIP.path.call ( '/ivrs', true);\n" .
-              "               }\n" .
+              "               },\n" .
+              "    onfail: function ( jqXHR)\n" .
+              "            {\n" .
+              "              try { var errors = JSON.parse ( jqXHR.responseText); } catch ( e) { return; }\n" .
+              "              if ( ! errors || typeof errors !== 'object') return;\n" .
+              "              var messages = [];\n" .
+              "              var workflow = flowchart.flowchart ( 'getData');\n" .
+              "              for ( var opId in errors)\n" .
+              "              {\n" .
+              "                if ( ! errors.hasOwnProperty ( opId)) continue;\n" .
+              "                var opTitle = opId;\n" .
+              "                if ( workflow.operators[opId])\n" .
+              "                {\n" .
+              "                  opTitle = $('<div>').html ( workflow.operators[opId].properties.title).text ().trim ();\n" .
+              "                }\n" .
+              "                if ( typeof errors[opId] === 'object')\n" .
+              "                {\n" .
+              "                  for ( var field in errors[opId])\n" .
+              "                  {\n" .
+              "                    if ( errors[opId].hasOwnProperty ( field)) messages.push ( '<b>' + opTitle + '</b>: ' + errors[opId][field]);\n" .
+              "                  }\n" .
+              "                } else {\n" .
+              "                  messages.push ( '<b>' + opTitle + '</b>: ' + errors[opId]);\n" .
+              "                }\n" .
+              "              }\n" .
+              "              if ( messages.length)\n" .
+              "              {\n" .
+              "                new PNotify ( { title: '" . __ ( "IVR validation error") . "', text: messages.join ( '<br>'), type: 'error'});\n" .
+              "                return false;\n" .
+              "              }\n" .
+              "            }\n" .
               "  }\n" .
               "}).on ( 'formFilter', function ()\n" .
               "{\n" .
@@ -738,7 +886,7 @@ function ivrs_add_page ( $buffer, $parameters)
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
+ * @return void
  */
 function ivrs_clone_function ( $buffer, $parameters)
 {
@@ -781,7 +929,7 @@ function ivrs_clone_function ( $buffer, $parameters)
               "      {\n" .
               "        operator.properties.inputs = { input: { label: '" . __ ( "In") . "', multipleLinks: true}};" .
               "      }\n" .
-              "      operator.properties.outputs = new Array ();\n" .
+              "      operator.properties.outputs = {};\n" .
               "      for ( var y = 0; y < data.Workflow.Operators[x].Outputs.length; y++)\n" .
               "      {\n" .
               "        var output = new Object ();\n" .
@@ -802,7 +950,13 @@ function ivrs_clone_function ( $buffer, $parameters)
               "      link.toConnector = 'input';\n" .
               "      workflow.links[x] = link;\n" .
               "    }\n" .
+              "    undoIgnore = true;\n" .
               "    $('#ivr_add_workflow').flowchart ( 'setData', workflow);\n" .
+              "    undoIgnore = false;\n" .
+              "    undoStack = [];\n" .
+              "    redoStack = [];\n" .
+              "    lastState = ivrSerializeState ();\n" .
+              "    ivrUndoUpdateButtons ();\n" .
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
@@ -832,6 +986,7 @@ function ivrs_view_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "IVR"), "link" => "/ivrs"),
     2 => array ( "title" => __ ( "View"))
   ));
+  sys_set_menu_highlight ( "/ivrs");
 
   /**
    * Add page CSS requirements
@@ -892,29 +1047,38 @@ function ivrs_view_page ( $buffer, $parameters)
   $output .= "    </div>\n";
   $output .= "  </div>\n";
 
-  // Add IVR flowchart icons field
+  // Add IVR flowchart icons field (hidden, used as data source for view)
   $output .= "  <div class=\"form-group hidden\">\n";
   $output .= "    <label class=\"control-label col-xs-2\">" . __ ( "Actions") . "</label>\n";
   $output .= "    <div class=\"col-xs-10 workflow-itens\">\n";
-  foreach ( $_in["ivr"]["operators"] as $operator)
+  $ivr_groups = array ( "default" => __ ( "Conditions"), "info" => __ ( "Navigation"), "success" => __ ( "Audio"), "primary" => __ ( "Call Control"), "warning" => __ ( "Integration"), "danger" => __ ( "Endpoints"));
+  foreach ( $ivr_groups as $style => $label)
   {
-    $inputs = array ( "input" => __ ( "In"));
-    if ( ! is_array ( $operator["outputs"]))
+    $group_ops = array_filter ( $_in["ivr"]["operators"], function ( $op) use ( $style) { return $op["style"] == $style; });
+    if ( empty ( $group_ops)) continue;
+    $output .= "      <div class=\"workflow-group workflow-group-" . $style . "\">\n";
+    $output .= "        <span class=\"workflow-group-label btn-" . $style . "\">" . $label . "</span>\n";
+    foreach ( $group_ops as $operator)
     {
-      $outputs = array ();
-      if ( $operator["outputs"] == 1)
+      $inputs = array ( "input" => __ ( "In"));
+      if ( ! is_array ( $operator["outputs"]))
       {
-        $outputs["output"] = __ ( "Out");
-      } else {
-        for ( $x = 0; $x < $operator["outputs"]; $x++)
+        $outputs = array ();
+        if ( $operator["outputs"] == 1)
         {
-          $outputs["output_" . $x] = __ ( "Out") . " " . ( $x + 1);
+          $outputs["output"] = __ ( "Out");
+        } else {
+          for ( $x = 0; $x < $operator["outputs"]; $x++)
+          {
+            $outputs["output_" . $x] = __ ( "Out") . " " . ( $x + 1);
+          }
         }
+      } else {
+        $outputs = $operator["outputs"];
       }
-    } else {
-      $outputs = $operator["outputs"];
+      $output .= "        <span class=\"workflow-element dlg-" . $operator["name"] . " btn btn-" . $operator["style"] .  "\" data-name=\"" . $operator["name"] . "\" data-inputs=\"" . base64_encode ( json_encode ( $inputs)) . "\" data-outputs=\"" . base64_encode ( json_encode ( $outputs)) . "\"" . ( $operator["modal"] ? " data-modal=\"" . $operator["name"] . "\"" : "") . "><i class=\"fa fa-" . $operator["icon"] . "\"></i> " . __ ( $operator["title"]) . "</span>\n";
     }
-    $output .= "      <span class=\"workflow-element dlg-" . $operator["name"] . " btn btn-" . $operator["style"] .  "\" data-name=\"" . $operator["name"] . "\" data-inputs=\"" . base64_encode ( json_encode ( $inputs)) . "\" data-outputs=\"" . base64_encode ( json_encode ( $outputs)) . "\"" . ( $operator["modal"] ? " data-modal=\"" . $operator["name"] . "\"" : "") . "><i class=\"fa fa-" . $operator["icon"] . "\"></i> " . __ ( $operator["title"]) . "</span>\n";
+    $output .= "      </div>\n";
   }
   $output .= "    </div>\n";
   $output .= "  </div>\n";
@@ -1176,7 +1340,7 @@ function ivrs_view_page ( $buffer, $parameters)
               "    {\n" .
               "      operator.properties.inputs = { input: { label: '" . __ ( "In") . "', multipleLinks: true}};" .
               "    }\n" .
-              "    operator.properties.outputs = new Array ();\n" .
+              "    operator.properties.outputs = {};\n" .
               "    for ( var y = 0; y < data.Workflow.Operators[x].Outputs.length; y++)\n" .
               "    {\n" .
               "      var output = new Object ();\n" .
@@ -1232,6 +1396,7 @@ function ivrs_edit_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "IVR"), "link" => "/ivrs"),
     2 => array ( "title" => __ ( "Edit"))
   ));
+  sys_set_menu_highlight ( "/ivrs");
 
   /**
    * Add page CSS requirements
@@ -1277,7 +1442,7 @@ function ivrs_edit_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"ivr_edit_form\">\n";
 
   // Add IVR name field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"ivr_edit_name\" class=\"control-label col-xs-2\">" . __ ( "Name") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Name\" class=\"form-control\" id=\"ivr_edit_name\" placeholder=\"" . __ ( "IVR name") . "\" />\n";
@@ -1285,7 +1450,7 @@ function ivrs_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add IVR description field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"ivr_edit_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"ivr_edit_description\" placeholder=\"" . __ ( "IVR description") . "\" />\n";
@@ -1296,25 +1461,34 @@ function ivrs_edit_page ( $buffer, $parameters)
   $output .= "  <div class=\"form-group\">\n";
   $output .= "    <label class=\"control-label col-xs-2\">" . __ ( "Actions") . "</label>\n";
   $output .= "    <div class=\"col-xs-10 workflow-itens\">\n";
-  foreach ( $_in["ivr"]["operators"] as $operator)
+  $ivr_groups = array ( "default" => __ ( "Conditions"), "info" => __ ( "Navigation"), "success" => __ ( "Audio"), "primary" => __ ( "Call Control"), "warning" => __ ( "Integration"), "danger" => __ ( "Endpoints"));
+  foreach ( $ivr_groups as $style => $label)
   {
-    $inputs = array ( "input" => __ ( "In"));
-    if ( ! is_array ( $operator["outputs"]))
+    $group_ops = array_filter ( $_in["ivr"]["operators"], function ( $op) use ( $style) { return $op["style"] == $style; });
+    if ( empty ( $group_ops)) continue;
+    $output .= "      <div class=\"workflow-group workflow-group-" . $style . "\">\n";
+    $output .= "        <span class=\"workflow-group-label btn-" . $style . "\">" . $label . "</span>\n";
+    foreach ( $group_ops as $operator)
     {
-      $outputs = array ();
-      if ( $operator["outputs"] == 1)
+      $inputs = array ( "input" => __ ( "In"));
+      if ( ! is_array ( $operator["outputs"]))
       {
-        $outputs["output"] = __ ( "Out");
-      } else {
-        for ( $x = 0; $x < $operator["outputs"]; $x++)
+        $outputs = array ();
+        if ( $operator["outputs"] == 1)
         {
-          $outputs["output_" . $x] = __ ( "Out") . " " . ( $x + 1);
+          $outputs["output"] = __ ( "Out");
+        } else {
+          for ( $x = 0; $x < $operator["outputs"]; $x++)
+          {
+            $outputs["output_" . $x] = __ ( "Out") . " " . ( $x + 1);
+          }
         }
+      } else {
+        $outputs = $operator["outputs"];
       }
-    } else {
-      $outputs = $operator["outputs"];
+      $output .= "        <span class=\"workflow-element dlg-" . $operator["name"] . " btn btn-" . $operator["style"] .  "\" data-name=\"" . $operator["name"] . "\" data-inputs=\"" . base64_encode ( json_encode ( $inputs)) . "\" data-outputs=\"" . base64_encode ( json_encode ( $outputs)) . "\"" . ( $operator["modal"] ? " data-modal=\"" . $operator["name"] . "\"" : "") . "><i class=\"fa fa-" . $operator["icon"] . "\"></i> " . __ ( $operator["title"]) . "</span>\n";
     }
-    $output .= "      <span class=\"workflow-element dlg-" . $operator["name"] . " btn btn-" . $operator["style"] .  "\" data-name=\"" . $operator["name"] . "\" data-inputs=\"" . base64_encode ( json_encode ( $inputs)) . "\" data-outputs=\"" . base64_encode ( json_encode ( $outputs)) . "\"" . ( $operator["modal"] ? " data-modal=\"" . $operator["name"] . "\"" : "") . "><i class=\"fa fa-" . $operator["icon"] . "\"></i> " . __ ( $operator["title"]) . "</span>\n";
+    $output .= "      </div>\n";
   }
   $output .= "    </div>\n";
   $output .= "  </div>\n";
@@ -1324,6 +1498,8 @@ function ivrs_edit_page ( $buffer, $parameters)
   $output .= "    <div class=\"workflow_container\">\n";
   $output .= "      <div id=\"ivr_edit_workflow\" class=\"workflow\"></div>\n";
   $output .= "      <div class=\"workflow_controls\">\n";
+  $output .= "        <i class=\"fa fa-undo disabled\" data-mode=\"undo\" title=\"" . __ ( "Undo last action") . "\"></i>\n";
+  $output .= "        <i class=\"fa fa-redo disabled\" data-mode=\"redo\" title=\"" . __ ( "Redo last action") . "\"></i>\n";
   $output .= "        <i class=\"fa fa-search-minus\" data-mode=\"zoomin\" title=\"" . __ ( "Zoom out") . "\"></i>\n";
   $output .= "        <i class=\"fa fa-home\" data-mode=\"reset\" title=\"" . __ ( "Zoom to fit") . "\"></i>\n";
   $output .= "        <i class=\"fa fa-search-plus\" data-mode=\"zoomout\" title=\"" . __ ( "Zoom in") . "\"></i>\n";
@@ -1475,6 +1651,83 @@ function ivrs_edit_page ( $buffer, $parameters)
               "var container = flowchart.parent ();\n" .
               "var currentOperatorId = null;\n" .
               "\n" .
+              "var undoStack = [];\n" .
+              "var redoStack = [];\n" .
+              "var undoIgnore = false;\n" .
+              "var lastState = null;\n" .
+              "var undoDebounce = null;\n" .
+              "\n" .
+              "function ivrSerializeState ()\n" .
+              "{\n" .
+              "  var raw = flowchart.flowchart ( 'getDataRef');\n" .
+              "  var state = { operators: {}, links: {} };\n" .
+              "  for ( var id in raw.operators)\n" .
+              "  {\n" .
+              "    if ( ! raw.operators.hasOwnProperty ( id)) continue;\n" .
+              "    var op = raw.operators[id];\n" .
+              "    state.operators[id] = { top: op.top, left: op.left, properties: JSON.parse ( JSON.stringify ( op.properties)) };\n" .
+              "  }\n" .
+              "  for ( var id in raw.links)\n" .
+              "  {\n" .
+              "    if ( ! raw.links.hasOwnProperty ( id)) continue;\n" .
+              "    var lk = raw.links[id];\n" .
+              "    state.links[id] = { fromOperator: lk.fromOperator, fromConnector: lk.fromConnector, fromSubConnector: lk.fromSubConnector, toOperator: lk.toOperator, toConnector: lk.toConnector, toSubConnector: lk.toSubConnector };\n" .
+              "  }\n" .
+              "  return JSON.stringify ( state);\n" .
+              "}\n" .
+              "\n" .
+              "function ivrUndoSnapshot ()\n" .
+              "{\n" .
+              "  if ( undoIgnore) return;\n" .
+              "  if ( undoDebounce !== null)\n" .
+              "  {\n" .
+              "    clearTimeout ( undoDebounce);\n" .
+              "  }\n" .
+              "  undoDebounce = setTimeout ( function ()\n" .
+              "  {\n" .
+              "    undoDebounce = null;\n" .
+              "    var currentState = ivrSerializeState ();\n" .
+              "    if ( lastState !== null && currentState !== lastState)\n" .
+              "    {\n" .
+              "      undoStack.push ( lastState);\n" .
+              "      redoStack = [];\n" .
+              "    }\n" .
+              "    lastState = currentState;\n" .
+              "    ivrUndoUpdateButtons ();\n" .
+              "  }, 0);\n" .
+              "}\n" .
+              "\n" .
+              "function ivrUndoUpdateButtons ()\n" .
+              "{\n" .
+              "  var controls = $('#ivr_edit_form .workflow_controls');\n" .
+              "  controls.find ( '[data-mode=\"undo\"]').toggleClass ( 'disabled', undoStack.length < 1);\n" .
+              "  controls.find ( '[data-mode=\"redo\"]').toggleClass ( 'disabled', redoStack.length < 1);\n" .
+              "}\n" .
+              "\n" .
+              "function ivrUndo ()\n" .
+              "{\n" .
+              "  if ( undoStack.length < 1) return;\n" .
+              "  redoStack.push ( ivrSerializeState ());\n" .
+              "  var state = JSON.parse ( undoStack.pop ());\n" .
+              "  undoIgnore = true;\n" .
+              "  flowchart.flowchart ( 'setData', state);\n" .
+              "  undoIgnore = false;\n" .
+              "  lastState = ivrSerializeState ();\n" .
+              "  ivrUndoUpdateButtons ();\n" .
+              "}\n" .
+              "\n" .
+              "function ivrRedo ()\n" .
+              "{\n" .
+              "  if ( redoStack.length < 1) return;\n" .
+              "  undoStack.push ( ivrSerializeState ());\n" .
+              "  var state = JSON.parse ( redoStack.pop ());\n" .
+              "  undoIgnore = true;\n" .
+              "  flowchart.flowchart ( 'setData', state);\n" .
+              "  undoIgnore = false;\n" .
+              "  lastState = ivrSerializeState ();\n" .
+              "  ivrUndoUpdateButtons ();\n" .
+              "}\n" .
+              "\n" .
               "var cx = flowchart.width () / 2;\n" .
               "var cy = flowchart.height () / 2;\n" .
               "\n" .
@@ -1487,8 +1740,15 @@ function ivrs_edit_page ( $buffer, $parameters)
               "$('#ivr_edit_form .workflow_controls i').on ( 'click', function ( e)\n" .
               "{\n" .
               "  e && e.preventDefault ();\n" .
+              "  if ( $(this).hasClass ( 'disabled')) return;\n" .
               "  switch ( $(this).data ( 'mode'))\n" .
               "  {\n" .
+              "    case 'undo':\n" .
+              "      ivrUndo ();\n" .
+              "      break;\n" .
+              "    case 'redo':\n" .
+              "      ivrRedo ();\n" .
+              "      break;\n" .
               "    case 'delete':\n" .
               "      if ( flowchart.flowchart ( 'getSelectedOperatorId') != 'start')\n" .
               "      {\n" .
@@ -1517,6 +1777,20 @@ function ivrs_edit_page ( $buffer, $parameters)
               "  }\n" .
               "});\n" .
               "\n" .
+              "$(document).on ( 'keydown.ivrundo', function ( e)\n" .
+              "{\n" .
+              "  if ( ( e.ctrlKey || e.metaKey) && e.key === 'z' && ! e.shiftKey)\n" .
+              "  {\n" .
+              "    e.preventDefault ();\n" .
+              "    ivrUndo ();\n" .
+              "  }\n" .
+              "  if ( ( e.ctrlKey || e.metaKey) && ( e.key === 'y' || ( e.key === 'z' && e.shiftKey)))\n" .
+              "  {\n" .
+              "    e.preventDefault ();\n" .
+              "    ivrRedo ();\n" .
+              "  }\n" .
+              "});\n" .
+              "\n" .
               "container.on ( 'mousewheel.focal', function ( e)\n" .
               "{\n" .
               "  e.preventDefault ();\n" .
@@ -1537,8 +1811,16 @@ function ivrs_edit_page ( $buffer, $parameters)
               "  onLinkCreate: function ( linkId, linkData)\n" .
               "                {\n" .
               "                  return linkData.fromOperator != linkData.toOperator;\n" .
-              "                }\n" .
+              "                },\n" .
+              "  onAfterChange: function ( changeType)\n" .
+              "                 {\n" .
+              "                   ivrUndoSnapshot ();\n" .
+              "                 }\n" .
               "}).panzoom ( 'reset');\n" .
+              "undoStack = [];\n" .
+              "redoStack = [];\n" .
+              "lastState = ivrSerializeState ();\n" .
+              "ivrUndoUpdateButtons ();\n" .
               "\n" .
               "flowchart.parent ().siblings ( '.delete_selected_button').click ( function ()\n" .
               "{\n" .
@@ -1678,7 +1960,37 @@ function ivrs_edit_page ( $buffer, $parameters)
               "    onsuccess: function ()\n" .
               "               {\n" .
               "                 VoIP.path.call ( '/ivrs', true);\n" .
-              "               }\n" .
+              "               },\n" .
+              "    onfail: function ( jqXHR)\n" .
+              "            {\n" .
+              "              try { var errors = JSON.parse ( jqXHR.responseText); } catch ( e) { return; }\n" .
+              "              if ( ! errors || typeof errors !== 'object') return;\n" .
+              "              var messages = [];\n" .
+              "              var workflow = flowchart.flowchart ( 'getData');\n" .
+              "              for ( var opId in errors)\n" .
+              "              {\n" .
+              "                if ( ! errors.hasOwnProperty ( opId)) continue;\n" .
+              "                var opTitle = opId;\n" .
+              "                if ( workflow.operators[opId])\n" .
+              "                {\n" .
+              "                  opTitle = $('<div>').html ( workflow.operators[opId].properties.title).text ().trim ();\n" .
+              "                }\n" .
+              "                if ( typeof errors[opId] === 'object')\n" .
+              "                {\n" .
+              "                  for ( var field in errors[opId])\n" .
+              "                  {\n" .
+              "                    if ( errors[opId].hasOwnProperty ( field)) messages.push ( '<b>' + opTitle + '</b>: ' + errors[opId][field]);\n" .
+              "                  }\n" .
+              "                } else {\n" .
+              "                  messages.push ( '<b>' + opTitle + '</b>: ' + errors[opId]);\n" .
+              "                }\n" .
+              "              }\n" .
+              "              if ( messages.length)\n" .
+              "              {\n" .
+              "                new PNotify ( { title: '" . __ ( "IVR validation error") . "', text: messages.join ( '<br>'), type: 'error'});\n" .
+              "                return false;\n" .
+              "              }\n" .
+              "            }\n" .
               "  }\n" .
               "}).on ( 'formFilter', function ()\n" .
               "{\n" .
@@ -1745,7 +2057,7 @@ function ivrs_edit_page ( $buffer, $parameters)
               "    {\n" .
               "      operator.properties.inputs = { input: { label: '" . __ ( "In") . "', multipleLinks: true}};" .
               "    }\n" .
-              "    operator.properties.outputs = new Array ();\n" .
+              "    operator.properties.outputs = {};\n" .
               "    for ( var y = 0; y < data.Workflow.Operators[x].Outputs.length; y++)\n" .
               "    {\n" .
               "      var output = new Object ();\n" .
@@ -1766,7 +2078,13 @@ function ivrs_edit_page ( $buffer, $parameters)
               "    link.toConnector = 'input';\n" .
               "    workflow.links[x] = link;\n" .
               "  }\n" .
+              "  undoIgnore = true;\n" .
               "  $('#ivr_edit_workflow').flowchart ( 'setData', workflow);\n" .
+              "  undoIgnore = false;\n" .
+              "  undoStack = [];\n" .
+              "  redoStack = [];\n" .
+              "  lastState = ivrSerializeState ();\n" .
+              "  ivrUndoUpdateButtons ();\n" .
               "  $('#ivr_edit_name').focus ();\n" .
               "});\n" .
               "\n" .

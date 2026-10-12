@@ -341,7 +341,114 @@ Documented in [INSTALL.md](INSTALL.md):
 
 ---
 
-## 13. Quick reference — new or changed hooks/events
+## 13. IVR workflow engine enhancements (v1.1)
+
+Eight new operators and five modifications to existing operators expand the IVR
+workflow engine.
+
+### Bug fixes
+
+| Operator | Fix |
+|----------|-----|
+| `date` | Added "other" fallback link when no date condition matches (mirrors `time` behavior) |
+| `email` | `operator_apply_variables()` now applied to To, Subject, and Body fields |
+
+### Modified operators
+
+| Operator | Change |
+|----------|--------|
+| `play` | New `Interruptible` toggle — uses `Background()` instead of `PlayBack()` when enabled |
+| `menu` | New `maxretries` output link — fires when retry limit is exceeded (distinct from `timedout`) |
+| `router` | New `regex` condition type; new `Logic` property for AND/OR evaluation of multiple conditions |
+| `dial` | New `CallerIDName`, `CallerIDNum` properties to override caller ID; `MOHClass` property for music on hold |
+| `script` | Now returns two outputs (`ok`/`error`) based on `SHELL_EXIT_CODE` instead of a single output |
+
+### New operators
+
+| Operator | Outputs | Asterisk app | Description |
+|----------|---------|--------------|-------------|
+| `queue` | answered, timeout, full, joinempty | `Queue()` | Route to queue with position announcement and max callers |
+| `voicemail` | 1 | `VoiceMail()` | Send to voicemail (busy/unavailable greeting) |
+| `say` | 1 | `SayDigits()` / `SayNumber()` / `SayAlpha()` / `SayUnixTime()` | Speak digits, numbers, letters, or date/time |
+| `gotoivr` | 0 | `GoTo()` | Jump to another IVR workflow |
+| `calleridcheck` | match, nomatch | `GotoIf()` | Branch by CallerID number pattern |
+| `http` | ok, error | `Set(${CURL()})` | HTTP GET/POST; response stored in variable |
+| `conference` | 1 | `ConfBridge()` | Send caller to a conference room |
+| `callback` | ok, error | `Dial(Local/...)` | Schedule callback via local channel |
+
+### Files
+
+- `Daemons/client-modules/ivr/operator-builtin.php` — dialplan generation
+- `Administrative Interface/modules/ivr/config.php` — UI definitions (modals, flowchart operators)
+- `Administrative Interface/modules/ivr/language.php` — i18n (EN + pt_BR, 139 new entries each)
+
+---
+
+## 14. Conference rooms (ConfBridge)
+
+Conference room management via the admin interface, backed by Asterisk ConfBridge.
+
+### Admin module: `conferences`
+
+Full CRUD for conference rooms with the following properties:
+
+| Property | Description |
+|----------|-------------|
+| `Name` | Conference room display name |
+| `PIN` | Participant access PIN (optional) |
+| `AdminPIN` | Administrator access PIN (optional) |
+| `MaxMembers` | Maximum participants (0 = unlimited) |
+| `MOHClass` | Music-on-hold class for waiting participants |
+| `RecordConference` | Enable automatic recording |
+| `AnnounceJoinLeave` | Announce when participants join/leave |
+| `WaitForAdmin` | Hold participants until an admin joins |
+
+REST API: `GET|POST /api/conferences`, `GET|PUT|DELETE /api/conferences/:id`.
+
+Admin UI: search (DataTables), add, view, edit, clone.
+
+Files:
+- `Administrative Interface/modules/conferences/{install,filter,api,webui,language}.php`
+
+### Client module: `conferences`
+
+Generates Asterisk `confbridge-{name}.conf` files with three sections per room:
+
+- **Bridge profile** — `max_members`, `record_conference`
+- **User profile** — `music_on_hold_class`, `announce_join_leave`, `wait_marked`, `pin`
+- **Admin profile** — `marked`, `admin`, `pin`
+
+After writing the config, runs `asterisk -rx "module reload app_confbridge.so"`.
+
+Files:
+- `Daemons/client-modules/conferences/client.php`
+
+### Extension type: `conference`
+
+Module `extensions-conferences` registers the "Conference" extension type via the
+`objects_types` filter. An extension of type `conference` maps a DID/number to a
+conference room.
+
+The client daemon generates `dialplan-extension-{number}.conf` with:
+
+- `ConfBridge(room-name, bridge-profile, user-profile|admin-profile)` depending
+  on the `Admin` flag set on the extension.
+- Hint: `Custom:conference-{name}` for BLF monitoring.
+
+Files:
+- `Administrative Interface/modules/extensions-conferences/{install,filter,api,language}.php`
+- `Daemons/client-modules/extensions-conference/client.php`
+
+### Asterisk bootstrap
+
+`confbridge.conf` includes `voipdomain/configs/confbridge-*.conf` — parallel to
+`queues.conf`, `voicemail.conf`, etc.
+
+Placeholder: `confbridge-000000.conf`.
+
+---
+
+## 15. Quick reference — new or changed hooks/events
 
 | Name | Type | Location |
 |------|------|----------|
@@ -357,6 +464,20 @@ Documented in [INSTALL.md](INSTALL.md):
 | `channels_sync_reload()` | Internal | `Daemons/monitor-modules/channels/monitor.php` |
 | `queues_sync_reload()` | Internal | `Daemons/monitor-modules/queues/monitor.php` |
 | `equipment_model_cisco_deploy_firmware_archive()` | Hook helper | `Daemons/client-modules/equipments-cisco/client.php` |
+| `conference_add` | Hook | `Daemons/client-modules/conferences/client.php` |
+| `conference_change` | Hook | same |
+| `conference_remove` | Hook | same |
+| `extension_conference_add` | Hook | `Daemons/client-modules/extensions-conference/client.php` |
+| `extension_conference_change` | Hook | same |
+| `extension_conference_remove` | Hook | same |
+| `ivr_operator_queue` | Hook | `Daemons/client-modules/ivr/operator-builtin.php` |
+| `ivr_operator_voicemail` | Hook | same |
+| `ivr_operator_say` | Hook | same |
+| `ivr_operator_gotoivr` | Hook | same |
+| `ivr_operator_calleridcheck` | Hook | same |
+| `ivr_operator_http` | Hook | same |
+| `ivr_operator_conference` | Hook | same |
+| `ivr_operator_callback` | Hook | same |
 
 ---
 
@@ -373,6 +494,8 @@ Documented in [INSTALL.md](INSTALL.md):
 | Monitor sync | `Daemons/monitor-modules/{channels,queues}/monitor.php` |
 | Router cache | `Daemons/router.php`, `Daemons/router-modules/queues/router.php` |
 | Extensions | `Daemons/client-modules/extensions-phones/client.php` |
+| Conferences | `Administrative Interface/modules/conferences/`, `Daemons/client-modules/conferences/client.php` |
+| Extension conferences | `Administrative Interface/modules/extensions-conferences/`, `Daemons/client-modules/extensions-conference/client.php` |
 | Inter-server PJSIP | `Daemons/client-modules/servers/client.php` |
 | JS formatting | `Administrative Interface/js/voipdomain.js` |
 | Systemd / tmpfiles | `Documentations/systemd/` |

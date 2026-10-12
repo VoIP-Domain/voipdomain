@@ -157,8 +157,7 @@ function authentication_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'Authentication'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_view");
   }
   $data = array ( "Status" => false, "Background" => 1, "Password" => true, "Plugins" => array ());
   if ( $tmp = $result->fetch_assoc ())
@@ -338,9 +337,9 @@ function authentication_edit ( $buffer, $parameters)
   /**
    * Sanitize parameters
    */
-  $parameters["Status"] = (boolean) $parameters["Status"];
+  $parameters["Status"] = (bool) $parameters["Status"];
   $parameters["Background"] = (int) $parameters["Background"];
-  $parameters["Password"] = (boolean) $parameters["Password"];
+  $parameters["Password"] = (bool) $parameters["Password"];
 
   /**
    * Call sanitize hook if exist
@@ -364,8 +363,7 @@ function authentication_edit ( $buffer, $parameters)
   $tmp = json_encode ( array ( "Status" => $parameters["Status"], "Background" => $parameters["Background"], "Password" => $parameters["Password"]));
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Authentication', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $tmp) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( $tmp) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_edit");
   }
 
   /**
@@ -492,8 +490,7 @@ function authentication_password ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $tenantid . " AND `Key` LIKE 'Authentication'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_password");
   }
   if ( ! $config = $result->fetch_assoc ())
   {
@@ -580,8 +577,7 @@ function authentication_password ( $buffer, $parameters)
    */
   if ( ! $result = $_in["mysql"]["id"]->query ( "SELECT `ExtensionPhone`.* FROM `ExtensionPhone` LEFT JOIN `Extensions` ON `Extensions`.`ID` = `ExtensionPhone`.`Extension` WHERE `Extensions`.`Tenant` = " . (int) $tenantid . " AND `ExtensionPhone`.`Email` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "' AND `ExtensionPhone`.`Password` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_password");
   }
   if ( ! $userInfo = $result->fetch_assoc ())
   {
@@ -606,8 +602,7 @@ function authentication_password ( $buffer, $parameters)
   $cookie = bin2hex ( openssl_random_pseudo_bytes ( 8));
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `AuthenticationToken` (`Token`, `Tenant`, `Plugin`, `Email`, `IssueDate`, `LastSeen`, `Expires`, `TokenData`, `UserData`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $cookie) . "', " . (int) $tenantid . ", 'Password', '" . $_in["mysql"]["id"]->real_escape_string ( $userInfo["Email"]) . "', NOW(), NOW(), '" . $_in["mysql"]["id"]->real_escape_string ( date ( "Y-m-d h:i:s", time () + $_in["general"]["timeout"])) . "', '', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $userInfo)) . "')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_password");
   }
 
   /**
@@ -662,8 +657,7 @@ function authentication_tenant_add_post ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Authentication', " . (int) $parameters["ID"] . ", '{\"Status\":false,\"Background\":1,\"Password\":true}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_tenant_add_post");
   }
 
   /**

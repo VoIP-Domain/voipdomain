@@ -464,6 +464,7 @@ $_in["ivr"]["operators"]["menu"] = array (
   "name" => "menu",
   "style" => "info",
   "outputs" => array (
+                 "maxretries" => __ ( "Max retries"),
                  "timedout" => __ ( "Timed out")
                ),
   "modal" => true,
@@ -603,6 +604,8 @@ $_in["ivr"]["operators"]["menu"] = array (
                  "    ivrBlock.properties.outputs['option' + letter].label = '" . __ ( "Option") . "' + ' ' + digit;\n" .
                  "  }\n" .
                  "}\n" .
+                 "ivrBlock.properties.outputs['maxretries'] = new Object ();\n" .
+                 "ivrBlock.properties.outputs['maxretries'].label = '" . __ ( "Max retries") . "';\n" .
                  "ivrBlock.properties.outputs['timedout'] = new Object ();\n" .
                  "ivrBlock.properties.outputs['timedout'].label = '" . __ ( "Timed out") . "';\n",
   "javascript" => "$('#workflow-dialog-menu-variable').mask ( 'Z',\n" .
@@ -669,23 +672,38 @@ $_in["ivr"]["operators"]["play"] = array (
                     "    <select name=\"play-file\" id=\"workflow-dialog-play-file\" class=\"form-control\" data-placeholder=\"" . __ ( "Audio file to play") . "\"><option value=\"\"></option></select>\n" .
                     "  </div>\n" .
                     "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-play-interruptible\" class=\"control-label col-xs-2\">" . __ ( "Interruptible") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"checkbox\" name=\"play-interruptible\" id=\"workflow-dialog-play-interruptible\" value=\"true\" class=\"form-control\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
                     "</form>\n",
   "modalfocus" => "workflow-dialog-play-description",
   "modalshow" => "$('#workflow-dialog-play-description').val ( ivrData.Description ? ivrData.Description : '');\n" .
-                 "$('#workflow-dialog-play-file').val ( ivrData.File).trigger ( 'change');\n",
+                 "$('#workflow-dialog-play-file').val ( ivrData.File).trigger ( 'change');\n" .
+                 "$('#workflow-dialog-play-interruptible').bootstrapToggle ( ivrData.Interruptible ? 'on' : 'off');\n",
   "modalsave" => "ivrData.Description = $('#workflow-dialog-play-description').val ();\n" .
-                 "ivrData.File = $('#workflow-dialog-play-file').val ();\n",
+                 "ivrData.File = $('#workflow-dialog-play-file').val ();\n" .
+                 "ivrData.Interruptible = $('#workflow-dialog-play-interruptible').prop ( 'checked');\n",
   "javascript" => "$('#workflow-dialog-play-file').select2 (\n" .
                   "{\n" .
                   "  allowClear: true,\n" .
                   "  width: '100%',\n" .
                   "  data: VoIP.APIsearch ( { path: '/audios', fields: 'ID,Description', formatText: '%Description%'})\n" .
-                  "});\n",
+                  "});\n" .
+                  "$('#workflow-dialog-play-interruptible').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});",
   "validation" => "var result = '';\n" .
                   "if ( $('#workflow-dialog-play-file').val () == '')\n" .
                   "{\n" .
                   "  result += '" . __ ( "File not selected.") . "\\n';\n" .
-                  "}\n"
+                  "}\n",
+  "requiredcss" => array (
+                     array ( "name" => "bootstrap-toggle", "src" => "/vendors/bootstrap-toggle/css/bootstrap-toggle.css", "dep" => array ( "bootstrap"))
+                   ),
+  "requiredjs" => array (
+                    array ( "name" => "bootstrap-toggle", "src" => "/vendors/bootstrap-toggle/js/bootstrap-toggle.js", "dep" => array ())
+                  )
 );
 
 /**
@@ -861,6 +879,15 @@ $_in["ivr"]["operators"]["router"] = array (
                     "    <input type=\"text\" name=\"router-variable\" id=\"workflow-dialog-router-variable\" class=\"form-control\" placeholder=\"" . __ ( "Filter variable") . "\" />\n" .
                     "  </div>\n" .
                     "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-router-logic\" class=\"control-label col-xs-2\">" . __ ( "Logic") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <select name=\"router-logic\" id=\"workflow-dialog-router-logic\" class=\"form-control\">\n" .
+                    "      <option value=\"or\">" . __ ( "Any condition matches (OR)") . "</option>\n" .
+                    "      <option value=\"and\">" . __ ( "All conditions match (AND)") . "</option>\n" .
+                    "    </select>\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
                     "<div class=\"form-group required\">\n" .
                     "  <label for=\"workflow-dialog-router-condition-_X_\" class=\"control-label col-xs-2\">" . __ ( "Conditions") . "</label>\n" .
                     "  <div class=\"col-xs-10 inputGroupContainer\">\n" .
@@ -875,6 +902,7 @@ $_in["ivr"]["operators"]["router"] = array (
                     "        <option value=\"<=\">" . __ ( "Lower or equal than") . "</option>\n" .
                     "        <option value=\">\">" . __ ( "Greater than") . "</option>\n" .
                     "        <option value=\">=\">" . __ ( "Greater or equal than") . "</option>\n" .
+                    "        <option value=\"regex\">" . __ ( "Regex match") . "</option>\n" .
                     "      </select>\n" .
                     "      <input type=\"text\" name=\"router-value-_X_\" id=\"workflow-dialog-router-value-_X_\" class=\"form-control router-value\" placeholder=\"" . __ ( "Condition value") . "\" />\n" .
                     "      <span class=\"input-group-addon input-icon-button btn btn-error btn-delroutercondition\"><i class=\"fa fa-minus\"></i></span>\n" .
@@ -890,6 +918,7 @@ $_in["ivr"]["operators"]["router"] = array (
   "modalfocus" => "workflow-dialog-router-description",
   "modalshow" => "$('#workflow-dialog-router-description').val ( ivrData.Description ? ivrData.Description : '');\n" .
                  "$('#workflow-dialog-router-variable').val ( ivrData.Variable ? ivrData.Variable : '');\n" .
+                 "$('#workflow-dialog-router-logic').val ( ivrData.Logic ? ivrData.Logic : 'or');\n" .
                  "$('#ivr_router_form .form-router-conditions:not(.hidden)').remove ();\n" .
                  "$('.btn-addroutercondition').data ( 'id', 0);\n" .
                  "if ( ivrData.Conditions && ivrData.Conditions.length > 0)\n" .
@@ -910,6 +939,7 @@ $_in["ivr"]["operators"]["router"] = array (
                  "}\n",
   "modalsave" => "ivrData.Description = $('#workflow-dialog-router-description').val ();\n" .
                  "ivrData.Variable = $('#workflow-dialog-router-variable').val ();\n" .
+                 "ivrData.Logic = $('#workflow-dialog-router-logic').val ();\n" .
                  "ivrData.Conditions = new Array ();\n" .
                  "$('#ivr_router_form .form-router-conditions:not(.hidden)').each ( function ()\n" .
                  "{\n" .
@@ -1050,14 +1080,38 @@ $_in["ivr"]["operators"]["dial"] = array (
                     "    <input type=\"text\" name=\"dial-timeout\" id=\"workflow-dialog-dial-timeout\" class=\"form-control\" placeholder=\"" . __ ( "Dial timeout") . "\" />\n" .
                     "  </div>\n" .
                     "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-dial-calleridname\" class=\"control-label col-xs-2\">" . __ ( "CallerID name") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"dial-calleridname\" id=\"workflow-dialog-dial-calleridname\" class=\"form-control\" placeholder=\"" . __ ( "Override caller ID name (optional)") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-dial-calleridnum\" class=\"control-label col-xs-2\">" . __ ( "CallerID number") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"dial-calleridnum\" id=\"workflow-dialog-dial-calleridnum\" class=\"form-control\" placeholder=\"" . __ ( "Override caller ID number (optional)") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-dial-mohclass\" class=\"control-label col-xs-2\">" . __ ( "MOH class") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"dial-mohclass\" id=\"workflow-dialog-dial-mohclass\" class=\"form-control\" placeholder=\"" . __ ( "Music on hold class (optional)") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
                     "</form>\n",
   "modalfocus" => "workflow-dialog-dial-description",
   "modalshow" => "$('#workflow-dialog-dial-description').val ( ivrData.Description ? ivrData.Description : '');\n" .
                  "$('#workflow-dialog-dial-destination').val ( ivrData.Destination ? ivrData.Destination : '');\n" .
-                 "$('#workflow-dialog-dial-timeout').val ( ivrData.Timeout ? ivrData.Timeout : '');\n",
+                 "$('#workflow-dialog-dial-timeout').val ( ivrData.Timeout ? ivrData.Timeout : '');\n" .
+                 "$('#workflow-dialog-dial-calleridname').val ( ivrData.CallerIDName ? ivrData.CallerIDName : '');\n" .
+                 "$('#workflow-dialog-dial-calleridnum').val ( ivrData.CallerIDNum ? ivrData.CallerIDNum : '');\n" .
+                 "$('#workflow-dialog-dial-mohclass').val ( ivrData.MOHClass ? ivrData.MOHClass : '');\n",
   "modalsave" => "ivrData.Description = $('#workflow-dialog-dial-description').val ();\n" .
                  "ivrData.Destination = $('#workflow-dialog-dial-destination').val ();\n" .
-                 "ivrData.Timeout = $('#workflow-dialog-dial-timeout').val ();\n",
+                 "ivrData.Timeout = $('#workflow-dialog-dial-timeout').val ();\n" .
+                 "ivrData.CallerIDName = $('#workflow-dialog-dial-calleridname').val ();\n" .
+                 "ivrData.CallerIDNum = $('#workflow-dialog-dial-calleridnum').val ();\n" .
+                 "ivrData.MOHClass = $('#workflow-dialog-dial-mohclass').val ();\n",
   "javascript" => "$('#workflow-dialog-dial-timeout').mask ( '0#');\n",
   "validation" => "var result = '';\n" .
                   "if ( $('#workflow-dialog-dial-destination').val () == '')\n" .
@@ -1078,7 +1132,10 @@ $_in["ivr"]["operators"]["dial"] = array (
 $_in["ivr"]["operators"]["script"] = array (
   "name" => "script",
   "style" => "warning",
-  "outputs" => 1,
+  "outputs" => array (
+                 "ok" => __ ( "OK"),
+                 "error" => __ ( "Error")
+               ),
   "modal" => true,
   "icon" => "file-alt",
   "title" => __ ( "Script"),
@@ -1238,6 +1295,535 @@ $_in["ivr"]["operators"]["email"] = array (
                   "{\n" .
                   "  result += '" . __ ( "Variable body missing.") . "\\n';\n" .
                   "}\n"
+);
+
+/**
+ * IVR queue operator
+ *
+ * Implements the possibility to place the caller into a queue.
+ */
+$_in["ivr"]["operators"]["queue"] = array (
+  "name" => "queue",
+  "style" => "danger",
+  "outputs" => array (
+                 "answered" => __ ( "Answered"),
+                 "timeout" => __ ( "Timeout"),
+                 "full" => __ ( "Full"),
+                 "joinempty" => __ ( "Empty")
+               ),
+  "modal" => true,
+  "icon" => "headset",
+  "title" => __ ( "Queue"),
+  "modaltitle" => __ ( "Queue options"),
+  "modalcontent" => "<form class=\"form-horizontal\" id=\"ivr_queue_form\">\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-queue-description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"queue-description\" id=\"workflow-dialog-queue-description\" class=\"form-control\" placeholder=\"" . __ ( "Description") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group required\">\n" .
+                    "  <label for=\"workflow-dialog-queue-name\" class=\"control-label col-xs-2\">" . __ ( "Queue") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"queue-name\" id=\"workflow-dialog-queue-name\" class=\"form-control\" placeholder=\"" . __ ( "Queue name") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-queue-mohclass\" class=\"control-label col-xs-2\">" . __ ( "MOH class") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"queue-mohclass\" id=\"workflow-dialog-queue-mohclass\" class=\"form-control\" placeholder=\"" . __ ( "Music on hold class (optional)") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-queue-announceposition\" class=\"control-label col-xs-2\">" . __ ( "Announce position") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"checkbox\" name=\"queue-announceposition\" id=\"workflow-dialog-queue-announceposition\" value=\"true\" class=\"form-control\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-queue-timeout\" class=\"control-label col-xs-2\">" . __ ( "Timeout") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"queue-timeout\" id=\"workflow-dialog-queue-timeout\" class=\"form-control\" placeholder=\"" . __ ( "Queue timeout (optional)") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-queue-maxcallers\" class=\"control-label col-xs-2\">" . __ ( "Max callers") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"queue-maxcallers\" id=\"workflow-dialog-queue-maxcallers\" class=\"form-control\" placeholder=\"" . __ ( "Maximum callers in queue (optional)") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "</form>\n",
+  "modalfocus" => "workflow-dialog-queue-description",
+  "modalshow" => "$('#workflow-dialog-queue-description').val ( ivrData.Description ? ivrData.Description : '');\n" .
+                 "$('#workflow-dialog-queue-name').val ( ivrData.Queue ? ivrData.Queue : '');\n" .
+                 "$('#workflow-dialog-queue-mohclass').val ( ivrData.MOHClass ? ivrData.MOHClass : '');\n" .
+                 "$('#workflow-dialog-queue-announceposition').bootstrapToggle ( ivrData.AnnouncePosition ? 'on' : 'off');\n" .
+                 "$('#workflow-dialog-queue-timeout').val ( ivrData.Timeout ? ivrData.Timeout : '');\n" .
+                 "$('#workflow-dialog-queue-maxcallers').val ( ivrData.MaxCallers ? ivrData.MaxCallers : '');\n",
+  "modalsave" => "ivrData.Description = $('#workflow-dialog-queue-description').val ();\n" .
+                 "ivrData.Queue = $('#workflow-dialog-queue-name').val ();\n" .
+                 "ivrData.MOHClass = $('#workflow-dialog-queue-mohclass').val ();\n" .
+                 "ivrData.AnnouncePosition = $('#workflow-dialog-queue-announceposition').prop ( 'checked');\n" .
+                 "ivrData.Timeout = $('#workflow-dialog-queue-timeout').val ();\n" .
+                 "ivrData.MaxCallers = $('#workflow-dialog-queue-maxcallers').val ();\n",
+  "javascript" => "$('#workflow-dialog-queue-announceposition').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});\n" .
+                  "$('#workflow-dialog-queue-timeout,#workflow-dialog-queue-maxcallers').mask ( '0#');\n",
+  "validation" => "var result = '';\n" .
+                  "if ( $('#workflow-dialog-queue-name').val () == '')\n" .
+                  "{\n" .
+                  "  result += '" . __ ( "Queue name missing.") . "\\n';\n" .
+                  "}\n",
+  "requiredcss" => array (
+                     array ( "name" => "bootstrap-toggle", "src" => "/vendors/bootstrap-toggle/css/bootstrap-toggle.css", "dep" => array ( "bootstrap"))
+                   ),
+  "requiredjs" => array (
+                    array ( "name" => "bootstrap-toggle", "src" => "/vendors/bootstrap-toggle/js/bootstrap-toggle.js", "dep" => array ()),
+                    array ( "name" => "jquery-mask", "src" => "/vendors/jQuery-Mask-Plugin/dist/jquery.mask.js", "dep" => array ())
+                  )
+);
+
+/**
+ * IVR voicemail operator
+ *
+ * Implements the possibility to send the caller to a voicemail box.
+ */
+$_in["ivr"]["operators"]["voicemail"] = array (
+  "name" => "voicemail",
+  "style" => "success",
+  "outputs" => 1,
+  "modal" => true,
+  "icon" => "voicemail",
+  "title" => __ ( "Voicemail"),
+  "modaltitle" => __ ( "Voicemail options"),
+  "modalcontent" => "<form class=\"form-horizontal\" id=\"ivr_voicemail_form\">\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-voicemail-description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"voicemail-description\" id=\"workflow-dialog-voicemail-description\" class=\"form-control\" placeholder=\"" . __ ( "Description") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group required\">\n" .
+                    "  <label for=\"workflow-dialog-voicemail-mailbox\" class=\"control-label col-xs-2\">" . __ ( "Mailbox") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"voicemail-mailbox\" id=\"workflow-dialog-voicemail-mailbox\" class=\"form-control\" placeholder=\"" . __ ( "Extension number or {var_VARIABLE}") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group required\">\n" .
+                    "  <label for=\"workflow-dialog-voicemail-greeting\" class=\"control-label col-xs-2\">" . __ ( "Greeting") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <select name=\"voicemail-greeting\" id=\"workflow-dialog-voicemail-greeting\" class=\"form-control\">\n" .
+                    "      <option value=\"unavailable\">" . __ ( "Unavailable") . "</option>\n" .
+                    "      <option value=\"busy\">" . __ ( "Busy") . "</option>\n" .
+                    "      <option value=\"skip\">" . __ ( "Skip") . "</option>\n" .
+                    "    </select>\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "</form>\n",
+  "modalfocus" => "workflow-dialog-voicemail-description",
+  "modalshow" => "$('#workflow-dialog-voicemail-description').val ( ivrData.Description ? ivrData.Description : '');\n" .
+                 "$('#workflow-dialog-voicemail-mailbox').val ( ivrData.Mailbox ? ivrData.Mailbox : '');\n" .
+                 "$('#workflow-dialog-voicemail-greeting').val ( ivrData.Greeting ? ivrData.Greeting : 'unavailable');\n",
+  "modalsave" => "ivrData.Description = $('#workflow-dialog-voicemail-description').val ();\n" .
+                 "ivrData.Mailbox = $('#workflow-dialog-voicemail-mailbox').val ();\n" .
+                 "ivrData.Greeting = $('#workflow-dialog-voicemail-greeting').val ();\n",
+  "validation" => "var result = '';\n" .
+                  "if ( $('#workflow-dialog-voicemail-mailbox').val () == '')\n" .
+                  "{\n" .
+                  "  result += '" . __ ( "Mailbox missing.") . "\\n';\n" .
+                  "}\n"
+);
+
+/**
+ * IVR say operator
+ *
+ * Implements the possibility to say digits, numbers, alpha or datetime values.
+ */
+$_in["ivr"]["operators"]["say"] = array (
+  "name" => "say",
+  "style" => "success",
+  "outputs" => 1,
+  "modal" => true,
+  "icon" => "comment-dots",
+  "title" => __ ( "Say"),
+  "modaltitle" => __ ( "Say options"),
+  "modalcontent" => "<form class=\"form-horizontal\" id=\"ivr_say_form\">\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-say-description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"say-description\" id=\"workflow-dialog-say-description\" class=\"form-control\" placeholder=\"" . __ ( "Description") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group required\">\n" .
+                    "  <label for=\"workflow-dialog-say-type\" class=\"control-label col-xs-2\">" . __ ( "Type") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <select name=\"say-type\" id=\"workflow-dialog-say-type\" class=\"form-control\">\n" .
+                    "      <option value=\"\">" . __ ( "Select type") . "</option>\n" .
+                    "      <option value=\"digits\">" . __ ( "Digits") . "</option>\n" .
+                    "      <option value=\"number\">" . __ ( "Number") . "</option>\n" .
+                    "      <option value=\"alpha\">" . __ ( "Alpha") . "</option>\n" .
+                    "      <option value=\"datetime\">" . __ ( "Date/Time") . "</option>\n" .
+                    "    </select>\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group required\">\n" .
+                    "  <label for=\"workflow-dialog-say-variable\" class=\"control-label col-xs-2\">" . __ ( "Variable") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"say-variable\" id=\"workflow-dialog-say-variable\" class=\"form-control\" placeholder=\"" . __ ( "Source variable") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-say-format\" class=\"control-label col-xs-2\">" . __ ( "Format") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"say-format\" id=\"workflow-dialog-say-format\" class=\"form-control\" placeholder=\"" . __ ( "Format (only for datetime)") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "</form>\n",
+  "modalfocus" => "workflow-dialog-say-description",
+  "modalshow" => "$('#workflow-dialog-say-description').val ( ivrData.Description ? ivrData.Description : '');\n" .
+                 "$('#workflow-dialog-say-type').val ( ivrData.Type ? ivrData.Type : '');\n" .
+                 "$('#workflow-dialog-say-variable').val ( ivrData.Variable ? ivrData.Variable : '');\n" .
+                 "$('#workflow-dialog-say-format').val ( ivrData.Format ? ivrData.Format : '');\n",
+  "modalsave" => "ivrData.Description = $('#workflow-dialog-say-description').val ();\n" .
+                 "ivrData.Type = $('#workflow-dialog-say-type').val ();\n" .
+                 "ivrData.Variable = $('#workflow-dialog-say-variable').val ();\n" .
+                 "ivrData.Format = $('#workflow-dialog-say-format').val ();\n",
+  "validation" => "var result = '';\n" .
+                  "if ( $('#workflow-dialog-say-type').val () == '')\n" .
+                  "{\n" .
+                  "  result += '" . __ ( "Type missing.") . "\\n';\n" .
+                  "}\n" .
+                  "if ( $('#workflow-dialog-say-variable').val () == '')\n" .
+                  "{\n" .
+                  "  result += '" . __ ( "Variable missing.") . "\\n';\n" .
+                  "}\n"
+);
+
+/**
+ * IVR go to IVR operator
+ *
+ * Implements the possibility to transfer flow to another IVR.
+ */
+$_in["ivr"]["operators"]["gotoivr"] = array (
+  "name" => "gotoivr",
+  "style" => "info",
+  "outputs" => 1,
+  "modal" => true,
+  "icon" => "share",
+  "title" => __ ( "Go to IVR"),
+  "modaltitle" => __ ( "Go to IVR options"),
+  "modalcontent" => "<form class=\"form-horizontal\" id=\"ivr_gotoivr_form\">\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-gotoivr-description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"gotoivr-description\" id=\"workflow-dialog-gotoivr-description\" class=\"form-control\" placeholder=\"" . __ ( "Description") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group required\">\n" .
+                    "  <label for=\"workflow-dialog-gotoivr-name\" class=\"control-label col-xs-2\">" . __ ( "IVR name") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"gotoivr-name\" id=\"workflow-dialog-gotoivr-name\" class=\"form-control\" placeholder=\"" . __ ( "IVR name") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-gotoivr-return\" class=\"control-label col-xs-2\">" . __ ( "Return") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"checkbox\" name=\"gotoivr-return\" id=\"workflow-dialog-gotoivr-return\" value=\"true\" class=\"form-control\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "</form>\n",
+  "modalfocus" => "workflow-dialog-gotoivr-description",
+  "modalshow" => "$('#workflow-dialog-gotoivr-description').val ( ivrData.Description ? ivrData.Description : '');\n" .
+                 "$('#workflow-dialog-gotoivr-name').val ( ivrData.Name ? ivrData.Name : '');\n" .
+                 "$('#workflow-dialog-gotoivr-return').bootstrapToggle ( ivrData.Return ? 'on' : 'off');\n",
+  "modalsave" => "ivrData.Description = $('#workflow-dialog-gotoivr-description').val ();\n" .
+                 "ivrData.Name = $('#workflow-dialog-gotoivr-name').val ();\n" .
+                 "ivrData.Return = $('#workflow-dialog-gotoivr-return').prop ( 'checked');\n",
+  "javascript" => "$('#workflow-dialog-gotoivr-return').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});",
+  "validation" => "var result = '';\n" .
+                  "if ( $('#workflow-dialog-gotoivr-name').val () == '')\n" .
+                  "{\n" .
+                  "  result += '" . __ ( "IVR name missing.") . "\\n';\n" .
+                  "}\n",
+  "requiredcss" => array (
+                     array ( "name" => "bootstrap-toggle", "src" => "/vendors/bootstrap-toggle/css/bootstrap-toggle.css", "dep" => array ( "bootstrap"))
+                   ),
+  "requiredjs" => array (
+                    array ( "name" => "bootstrap-toggle", "src" => "/vendors/bootstrap-toggle/js/bootstrap-toggle.js", "dep" => array ())
+                  )
+);
+
+/**
+ * IVR caller ID check operator
+ *
+ * Implements the possibility to check caller ID against blocklists or patterns.
+ */
+$_in["ivr"]["operators"]["calleridcheck"] = array (
+  "name" => "calleridcheck",
+  "style" => "default",
+  "outputs" => array (
+                 "match" => __ ( "Match"),
+                 "nomatch" => __ ( "No match")
+               ),
+  "modal" => true,
+  "icon" => "phone-square-alt",
+  "title" => __ ( "CallerID check"),
+  "modaltitle" => __ ( "CallerID check options"),
+  "modalcontent" => "<form class=\"form-horizontal\" id=\"ivr_calleridcheck_form\">\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-calleridcheck-description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"calleridcheck-description\" id=\"workflow-dialog-calleridcheck-description\" class=\"form-control\" placeholder=\"" . __ ( "Description") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group required\">\n" .
+                    "  <label for=\"workflow-dialog-calleridcheck-type\" class=\"control-label col-xs-2\">" . __ ( "Check type") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <select name=\"calleridcheck-type\" id=\"workflow-dialog-calleridcheck-type\" class=\"form-control\">\n" .
+                    "      <option value=\"\">" . __ ( "Select check type") . "</option>\n" .
+                    "      <option value=\"blocklist\">" . __ ( "Blocklist") . "</option>\n" .
+                    "      <option value=\"exceptions\">" . __ ( "Exceptions") . "</option>\n" .
+                    "      <option value=\"regex\">" . __ ( "Regex") . "</option>\n" .
+                    "      <option value=\"variable\">" . __ ( "Variable") . "</option>\n" .
+                    "    </select>\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-calleridcheck-pattern\" class=\"control-label col-xs-2\">" . __ ( "Pattern") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"calleridcheck-pattern\" id=\"workflow-dialog-calleridcheck-pattern\" class=\"form-control\" placeholder=\"" . __ ( "Regex pattern (for regex type)") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-calleridcheck-variable\" class=\"control-label col-xs-2\">" . __ ( "Variable") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"calleridcheck-variable\" id=\"workflow-dialog-calleridcheck-variable\" class=\"form-control\" placeholder=\"" . __ ( "Variable name (for variable type)") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "</form>\n",
+  "modalfocus" => "workflow-dialog-calleridcheck-description",
+  "modalshow" => "$('#workflow-dialog-calleridcheck-description').val ( ivrData.Description ? ivrData.Description : '');\n" .
+                 "$('#workflow-dialog-calleridcheck-type').val ( ivrData.CheckType ? ivrData.CheckType : '');\n" .
+                 "$('#workflow-dialog-calleridcheck-pattern').val ( ivrData.Pattern ? ivrData.Pattern : '');\n" .
+                 "$('#workflow-dialog-calleridcheck-variable').val ( ivrData.Variable ? ivrData.Variable : '');\n",
+  "modalsave" => "ivrData.Description = $('#workflow-dialog-calleridcheck-description').val ();\n" .
+                 "ivrData.CheckType = $('#workflow-dialog-calleridcheck-type').val ();\n" .
+                 "ivrData.Pattern = $('#workflow-dialog-calleridcheck-pattern').val ();\n" .
+                 "ivrData.Variable = $('#workflow-dialog-calleridcheck-variable').val ();\n",
+  "validation" => "var result = '';\n" .
+                  "if ( $('#workflow-dialog-calleridcheck-type').val () == '')\n" .
+                  "{\n" .
+                  "  result += '" . __ ( "Check type missing.") . "\\n';\n" .
+                  "}\n" .
+                  "if ( $('#workflow-dialog-calleridcheck-type').val () == 'regex' && $('#workflow-dialog-calleridcheck-pattern').val () == '')\n" .
+                  "{\n" .
+                  "  result += '" . __ ( "Pattern missing.") . "\\n';\n" .
+                  "}\n" .
+                  "if ( $('#workflow-dialog-calleridcheck-type').val () == 'variable' && $('#workflow-dialog-calleridcheck-variable').val () == '')\n" .
+                  "{\n" .
+                  "  result += '" . __ ( "Variable missing.") . "\\n';\n" .
+                  "}\n"
+);
+
+/**
+ * IVR HTTP request operator
+ *
+ * Implements the possibility to make HTTP requests and store the response.
+ */
+$_in["ivr"]["operators"]["http"] = array (
+  "name" => "http",
+  "style" => "warning",
+  "outputs" => array (
+                 "ok" => __ ( "OK"),
+                 "error" => __ ( "Error")
+               ),
+  "modal" => true,
+  "icon" => "globe",
+  "title" => __ ( "HTTP"),
+  "modaltitle" => __ ( "HTTP request options"),
+  "modalcontent" => "<form class=\"form-horizontal\" id=\"ivr_http_form\">\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-http-description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"http-description\" id=\"workflow-dialog-http-description\" class=\"form-control\" placeholder=\"" . __ ( "Description") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group required\">\n" .
+                    "  <label for=\"workflow-dialog-http-url\" class=\"control-label col-xs-2\">" . __ ( "URL") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"http-url\" id=\"workflow-dialog-http-url\" class=\"form-control\" placeholder=\"" . __ ( "Request URL") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group required\">\n" .
+                    "  <label for=\"workflow-dialog-http-method\" class=\"control-label col-xs-2\">" . __ ( "Method") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <select name=\"http-method\" id=\"workflow-dialog-http-method\" class=\"form-control\">\n" .
+                    "      <option value=\"GET\">GET</option>\n" .
+                    "      <option value=\"POST\">POST</option>\n" .
+                    "    </select>\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group required\">\n" .
+                    "  <label for=\"workflow-dialog-http-variable\" class=\"control-label col-xs-2\">" . __ ( "Variable") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"http-variable\" id=\"workflow-dialog-http-variable\" class=\"form-control\" placeholder=\"" . __ ( "Variable to store response") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-http-timeout\" class=\"control-label col-xs-2\">" . __ ( "Timeout") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"http-timeout\" id=\"workflow-dialog-http-timeout\" class=\"form-control\" placeholder=\"" . __ ( "Request timeout (default 5)") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-http-body\" class=\"control-label col-xs-2\">" . __ ( "Body") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <textarea name=\"http-body\" id=\"workflow-dialog-http-body\" class=\"form-control\" placeholder=\"" . __ ( "Request body (for POST)") . "\" style=\"max-width: 100%;min-width: 100%;max-height: 12em;min-height: 3em\"></textarea>\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "</form>\n",
+  "modalfocus" => "workflow-dialog-http-description",
+  "modalshow" => "$('#workflow-dialog-http-description').val ( ivrData.Description ? ivrData.Description : '');\n" .
+                 "$('#workflow-dialog-http-url').val ( ivrData.URL ? ivrData.URL : '');\n" .
+                 "$('#workflow-dialog-http-method').val ( ivrData.Method ? ivrData.Method : 'GET');\n" .
+                 "$('#workflow-dialog-http-variable').val ( ivrData.Variable ? ivrData.Variable : '');\n" .
+                 "$('#workflow-dialog-http-timeout').val ( ivrData.Timeout ? ivrData.Timeout : '5');\n" .
+                 "$('#workflow-dialog-http-body').val ( ivrData.Body ? ivrData.Body : '');\n",
+  "modalsave" => "ivrData.Description = $('#workflow-dialog-http-description').val ();\n" .
+                 "ivrData.URL = $('#workflow-dialog-http-url').val ();\n" .
+                 "ivrData.Method = $('#workflow-dialog-http-method').val ();\n" .
+                 "ivrData.Variable = $('#workflow-dialog-http-variable').val ();\n" .
+                 "ivrData.Timeout = $('#workflow-dialog-http-timeout').val ();\n" .
+                 "ivrData.Body = $('#workflow-dialog-http-body').val ();\n",
+  "javascript" => "$('#workflow-dialog-http-timeout').mask ( '0#');\n",
+  "validation" => "var result = '';\n" .
+                  "if ( $('#workflow-dialog-http-url').val () == '')\n" .
+                  "{\n" .
+                  "  result += '" . __ ( "URL missing.") . "\\n';\n" .
+                  "}\n" .
+                  "if ( $('#workflow-dialog-http-method').val () == '')\n" .
+                  "{\n" .
+                  "  result += '" . __ ( "Method missing.") . "\\n';\n" .
+                  "}\n" .
+                  "if ( $('#workflow-dialog-http-variable').val () == '')\n" .
+                  "{\n" .
+                  "  result += '" . __ ( "Variable missing.") . "\\n';\n" .
+                  "}\n",
+  "requiredjs" => array (
+                    array ( "name" => "jquery-mask", "src" => "/vendors/jQuery-Mask-Plugin/dist/jquery.mask.js", "dep" => array ())
+                  )
+);
+
+/**
+ * IVR conference operator
+ *
+ * Implements the possibility to place the caller into a conference room.
+ */
+$_in["ivr"]["operators"]["conference"] = array (
+  "name" => "conference",
+  "style" => "danger",
+  "outputs" => 1,
+  "modal" => true,
+  "icon" => "users",
+  "title" => __ ( "Conference"),
+  "modaltitle" => __ ( "Conference options"),
+  "modalcontent" => "<form class=\"form-horizontal\" id=\"ivr_conference_form\">\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-conference-description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"conference-description\" id=\"workflow-dialog-conference-description\" class=\"form-control\" placeholder=\"" . __ ( "Description") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group required\">\n" .
+                    "  <label for=\"workflow-dialog-conference-room\" class=\"control-label col-xs-2\">" . __ ( "Room") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"conference-room\" id=\"workflow-dialog-conference-room\" class=\"form-control\" placeholder=\"" . __ ( "Conference room name") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-conference-pin\" class=\"control-label col-xs-2\">" . __ ( "PIN") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"conference-pin\" id=\"workflow-dialog-conference-pin\" class=\"form-control\" placeholder=\"" . __ ( "Access PIN (optional)") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-conference-profile\" class=\"control-label col-xs-2\">" . __ ( "Profile") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"conference-profile\" id=\"workflow-dialog-conference-profile\" class=\"form-control\" placeholder=\"" . __ ( "Conference profile (default: default_bridge)") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-conference-mohclass\" class=\"control-label col-xs-2\">" . __ ( "MOH class") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"conference-mohclass\" id=\"workflow-dialog-conference-mohclass\" class=\"form-control\" placeholder=\"" . __ ( "Music on hold class (optional)") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "</form>\n",
+  "modalfocus" => "workflow-dialog-conference-description",
+  "modalshow" => "$('#workflow-dialog-conference-description').val ( ivrData.Description ? ivrData.Description : '');\n" .
+                 "$('#workflow-dialog-conference-room').val ( ivrData.Room ? ivrData.Room : '');\n" .
+                 "$('#workflow-dialog-conference-pin').val ( ivrData.PIN ? ivrData.PIN : '');\n" .
+                 "$('#workflow-dialog-conference-profile').val ( ivrData.Profile ? ivrData.Profile : '');\n" .
+                 "$('#workflow-dialog-conference-mohclass').val ( ivrData.MOHClass ? ivrData.MOHClass : '');\n",
+  "modalsave" => "ivrData.Description = $('#workflow-dialog-conference-description').val ();\n" .
+                 "ivrData.Room = $('#workflow-dialog-conference-room').val ();\n" .
+                 "ivrData.PIN = $('#workflow-dialog-conference-pin').val ();\n" .
+                 "ivrData.Profile = $('#workflow-dialog-conference-profile').val ();\n" .
+                 "ivrData.MOHClass = $('#workflow-dialog-conference-mohclass').val ();\n",
+  "validation" => "var result = '';\n" .
+                  "if ( $('#workflow-dialog-conference-room').val () == '')\n" .
+                  "{\n" .
+                  "  result += '" . __ ( "Room missing.") . "\\n';\n" .
+                  "}\n"
+);
+
+/**
+ * IVR callback operator
+ *
+ * Implements the possibility to schedule a callback.
+ */
+$_in["ivr"]["operators"]["callback"] = array (
+  "name" => "callback",
+  "style" => "warning",
+  "outputs" => 1,
+  "modal" => true,
+  "icon" => "phone-volume",
+  "title" => __ ( "Callback"),
+  "modaltitle" => __ ( "Callback options"),
+  "modalcontent" => "<form class=\"form-horizontal\" id=\"ivr_callback_form\">\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-callback-description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"callback-description\" id=\"workflow-dialog-callback-description\" class=\"form-control\" placeholder=\"" . __ ( "Description") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-callback-queue\" class=\"control-label col-xs-2\">" . __ ( "Queue") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"callback-queue\" id=\"workflow-dialog-callback-queue\" class=\"form-control\" placeholder=\"" . __ ( "Associated queue (optional)") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-callback-variable\" class=\"control-label col-xs-2\">" . __ ( "Variable") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"callback-variable\" id=\"workflow-dialog-callback-variable\" class=\"form-control\" placeholder=\"" . __ ( "Variable to store caller number (optional)") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "<div class=\"form-group\">\n" .
+                    "  <label for=\"workflow-dialog-callback-email\" class=\"control-label col-xs-2\">" . __ ( "Notify email") . "</label>\n" .
+                    "  <div class=\"col-xs-10\">\n" .
+                    "    <input type=\"text\" name=\"callback-email\" id=\"workflow-dialog-callback-email\" class=\"form-control\" placeholder=\"" . __ ( "Email to notify (optional)") . "\" />\n" .
+                    "  </div>\n" .
+                    "</div>\n" .
+                    "</form>\n",
+  "modalfocus" => "workflow-dialog-callback-description",
+  "modalshow" => "$('#workflow-dialog-callback-description').val ( ivrData.Description ? ivrData.Description : '');\n" .
+                 "$('#workflow-dialog-callback-queue').val ( ivrData.Queue ? ivrData.Queue : '');\n" .
+                 "$('#workflow-dialog-callback-variable').val ( ivrData.Variable ? ivrData.Variable : '');\n" .
+                 "$('#workflow-dialog-callback-email').val ( ivrData.Email ? ivrData.Email : '');\n",
+  "modalsave" => "ivrData.Description = $('#workflow-dialog-callback-description').val ();\n" .
+                 "ivrData.Queue = $('#workflow-dialog-callback-queue').val ();\n" .
+                 "ivrData.Variable = $('#workflow-dialog-callback-variable').val ();\n" .
+                 "ivrData.Email = $('#workflow-dialog-callback-email').val ();\n"
 );
 
 /**

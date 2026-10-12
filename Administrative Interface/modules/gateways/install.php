@@ -75,6 +75,8 @@ function gateways_install_db ( $buffer, $parameters)
                                      "  `RPID` boolean NOT NULL DEFAULT false,\n" .
                                      "  `Qualify` boolean NOT NULL DEFAULT false,\n" .
                                      "  `Inbound` boolean NOT NULL DEFAULT true,\n" .
+                                     "  `CallerIDMode` enum('none','fixed','extension') NOT NULL DEFAULT 'none',\n" .
+                                     "  `CallerIDNumber` varchar(80) NOT NULL DEFAULT '',\n" .
                                      "  PRIMARY KEY (`ID`),\n" .
                                      "  KEY `Description` (`Description`),\n" .
                                      "  KEY `Type` (`Type`),\n" .

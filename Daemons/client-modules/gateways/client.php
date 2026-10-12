@@ -377,6 +377,23 @@ function gateway_add ( $buffer, $parameters)
   asterisk_exec ( "pjsip reload");
   asterisk_exec ( "dialplan reload");
 
+  // Configure CallerID AstDB entries
+  if ( array_key_exists ( "CallerIDMode", $parameters) && $parameters["CallerIDMode"] == "extension")
+  {
+    $parts = explode ( "{extension}", $parameters["CallerIDNumber"], 2);
+    $prefix = isset ( $parts[0]) ? $parts[0] : "";
+    $suffix = isset ( $parts[1]) ? $parts[1] : "";
+    asterisk_exec ( "database put gw_cid " . $parameters["ID"] . "/mode extension");
+    asterisk_exec ( "database put gw_cid " . $parameters["ID"] . "/prefix " . $prefix);
+    asterisk_exec ( "database put gw_cid " . $parameters["ID"] . "/suffix " . $suffix);
+  } else if ( array_key_exists ( "CallerIDMode", $parameters) && $parameters["CallerIDMode"] == "fixed")
+  {
+    asterisk_exec ( "database put gw_cid " . $parameters["ID"] . "/mode fixed");
+    asterisk_exec ( "database put gw_cid " . $parameters["ID"] . "/number " . $parameters["CallerIDNumber"]);
+  } else {
+    asterisk_exec ( "database deltree gw_cid " . $parameters["ID"]);
+  }
+
   /**
    * Execute finish hook if exist
    */
@@ -716,6 +733,25 @@ function gateway_change ( $buffer, $parameters)
   asterisk_exec ( "pjsip reload");
   asterisk_exec ( "dialplan reload");
 
+  // Configure CallerID AstDB entries
+  if ( array_key_exists ( "CallerIDMode", $parameters) && $parameters["CallerIDMode"] == "extension")
+  {
+    $parts = explode ( "{extension}", $parameters["CallerIDNumber"], 2);
+    $prefix = isset ( $parts[0]) ? $parts[0] : "";
+    $suffix = isset ( $parts[1]) ? $parts[1] : "";
+    asterisk_exec ( "database deltree gw_cid " . $parameters["ID"]);
+    asterisk_exec ( "database put gw_cid " . $parameters["ID"] . "/mode extension");
+    asterisk_exec ( "database put gw_cid " . $parameters["ID"] . "/prefix " . $prefix);
+    asterisk_exec ( "database put gw_cid " . $parameters["ID"] . "/suffix " . $suffix);
+  } else if ( array_key_exists ( "CallerIDMode", $parameters) && $parameters["CallerIDMode"] == "fixed")
+  {
+    asterisk_exec ( "database deltree gw_cid " . $parameters["ID"]);
+    asterisk_exec ( "database put gw_cid " . $parameters["ID"] . "/mode fixed");
+    asterisk_exec ( "database put gw_cid " . $parameters["ID"] . "/number " . $parameters["CallerIDNumber"]);
+  } else {
+    asterisk_exec ( "database deltree gw_cid " . $parameters["ID"]);
+  }
+
   /**
    * Execute finish hook if exist
    */
@@ -821,6 +857,9 @@ function gateway_remove ( $buffer, $parameters)
   // Reload Asterisk configurations
   asterisk_exec ( "pjsip reload");
   asterisk_exec ( "dialplan reload");
+
+  // Remove CallerID AstDB entries
+  asterisk_exec ( "database deltree gw_cid " . $parameters["ID"]);
 
   /**
    * Execute finish hook if exist

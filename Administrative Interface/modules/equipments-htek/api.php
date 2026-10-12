@@ -144,8 +144,7 @@ function equipments_htek_tenant_add_post ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_uc902sp', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G722\",\"ILBC\",\"OPUS\",\"G726\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"vduser\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"vdadmin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_htek_tenant_add_post");
   }
 
   /**

@@ -200,8 +200,7 @@ function costcenters_search ( $buffer, $parameters)
    */
   if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Code` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%')" : "") . " ORDER BY `Description`, `Code`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "costcenters_search");
   }
 
   /**
@@ -383,8 +382,7 @@ function costcenters_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "costcenters_view");
   }
   if ( ! $costcenter = $result->fetch_assoc ())
   {
@@ -529,8 +527,7 @@ function costcenters_add ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "'"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "costcenters_add");
     }
     if ( $result->num_rows != 0)
     {
@@ -576,8 +573,7 @@ function costcenters_add ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `CostCenters` (`Tenant`, `Description`, `Code`) VALUES (" . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "costcenters_add");
   }
   $parameters["ID"] = $_in["mysql"]["id"]->insert_id;
 
@@ -715,8 +711,7 @@ function costcenters_edit ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "' AND `ID` != " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "costcenters_edit");
     }
     if ( $result->num_rows != 0)
     {
@@ -729,8 +724,7 @@ function costcenters_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "costcenters_edit");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -781,8 +775,7 @@ function costcenters_edit ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `CostCenters` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "' WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "costcenters_edit");
   }
 
   /**
@@ -912,8 +905,7 @@ function costcenters_remove ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "costcenters_remove");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -934,8 +926,7 @@ function costcenters_remove ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `CostCenters` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "costcenters_remove");
   }
 
   /**

@@ -102,7 +102,7 @@ VoIP Domain/
 | `functions-api.php` / `functions-webui.php` | Helpers separados |
 | `config.php` | Config do módulo injetada em `$_in` |
 
-Módulos core incluem: `interface`, `authentication`, `tenants`, `users`, `tokens`, `servers`, `extensions`, `extensions-phones`, `extensions-queues`, `extensions-ivr`, `extensions-hunts`, `ivr`, `queues`, `agents`, `gateways`, `ranges`, `profiles`, `groups`, `blocks`, `exceptions`, `equipments`, `equipments-*` (vendors), `audios`, `notifications`, `config`, `debug`, `countrydb`, `currencies`, `costcenters`.
+Módulos core incluem: `interface`, `authentication`, `tenants`, `users`, `tokens`, `servers`, `extensions`, `extensions-phones`, `extensions-queues`, `extensions-ivr`, `extensions-hunts`, `extensions-conferences`, `ivr`, `queues`, `conferences`, `agents`, `gateways`, `ranges`, `profiles`, `groups`, `blocks`, `exceptions`, `equipments`, `equipments-*` (vendors), `audios`, `notifications`, `config`, `debug`, `countrydb`, `currencies`, `costcenters`.
 
 ---
 
@@ -209,33 +209,96 @@ Plugins em `plugins/disabled_<name>/` são **ignorados**.
 
 ## 6. Hooks
 
-### 6.1 Registro
+Hooks são o mecanismo central de extensibilidade — cadeias ordenadas de funções registradas sob um nome string. Quando um hook dispara, cada função registrada é chamada em sequência, passando o valor de retorno acumulado (`$buffer`) de uma para a próxima.
+
+### 6.1 Estado global (`$_plugins`)
+
+O sistema de hooks usa um array global `$_plugins` com estes sub-arrays:
+
+| Chave | Propósito |
+|-------|-----------|
+| `hooks` | `[nome_hook => [fn1, fn2, ...]]` — cadeias ordenadas de funções |
+| `map` | `[nome_funcao => nome_modulo]` — rastreia qual módulo registrou cada função |
+| `functions` | `[nome_funcao => array_documentacao]` — documentação OpenAPI por função |
+| `components` | `[nome_componente => array_schema]` — schemas de componentes OAS |
+| `componentmap` | `[nome_componente => nome_modulo]` — rastreia qual módulo registrou cada componente |
+| `buffers` | `[nome_hook => buffer_atual]` — buffers em runtime durante execução do hook |
+| `current` | `[nome_hook => [fn1, fn2, ...]]` — detecção de loop (funções em execução) |
+| `deferred_hooks` | Fila para chamadas `framework_add_hook_at()` cuja função referência ainda não existe |
+
+### 6.2 Registro
 
 ```php
-framework_add_hook ( "ranges_add", "ranges_add", IN_HOOK_NULL, $documentation);
+framework_add_hook ( $hook, $function, $options = 0, $documentation = array () )
 ```
 
-| Constante | Efeito |
-|-----------|--------|
-| `IN_HOOK_NULL` (0) | Anexa handler ao final da cadeia |
-| `IN_HOOK_INSERT_FIRST` (1) | Prepend do handler |
-| `IN_HOOK_REMOVE_OTHERS` (2) | Limpa handlers existentes primeiro |
-| `IN_HOOK_REPLACE` (4) | Usado com `framework_add_hook_at` |
-| `IN_HOOK_INSERT_BEFORE` / `IN_HOOK_INSERT_AFTER` | Inserção posicional |
+| Parâmetro | Descrição |
+|-----------|-----------|
+| `$hook` | Nome string do hook (ex.: `"ranges_add"`) |
+| `$function` | Nome da função PHP a registrar |
+| `$options` | Bitmask de constantes `IN_HOOK_*` |
+| `$documentation` | Array de documentação OpenAPI (mesclado na exportação OAS) |
 
-4º argumento opcional: array de documentação OpenAPI (mesclado na exportação Swagger).
+**Constantes de opção:**
 
-### 6.2 Invocação
+| Constante | Valor | Efeito |
+|-----------|-------|--------|
+| `IN_HOOK_NULL` | 0 | Anexa handler ao final da cadeia (padrão) |
+| `IN_HOOK_INSERT_FIRST` | 1 | Prepend do handler no início da cadeia |
+| `IN_HOOK_REMOVE_OTHERS` | 2 | Limpa todos os handlers existentes antes de adicionar |
+| `IN_HOOK_REPLACE` | 4 | Substitui uma função específica (usado com `framework_add_hook_at`) |
+| `IN_HOOK_INSERT_BEFORE` | 8 | Insere antes de uma função específica (usado com `framework_add_hook_at`) |
+| `IN_HOOK_INSERT_AFTER` | 16 | Insere após uma função específica (usado com `framework_add_hook_at`) |
+
+**Notas de comportamento:**
+
+- Registrar a mesma função duas vezes no mesmo hook gera um erro do framework e é silenciosamente ignorado.
+- `$_plugins["map"][$function]` é definido como `$_in["module"]` — rastreia qual módulo é dono de cada função (usado para lazy loading e contexto de i18n).
+- Arrays de documentação são mesclados via `array_merge_recursive_distinct_with_sequencial()` se a função já possui documentação.
+
+### 6.3 Registro posicional (`framework_add_hook_at`)
 
 ```php
-if ( framework_has_hook ( "ranges_add_pre"))
-{
-  $parameters = framework_call ( "ranges_add_pre", $parameters);
-}
-$result = framework_call ( "ranges_add", array (), false, $parameters);
+framework_add_hook_at ( $hook, $function, $reference, $options = IN_HOOK_INSERT_AFTER )
 ```
 
-Assinatura para todo handler de hook:
+Insere `$function` relativo a uma função `$reference` existente na cadeia do hook.
+
+| `$options` | Efeito |
+|------------|--------|
+| `IN_HOOK_INSERT_AFTER` | Insere `$function` imediatamente após `$reference` (padrão) |
+| `IN_HOOK_INSERT_BEFORE` | Insere `$function` imediatamente antes de `$reference` |
+| `IN_HOOK_REPLACE` | Substitui `$reference` por `$function` |
+
+**Resolução adiada:** se o hook ou a função referência ainda não existir (porque o módulo não carregou), o registro é enfileirado em `$_plugins["deferred_hooks"]`. Após todos os módulos carregarem, `framework_resolve_deferred_hooks()` processa a fila em até 10 passagens até que todas as referências sejam resolvidas. Entradas não resolvíveis geram um erro do framework.
+
+### 6.4 Invocação
+
+```php
+framework_call ( $hook, $parameters = array (), $output = false, $buffer = "" )
+```
+
+| Parâmetro | Descrição |
+|-----------|-----------|
+| `$hook` | Nome do hook a executar |
+| `$parameters` | Array passado como 2º argumento para cada handler |
+| `$output` | Se `true`, imprime (echo) o buffer final (usado para renderização de página) |
+| `$buffer` | Valor inicial do buffer (passado como 1º argumento para o primeiro handler) |
+
+**Fluxo de execução:**
+
+1. Verifica se hook existe → erro do framework se não.
+2. Verifica chamada reentrante no mesmo hook → erro do framework se detectado (prevenção de loop).
+3. Inicializa buffer (usa parâmetro `$buffer` se não houver buffer existente).
+4. Para cada função na cadeia:
+   a. **Lazy load** — se a função não existe em memória, tenta `require_once` dos arquivos `filter.php` e `webui.php` do módulo.
+   b. **Define contexto do módulo** — `$_in["module"]` é definido como o módulo proprietário da função (de `$_plugins["map"]`).
+   c. **Chamada** — `call_user_func($function, $buffer, $parameters)`. O valor de retorno se torna o novo buffer.
+5. Limpa entrada de detecção de loop. Reseta `$_in["module"]` para vazio.
+6. Se `$output` é true, imprime o buffer.
+7. Retorna o buffer final.
+
+**Assinatura do handler:**
 
 ```php
 function my_handler ( $buffer, $parameters)
@@ -246,11 +309,52 @@ function my_handler ( $buffer, $parameters)
 }
 ```
 
-`framework_call` retorna o buffer final após todos os handlers executarem. Detecção de loop impede chamadas reentrantes no mesmo hook.
+**Importante:** sempre retorne `$buffer` (modificado ou não). Não retornar quebra a cadeia para os handlers subsequentes.
 
-### 6.3 Hooks dinâmicos
+**Padrões comuns de invocação:**
 
-Alguns hooks são construídos em runtime:
+```php
+// Chamada simples — dispara hook, obtém resultado:
+$result = framework_call ( "ranges_view", $parameters);
+
+// Com buffer inicial (comum para hooks de API onde $parameters é o 4º arg):
+$result = framework_call ( "ranges_add", array (), false, $parameters);
+
+// Guard para hooks opcionais (dinâmicos ou que podem não existir):
+if ( framework_has_hook ( "ranges_add_pre"))
+{
+  $parameters = framework_call ( "ranges_add_pre", $parameters);
+}
+
+// Renderização de página — imprime o HTML acumulado:
+framework_call ( "extensions_search_page", $parameters, true);
+```
+
+### 6.5 Inspeção e remoção de hooks
+
+```php
+// Verificar se um hook existe:
+framework_has_hook ( $hook )                    // retorna boolean
+
+// Verificar se uma função específica está registrada no hook:
+framework_has_hook ( $hook, $function )         // retorna array (function, hook chain)
+
+// Remover uma única função de um hook:
+framework_remove_hook_function ( $hook, $function )  // retorna boolean
+
+// Remover um hook inteiro (todas as funções):
+framework_remove_hook ( $hook )                 // retorna boolean
+
+// Ler o buffer atual durante a execução:
+framework_get_buffer ( $hook )                  // retorna mixed
+
+// Limpar o buffer de um hook:
+framework_clear_buffer ( $hook )                // void
+```
+
+### 6.6 Hooks dinâmicos
+
+Alguns hooks são construídos em runtime a partir de dados:
 
 ```php
 framework_call ( "ivr_operator_" . $operator["Operator"], $params);
@@ -260,7 +364,7 @@ framework_call ( "equipment_model_" . $model . "_configure", ...);
 
 Sempre proteja com `framework_has_hook()` quando o alvo pode não existir.
 
-### 6.4 Formato de retorno de hook de daemon
+### 6.7 Formato de retorno de hook de daemon
 
 Handlers de evento client invocados de `task_manager` devem retornar:
 
@@ -278,17 +382,33 @@ Códigos não-2xx são logados; `task_finished` ainda atualiza `Commands` com ba
 
 ## 7. Filters
 
-Filters diferem de hooks: **no máximo um handler por módulo** por nome de filter.
+Filters diferem de hooks: **no máximo um handler por módulo** por nome de filter. São indexados pelo nome do módulo, não ordenados sequencialmente.
+
+### 7.1 Registro
 
 ```php
-framework_add_filter ( "page_menu_registers", "myplugin_menu");
+framework_add_filter ( $filter, $function )
 ```
+
+Armazena `$_filters[$filter][$_in["module"]] = $function`. Retorna `false` se o módulo já tem um handler para este filter.
+
+### 7.2 Invocação
 
 ```php
-$menu = filters_call ( "page_menu_registers", $parameters, $existingMenu);
+$result = filters_call ( $filter, $parameters = array (), $buffer = array () )
 ```
 
-Assinatura dos handlers de filter:
+Retorna `false` se nenhum handler está registrado. Caso contrário:
+
+1. Adiciona `$parameters["called_filter"] = $filter` aos parâmetros.
+2. Salva `$_in["module"]`, depois itera cada handler registrado.
+3. **Lazy load** do `filter.php` do módulo se a função não existir.
+4. Define `$_in["module"]` como o módulo do handler antes de cada chamada.
+5. Chama cada handler: `$buffer = call_user_func($function, $buffer, $parameters)`.
+6. Restaura `$_in["module"]` para o valor original.
+7. Retorna o `$buffer` final.
+
+### 7.3 Assinatura do handler
 
 ```php
 function myplugin_menu ( $buffer, $parameters)
@@ -298,7 +418,9 @@ function myplugin_menu ( $buffer, $parameters)
 }
 ```
 
-Filters comuns:
+Igual aos hooks: sempre retorne `$buffer`.
+
+### 7.4 Filters comuns
 
 | Filter | Propósito |
 |--------|-----------|
@@ -308,6 +430,7 @@ Filters comuns:
 | `authentication_plugins` | Lista de provedores OAuth |
 | `extensions_add_subpages` | Abas extras nos formulários de extensão |
 | `e164_identify` / `e164_identify_country_XXX` | Normalização de número |
+| `audio_inuse` | Verifica se um arquivo de áudio é referenciado por um módulo |
 
 Slots de filter opcionais (podem ter zero registrantes): `page_menu_others`, `page_menu_reports_*`, `authentication_failure`.
 
@@ -731,6 +854,7 @@ Módulo core `extensions` fornece CRUD compartilhado; comportamento específico 
 | `extensions-queues` | `extension_queue` | `extension_queue_*` |
 | `extensions-ivr` | `extension_ivr` | `extension_ivr_*` |
 | `extensions-hunts` | `extension_hunt` | `extension_hunt_*` |
+| `extensions-conferences` | `extension_conference` | `extension_conference_*` |
 
 Exemplo de hooks cross-module: `extensions_number_changed`, `extensions_remove_pre` (cleanup de hunt).
 
@@ -770,7 +894,7 @@ Evento `equipment_configure` envia config gerada ao telefone via HTTP/TFTP/FTP c
 
 ### 21.1 Admin
 
-- Editor visual de workflow (`modules/ivr/config.php` define operadores: time, menu, dial, …).
+- Editor visual de workflow (`modules/ivr/config.php` define operadores).
 - Salvo como JSON no IVR + registros de extensão.
 - Filters de validação: `ivr_operator_filter_{operator}`.
 
@@ -791,6 +915,59 @@ framework_call ( "ivr_operator_" . $operator["Operator"], array (
 Operadores built-in em `operator-builtin.php` retornam linhas de dialplan Asterisk (`Answer()`, `Read()`, `GoTo()`, …).
 
 Variáveis em expressões: `{date}`, `{time}`, `{callerid}`, `{var_NAME}` via `operator_apply_variables()`.
+
+### 21.3 Operadores built-in
+
+#### Controle de fluxo
+
+| Operador | Saídas | App Asterisk | Descrição |
+|----------|--------|--------------|-----------|
+| `start` | 1 | — | Ponto de entrada |
+| `answer` | 1 | `Answer()` | Atender o canal |
+| `wait` | 1 | `Wait()` | Pausar por N segundos |
+| `hangup` | 0 | `Hangup()` | Desligar o canal |
+| `redirect` | 0 | `GoTo()` | Redirecionar para extensão/contexto |
+| `gotoivr` | 0 | `GoTo()` | Saltar para outro workflow IVR |
+
+#### Condições e roteamento
+
+| Operador | Saídas | App Asterisk | Descrição |
+|----------|--------|--------------|-----------|
+| `time` | 2+ | `GotoIfTime()` | Desvio por faixa horária |
+| `date` | 2+ | `GotoIf()` + `${STRFTIME}` | Desvio por intervalo de data (com fallback "other") |
+| `weekday` | 2+ | `GotoIf()` + `${STRFTIME}` | Desvio por dia da semana |
+| `router` | 2+ | `GotoIf()` | Desvio por condições de variável (igual, contém, começa, termina, maior, menor, regex); suporta lógica AND/OR |
+| `calleridcheck` | match/nomatch | `GotoIf()` | Desvio por padrão de CallerID |
+| `menu` | dígitos + timeout + maxretries | `Read()` | Coleta de dígitos DTMF com limite de tentativas |
+| `read` | 1 | `Read()` | Coletar dígitos em uma variável |
+
+#### Mídia
+
+| Operador | Saídas | App Asterisk | Descrição |
+|----------|--------|--------------|-----------|
+| `play` | 1 | `PlayBack()` ou `Background()` | Reproduzir áudio (opção interruptível usa `Background()`) |
+| `record` | 1 | `MixMonitor()` | Iniciar/parar gravação |
+| `stop` | 1 | `StopMixMonitor()` | Parar gravação |
+| `say` | 1 | `SayDigits()` / `SayNumber()` / `SayAlpha()` / `SayUnixTime()` | Falar dígitos, números, letras ou data/hora |
+
+#### Telefonia
+
+| Operador | Saídas | App Asterisk | Descrição |
+|----------|--------|--------------|-----------|
+| `dial` | answered/noanswer/busy/congestion | `Dial()` | Discar extensão ou número; suporta CallerID e classe MOH |
+| `queue` | answered/timeout/full/joinempty | `Queue()` | Encaminhar chamada para fila com anúncio de posição e limite de chamadores |
+| `voicemail` | 1 | `VoiceMail()` | Enviar chamador para correio de voz (saudação ocupado/indisponível) |
+| `conference` | 1 | `ConfBridge()` | Enviar chamador para sala de conferência |
+| `callback` | ok/error | `Dial(Local/...)` | Agendar retorno de chamada via canal local |
+
+#### Ações
+
+| Operador | Saídas | App Asterisk | Descrição |
+|----------|--------|--------------|-----------|
+| `setvar` | 1 | `Set()` | Definir variável do canal |
+| `script` | ok/error | `System()` | Executar script shell (desvia por código de saída) |
+| `email` | 1 | `System(curl)` | Enviar email (suporta substituição de variáveis em To/Subject/Body) |
+| `http` | ok/error | `Set(result=${CURL()})` | Requisição HTTP GET/POST; resposta armazenada em variável |
 
 ---
 
@@ -836,13 +1013,217 @@ Veja amostras; router usa `vd`, monitor usa `vdclient` + credenciais `[ami]`.
 
 ## 24. Internacionalização
 
+O VoIP Domain utiliza um sistema de i18n customizado inspirado no gettext, baseado em um dicionário em memória (`$_in["i18n"]`). Todas as strings visíveis ao usuário são escritas em inglês e envolvidas com funções de tradução. As traduções são carregadas dos arquivos `language.php` durante o carregamento dos módulos.
+
+### 24.1 Estrutura do arquivo de idioma (`language.php`)
+
+Cada módulo possui um `language.php` que registra as strings traduzíveis. O arquivo possui duas seções:
+
 ```php
-// language.php
-i18n_add ( "My string");
-echo __ ( "My string"); // resolvido em runtime de $_in["i18n"]
+/**
+ * Add basic language structure (english)
+ */
+i18n_add ( "Search gateways");
+i18n_add ( "The gateway description is required.");
+i18n_add ( "An object containing information about the system gateway.");
+
+/**
+ * Add Brazilian Portuguese support
+ */
+i18n_add ( "Search gateways", "Pesquisar gateways", "pt_BR");
+i18n_add ( "The gateway description is required.", "A descrição do gateway é obrigatória.", "pt_BR");
+i18n_add ( "An object containing information about the system gateway.", "Um objeto contendo informações sobre o gateway do sistema.", "pt_BR");
 ```
 
-Locale de `[general] language` (ex.: `en_US`, `pt_BR`). Strings JS exportadas via `$_in["page"]["i18n"]`.
+Chamadas apenas em inglês (`i18n_add("text")`) registram a chave em `$_in["i18n"]` para que o sistema saiba que a string existe. Chamadas com tradução (`i18n_add("text", "tradução", "lang")`) armazenam a tradução indexada por idioma e contexto do módulo.
+
+### 24.2 Funções PHP de tradução
+
+| Função | Assinatura | Propósito |
+|--------|-----------|-----------|
+| `__()` | `__ ( $text, $strip = true, $slashes = true, $context = "" )` | Retorna string traduzida |
+| `_e()` | `_e ( $text, $strip = true, $slashes = true, $context = "" )` | Imprime (echo) string traduzida |
+| `_n()` | `_n ( $singular, $plural, $count, $strip = true, $slashes = true, $context = "" )` | Retorna forma singular/plural |
+| `_ne()` | `_ne ( $singular, $plural, $count, $strip = true, $slashes = true, $context = "" )` | Imprime (echo) forma singular/plural |
+| `i18n_add()` | `i18n_add ( $text, $translation = "", $language = "", $context = "" )` | Registra uma string ou tradução |
+
+**Parâmetros:**
+
+- `$strip` — remove tags HTML do resultado (padrão `true`). Defina como `false` quando a string contiver HTML intencional.
+- `$slashes` — adiciona barras invertidas antes de `"` e `'` (padrão `true`). Defina como `false` quando o resultado não será incorporado em um literal de string JavaScript.
+- `$context` — nome do módulo para busca com escopo. Quando vazio (padrão), usa `$_in["module"]`.
+
+### 24.3 Cadeia de resolução da tradução
+
+Quando `__("Some text")` é chamado, o sistema resolve a tradução nesta ordem:
+
+1. **`{idioma}-{contexto}`** — ex.: `pt_BR-gateways`. Correspondência exata do módulo.
+2. **`{idioma}`** — ex.: `pt_BR`. Fallback sem contexto (strings do módulo `interface` são armazenadas assim porque `$_in["module"]` é vazio quando `interface/language.php` carrega).
+3. **Texto original** — se nenhuma tradução for encontrada, a string em inglês é retornada como está.
+
+Exemplo com módulo `gateways` e idioma `pt_BR`:
+
+```
+__("Search gateways")
+  → busca "pt_BR-gateways" em $_in["i18n"]["Search gateways"] → ENCONTRADO → "Pesquisar gateways"
+
+__("Search gateways", true, true, "blocks")
+  → busca "pt_BR-blocks" → NÃO ENCONTRADO
+  → busca "pt_BR"        → NÃO ENCONTRADO (registrado no contexto gateways)
+  → fallback             → "Search gateways"
+```
+
+### 24.4 Contexto do módulo (`$_in["module"]`)
+
+O contexto é fundamental para o escopo das traduções:
+
+- Quando `language.php` carrega, `$_in["module"]` está definido com o nome do diretório do módulo (ex.: `"gateways"`, `"servers"`, `"ivr"`).
+- `i18n_add()` usa `$_in["module"]` como contexto padrão, então as traduções são armazenadas como `{idioma}-{módulo}`.
+- `__()` também usa `$_in["module"]` como padrão para busca.
+- **O módulo `interface` é especial:** `$_in["module"]` é definido como `""` (string vazia) quando `modules/interface/language.php` carrega. Isso significa que suas traduções são armazenadas na chave sem contexto `{idioma}` (ex.: `pt_BR`), tornando-as globalmente acessíveis como fallback para todos os módulos.
+
+### 24.5 Formato de armazenamento
+
+Internamente, `$_in["i18n"]` é um array associativo aninhado:
+
+```php
+$_in["i18n"] = array (
+  "Search gateways" => array (
+    "pt_BR-gateways" => "Pesquisar gateways"
+  ),
+  "Add" => array (
+    "pt_BR" => "Adicionar"   // módulo interface (global)
+  ),
+  "Error" => array (
+    "pt_BR" => "Erro",              // módulo interface (global)
+    "pt_BR-debug" => "Erro debug"   // override do módulo debug (hipotético)
+  )
+);
+```
+
+### 24.6 Cache
+
+No modo produção (`general.debug = false`), `$_in["i18n"]` é armazenado em cache no `modules/cache.json` junto com hooks, filtros e paths. O cache inclui todas as traduções de todos os arquivos `language.php`, com resultados de `__()` pré-avaliados para strings de registro de hooks (menus, títulos de API, etc.).
+
+No modo debug, todos os arquivos `language.php` são recarregados a cada requisição.
+
+**Invalidação de cache:** delete `modules/cache.json` para forçar uma recarga completa. Isso acontece automaticamente quando um plugin é habilitado/desabilitado.
+
+### 24.7 Seleção do idioma
+
+O idioma do usuário é determinado a partir de:
+
+1. **Sessão Web UI:** `$_in["general"]["language"]` é definido a partir do perfil do usuário durante a autenticação.
+2. **Token/sessão API:** mesmo mecanismo, definido durante a autenticação da API.
+3. **Padrão:** `$_in["general"]["language"]` usa `en_US` por padrão de `webinterface.conf` (`[general] language`).
+
+**Restrição importante:** no `api.php`, os arquivos dos módulos (incluindo `language.php` e `api.php`) carregam **antes** da autenticação. Isso significa que chamadas `__()` em `framework_add_hook()` e `framework_add_api_call()` (arrays de documentação) avaliam com o idioma padrão (`en_US`). A exportação da documentação OAS (`debug_api_export()`) compensa isso retraduzindo as strings no momento da exportação usando o idioma do usuário autenticado com parâmetros `$context` explícitos.
+
+### 24.8 i18n no JavaScript
+
+#### 24.8.1 Strings globais (carregadas no boot da página)
+
+Quando o shell SPA carrega, `index.php` envia o dicionário completo de `$_in["i18n"]` para o idioma atual como parte da inicialização da página. O framework JavaScript (`voipdomain.js`) armazena essas strings em um objeto interno `i18ndata`.
+
+#### 24.8.2 Strings por página (`sys_addtext`)
+
+Para strings necessárias apenas em uma página específica (ex.: labels do DataTables, JavaScript inline), use `sys_addtext()` no hook da página:
+
+```php
+function myfeature_page ( $buffer, $parameters)
+{
+  sys_addtext ( "No records found", __ ( "No records found"));
+  sys_addtext ( "Loading...", __ ( "Loading..."));
+  // ...
+}
+```
+
+Isso popula `$_in["page"]["i18n"]`, que é incluído no JSON de resposta AJAX da página. O frontend processa antes de executar o JavaScript inline:
+
+```javascript
+// voipdomain.js — processamento automático no carregamento da página
+if ( 'i18n' in modules[module])
+{
+  for ( var key in modules[module].i18n)
+  {
+    if ( modules[module].i18n.hasOwnProperty ( key))
+    {
+      VoIP.i18n.add ( key, modules[module].i18n[key]);
+    }
+  }
+}
+```
+
+#### 24.8.3 API de tradução JavaScript
+
+```javascript
+// Registrar uma string:
+VoIP.i18n.add ( "original", "tradução");
+
+// Traduzir uma string:
+var text = VoIP.i18n.__ ( "original");
+// Retorna "tradução" se registrada, "original" caso contrário
+```
+
+O sistema de i18n do JavaScript é um lookup simples chave-valor (sem contexto, sem cadeia de fallback). Toda a resolução de contexto acontece no lado do servidor em `sys_addtext()`.
+
+### 24.9 i18n na documentação OAS
+
+As strings de documentação da API (títulos de endpoint, descrições, descrições de parâmetros, descrições de resposta, descrições de campos e exemplos de schemas) são definidas nos arquivos `api.php` dos módulos usando `__()`. Como esses arquivos carregam antes da autenticação, as strings são inicialmente armazenadas em inglês.
+
+A função `debug_api_export()` (em `modules/debug/api.php`) retraduz essas strings no momento da exportação:
+
+- **Summary/description do endpoint:** retraduzidos usando o contexto do módulo primário (`$primarymodule`) determinado a partir de `$_plugins["map"]`.
+- **Schemas de request/response:** retraduzidos via `format_schema($parameters, $context)` com o contexto do módulo propagado por todas as chamadas recursivas.
+- **Schemas de componentes:** contexto do módulo resolvido a partir de `$_plugins["componentmap"]`, que é populado por `framework_add_component_documentation()`.
+
+### 24.10 Adicionando um novo idioma
+
+1. Abra cada arquivo `language.php` em `modules/*/`.
+2. Adicione um novo bloco abaixo das traduções existentes:
+
+```php
+/**
+ * Add Spanish support
+ */
+i18n_add ( "Search gateways", "Buscar gateways", "es_ES");
+i18n_add ( "The gateway description is required.", "La descripción del gateway es obligatoria.", "es_ES");
+// ... todas as strings
+```
+
+3. Defina o idioma em `webinterface.conf`: `language = es_ES`.
+4. Delete `modules/cache.json` para reconstruir.
+
+### 24.11 Ferramenta de validação (`checklanguage`)
+
+Uma ferramenta CLI em `modules/checklanguage` valida a consistência do i18n por módulo:
+
+```bash
+cd modules
+./checklanguage gateways
+```
+
+Ela varre os arquivos PHP procurando chamadas `__()`, `_e()`, `_n()`, `_ne()` e cruza com os registros em `language.php`. Reporta:
+
+- **Traduções ausentes:** strings usadas no código mas não registradas em `language.php`.
+- **Entradas não utilizadas:** strings registradas mas não encontradas em nenhum arquivo PHP (podem ser strings globais do módulo `interface` — verifique antes de remover).
+- **Entradas duplicadas:** mesma string registrada múltiplas vezes.
+
+Executar em todos os módulos:
+
+```bash
+for m in */; do [ -f "$m/language.php" ] && echo "=== $m ===" && ./checklanguage "${m%/}"; done
+```
+
+### 24.12 Boas práticas
+
+1. **Sempre registre as chaves em inglês** — mesmo que o deployment atual seja em inglês. `i18n_add("My string")` garante que a chave existe em `$_in["i18n"]`.
+2. **Use `$strip = false, $slashes = false`** quando a string traduzida contiver HTML ou não será incorporada em JS: `__("Link: <a href='...'", false, false)`.
+3. **Use `$context` explicitamente** ao traduzir strings fora do módulo de origem (ex.: em `debug_api_export()`).
+4. **Não duplique strings do interface** — se uma string está registrada em `modules/interface/language.php`, ela é globalmente acessível. Não registre novamente em outros módulos.
+5. **Mantenha as chaves estáveis** — a string em inglês É a chave. Alterá-la quebra o vínculo com todas as traduções.
+6. **Use `sys_addtext()` para strings JS específicas de página** — não coloque todas as strings no dicionário global de boot.
+7. **Execute `checklanguage` após alterações** — detecte traduções faltantes antes do deploy.
 
 ---
 
@@ -904,4 +1285,4 @@ Nem todas as fases são implementadas para toda entidade — registre apenas o q
 
 ---
 
-*Versão do documento: 2026-06 — alinhado com VoIP Domain 0.3 RC1.*
+*Versão do documento: 2026-07 — alinhado com VoIP Domain 1.1.*

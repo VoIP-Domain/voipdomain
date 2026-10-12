@@ -168,23 +168,19 @@ function equipments_audiocodes_tenant_add_post ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_310hd', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"G729\",\"ALAW\",\"ULAW\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_audiocodes_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_405hd', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"G729\",\"ALAW\",\"ULAW\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_audiocodes_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_440hd', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"G729\",\"ALAW\",\"ULAW\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_audiocodes_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_450hd', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G722\",\"SILK8\",\"SILK16\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_audiocodes_tenant_add_post");
   }
 
   /**

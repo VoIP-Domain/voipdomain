@@ -221,8 +221,7 @@ function ranges_search ( $buffer, $parameters)
    */
   if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `Ranges`.`ID`, `Ranges`.`Description`, `Ranges`.`Start`, `Ranges`.`Finish`, `Servers`.`Description` AS `Server` FROM `Ranges` LEFT JOIN `Servers` ON `Ranges`.`Server` = `Servers`.`ID` WHERE `Ranges`.`Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND `Ranges`.`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " ORDER BY `Description`, `Start`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ranges_search");
   }
 
   /**
@@ -234,8 +233,7 @@ function ranges_search ( $buffer, $parameters)
   {
     if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Range` = " . (int) $result["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "ranges_search");
     }
     $result["Extensions"] = intval ( $count->fetch_assoc ()["Total"]);
     $count->free ();
@@ -425,8 +423,7 @@ function ranges_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Ranges`.*, `Servers`.`Description` AS `ServerDescription` FROM `Ranges` LEFT JOIN `Servers` ON `Ranges`.`Server` = `Servers`.`ID` WHERE `Ranges`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Ranges`.`ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ranges_view");
   }
   if ( ! $range = $result->fetch_assoc ())
   {
@@ -598,8 +595,7 @@ function ranges_add ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Data` FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'NumbersLength'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ranges_add");
   }
   $createnumberslength = false;
   if ( $result->num_rows != 1 || ! $numberslength = $result->fetch_assoc ()["Data"])
@@ -619,8 +615,7 @@ function ranges_add ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["Server"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "ranges_add");
     }
     if ( ! $server = $result->fetch_assoc ())
     {
@@ -635,8 +630,7 @@ function ranges_add ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND " . (int) $parameters["Finish"] . " >= `Start` AND `Finish` >= " . (int) $parameters["Start"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "ranges_add");
     }
     if ( $result->num_rows != 0)
     {
@@ -689,8 +683,7 @@ function ranges_add ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Ranges` (`Tenant`, `Description`, `Server`, `Start`, `Finish`) VALUES (" . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', " . (int) $parameters["Server"] . ", " . (int) $parameters["Start"] . ", " . (int) $parameters["Finish"] . ")"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ranges_add");
   }
   $parameters["ID"] = $_in["mysql"]["id"]->insert_id;
 
@@ -699,8 +692,7 @@ function ranges_add ( $buffer, $parameters)
    */
   if ( $createnumberslength && ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Tenant`, `Key`, `Data`) VALUES (" . (int) $_in["session"]["Tenant"] . ", 'NumbersLength', '" . (int) $numberslength . "')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ranges_add");
   }
 
   /**
@@ -874,13 +866,11 @@ function ranges_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'NumbersLength'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ranges_edit");
   }
   if ( ! $numberslength = $result->fetch_assoc ()["Data"])
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ranges_edit");
   }
   if ( ! array_key_exists ( "Start", $data) && strlen ( (string) $parameters["Start"]) != $numberslength)
   {
@@ -894,8 +884,7 @@ function ranges_edit ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["Server"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "ranges_edit");
     }
     if ( ! $server = $result->fetch_assoc ())
     {
@@ -908,8 +897,7 @@ function ranges_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ranges_edit");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -924,8 +912,7 @@ function ranges_edit ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND " . (int) $parameters["Finish"] . " >= `Start` AND `Finish` >= " . (int) $parameters["Start"] . " AND `ID` != " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "ranges_edit");
     }
     if ( $result->num_rows != 0)
     {
@@ -979,8 +966,7 @@ function ranges_edit ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Ranges` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Server` = " . (int) $parameters["Server"] . ", `Start` = " . (int) $parameters["Start"] . ", `Finish` = " . (int) $parameters["Finish"] . " WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ranges_edit");
   }
 
   /**
@@ -1131,8 +1117,7 @@ function ranges_remove ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ranges_remove");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -1145,8 +1130,7 @@ function ranges_remove ( $buffer, $parameters)
    */
   if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Range` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ranges_remove");
   }
   $total = intval ( $count->fetch_assoc ()["Total"]);
   $count->free ();
@@ -1169,8 +1153,7 @@ function ranges_remove ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ranges_remove");
   }
 
   /**
@@ -1229,8 +1212,7 @@ function ranges_server_reconfig ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Server` != " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ranges_server_reconfig");
   }
   while ( $range = $result->fetch_assoc ())
   {

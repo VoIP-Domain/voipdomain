@@ -116,8 +116,7 @@ function authentication_view_post_openid ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'Authentication_OpenID'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_view_post_openid");
   }
   $buffer["Plugins"]["OpenID"] = array ();
   if ( $tmp = $result->fetch_assoc () && is_json ( $tmp["Data"]))
@@ -230,7 +229,7 @@ function authentication_edit_validate_openid ( $buffer, $parameters)
   {
     $buffer["Plugin_OpenID_Status"] = __ ( "The provided status is not valid.");
   }
-  if ( (boolean) $parameters["Plugins"]["OpenID"]["Status"])
+  if ( (bool) $parameters["Plugins"]["OpenID"]["Status"])
   {
     if ( ! array_key_exists ( "ClientID", $parameters["Plugins"]["OpenID"]) || empty ( $parameters["Plugins"]["OpenID"]["ClientID"]))
     {
@@ -286,7 +285,7 @@ function authentication_edit_sanitize_openid ( $buffer, $parameters)
   /**
    * Sanitize parameters
    */
-  $parameters["Plugins"]["OpenID"]["Status"] = (boolean) $parameters["Plugins"]["OpenID"]["Status"];
+  $parameters["Plugins"]["OpenID"]["Status"] = (bool) $parameters["Plugins"]["OpenID"]["Status"];
   if ( substr_count ( $parameters["Plugins"]["OpenID"]["ServerURI"], "/") == 2)
   {
     $parameters["Plugins"]["OpenID"]["ServerURI"] .= "/";
@@ -314,8 +313,7 @@ function authentication_edit_post_openid ( $buffer, $parameters)
   $tmp = json_encode ( array ( "Status" => $parameters["Plugins"]["OpenID"]["Status"], "ClientID" => $parameters["Plugins"]["OpenID"]["ClientID"], "ClientSecret" => $parameters["Plugins"]["OpenID"]["ClientSecret"], "RedirectURI" => $parameters["Plugins"]["OpenID"]["RedirectURI"], "ServerURI" => $parameters["Plugins"]["OpenID"]["ServerURI"], "Realm" => $parameters["Plugins"]["OpenID"]["Realm"]));
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Authentication_OpenID', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $tmp) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( $tmp) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_edit_post_openid");
   }
 
   /**
@@ -348,7 +346,7 @@ framework_add_api_call (
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
+ * @return void
  */
 function authentication_openid_redirect ( $buffer, $parameters)
 {
@@ -364,8 +362,7 @@ function authentication_openid_redirect ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $tenantid . " AND `Key` LIKE 'Authentication_OpenID'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_openid_redirect");
   }
   if ( ! $plugin = $result->fetch_assoc ())
   {
@@ -402,8 +399,7 @@ function authentication_openid_redirect ( $buffer, $parameters)
     setcookie ( $_in["general"]["cookie"] . "_oauth2_" . $cookie, $state, $expire, "/api/auth/openid");
     if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `AuthenticationCache` (`Tenant`, `Plugin`, `Cookie`, `State`, `Expire`, `Callback`) VALUES (" . (int) $tenantid . ", 'OpenID', '" . $_in["mysql"]["id"]->real_escape_string ( $cookie) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $state) . "', " . (int) $expire . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Callback"]) . "')"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "authentication_openid_redirect");
     }
 
     /**
@@ -436,8 +432,7 @@ function authentication_openid_redirect ( $buffer, $parameters)
   }
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `AuthenticationCache` WHERE `Plugin` = 'OpenID' AND `Cookie` = '" . $_in["mysql"]["id"]->real_escape_string ( $cookie) . "' AND `State` = '" . $_in["mysql"]["id"]->real_escape_string ( $state) . "' AND `Expire` >= " . time ()))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_openid_redirect");
   }
   if ( ! $cache = $result->fetch_assoc ())
   {
@@ -451,8 +446,7 @@ function authentication_openid_redirect ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `AuthenticationCache` WHERE `Plugin` = 'OpenID' AND `Cookie` = '" . $_in["mysql"]["id"]->real_escape_string ( $cookie) . "' AND `State` = '" . $_in["mysql"]["id"]->real_escape_string ( $state) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_openid_redirect");
   }
 
   /**
@@ -505,8 +499,7 @@ function authentication_openid_redirect ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `AuthenticationToken` (`Token`, `Tenant`, `Plugin`, `Email`, `IssueDate`, `LastSeen`, `Expires`, `TokenData`, `UserData`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $cookie) . "', " . (int) $tenantid . ", 'OpenID', '" . $_in["mysql"]["id"]->real_escape_string ( $userInfo["email"]) . "', NOW(), NOW(), '" . $_in["mysql"]["id"]->real_escape_string ( date ( "Y-m-d h:i:s", time () + $tokenInfo["expires_in"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $tokenInfo)) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $userInfo)) . "')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_openid_redirect");
   }
   setcookie ( $_in["general"]["cookie"] . "_authtoken", $cookie, time () + $tokenInfo["expires_in"], "/");
 
@@ -541,8 +534,7 @@ function authentication_openid_tenant_add_post ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Authentication_Plugin_OpenID', " . (int) $parameters["ID"] . ", '{\"Status\":false,\"ClientID\":\"\",\"ClientSecret\":\"\",\"RedirectURI\":\"\"}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_openid_tenant_add_post");
   }
 
   /**

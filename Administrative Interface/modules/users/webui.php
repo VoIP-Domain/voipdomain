@@ -189,6 +189,7 @@ function users_add_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Users"), "link" => "/users"),
     2 => array ( "title" => __ ( "Add"))
   ));
+  sys_set_menu_highlight ( "/users");
 
   /**
    * Add page CSS requirements
@@ -206,7 +207,7 @@ function users_add_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"user_add_form\">\n";
 
   // Add user name field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"user_add_name\" class=\"control-label col-xs-2\">" . __ ( "Name") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Name\" class=\"form-control\" id=\"user_add_name\" placeholder=\"" . __ ( "User name") . "\" />\n";
@@ -214,7 +215,7 @@ function users_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add user login field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"user_add_username\" class=\"control-label col-xs-2\">" . __ ( "Username") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Username\" class=\"form-control\" id=\"user_add_username\" placeholder=\"" . __ ( "User login name") . "\" />\n";
@@ -222,7 +223,7 @@ function users_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add user e-mail field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"user_add_email\" class=\"control-label col-xs-2\">" . __ ( "E-mail") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"email\" name=\"Email\" class=\"form-control\" id=\"user_add_email\" placeholder=\"" . __ ( "User e-mail") . "\" />\n";
@@ -230,7 +231,7 @@ function users_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add user password field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"user_add_password\" class=\"control-label col-xs-2\">" . __ ( "Password") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"password\" name=\"Password\" class=\"form-control\" id=\"user_add_password\" placeholder=\"" . __ ( "User password") . "\" autocomplete=\"off\" />\n";
@@ -238,7 +239,7 @@ function users_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add user password confirmation field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"user_add_confirmation\" class=\"control-label col-xs-2\">" . __ ( "Confirmation") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"password\" name=\"Confirmation\" class=\"form-control\" id=\"user_add_confirmation\" placeholder=\"" . __ ( "User password confirmation") . "\" autocomplete=\"off\" />\n";
@@ -338,7 +339,7 @@ function users_add_page ( $buffer, $parameters)
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
+ * @return void
  */
 function users_clone_function ( $buffer, $parameters)
 {
@@ -392,6 +393,7 @@ function users_view_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Users"), "link" => "/users"),
     2 => array ( "title" => __ ( "View"))
   ));
+  sys_set_menu_highlight ( "/users");
 
   /**
    * Add page CSS requirements
@@ -521,6 +523,7 @@ function users_edit_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Users"), "link" => "/users"),
     2 => array ( "title" => __ ( "Edit"))
   ));
+  sys_set_menu_highlight ( "/users");
 
   /**
    * Add page CSS requirements
@@ -540,7 +543,7 @@ function users_edit_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"user_edit_form\">\n";
 
   // Add user name field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"user_edit_name\" class=\"control-label col-xs-2\">" . __ ( "Name") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Name\" class=\"form-control\" id=\"user_edit_name\" placeholder=\"" . __ ( "User name") . "\" />\n";
@@ -548,7 +551,7 @@ function users_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add user login field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"user_edit_username\" class=\"control-label col-xs-2\">" . __ ( "Username") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Username\" class=\"form-control\" id=\"user_edit_username\" placeholder=\"" . __ ( "User login name") . "\" />\n";
@@ -556,7 +559,7 @@ function users_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add user e-mail field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"user_edit_email\" class=\"control-label col-xs-2\">" . __ ( "E-mail") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"email\" name=\"Email\" class=\"form-control\" id=\"user_edit_email\" placeholder=\"" . __ ( "User e-mail") . "\" />\n";

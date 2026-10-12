@@ -55,6 +55,7 @@ $_in["module"] = "";
 require_once ( "modules/interface/language.php");
 require_once ( "modules/interface/filter.php");
 require_once ( "modules/interface/webui.php");
+sys_register_module ( "interface", "core", "modules/interface");
 
 /**
  * Check if system is configured, otherwise show the installation page
@@ -135,6 +136,7 @@ if ( ! $_in["general"]["debug"] && is_array ( $cache = json_decode ( @file_get_c
     {
       require_once ( $module . "/webui.php");
     }
+    sys_register_module ( basename ( $module), "core", $module);
   }
 
   /**
@@ -142,8 +144,13 @@ if ( ! $_in["general"]["debug"] && is_array ( $cache = json_decode ( @file_get_c
    */
   foreach ( glob ( "plugins/*") as $module)
   {
-    if ( substr ( $module, 0, 17) == "plugins/disabled_" || ! is_dir ( $module))
+    if ( ! is_dir ( $module))
     {
+      continue;
+    }
+    if ( substr ( $module, 0, 17) == "plugins/disabled_")
+    {
+      sys_register_module ( substr ( basename ( $module), 9), "plugin", $module, array ( "loaded" => false, "status" => "I"));
       continue;
     }
     $_in["module"] = basename ( $module);
@@ -171,14 +178,20 @@ if ( ! $_in["general"]["debug"] && is_array ( $cache = json_decode ( @file_get_c
     {
       require_once ( $module . "/webui.php");
     }
+    sys_register_module ( basename ( $module), "plugin", $module);
   }
+
+  /**
+   * Resolve any deferred hook registrations
+   */
+  framework_resolve_deferred_hooks ();
 
   /**
    * Write cache file (only if not in debug mode)
    */
   if ( ! $_in["general"]["debug"])
   {
-    @file_put_contents ( "modules/cache.json", json_encode ( array ( "map" => $_plugins["map"], "hooks" => $_plugins["hooks"], "functions" => $_plugins["functions"], "paths" => $_paths, "i18n" => $_in["i18n"], "filters" => $_filters)));
+    @file_put_contents ( "modules/cache.json", json_encode ( array ( "map" => $_plugins["map"], "hooks" => $_plugins["hooks"], "functions" => $_plugins["functions"], "paths" => $_paths, "i18n" => $_in["i18n"], "filters" => $_filters, "modules" => $_in["modules"])));
   }
 }
 
@@ -243,8 +256,7 @@ if ( array_key_exists ( $_in["general"]["cookie"] . "_adm", $_COOKIE))
 {
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `AdminSessions`.`SID`, `AdminSessions`.`LastSeen`, `Admins`.* FROM `AdminSessions` LEFT JOIN `Admins` ON `AdminSessions`.`Admin` = `Admins`.`ID` WHERE `AdminSessions`.`SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_COOKIE[$_in["general"]["cookie"] . "_adm"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "admin_session_init");
   }
   if ( ! $session = $result->fetch_assoc ())
   {
@@ -361,8 +373,7 @@ if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE))
 {
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Sessions`.`SID`, `Sessions`.`LastSeen`, `Users`.* FROM `Sessions` LEFT JOIN `Users` ON `Sessions`.`User` = `Users`.`ID` WHERE `Sessions`.`SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_COOKIE[$_in["general"]["cookie"]]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "user_session_init");
   }
   if ( ! $session = $result->fetch_assoc ())
   {
@@ -571,6 +582,14 @@ foreach ( $_paths as $entrypath => $entry)
   if ( ! empty ( $_in["page"]["startevent"]["id"]) && ! empty ( $_in["page"]["startevent"]["event"]))
   {
     $return["startevent"] = array ( "id" => $_in["page"]["startevent"]["id"], "event" => $_in["page"]["startevent"]["event"], "data" => $_in["page"]["startevent"]["data"]);
+  }
+  if ( ! empty ( $_in["page"]["altpaths"]))
+  {
+    $return["altpaths"] = $_in["page"]["altpaths"];
+  }
+  if ( ! empty ( $_in["page"]["i18n"]))
+  {
+    $return["i18n"] = $_in["page"]["i18n"];
   }
 
   /**

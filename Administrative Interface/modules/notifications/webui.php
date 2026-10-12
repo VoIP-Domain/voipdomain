@@ -191,6 +191,7 @@ function notifications_add_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Notifications"), "link" => "/notifications"),
     2 => array ( "title" => __ ( "Add"))
   ));
+  sys_set_menu_highlight ( "/notifications");
 
   /**
    * Add page CSS requirements
@@ -219,7 +220,7 @@ function notifications_add_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"notification_add_form\">\n";
 
   // Add notification description field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"notification_add_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"notification_add_description\" placeholder=\"" . __ ( "Notification description") . "\" />\n";
@@ -227,7 +228,7 @@ function notifications_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add notification event selector
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"notification_add_event\" class=\"control-label col-xs-2\">" . __ ( "Event") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <select name=\"Event\" id=\"notification_add_event\" class=\"form-control\" data-placeholder=\"" . __ ( "Notification event") . "\"><option value=\"\"></option></select>\n";
@@ -241,7 +242,7 @@ function notifications_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add notification method selector
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"notification_add_method\" class=\"control-label col-xs-2\">" . __ ( "Method") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <select name=\"Method\" id=\"notification_add_method\" class=\"form-control\" data-placeholder=\"" . __ ( "Notification method") . "\">\n";
@@ -259,7 +260,7 @@ function notifications_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add notification URL field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"notification_add_url\" class=\"control-label col-xs-2\">" . __ ( "URL") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"url\" name=\"URL\" class=\"form-control\" id=\"notification_add_url\" placeholder=\"" . __ ( "Notification URL") . "\" />\n";
@@ -267,7 +268,7 @@ function notifications_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add notification data type selector
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"notification_add_type\" class=\"control-label col-xs-2\">" . __ ( "Data type") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <select name=\"Type\" id=\"notification_add_type\" class=\"form-control\" data-placeholder=\"" . __ ( "Notification data type") . "\">\n";
@@ -559,7 +560,7 @@ function notifications_add_page ( $buffer, $parameters)
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
+ * @return void
  */
 function notifications_clone_function ( $buffer, $parameters)
 {
@@ -663,6 +664,7 @@ function notifications_view_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Notifications"), "link" => "/notifications"),
     2 => array ( "title" => __ ( "View"))
   ));
+  sys_set_menu_highlight ( "/notifications");
 
   /**
    * Add page CSS requirements
@@ -924,6 +926,7 @@ function notifications_edit_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Notifications"), "link" => "/notifications"),
     2 => array ( "title" => __ ( "Edit"))
   ));
+  sys_set_menu_highlight ( "/notifications");
 
   /**
    * Add page CSS requirements
@@ -952,7 +955,7 @@ function notifications_edit_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"notification_edit_form\">\n";
 
   // Add notification description field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"notification_edit_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"notification_edit_description\" placeholder=\"" . __ ( "Notification description") . "\" />\n";
@@ -960,7 +963,7 @@ function notifications_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add notification event selector
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"notification_edit_event\" class=\"control-label col-xs-2\">" . __ ( "Event") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <select name=\"Event\" id=\"notification_edit_event\" class=\"form-control\" data-placeholder=\"" . __ ( "Notification event") . "\"><option value=\"\"></option></select>\n";
@@ -974,7 +977,7 @@ function notifications_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add notification method selector
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"notification_edit_method\" class=\"control-label col-xs-2\">" . __ ( "Method") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <select name=\"Method\" id=\"notification_edit_method\" class=\"form-control\" data-placeholder=\"" . __ ( "Notification method") . "\">\n";
@@ -992,7 +995,7 @@ function notifications_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add notification URL field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"notification_edit_url\" class=\"control-label col-xs-2\">" . __ ( "URL") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"url\" name=\"URL\" class=\"form-control\" id=\"notification_edit_url\" placeholder=\"" . __ ( "Notification URL") . "\" />\n";
@@ -1000,7 +1003,7 @@ function notifications_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add notification data type selector
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"notification_edit_type\" class=\"control-label col-xs-2\">" . __ ( "Data type") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <select name=\"Type\" id=\"notification_edit_type\" class=\"form-control\" data-placeholder=\"" . __ ( "Notification data type") . "\">\n";

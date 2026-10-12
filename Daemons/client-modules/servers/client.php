@@ -668,7 +668,7 @@ function server_wipe ( $buffer, $parameters)
 
 /**
  * Function to rebuild all server configuration.
- * Required parameters are: (boolean) CleanUp
+ * Required parameters are: (bool) CleanUp
  * Possible results:
  *   - 200: OK, server rebuilded
  *   - 406: Invalid parameters

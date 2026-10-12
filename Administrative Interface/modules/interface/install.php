@@ -303,15 +303,40 @@ function install_populate ( $buffer, $parameters)
   install_add_db_table ( "Plugins", "CREATE TABLE `Plugins` (\n" .
                                     "  `Dirname` varchar(255) NOT NULL,\n" .
                                     "  `Name` varchar(255) NOT NULL,\n" .
-                                    "  `Version` float unsigned NOT NULL,\n" .
+                                    "  `Version` varchar(32) NOT NULL,\n" .
                                     "  `Author` varchar(255) NOT NULL,\n" .
+                                    "  `AuthorEmail` varchar(255) DEFAULT NULL,\n" .
                                     "  `Description` varchar(255) NOT NULL,\n" .
                                     "  `License` varchar(255) NOT NULL,\n" .
-                                    "  `Status` enum('A','I') NOT NULL DEFAULT 'A',\n" .
+                                    "  `SupportURL` varchar(512) DEFAULT NULL,\n" .
+                                    "  `PublishedAt` date DEFAULT NULL,\n" .
+                                    "  `Daemons` varchar(255) DEFAULT NULL,\n" .
+                                    "  `SignedBy` varchar(255) DEFAULT NULL,\n" .
+                                    "  `Conflicts` text DEFAULT NULL,\n" .
+                                    "  `Status` enum('A','I','S','F') NOT NULL DEFAULT 'A',\n" .
                                     "  `Requires` mediumblob,\n" .
                                     "  PRIMARY KEY (`Name`),\n" .
                                     "  UNIQUE KEY `Dirname` (`Dirname`)\n" .
                                     ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Installed plugins information';\n");
+  install_add_db_table ( "SchemaLog", "CREATE TABLE `SchemaLog` (\n" .
+                                      "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                      "  `Module` varchar(128) NOT NULL,\n" .
+                                      "  `VersionFrom` varchar(32) DEFAULT NULL,\n" .
+                                      "  `VersionTo` varchar(32) NOT NULL,\n" .
+                                      "  `Type` enum('install','upgrade') NOT NULL,\n" .
+                                      "  `AppliedAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n" .
+                                      "  `Status` enum('success','failed','partial') NOT NULL,\n" .
+                                      "  `Details` text,\n" .
+                                      "  PRIMARY KEY (`ID`),\n" .
+                                      "  KEY `idx_module_version` (`Module`, `VersionTo`)\n" .
+                                      ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Database schema migration log';\n");
+  install_add_db_table ( "ModuleVersions", "CREATE TABLE `ModuleVersions` (\n" .
+                                           "  `Module` varchar(128) NOT NULL,\n" .
+                                           "  `Version` varchar(32) NOT NULL,\n" .
+                                           "  `InstalledAt` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,\n" .
+                                           "  `UpdatedAt` datetime DEFAULT NULL,\n" .
+                                           "  PRIMARY KEY (`Module`)\n" .
+                                           ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Core module version registry';\n");
   install_add_db_table ( "cdr", "CREATE TABLE `cdr` (\n" .
                                 "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
                                 "  `calldate` datetime NOT NULL,\n" .
@@ -349,6 +374,9 @@ function install_populate ( $buffer, $parameters)
                                 "  `insertdate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,\n" .
                                 "  `SIPID` varchar(255) DEFAULT '',\n" .
                                 "  `flags` text NOT NULL,\n" .
+                                "  `hangupcause` int(10) unsigned NOT NULL DEFAULT 0,\n" .
+                                "  `dialstatus` varchar(32) NOT NULL DEFAULT '',\n" .
+                                "  `encryption` varchar(32) NOT NULL DEFAULT '',\n" .
                                 "  `srcid` int(10) unsigned DEFAULT NULL,\n" .
                                 "  `dstid` int(10) unsigned DEFAULT NULL,\n" .
                                 "  `ccid` int(10) unsigned DEFAULT NULL,\n" .
@@ -366,6 +394,40 @@ function install_populate ( $buffer, $parameters)
                                 "  KEY `cdr_ibfk_1` (`Tenant`),\n" . 
                                 "  CONSTRAINT `cdr_ibfk_1` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" . 
                                 ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Call records';\n", array ( "Tenants"));
+
+  install_add_db_table ( "cel", "CREATE TABLE `cel` (\n" .
+                                "  `ID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n" .
+                                "  `Tenant` bigint(20) unsigned NOT NULL,\n" .
+                                "  `Server` int(11) unsigned NOT NULL DEFAULT 0,\n" .
+                                "  `EventName` varchar(64) NOT NULL,\n" .
+                                "  `EventTime` datetime(3) NOT NULL,\n" .
+                                "  `CallerIDnum` varchar(80) NOT NULL DEFAULT '',\n" .
+                                "  `CallerIDname` varchar(80) NOT NULL DEFAULT '',\n" .
+                                "  `CallerIDani` varchar(80) NOT NULL DEFAULT '',\n" .
+                                "  `CallerIDrdnis` varchar(80) NOT NULL DEFAULT '',\n" .
+                                "  `CallerIDdnid` varchar(80) NOT NULL DEFAULT '',\n" .
+                                "  `Exten` varchar(80) NOT NULL DEFAULT '',\n" .
+                                "  `Context` varchar(80) NOT NULL DEFAULT '',\n" .
+                                "  `Channel` varchar(80) NOT NULL DEFAULT '',\n" .
+                                "  `Application` varchar(80) NOT NULL DEFAULT '',\n" .
+                                "  `AppData` varchar(255) NOT NULL DEFAULT '',\n" .
+                                "  `AccountCode` varchar(80) NOT NULL DEFAULT '',\n" .
+                                "  `PeerAccount` varchar(80) NOT NULL DEFAULT '',\n" .
+                                "  `UniqueID` varchar(64) NOT NULL,\n" .
+                                "  `LinkedID` varchar(64) NOT NULL,\n" .
+                                "  `AMAFlags` varchar(16) NOT NULL DEFAULT '',\n" .
+                                "  `UserField` varchar(255) NOT NULL DEFAULT '',\n" .
+                                "  `Peer` varchar(255) NOT NULL DEFAULT '',\n" .
+                                "  `Extra` text NOT NULL,\n" .
+                                "  PRIMARY KEY (`ID`),\n" .
+                                "  KEY `UniqueID` (`UniqueID`),\n" .
+                                "  KEY `LinkedID` (`LinkedID`),\n" .
+                                "  KEY `Tenant` (`Tenant`),\n" .
+                                "  KEY `Server` (`Server`),\n" .
+                                "  KEY `EventTime` (`EventTime`),\n" .
+                                "  KEY `EventName` (`EventName`),\n" .
+                                "  CONSTRAINT `cel_ibfk_1` FOREIGN KEY (`Tenant`) REFERENCES `Tenants` (`ID`) ON DELETE CASCADE ON UPDATE CASCADE\n" .
+                                ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Channel Event Logging';\n", array ( "Tenants"));
 
   /**
    * Add basic system triggers
@@ -401,13 +463,26 @@ function install_populate ( $buffer, $parameters)
    */
   if ( framework_has_hook ( "install_db"))
   {
-    framework_call ( "install_db", array ());
+    framework_call ( "install_db", array ( "type" => "install", "version" => "1.0.0"));
   }
 
   /**
    * Create database objects collected from install hooks
    */
   $return = plugin_process_db ( $return);
+
+  /**
+   * Populate ModuleVersions table with all core module versions and log schema install
+   */
+  if ( ! array_key_exists ( "Tables", $return) && ! array_key_exists ( "Message", $return))
+  {
+    $module_versions = voipdomain_get_core_module_versions ();
+    foreach ( $module_versions as $module => $version)
+    {
+      @$_in["mysql"]["id"]->query ( "INSERT INTO `ModuleVersions` (`Module`, `Version`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $module) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $version) . "')");
+    }
+    @$_in["mysql"]["id"]->query ( "INSERT INTO `SchemaLog` (`Module`, `VersionFrom`, `VersionTo`, `Type`, `Status`, `Details`) VALUES ('core', NULL, '1.0.0', 'install', 'success', 'Fresh installation')");
+  }
 
   /**
    * Create unprivileged VoIP Domain user

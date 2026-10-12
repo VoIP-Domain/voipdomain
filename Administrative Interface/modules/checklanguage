@@ -1,0 +1,156 @@
+#!/usr/bin/php -q
+<?php
+// Print script banner:
+echo chr ( 27) . "[1mVoIP Domain i18n checker" . chr ( 27) . "[0m v1.1 - by Ernani Azevedo <azevedo@voipdomain.io>\n\n";
+
+/**
+ * Escape a string for display (converts actual chars back to source representation).
+ */
+function esc ( $text)
+{
+  return str_replace (
+    array ( "\\",   "\"",   "\n",  "\r",  "\t",  "\$"),
+    array ( "\\\\", "\\\"", "\\n", "\\r", "\\t", "\\\$"),
+    $text
+  );
+}
+
+// Check for parameters:
+$dump = false;
+$output = "";
+$directory = "";
+for ( $x = 2; $x <= $_SERVER["argc"]; $x++)
+{
+  switch ( $_SERVER["argv"][$x - 1])
+  {
+    case "-d":
+      $dump = true;
+      break;
+    default:
+      $directory = str_replace ( "//", "/", $_SERVER["argv"][$x - 1] . "/");
+      break;
+  }
+}
+
+// Check if any PHP file could be found:
+$files = glob ( $directory . "*.php");
+if ( sizeof ( $files) == 0)
+{
+  echo "Error: Cannot find any PHP file to process. Run inside a module directory or\n";
+  echo "       provide directory name as parameter.\n";
+  exit ();
+}
+
+// Generate a list of used translations:
+$usedsentences = array ();
+foreach ( $files as $file)
+{
+  $content = file_get_contents ( $file);
+  $lastoffset = 0;
+  while ( preg_match ( '/_(_|n|e|ne)\s*\(\s*"((?:[^"\\\\]|\\\\.)*)"\s*(?:\)|,)/', $content, $matches, PREG_OFFSET_CAPTURE, $lastoffset))
+  {
+    $captured = stripcslashes ( $matches[2][0]);
+    if ( ! in_array ( $captured, $usedsentences))
+    {
+      $usedsentences[] = $captured;
+    }
+    $lastoffset = $matches[0][1] + strlen ( $matches[0][0]);
+  }
+}
+
+// Include interface module language file (global translations) and module language file to fetch translations sentences:
+$haserror = false;
+$translations = array ();
+$globals = array ();
+function i18n_add ( $text, $translation = "", $language = "en_US", $context = "")
+{
+  global $translations, $globals, $haserror;
+
+  if ( ! array_key_exists ( $language, $translations))
+  {
+    $translations[$language] = array ();
+  }
+  if ( $language != "en_US" && $translation == "")
+  {
+    switch ( $language)
+    {
+      case "pt_BR":
+        echo "🇧🇷";
+        break;
+      default:
+        echo "🇺🇸 ";
+        break;
+    }
+    echo " Warning: Empty translation to sentence \"" . esc ( $text) . "\" to language " . $language . "!\n";
+    $haserror = true;
+  }
+  if ( in_array ( $text, $translations[$language]))
+  {
+    echo "🇺🇸 Warning: Duplicated sentence \"" . esc ( $text) . "\" to language " . $language . "!\n";
+    $haserror = true;
+  }
+  if ( $language != "en_US" && ! in_array ( $text, $translations["en_US"]))
+  {
+    echo "🇺🇸 Warning: Sentence \"" . esc ( $text) . "\" doesn't exist at en_US default translation table!\n";
+    $haserror = true;
+  }
+  if ( $language == "en_US" && array_key_exists ( $language, $globals) && in_array ( $text, $globals[$language]))
+  {
+    echo "🌎 Warning: Sentence \"" . esc ( $text) . "\" already exist at global file!\n";
+    $haserror = true;
+  }
+  $translations[$language][] = $text;
+}
+if ( sha1_file ( ( empty ( $directory) ? "../interface/" : "interface/") . "language.php") != sha1_file ( $directory . "language.php"))
+{
+  include ( ( empty ( $directory) ? "../interface/" : "interface/") . "language.php");
+  $globals = $translations;
+} else {
+  $globals = array ();
+}
+$translations = array ();
+include ( $directory . "language.php");
+if ( sizeof ( $translations) == 0)
+{
+  echo "☠️  Fatal: No translation found!\n";
+  exit ();
+}
+
+// Check used translations:
+$unused = $translations["en_US"];
+foreach ( $usedsentences as $sentence)
+{
+  if ( ! in_array ( $sentence, $unused) && ( ! array_key_exists ( "en_US", $globals) || ! in_array ( $sentence, $globals["en_US"])))
+  {
+    echo "☠️  Warning: Sentence \"" . esc ( $sentence) . "\" translation not found!\n";
+    $haserror = true;
+    if ( $dump)
+    {
+      $output .= "i18n_add ( \"" . esc ( $sentence) . "\");\n";
+    }
+  } else {
+    if ( ( $key = array_search ( $sentence, $unused)) !== false)
+    {
+      unset ( $unused[$key]);
+    }
+  }
+}
+
+// Show unused sentences:
+foreach ( $unused as $sentence)
+{
+  echo "☠️  Warning: Unused sentence \"" . esc ( $sentence) . "\" found!\n";
+}
+
+// Dump if requested:
+if ( $dump && ! empty ( $output))
+{
+  echo "\n" . $output;
+}
+
+// If no error found, say it!
+if ( ! $haserror)
+{
+  echo "🤩 No error found!\n";
+}
+?>

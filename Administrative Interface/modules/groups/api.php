@@ -238,8 +238,7 @@ function groups_search ( $buffer, $parameters)
    */
   if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `Groups`.`ID`, `Groups`.`Description`, `Groups`.`CostCenter` AS `CostCenterID`, `CostCenters`.`Description` AS `CostCenterDescription`, `Groups`.`Profile` AS `ProfileID`, `Profiles`.`Description` AS `ProfileDescription` FROM `Groups` LEFT JOIN `CostCenters` ON `Groups`.`CostCenter` = `CostCenters`.`ID` LEFT JOIN `Profiles` ON `Groups`.`Profile` = `Profiles`.`ID` WHERE `Groups`.`Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Groups`.`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `CostCenters`.`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%')" : "") . " GROUP BY `Groups`.`ID`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "groups_search");
   }
 
   /**
@@ -455,8 +454,7 @@ function groups_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Groups`.*, `Profiles`.`Description` AS `ProfileDescription`, `CostCenters`.`Description` AS `CostCenterDescription`, `CostCenters`.`Code` AS `CostCenterCode` FROM `Groups` LEFT JOIN `CostCenters` ON `Groups`.`CostCenter` = `CostCenters`.`ID` LEFT JOIN `Profiles` ON `Groups`.`Profile` = `Profiles`.`ID` WHERE `Groups`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Groups`.`ID` = " . (int) $parameters["ID"] . " GROUP BY `Groups`.`ID`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "groups_view");
   }
   if ( ! $group = $result->fetch_assoc ())
   {
@@ -613,8 +611,7 @@ function groups_add ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Profiles` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["Profile"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "groups_add");
     }
     if ( $result->num_rows != 1)
     {
@@ -629,8 +626,7 @@ function groups_add ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["CostCenter"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "groups_add");
     }
     if ( $result->num_rows != 1)
     {
@@ -682,8 +678,7 @@ function groups_add ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Groups` (`Tenant`, `Description`, `Profile`, `CostCenter`) VALUES (" . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', " . (int) $parameters["Profile"] . ", " . (int) $parameters["CostCenter"] . ")"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "groups_add");
   }
   $parameters["ID"] = $_in["mysql"]["id"]->insert_id;
 
@@ -841,8 +836,7 @@ function groups_edit ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Profiles` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["Profile"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "groups_edit");
     }
     if ( $result->num_rows != 1)
     {
@@ -857,8 +851,7 @@ function groups_edit ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["CostCenter"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "groups_edit");
     }
     if ( $result->num_rows != 1)
     {
@@ -871,8 +864,7 @@ function groups_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Groups` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "groups_edit");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -925,8 +917,7 @@ function groups_edit ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Groups` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Profile` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Profile"]) . "', `CostCenter` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["CostCenter"]) . "' WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "groups_edit");
   }
 
   /**
@@ -1066,8 +1057,7 @@ function groups_remove ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Groups` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "groups_remove");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -1103,8 +1093,7 @@ function groups_remove ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Groups` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "groups_remove");
   }
 
   /**
@@ -1308,8 +1297,7 @@ function groups_report ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`ExtensionPhone`.`Extension` SEPARATOR ',') AS `Extensions` FROM `Groups` LEFT JOIN `ExtensionPhone` ON `Groups`.`ID` = `ExtensionPhone`.`Group` WHERE `Groups`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Groups`.`ID` = " . (int) $parameters["ID"] . " GROUP BY `Groups`.`ID`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "groups_report");
   }
   $extensions = $result->fetch_assoc ()["Extensions"];
 
@@ -1318,8 +1306,7 @@ function groups_report ( $buffer, $parameters)
    */
   if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND ( `srcid` IN ('" . $_in["mysql"]["id"]->real_escape_string ( $extensions) . "') OR `dstid` IN ('" . $_in["mysql"]["id"]->real_escape_string ( $extensions) . "')) AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "groups_report");
   }
 
   /**
@@ -1377,8 +1364,7 @@ function groups_server_reconfig ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Groups` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "groups_server_reconfig:fetch_groups");
   }
   while ( $group = $result->fetch_assoc ())
   {

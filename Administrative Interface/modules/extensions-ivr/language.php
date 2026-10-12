@@ -61,6 +61,7 @@ i18n_add ( "The selected IVR is invalid.", "A URA selecionada é inválida.", "p
 i18n_add ( "An object with IVR information.", "Um objeto com as informações da URA.", "pt_BR");
 i18n_add ( "Sales", "Vendas", "pt_BR");
 i18n_add ( "Sales IVR workflow.", "Workflow de vendas.", "pt_BR");
+i18n_add ( "The IVR name.", "O nome da URA.", "pt_BR");
 i18n_add ( "The IVR description.", "A descrição da URA.", "pt_BR");
 i18n_add ( "The IVR internal system unique identifier.", "O identificador único interno do sistema da URA.", "pt_BR");
 i18n_add ( "The IVR system unique identifier.", "O identificador único da URA no sistema.", "pt_BR");

@@ -432,8 +432,7 @@ function notifications_events_view ( $buffer, $parameters)
    */
   if ( ! array_key_exists ( $parameters["ID"], $_in["events"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "notifications_events_view");
   }
 
   /**
@@ -659,8 +658,7 @@ function notifications_search ( $buffer, $parameters)
    */
   if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Description`, `Event`, `Expire` FROM `Notifications` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " ORDER BY `Description`, `Event`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "notifications_search");
   }
 
   /**
@@ -934,8 +932,7 @@ function notifications_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Notifications` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "notifications_view");
   }
   if ( ! $notification = $result->fetch_assoc ())
   {
@@ -1239,8 +1236,7 @@ function notifications_add ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Notifications` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Event` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Event"]) . "' AND `URL` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["URL"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "notifications_add");
   }
   if ( $result->num_rows != 0)
   {
@@ -1295,8 +1291,7 @@ function notifications_add ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Notifications` (`Tenant`, `Description`, `Event`, `Filters`, `URL`, `Method`, `Type`, `Variables`, `Headers`, `RelaxSSL`, `Expire`) VALUES (" . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Event"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Filters"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["URL"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Method"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Variables"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Headers"])) . "', '" . ( $parameters["SSL"] ? "Y" : "N") . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Validity"]) . "')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "notifications_add");
   }
   $parameters["ID"] = $_in["mysql"]["id"]->insert_id;
 
@@ -1576,8 +1571,7 @@ function notifications_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Notifications` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Event` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["event"]) . "' AND `URL` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["URL"]) . "' AND `ID` != " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "notifications_edit");
   }
   if ( $result->num_rows != 0)
   {
@@ -1589,8 +1583,7 @@ function notifications_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Notifications` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "notifications_edit");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -1643,8 +1636,7 @@ function notifications_edit ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Notifications` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Event` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Event"]) . "', `Filters` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Filters"])) . "', `URL` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["URL"]) . "', `Method` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Method"]) . "', `Type` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "', `Variables` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Variables"])) . "', `Headers` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Headers"])) . "', `RelaxSSL` = '" . ( $parameters["SSL"] ? "Y" : "N") . "', `Expire` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Validity"]) . "' WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "notifications_edit");
   }
 
   /**
@@ -1782,8 +1774,7 @@ function notifications_remove ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Notifications` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "notifications_remove");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -1804,8 +1795,7 @@ function notifications_remove ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Notifications` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "notifications_remove");
   }
 
   /**

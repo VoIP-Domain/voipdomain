@@ -238,8 +238,7 @@ function reports_weekhour ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT SUBSTR(`calldate`, 1, 13) AS `Data`, COUNT(*) AS `Total` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `calldate` != '0000-00-00 00:00:00' AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . " 23:59:59'" . $filter . " GROUP BY `Data` ORDER BY `Data`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "reports_weekhour");
   }
 
   /**
@@ -448,8 +447,7 @@ function reports_list ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Number`, `Description`, `Type` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . $where . " ORDER BY `Number`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "reports_list");
   }
 
   /**
@@ -664,8 +662,7 @@ function reports_ranges ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Ranges`.*, `Servers`.`ID` AS `ServerID`, `Servers`.`Description` AS `ServerDescription` FROM `Ranges` LEFT JOIN `Servers` ON `Ranges`.`Server` = `Servers`.`ID` WHERE `Ranges`.`Tenant` = " . (int) $_in["session"]["Tenant"] . ( $parameters["Range"] ? " AND `Ranges`.`ID` = " . (int) $parameters["Range"] : "")))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "reports_ranges");
   }
 
   /**
@@ -924,8 +921,7 @@ function reports_financial_costcenters ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.* FROM `Extensions` LEFT JOIN `ExtensionPhone` ON `Extensions`.`ID` = `ExtensionPhone`.`Extension` LEFT JOIN `Groups` ON `ExtensionPhone`.`Group` = `Groups`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND (`ExtensionPhone`.`CostCenter` = " . (int) $parameters["ID"] . " OR ( `ExtensionPhone`.`CostCenter` IS NULL AND `Groups`.`CostCenter` = " . (int) $parameters["ID"] . ")) ORDER BY `Extensions`.`Number`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "reports_financial_costcenters");
   }
 
   /**
@@ -936,8 +932,7 @@ function reports_financial_costcenters ( $buffer, $parameters)
   {
     if ( ! $sum = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total`, SUM(value) AS `Cost`, SUM(billsec) as `Time` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `src` = '" . $_in["mysql"]["id"]->real_escape_string ( $extension["Number"]) . "' AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "'"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "reports_financial_costcenters");
     }
     if ( ! $values = $sum->fetch_assoc ())
     {
@@ -1184,8 +1179,7 @@ function reports_financial_groups ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` LEFT JOIN `ExtensionPhone` ON `ExtensionPhone`.`Extension` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionPhone`.`Group` = " . (int) $parameters["ID"] . " ORDER BY `Extensions`.`Number`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "reports_financial_groups");
   }
 
   /**
@@ -1196,8 +1190,7 @@ function reports_financial_groups ( $buffer, $parameters)
   {
     if ( ! $sum = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total`, SUM(value) AS `Cost`, SUM(billsec) as `Time` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `src` = '" . $_in["mysql"]["id"]->real_escape_string ( $extension["Number"]) . "' AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "'"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "reports_financial_groups");
     }
     if ( ! $values = $sum->fetch_assoc ())
     {
@@ -1430,8 +1423,7 @@ function reports_financial_gateways ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " ORDER BY `Description`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "reports_financial_gateways");
   }
 
   /**
@@ -1442,8 +1434,7 @@ function reports_financial_gateways ( $buffer, $parameters)
   {
     if ( ! $sum = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total`, SUM(value) AS `Cost`, SUM(billsec) as `Time` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `gateway` = " . (int) $gateway["ID"] . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "'"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "reports_financial_gateways");
     }
     if ( ! $values = $sum->fetch_assoc ())
     {
@@ -1838,8 +1829,7 @@ function reports_activity ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`ID`, `Extensions`.`Number`, `Extensions`.`Description`, `Extensions`.`Type`, `ExtensionActivity`.`LastDialed`, `ExtensionActivity`.`LastReceived` FROM `Extensions` LEFT JOIN `ExtensionActivity` ON `Extensions`.`ID` = `ExtensionActivity`.`UID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "reports_activity");
   }
 
   /**
@@ -2051,8 +2041,7 @@ function user_received_report ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "user_received_report");
   }
   if ( ! $extension = $result->fetch_assoc ())
   {
@@ -2065,8 +2054,7 @@ function user_received_report ( $buffer, $parameters)
    */
   if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `dstid` = " . (int) $parameters["ID"] . "' AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "user_received_report");
   }
 
   /**
@@ -2270,8 +2258,7 @@ function group_received_report ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`ExtensionPhone`.`Extension` SEPARATOR ',') AS `Extensions` FROM `Groups` LEFT JOIN `ExtensionPhone` ON `Groups`.`ID` = `ExtensionPhone`.`Group` WHERE `Groups`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Groups`.`ID` = " . (int) $parameters["ID"] . " GROUP BY `Groups`.`ID`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "group_received_report");
   }
   $extensions = $result->fetch_assoc ()["Extensions"];
 
@@ -2280,8 +2267,7 @@ function group_received_report ( $buffer, $parameters)
    */
   if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `dstid` IN ('" . $_in["mysql"]["id"]->real_escape_string ( $extensions) . "') AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "group_received_report");
   }
 
   /**
@@ -2485,8 +2471,7 @@ function gateway_received_report ( $buffer, $parameters)
    */
   if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `gateway` = " . (int) $parameters["ID"] . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' AND `dstid` != 0 ORDER BY `calldate` DESC"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "gateway_received_report");
   }
 
   /**
@@ -2681,8 +2666,7 @@ function system_received_report ( $buffer, $parameters)
    */
   if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `dstid` != 0 AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "system_received_report");
   }
 
   /**
@@ -2886,8 +2870,7 @@ function user_made_report ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "user_made_report");
   }
   if ( ! $extension = $result->fetch_assoc ())
   {
@@ -2900,8 +2883,7 @@ function user_made_report ( $buffer, $parameters)
    */
   if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `srcid` = " . (int) $parameters["ID"] . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "user_made_report");
   }
 
   /**
@@ -3105,8 +3087,7 @@ function group_made_report ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`ExtensionPhone`.`Extension` SEPARATOR ',') AS `Extensions` FROM `Groups` LEFT JOIN `ExtensionPhone` ON `Groups`.`ID` = `ExtensionPhone`.`Group` WHERE `Groups`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Groups`.`ID` = " . (int) $parameters["ID"] . " GROUP BY `Groups`.`ID`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "group_made_report");
   }
   $extensions = $result->fetch_assoc ()["Extensions"];
 
@@ -3115,8 +3096,7 @@ function group_made_report ( $buffer, $parameters)
    */
   if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `srcid` IN ('" . $_in["mysql"]["id"]->real_escape_string ( $extensions) . "') AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "group_made_report");
   }
 
   /**
@@ -3320,8 +3300,7 @@ function gateway_made_report ( $buffer, $parameters)
    */
   if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `gateway` = " . (int) $parameters["ID"] . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' AND `srcid` != 0 ORDER BY `calldate` DESC"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "gateway_made_report");
   }
 
   /**
@@ -3516,8 +3495,7 @@ function system_made_report ( $buffer, $parameters)
    */
   if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `srcid` != 0 AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "system_made_report");
   }
 
   /**
@@ -3816,8 +3794,7 @@ function consolidated_extension_report ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Number`, `Description`, `Type` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "consolidated_extension_report");
   }
   if ( $result->num_rows == 0)
   {
@@ -3831,8 +3808,7 @@ function consolidated_extension_report ( $buffer, $parameters)
      */
     if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' AND `srcid` = " . (int) $extension["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "consolidated_extension_report");
     }
     $matrix = array (
       "Local" => array ( "Total" => 0, "Time" => 0, "Cost" => 0),
@@ -4137,8 +4113,7 @@ function consolidated_group_report ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Groups`.`ID`, `Groups`.`Description`, GROUP_CONCAT(`ExtensionPhone`.`Extension` SEPARATOR ',') AS `Extensions` FROM `Groups` LEFT JOIN `ExtensionPhone` ON `Groups`.`ID` = `ExtensionPhone`.`Group` WHERE `Groups`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " GROUP BY `Groups`.`ID`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "consolidated_group_report");
   }
   if ( $result->num_rows == 0)
   {
@@ -4152,8 +4127,7 @@ function consolidated_group_report ( $buffer, $parameters)
      */
     if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' AND `srcid` IN ('" . $_in["mysql"]["id"]->real_escape_string ( $group["Extensions"]) . "')"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "consolidated_group_report");
     }
     $matrix = array (
       "Local" => array ( "Total" => 0, "Time" => 0, "Cost" => 0),
@@ -4458,8 +4432,7 @@ function consolidated_gateway_report ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Description` FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "consolidated_gateway_report");
   }
   if ( $result->num_rows == 0)
   {
@@ -4473,8 +4446,7 @@ function consolidated_gateway_report ( $buffer, $parameters)
      */
     if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' AND `gateway` = " . (int) $gateway["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "consolidated_gateway_report");
     }
     $matrix = array (
       "Local" => array ( "Total" => 0, "Time" => 0, "Cost" => 0),
@@ -4779,8 +4751,7 @@ function consolidated_server_report ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Description` FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "consolidated_server_report");
   }
   if ( $result->num_rows == 0)
   {
@@ -4794,8 +4765,7 @@ function consolidated_server_report ( $buffer, $parameters)
      */
     if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' AND `server` = " . (int) $server["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "consolidated_server_report");
     }
     $matrix = array (
       "Local" => array ( "Total" => 0, "Time" => 0, "Cost" => 0),

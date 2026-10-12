@@ -326,7 +326,12 @@ function firmware_add ( $buffer, $parameters)
   /**
    * Execute model firmware add hook
    */
-  if ( ! framework_call ( "equipment_model_" . $parameters["UID"] . "_firmware_add", $parameters, false, true))
+  $result = framework_call ( "equipment_model_" . $parameters["UID"] . "_firmware_add", $parameters, false, true);
+  if ( is_array ( $result) && array_key_exists ( "code", $result) && ( $result["code"] < 200 || $result["code"] > 299))
+  {
+    return $result;
+  }
+  if ( $result === false)
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -452,7 +457,12 @@ function firmware_remove ( $buffer, $parameters)
   /**
    * Execute model firmware remove hook
    */
-  if ( ! framework_call ( "equipment_model_" . $parameters["UID"] . "_firmware_remove", $parameters, false, true))
+  $result = framework_call ( "equipment_model_" . $parameters["UID"] . "_firmware_remove", $parameters, false, true);
+  if ( is_array ( $result) && array_key_exists ( "code", $result) && ( $result["code"] < 200 || $result["code"] > 299))
+  {
+    return $result;
+  }
+  if ( $result === false)
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }

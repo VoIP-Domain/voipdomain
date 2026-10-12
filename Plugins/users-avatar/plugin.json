@@ -1,0 +1,29 @@
+{
+  "$schema": "voipdomain-plugin-1.0",
+  "name": "users-avatar",
+  "display_name": "Users Avatar",
+  "version": "1.0.0",
+  "author": {
+    "name": "Ernani José Camargo Azevedo",
+    "email": "azevedo@voipdomain.io",
+    "url": "https://voipdomain.io"
+  },
+  "published": "2026-07-22",
+  "description": "Adds user login avatar support to the administrative interface",
+  "license": "GPLv3",
+  "support": {
+    "url": "https://voipdomain.io/support",
+    "email": "support@voipdomain.io"
+  },
+  "requires": {
+    "core": ">=1.0.0",
+    "php": ">=8.1"
+  },
+  "conflicts": [],
+  "daemons": [],
+  "hooks": {
+    "install": "users_avatar_install_db"
+  },
+  "config": {},
+  "signature": {}
+}

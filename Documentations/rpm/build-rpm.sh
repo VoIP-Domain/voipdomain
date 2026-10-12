@@ -8,7 +8,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-VERSION="${1:-0.3}"
+VERSION="${1:-1.0}"
 SPEC="$ROOT/Documentations/rpm/voipdomain.spec"
 TARBALL="voipdomain-${VERSION}.tar.xz"
 WORKDIR="$(mktemp -d)"

@@ -58,7 +58,7 @@ foreach ( glob ( dirname ( __FILE__) . "/country-*.php") as $filename)
 
 /**
  * Function to create a new profile.
- * Required parameters are: (int) ID, (string) Description, (string) Domain, (string) Country, (string) TimeZone, (float) Offset, (int) AreaCode, (string) Language, (int) Prefix, (int) MOH, (boolean) EmergencyShortcut, (int) NGGW, (array (int)) Gateways[], (array (int)) Blockeds[]
+ * Required parameters are: (int) ID, (string) Description, (string) Domain, (string) Country, (string) TimeZone, (float) Offset, (int) AreaCode, (string) Language, (int) Prefix, (int) MOH, (bool) EmergencyShortcut, (int) NGGW, (array (int)) Gateways[], (array (int)) Blockeds[]
  * Possible results:
  *   - 200: OK, profile created (overwritten)
  *   - 201: OK, profile created
@@ -346,7 +346,7 @@ function profile_add ( $buffer, $parameters)
 
 /**
  * Function to change an existing profile.
- * Required parameters are: (int) ID, (string) Description, (string) Domain, (string) Country, (string) TimeZone, (float) Offset, (int) AreaCode, (string) Language, (int) Prefix, (int) MOH, (boolean) EmergencyShortcut, (int) NGGW, (array (int)) Gateways[], (array (int)) Blockeds[]
+ * Required parameters are: (int) ID, (string) Description, (string) Domain, (string) Country, (string) TimeZone, (float) Offset, (int) AreaCode, (string) Language, (int) Prefix, (int) MOH, (bool) EmergencyShortcut, (int) NGGW, (array (int)) Gateways[], (array (int)) Blockeds[]
  * Possible results:
  *   - 200: OK, profile changed
  *   - 404: Profile doesn't exist

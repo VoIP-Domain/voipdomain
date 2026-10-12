@@ -183,8 +183,7 @@ framework_add_component_documentation (
                     "example" => __ ( "+55[1-9][1-9][6-9]")
                   ),
                   "Cost" => array (
-                    "type" => "integer",
-                    "format" => "float",
+                    "type" => "float",
                     "description" => __ ( "The minute cost fare for this route."),
                     "minimum" => 0,
                     "example" => 0.2512
@@ -383,8 +382,7 @@ function gateways_search ( $buffer, $parameters)
    */
   if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Description`, `Active`, `Type`, `Priority`, `Number` FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Number` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%')" : "") . ( ! empty ( $parameters["ActiveOnly"]) ? " AND `Active` = TRUE" : "") . " ORDER BY `Description`, `Number`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "gateways_search");
   }
 
   /**
@@ -394,7 +392,7 @@ function gateways_search ( $buffer, $parameters)
   $fields = api_filter_fields ( $parameters["Fields"], $parameters["function"]["DefaultFields"], $parameters["function"]["PermittedFields"]);
   while ( $result = $results->fetch_assoc ())
   {
-    $result["Active"] = (boolean) $result["Active"];
+    $result["Active"] = (bool) $result["Active"];
     $result["TypeEN"] = $result["Type"];
     $result["Type"] = __ ( $result["Type"]);
     switch ( $result["Priority"])
@@ -601,8 +599,7 @@ function gateways_fares_search ( $buffer, $parameters)
    */
   if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Name` FROM `Files` WHERE `Type` = 'fares'" . ( ! empty ( $parameters["Filter"]) ? " AND `Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "")))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "gateways_fares_search");
   }
 
   /**
@@ -769,8 +766,7 @@ function gateways_fares_file ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Files` WHERE `Type` = 'fares' AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "gateways_fares_file");
   }
   if ( ! $fare = $result->fetch_assoc ())
   {
@@ -929,8 +925,7 @@ function gateways_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "gateways_view");
   }
   if ( ! $gateway = $result->fetch_assoc ())
   {
@@ -941,7 +936,7 @@ function gateways_view ( $buffer, $parameters)
   /**
    * Format data
    */
-  $gateway["Active"] = (boolean) $gateway["Active"];
+  $gateway["Active"] = (bool) $gateway["Active"];
   $gateway["TypeEN"] = $gateway["Type"];
   $gateway["Type"] = __ ( $gateway["Type"]);
   switch ( $gateway["Priority"])
@@ -957,13 +952,13 @@ function gateways_view ( $buffer, $parameters)
       break;
   }
   $gateway["Priority"] = __ ( $gateway["PriorityEN"]);
-  $gateway["NAT"] = (boolean) $gateway["NAT"];
-  $gateway["RPID"] = (boolean) $gateway["RPID"];
-  $gateway["Qualify"] = (boolean) $gateway["Qualify"];
-  $gateway["Inbound"] = (boolean) $gateway["Inbound"];
+  $gateway["NAT"] = (bool) $gateway["NAT"];
+  $gateway["RPID"] = (bool) $gateway["RPID"];
+  $gateway["Qualify"] = (bool) $gateway["Qualify"];
+  $gateway["Inbound"] = (bool) $gateway["Inbound"];
   $gateway["Routes"] = json_decode ( $gateway["Routes"], true);
   $gateway["Translations"] = json_decode ( $gateway["Translations"], true);
-  $data = api_filter_entry ( array ( "ID", "Description", "Active", "Type", "TypeEN", "Priority", "PriorityEN", "Config", "Number", "Address", "Port", "Username", "Password", "NAT", "RPID", "Qualify", "Inbound", "Discard", "Minimum", "Fraction", "Routes", "Translations", "Currency"), $gateway);
+  $data = api_filter_entry ( array ( "ID", "Description", "Active", "Type", "TypeEN", "Priority", "PriorityEN", "Config", "Number", "Address", "Port", "Username", "Password", "NAT", "RPID", "Qualify", "Inbound", "CallerIDMode", "CallerIDNumber", "Discard", "Minimum", "Fraction", "Routes", "Translations", "Currency"), $gateway);
 
   /**
    * Call post hook if exist
@@ -1141,8 +1136,7 @@ framework_add_hook (
                       "required" => true
                     ),
                     "Cost" => array (
-                      "type" => "integer",
-                      "format" => "float",
+                      "type" => "float",
                       "description" => __ ( "The minute cost fare for this route."),
                       "minimum" => 0,
                       "example" => 0.2512,
@@ -1399,8 +1393,7 @@ function gateways_add ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Currencies` WHERE `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Currency"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "gateways_add");
   }
   if ( $result->num_rows != 1)
   {
@@ -1428,14 +1421,24 @@ function gateways_add ( $buffer, $parameters)
    * Sanitize parameters
    */
   $parameters["Port"] = (int) $parameters["Port"];
-  $parameters["Active"] = (boolean) $parameters["Active"];
-  $parameters["NAT"] = (boolean) $parameters["NAT"];
-  $parameters["RPID"] = (boolean) $parameters["RPID"];
-  $parameters["Qualify"] = (boolean) $parameters["Qualify"];
-  $parameters["Inbound"] = (boolean) $parameters["Inbound"];
+  $parameters["Active"] = (bool) $parameters["Active"];
+  $parameters["NAT"] = (bool) $parameters["NAT"];
+  $parameters["RPID"] = (bool) $parameters["RPID"];
+  $parameters["Qualify"] = (bool) $parameters["Qualify"];
+  $parameters["Inbound"] = (bool) $parameters["Inbound"];
   $parameters["Fraction"] = (int) $parameters["Fraction"];
   $parameters["Minimum"] = (int) $parameters["Minimum"];
   $parameters["Discard"] = (int) $parameters["Discard"];
+  if ( ! array_key_exists ( "CallerIDNumber", $parameters) || empty ( trim ( $parameters["CallerIDNumber"])))
+  {
+    $parameters["CallerIDNumber"] = "";
+    $parameters["CallerIDMode"] = "none";
+  } else if ( strpos ( $parameters["CallerIDNumber"], "{extension}") !== false)
+  {
+    $parameters["CallerIDMode"] = "extension";
+  } else {
+    $parameters["CallerIDMode"] = "fixed";
+  }
 
   /**
    * Call sanitize hook if exist
@@ -1456,10 +1459,9 @@ function gateways_add ( $buffer, $parameters)
   /**
    * Add new gateway record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Gateways` (`Description`, `Tenant`, `Config`, `Active`, `Number`, `Type`, `Priority`, `Currency`, `Address`, `Port`, `Username`, `Password`, `Routes`, `Translations`, `Discard`, `Minimum`, `Fraction`, `NAT`, `RPID`, `Qualify`, `Inbound`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Config"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Active"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Priority"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Currency"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "', " . (int) $parameters["Port"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Routes"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Translations"])) . "', " . (int) $parameters["Discard"] . ", " . (int) $parameters["Minimum"] . ", " . (int) $parameters["Fraction"] . ", '" . ( $parameters["NAT"] ? 1 : 0) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["RPID"] ? 1 : 0) . "', '" . ( $parameters["Qualify"] ? 1 : 0) . "', '" . ( $parameters["Inbound"] ? 1 : 0) . "')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Gateways` (`Description`, `Tenant`, `Config`, `Active`, `Number`, `Type`, `Priority`, `Currency`, `Address`, `Port`, `Username`, `Password`, `Routes`, `Translations`, `Discard`, `Minimum`, `Fraction`, `NAT`, `RPID`, `Qualify`, `Inbound`, `CallerIDMode`, `CallerIDNumber`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Config"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Active"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Priority"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Currency"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "', " . (int) $parameters["Port"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Routes"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Translations"])) . "', " . (int) $parameters["Discard"] . ", " . (int) $parameters["Minimum"] . ", " . (int) $parameters["Fraction"] . ", '" . ( $parameters["NAT"] ? 1 : 0) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["RPID"] ? 1 : 0) . "', '" . ( $parameters["Qualify"] ? 1 : 0) . "', '" . ( $parameters["Inbound"] ? 1 : 0) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["CallerIDMode"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["CallerIDNumber"]) . "')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "gateways_add");
   }
   $parameters["ID"] = $_in["mysql"]["id"]->insert_id;
 
@@ -1476,7 +1478,7 @@ function gateways_add ( $buffer, $parameters)
    */
   if ( $parameters["Active"])
   {
-    $notify = array ( "ID" => $parameters["ID"], "Description" => $parameters["Description"], "Domain" => $_in["general"]["domain"], "Username" => $parameters["Username"], "Password" => $parameters["Password"], "Address" => $parameters["Address"], "Port" => $parameters["Port"], "Qualify" => $parameters["Qualify"], "NAT" => $parameters["NAT"], "RPID" => $parameters["RPID"], "Inbound" => $parameters["Inbound"], "Config" => $parameters["Config"], "Number" => str_replace ( " ", "", $parameters["Number"]), "Type" => $parameters["Type"], "Priority" => $parameters["Priority"], "Currency" => $parameters["Currency"], "Routes" => $parameters["Routes"], "Translations" => $parameters["Translations"], "Discard" => $parameters["Discard"], "Minimum" => $parameters["Minimum"], "Fraction" => $parameters["Fraction"]);
+    $notify = array ( "ID" => $parameters["ID"], "Description" => $parameters["Description"], "Domain" => $_in["general"]["domain"], "Username" => $parameters["Username"], "Password" => $parameters["Password"], "Address" => $parameters["Address"], "Port" => $parameters["Port"], "Qualify" => $parameters["Qualify"], "NAT" => $parameters["NAT"], "RPID" => $parameters["RPID"], "Inbound" => $parameters["Inbound"], "CallerIDMode" => $parameters["CallerIDMode"], "CallerIDNumber" => $parameters["CallerIDNumber"], "Config" => $parameters["Config"], "Number" => str_replace ( " ", "", $parameters["Number"]), "Type" => $parameters["Type"], "Priority" => $parameters["Priority"], "Currency" => $parameters["Currency"], "Routes" => $parameters["Routes"], "Translations" => $parameters["Translations"], "Discard" => $parameters["Discard"], "Minimum" => $parameters["Minimum"], "Fraction" => $parameters["Fraction"]);
     if ( framework_has_hook ( "gateways_add_notify"))
     {
       $notify = framework_call ( "gateways_add_notify", $parameters, false, $notify);
@@ -1656,8 +1658,7 @@ framework_add_hook (
                       "required" => true
                     ),
                     "Cost" => array (
-                      "type" => "integer",
-                      "format" => "float",
+                      "type" => "float",
                       "description" => __ ( "The minute cost fare for this route."),
                       "minimum" => 0,
                       "example" => 0.2512,
@@ -1910,8 +1911,7 @@ function gateways_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Currencies` WHERE `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Currency"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "gateways_edit");
   }
   if ( $result->num_rows != 1)
   {
@@ -1923,8 +1923,7 @@ function gateways_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "gateways_edit");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -1953,14 +1952,24 @@ function gateways_edit ( $buffer, $parameters)
    * Sanitize parameters
    */
   $parameters["Port"] = (int) $parameters["Port"];
-  $parameters["Active"] = (boolean) $parameters["Active"];
-  $parameters["NAT"] = (boolean) $parameters["NAT"];
-  $parameters["RPID"] = (boolean) $parameters["RPID"];
-  $parameters["Qualify"] = (boolean) $parameters["Qualify"];
-  $parameters["Inbound"] = (boolean) $parameters["Inbound"];
+  $parameters["Active"] = (bool) $parameters["Active"];
+  $parameters["NAT"] = (bool) $parameters["NAT"];
+  $parameters["RPID"] = (bool) $parameters["RPID"];
+  $parameters["Qualify"] = (bool) $parameters["Qualify"];
+  $parameters["Inbound"] = (bool) $parameters["Inbound"];
   $parameters["Fraction"] = (int) $parameters["Fraction"];
   $parameters["Minimum"] = (int) $parameters["Minimum"];
   $parameters["Discard"] = (int) $parameters["Discard"];
+  if ( ! array_key_exists ( "CallerIDNumber", $parameters) || empty ( trim ( $parameters["CallerIDNumber"])))
+  {
+    $parameters["CallerIDNumber"] = "";
+    $parameters["CallerIDMode"] = "none";
+  } else if ( strpos ( $parameters["CallerIDNumber"], "{extension}") !== false)
+  {
+    $parameters["CallerIDMode"] = "extension";
+  } else {
+    $parameters["CallerIDMode"] = "fixed";
+  }
 
   /**
    * Call sanitize hook if exist
@@ -1981,10 +1990,9 @@ function gateways_edit ( $buffer, $parameters)
   /**
    * Update gateway record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Gateways` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Config` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Config"]) . "', `Active` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Active"]) . "', `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "', `Type` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "', `Priority` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Priority"]) . "', `Currency` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Currency"]) . "', `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "', `Port` = " . (int) $parameters["Port"] . ", `Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "', `Password` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "', `Routes` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Routes"])) . "', `Translations` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Translations"])) . "', `Discard` = " . (int) $parameters["Discard"] . ", `Minimum` = " . (int) $parameters["Minimum"] . ", `Fraction` = " . (int) $parameters["Fraction"] . ", `NAT` = '" . ( $parameters["NAT"] ? 1 : 0) . "', `RPID` = '" . ( $parameters["RPID"] ? 1 : 0) . "', `Qualify` = '" . ( $parameters["Qualify"] ? 1 : 0) . "', `Inbound` = '" . ( $parameters["Inbound"] ? 1 : 0) . "' WHERE `ID` = " . (int) $parameters["ID"]))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Gateways` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Config` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Config"]) . "', `Active` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Active"]) . "', `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "', `Type` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "', `Priority` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Priority"]) . "', `Currency` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Currency"]) . "', `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "', `Port` = " . (int) $parameters["Port"] . ", `Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "', `Password` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "', `Routes` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Routes"])) . "', `Translations` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Translations"])) . "', `Discard` = " . (int) $parameters["Discard"] . ", `Minimum` = " . (int) $parameters["Minimum"] . ", `Fraction` = " . (int) $parameters["Fraction"] . ", `NAT` = '" . ( $parameters["NAT"] ? 1 : 0) . "', `RPID` = '" . ( $parameters["RPID"] ? 1 : 0) . "', `Qualify` = '" . ( $parameters["Qualify"] ? 1 : 0) . "', `Inbound` = '" . ( $parameters["Inbound"] ? 1 : 0) . "', `CallerIDMode` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["CallerIDMode"]) . "', `CallerIDNumber` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["CallerIDNumber"]) . "' WHERE `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "gateways_edit");
   }
 
   /**
@@ -2002,9 +2010,9 @@ function gateways_edit ( $buffer, $parameters)
   {
     if ( $parameters["Active"])
     {
-      if ( $parameters["ORIGINAL"]["Description"] != $parameters["Description"] || $parameters["ORIGINAL"]["Address"] != $parameters["Address"] || $parameters["ORIGINAL"]["Port"] != $parameters["Port"] || $parameters["ORIGINAL"]["Username"] != $parameters["Username"] || $parameters["ORIGINAL"]["Password"] != $parameters["Password"] || $parameters["ORIGINAL"]["NAT"] != $parameters["NAT"] || $parameters["ORIGINAL"]["RPID"] != $parameters["RPID"] || $parameters["ORIGINAL"]["Qualify"] != $parameters["Qualify"] || $parameters["ORIGINAL"]["Inbound"] != $parameters["Inbound"] || $parameters["ORIGINAL"]["Currency"] != $parameters["Currency"])
+      if ( $parameters["ORIGINAL"]["Description"] != $parameters["Description"] || $parameters["ORIGINAL"]["Address"] != $parameters["Address"] || $parameters["ORIGINAL"]["Port"] != $parameters["Port"] || $parameters["ORIGINAL"]["Username"] != $parameters["Username"] || $parameters["ORIGINAL"]["Password"] != $parameters["Password"] || $parameters["ORIGINAL"]["NAT"] != $parameters["NAT"] || $parameters["ORIGINAL"]["RPID"] != $parameters["RPID"] || $parameters["ORIGINAL"]["Qualify"] != $parameters["Qualify"] || $parameters["ORIGINAL"]["Inbound"] != $parameters["Inbound"] || $parameters["ORIGINAL"]["Currency"] != $parameters["Currency"] || $parameters["ORIGINAL"]["CallerIDMode"] != $parameters["CallerIDMode"] || $parameters["ORIGINAL"]["CallerIDNumber"] != $parameters["CallerIDNumber"])
       {
-        $notify = array ( "ID" => $parameters["ID"], "Description" => $parameters["Description"], "Domain" => $_in["general"]["domain"], "Username" => $parameters["Username"], "Password" => $parameters["Password"], "Address" => $parameters["Address"], "Port" => $parameters["Port"], "Qualify" => $parameters["Qualify"], "NAT" => $parameters["NAT"], "RPID" => $parameters["RPID"], "Inbound" => $parameters["Inbound"], "Config" => $parameters["Config"], "Number" => str_replace ( " ", "", $parameters["Number"]), "Type" => $parameters["Type"], "Priority" => $parameters["Priority"], "Currency" => $parameters["Currency"], "Routes" => $parameters["Routes"], "Translations" => $parameters["Translations"], "Discard" => $parameters["Discard"], "Minimum" => $parameters["Minimum"], "Fraction" => $parameters["Fraction"]);
+        $notify = array ( "ID" => $parameters["ID"], "Description" => $parameters["Description"], "Domain" => $_in["general"]["domain"], "Username" => $parameters["Username"], "Password" => $parameters["Password"], "Address" => $parameters["Address"], "Port" => $parameters["Port"], "Qualify" => $parameters["Qualify"], "NAT" => $parameters["NAT"], "RPID" => $parameters["RPID"], "Inbound" => $parameters["Inbound"], "CallerIDMode" => $parameters["CallerIDMode"], "CallerIDNumber" => $parameters["CallerIDNumber"], "Config" => $parameters["Config"], "Number" => str_replace ( " ", "", $parameters["Number"]), "Type" => $parameters["Type"], "Priority" => $parameters["Priority"], "Currency" => $parameters["Currency"], "Routes" => $parameters["Routes"], "Translations" => $parameters["Translations"], "Discard" => $parameters["Discard"], "Minimum" => $parameters["Minimum"], "Fraction" => $parameters["Fraction"]);
         if ( framework_has_hook ( "gateways_edit_notify"))
         {
           $notify = framework_call ( "gateways_edit_notify", $parameters, false, $notify);
@@ -2026,7 +2034,7 @@ function gateways_edit ( $buffer, $parameters)
    */
   if ( ! $parameters["ORIGINAL"]["Active"] && $parameters["Active"])
   {
-    $notify = array ( "ID" => $parameters["ID"], "Description" => $parameters["Description"], "Domain" => $_in["general"]["domain"], "Username" => $parameters["Username"], "Password" => $parameters["Password"], "Address" => $parameters["Address"], "Port" => $parameters["Port"], "Qualify" => $parameters["Qualify"], "NAT" => $parameters["NAT"], "RPID" => $parameters["RPID"], "Inbound" => $parameters["Inbound"], "Config" => $parameters["Config"], "Number" => str_replace ( " ", "", $parameters["Number"]), "Type" => $parameters["Type"], "Priority" => $parameters["Priority"], "Currency" => $parameters["Currency"], "Routes" => $parameters["Routes"], "Translations" => $parameters["Translations"], "Discard" => $parameters["Discard"], "Minimum" => $parameters["Minimum"], "Fraction" => $parameters["Fraction"]);
+    $notify = array ( "ID" => $parameters["ID"], "Description" => $parameters["Description"], "Domain" => $_in["general"]["domain"], "Username" => $parameters["Username"], "Password" => $parameters["Password"], "Address" => $parameters["Address"], "Port" => $parameters["Port"], "Qualify" => $parameters["Qualify"], "NAT" => $parameters["NAT"], "RPID" => $parameters["RPID"], "Inbound" => $parameters["Inbound"], "CallerIDMode" => $parameters["CallerIDMode"], "CallerIDNumber" => $parameters["CallerIDNumber"], "Config" => $parameters["Config"], "Number" => str_replace ( " ", "", $parameters["Number"]), "Type" => $parameters["Type"], "Priority" => $parameters["Priority"], "Currency" => $parameters["Currency"], "Routes" => $parameters["Routes"], "Translations" => $parameters["Translations"], "Discard" => $parameters["Discard"], "Minimum" => $parameters["Minimum"], "Fraction" => $parameters["Fraction"]);
     if ( framework_has_hook ( "gateways_add_notify"))
     {
       $notify = framework_call ( "gateways_add_notify", $parameters, false, $notify);
@@ -2152,8 +2160,7 @@ function gateways_remove ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "gateways_remove");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -2174,8 +2181,7 @@ function gateways_remove ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "gateways_remove");
   }
 
   /**
@@ -2379,8 +2385,7 @@ function gateways_report ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "gateways_report");
   }
   if ( ! $gateway = $result->fetch_assoc ())
   {
@@ -2393,8 +2398,7 @@ function gateways_report ( $buffer, $parameters)
    */
   if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `gateway` = " . (int) $gateway["ID"] . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "gateways_report");
   }
 
   /**
@@ -2452,14 +2456,13 @@ function gateways_server_reconfig ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "gateways_server_reconfig");
   }
   while ( $gateway = $result->fetch_assoc ())
   {
     if ( $gateway["Active"])
     {
-      $notify = array ( "ID" => $gateway["ID"], "Description" => $gateway["Description"], "Domain" => $_in["general"]["domain"], "Username" => $gateway["Username"], "Password" => $gateway["Password"], "Address" => $gateway["Address"], "Port" => $gateway["Port"], "Qualify" => $gateway["Qualify"] == 1, "NAT" => $gateway["NAT"] == 1, "RPID" => $gateway["RPID"] == 1, "Inbound" => $gateway["Inbound"] == 1, "Config" => $gateway["Config"], "Number" => str_replace ( " ", "", $gateway["Number"]), "Type" => $gateway["Type"], "Priority" => $gateway["Priority"], "Currency" => $gateway["Currency"], "Routes" => json_decode ( $gateway["Routes"], true), "Translations" => json_decode ( $gateway["Translations"], true), "Discard" => $gateway["Discard"], "Minimum" => $gateway["Minimum"], "Fraction" => $gateway["Fraction"]);
+      $notify = array ( "ID" => $gateway["ID"], "Description" => $gateway["Description"], "Domain" => $_in["general"]["domain"], "Username" => $gateway["Username"], "Password" => $gateway["Password"], "Address" => $gateway["Address"], "Port" => $gateway["Port"], "Qualify" => $gateway["Qualify"] == 1, "NAT" => $gateway["NAT"] == 1, "RPID" => $gateway["RPID"] == 1, "Inbound" => $gateway["Inbound"] == 1, "CallerIDMode" => $gateway["CallerIDMode"], "CallerIDNumber" => $gateway["CallerIDNumber"], "Config" => $gateway["Config"], "Number" => str_replace ( " ", "", $gateway["Number"]), "Type" => $gateway["Type"], "Priority" => $gateway["Priority"], "Currency" => $gateway["Currency"], "Routes" => json_decode ( $gateway["Routes"], true), "Translations" => json_decode ( $gateway["Translations"], true), "Discard" => $gateway["Discard"], "Minimum" => $gateway["Minimum"], "Fraction" => $gateway["Fraction"]);
       if ( framework_has_hook ( "gateways_add_notify"))
       {
         $notify = framework_call ( "gateways_add_notify", $parameters, false, $notify);

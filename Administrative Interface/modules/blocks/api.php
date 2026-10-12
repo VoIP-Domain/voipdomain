@@ -199,8 +199,7 @@ function blocks_search ( $buffer, $parameters)
    */
   if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Blocks` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Number` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%')" : "") . " ORDER BY `Description`, `Number`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "blocks_search");
   }
 
   /**
@@ -280,8 +279,7 @@ function blocks_fastsearch ( $buffer, $parameters)
    */
   if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Number`, `Description` FROM `Blocks` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "')" : "") . " ORDER BY `Number`, `Description`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "blocks_fastsearch");
   }
 
   /**
@@ -445,8 +443,7 @@ function blocks_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Blocks` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "blocks_view");
   }
   if ( ! $block = $result->fetch_assoc ())
   {
@@ -479,6 +476,158 @@ function blocks_view ( $buffer, $parameters)
    * Return structured data
    */
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
+}
+
+/**
+ * API call to get block report
+ */
+framework_add_hook (
+  "blocks_report",
+  "blocks_report",
+  IN_HOOK_NULL,
+  array (
+    "response" => array (
+      200 => array (
+        "description" => __ ( "An array of blocked call records for the specified block."),
+        "schema" => array (
+          "type" => "array",
+          "items" => array (
+            "type" => "object",
+            "properties" => array (
+              "Date" => array (
+                "type" => "string",
+                "description" => __ ( "The date and time of the blocked call."),
+                "example" => "2026-07-24 18:30:00"
+              ),
+              "Source" => array (
+                "type" => "string",
+                "description" => __ ( "The source caller ID number."),
+                "example" => "+5511999999999"
+              ),
+              "Destination" => array (
+                "type" => "string",
+                "description" => __ ( "The destination number that was called."),
+                "example" => "1001"
+              ),
+              "Duration" => array (
+                "type" => "string",
+                "description" => __ ( "The call duration in seconds."),
+                "example" => "5"
+              ),
+              "Disposition" => array (
+                "type" => "string",
+                "description" => __ ( "The call disposition status."),
+                "example" => "NO ANSWER"
+              ),
+              "Server" => array (
+                "type" => "string",
+                "description" => __ ( "The server that processed the call."),
+                "example" => "1"
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+);
+framework_add_permission ( "blocks_report", __ ( "View block reports"));
+framework_add_api_call (
+  "/blocks/:ID/report",
+  "Read",
+  "blocks_report",
+  array (
+    "permissions" => array ( "Administrator", "blocks_report"),
+    "title" => __ ( "Block report"),
+    "description" => __ ( "Get a report of blocked calls for a specific blocked number."),
+    "parameters" => array (
+      array (
+        "name" => "ID",
+        "type" => "integer",
+        "description" => __ ( "The blocked number internal system unique identifier."),
+        "example" => 1
+      )
+    )
+  )
+);
+
+/**
+ * Function to generate block report data.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function blocks_report ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Validate received parameters
+   */
+  $data = array ();
+  if ( ! array_key_exists ( "ID", $parameters) || ! is_numeric ( $parameters["ID"]))
+  {
+    $data["ID"] = __ ( "Invalid block ID.");
+  }
+
+  /**
+   * Return error data if some error occurred
+   */
+  if ( sizeof ( $data) != 0)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+    return $data;
+  }
+
+  /**
+   * Sanitize parameters
+   */
+  $parameters["ID"] = (int) $parameters["ID"];
+
+  /**
+   * Get block information
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Blocks` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
+  {
+    database_query_error ( "blocks_report");
+  }
+  if ( ! $block = $result->fetch_assoc ())
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 400 Bad Request");
+    exit ();
+  }
+
+  /**
+   * Query CDR for blocked calls matching this number
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `calldate`, `src`, `dst`, `duration`, `disposition`, `server` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `src` = '" . $_in["mysql"]["id"]->real_escape_string ( $block["Number"]) . "' AND `flags` LIKE '%blocked%' ORDER BY `calldate` DESC LIMIT 1000"))
+  {
+    database_query_error ( "blocks_report");
+  }
+
+  /**
+   * Format data
+   */
+  $records = array ();
+  while ( $row = $result->fetch_assoc ())
+  {
+    $records[] = array (
+      "Date" => $row["calldate"],
+      "Source" => $row["src"],
+      "Destination" => $row["dst"],
+      "Duration" => $row["duration"] . "s",
+      "Disposition" => $row["disposition"],
+      "Server" => $row["server"]
+    );
+  }
+
+  /**
+   * Return structured data
+   */
+  return $records;
 }
 
 /**
@@ -591,8 +740,7 @@ function blocks_add ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Blocks` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "'"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "blocks_add");
     }
     if ( $result->num_rows != 0)
     {
@@ -638,8 +786,7 @@ function blocks_add ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Blocks` (`Description`, `Number`, `Tenant`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "', " . (int) $_in["session"]["Tenant"] . ")"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "blocks_add");
   }
   $parameters["ID"] = $_in["mysql"]["id"]->insert_id;
 
@@ -787,8 +934,7 @@ function blocks_edit ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Blocks` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "' AND `ID` != " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "blocks_edit");
     }
     if ( $result->num_rows != 0)
     {
@@ -801,8 +947,7 @@ function blocks_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Blocks` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "blocks_edit");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -853,8 +998,7 @@ function blocks_edit ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Blocks` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "' WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "blocks_edit");
   }
 
   /**
@@ -994,8 +1138,7 @@ function blocks_remove ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Blocks` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "blocks_remove");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -1016,8 +1159,7 @@ function blocks_remove ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Blocks` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "blocks_remove");
   }
 
   /**
@@ -1076,8 +1218,7 @@ function blocks_server_reconfig ( $buffer, $parameters)
    */
   if ( ! $result = $_in["mysql"]["id"]->query ( "SELECT * FROM `Blocks` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "blocks_server_reconfig");
   }
   while ( $block = $result->fetch_assoc ())
   {

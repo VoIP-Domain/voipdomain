@@ -74,7 +74,7 @@ foreach ( glob ( dirname ( __FILE__) . "/country-*.php") as $filename)
 
 /**
  * Function to create a new extension.
- * Required parameters are: (int) Number, (int) UID, (string) Password, (int) Group, (array (int)) Captures[], (string) Name, (array (int)) Transhipments[], (int) CostCenter?, (boolean) VoiceMail, (int) VolTX, (int) VolRX, (boolean) Monitor, (array (array (enum['y','n','p'] Local, enum['y','n','p'] Interstate, enum['y','n','p'] International)) Landline[], (array (enum['y','n','p'] Local, enum['y','n','p'] Interstate, enum['y','n','p'] International)) Mobile[], (array (enum['y','n','p'] Local, enum['y','n','p'] Interstate, enum['y','n','p'] International)) Marine[], (array (enum['y','n','p'] Local, enum['y','n','p'] International)) Tollfree[], (array (enum['y','n','p'] Local, enum['y','n','p'] International)) PRN[], (array (enum['y','n','p'] Local, enum['y','n','p'] International)) Satellite[]) Permissions[], (string) Email?
+ * Required parameters are: (int) Number, (int) UID, (string) Password, (int) Group, (array (int)) Captures[], (string) Name, (array (int)) Transhipments[], (int) CostCenter?, (bool) VoiceMail, (int) VolTX, (int) VolRX, (bool) Monitor, (array (array (enum['y','n','p'] Local, enum['y','n','p'] Interstate, enum['y','n','p'] International)) Landline[], (array (enum['y','n','p'] Local, enum['y','n','p'] Interstate, enum['y','n','p'] International)) Mobile[], (array (enum['y','n','p'] Local, enum['y','n','p'] Interstate, enum['y','n','p'] International)) Marine[], (array (enum['y','n','p'] Local, enum['y','n','p'] International)) Tollfree[], (array (enum['y','n','p'] Local, enum['y','n','p'] International)) PRN[], (array (enum['y','n','p'] Local, enum['y','n','p'] International)) Satellite[]) Permissions[], (string) Email?
  * Possible results:
  *   - 200: OK, extension created (overwritten)
  *   - 201: OK, extension created
@@ -349,9 +349,9 @@ function extension_phone_add ( $buffer, $parameters)
     "p_prn_international" => $parameters["Permissions"]["PRN"]["International"],
     "p_satellite_local" => $parameters["Permissions"]["Satellite"]["Local"],
     "p_satellite_international" => $parameters["Permissions"]["Satellite"]["International"],
-    "voltx" => (int) $parameters["Permissions"]["VolTX"],
-    "volrx" => (int) $parameters["Permissions"]["VolRX"],
-    "monitor" => $parameters["Permissions"]["Monitor"] == true ? "yes" : "no"
+    "voltx" => (int) ( array_key_exists ( "VolTX", $parameters["Permissions"]) ? $parameters["Permissions"]["VolTX"] : 0),
+    "volrx" => (int) ( array_key_exists ( "VolRX", $parameters["Permissions"]) ? $parameters["Permissions"]["VolRX"] : 0),
+    "monitor" => ( array_key_exists ( "Monitor", $parameters["Permissions"]) && $parameters["Permissions"]["Monitor"] == true) ? "yes" : "no"
   );
   if ( sizeof ( $parameters["Transhipments"]) != 0)
   {
@@ -590,7 +590,7 @@ function extension_phone_clear_asterisk_database ( $number)
 
 /**
  * Function to change an existing extension.
- * Required parameters are: (int) Number, (int) NewNumber, (int) UID, (string) Password, (int) Group, (array (int)) Captures[], (string) Name, (array (int)) Transhipments[], (int) CostCenter?, (boolean) VoiceMail, (int) VolTX, (int) VolRX, (boolean) Monitor, (array (array (enum['y','n','p'] Local, enum['y','n','p'] Interstate, enum['y','n','p'] International)) Landline[], (array (enum['y','n','p'] Local, enum['y','n','p'] Interstate, enum['y','n','p'] International)) Mobile[], (array (enum['y','n','p'] Local, enum['y','n','p'] Interstate, enum['y','n','p'] International)) Marine[], (array (enum['y','n','p'] Local, enum['y','n','p'] International)) Tollfree[], (array (enum['y','n','p'] Local, enum['y','n','p'] International)) PRN[], (array (enum['y','n','p'] Local, enum['y','n','p'] International)) Satellite[]) Permissions[], (string) Email?
+ * Required parameters are: (int) Number, (int) NewNumber, (int) UID, (string) Password, (int) Group, (array (int)) Captures[], (string) Name, (array (int)) Transhipments[], (int) CostCenter?, (bool) VoiceMail, (int) VolTX, (int) VolRX, (bool) Monitor, (array (array (enum['y','n','p'] Local, enum['y','n','p'] Interstate, enum['y','n','p'] International)) Landline[], (array (enum['y','n','p'] Local, enum['y','n','p'] Interstate, enum['y','n','p'] International)) Mobile[], (array (enum['y','n','p'] Local, enum['y','n','p'] Interstate, enum['y','n','p'] International)) Marine[], (array (enum['y','n','p'] Local, enum['y','n','p'] International)) Tollfree[], (array (enum['y','n','p'] Local, enum['y','n','p'] International)) PRN[], (array (enum['y','n','p'] Local, enum['y','n','p'] International)) Satellite[]) Permissions[], (string) Email?
  * Possible results:
  *   - 200: OK, extension changed
  *   - 404: Extension doesn't exist
@@ -889,9 +889,9 @@ function extension_phone_change ( $buffer, $parameters)
     "p_prn_international" => $parameters["Permissions"]["PRN"]["International"],
     "p_satellite_local" => $parameters["Permissions"]["Satellite"]["Local"],
     "p_satellite_international" => $parameters["Permissions"]["Satellite"]["International"],
-    "voltx" => (int) $parameters["Permissions"]["VolTX"],
-    "volrx" => (int) $parameters["Permissions"]["VolRX"],
-    "monitor" => $parameters["Permissions"]["Monitor"] == true ? "yes" : "no"
+    "voltx" => (int) ( array_key_exists ( "VolTX", $parameters["Permissions"]) ? $parameters["Permissions"]["VolTX"] : 0),
+    "volrx" => (int) ( array_key_exists ( "VolRX", $parameters["Permissions"]) ? $parameters["Permissions"]["VolRX"] : 0),
+    "monitor" => ( array_key_exists ( "Monitor", $parameters["Permissions"]) && $parameters["Permissions"]["Monitor"] == true) ? "yes" : "no"
   );
   if ( sizeof ( $parameters["Transhipments"]) != 0)
   {
@@ -2047,7 +2047,7 @@ function transhipment_change ( $buffer, $parameters)
 
 /**
  * Function to change an extension auto provision file.
- * Required parameters are: (int) Number, (string) Username, (string) Password, (string) Name, (string) MAC, (string) Type, (string) Domain, (array (string)) NTP[], (string) Country, (string) TimeZone, (float) Offset, (int) Prefix, (boolean) EmergencyShortcut, (array (string)) Hints
+ * Required parameters are: (int) Number, (string) Username, (string) Password, (string) Name, (string) MAC, (string) Type, (string) Domain, (array (string)) NTP[], (string) Country, (string) TimeZone, (float) Offset, (int) Prefix, (bool) EmergencyShortcut, (array (string)) Hints
  * Possible results:
  *   - 200: OK, AP changed
  *   - 404: AP doesn't exist
@@ -2309,7 +2309,7 @@ function ap_change ( $buffer, $parameters)
 
 /**
  * Function to create an extension auto provision file.
- * Required parameters are: (int) Number, (string) Username, (string) Password, (string) Name, (string) MAC, (string) Type, (string) Domain, (array (string)) NTP[], (string) Country, (string) TimeZone, (float) Offset, (int) Prefix, (boolean) EmergencyShortcut, (array (string)) Hints
+ * Required parameters are: (int) Number, (string) Username, (string) Password, (string) Name, (string) MAC, (string) Type, (string) Domain, (array (string)) NTP[], (string) Country, (string) TimeZone, (float) Offset, (int) Prefix, (bool) EmergencyShortcut, (array (string)) Hints
  * Possible results:
  *   - 200: OK, AP created (overwritten)
  *   - 201: OK, AP created
@@ -2736,7 +2736,7 @@ function extension_phone_wipe ( $buffer, $parameters)
       unlink_config ( "config", "dialplan-extension-" . $data["Number"]);
       unlink_config ( "config", "sip-extension-" . $data["Number"]);
       unlink_config ( "configdb", "extension-" . $data["Number"]);
-      if ( $data["Voicemail"])
+      if ( ! empty ( $data["Voicemail"]))
       {
         unlink_config ( "config", "voicemail-" . $data["Number"]);
       }

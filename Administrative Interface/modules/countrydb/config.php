@@ -36,11 +36,11 @@
  */
 
 /**
- * Local current language country names list if available
+ * Load all available country name translation files
  */
 $_in["countries"] = array ();
-if ( is_readable ( __DIR__ . "/countries-" . $_in["general"]["language"] . ".php"))
+foreach ( glob ( __DIR__ . "/countries-*.php") as $countryFile)
 {
-  require_once ( __DIR__ . "/countries-" . $_in["general"]["language"] . ".php");
+  require_once ( $countryFile);
 }
 ?>

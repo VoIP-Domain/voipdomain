@@ -272,9 +272,9 @@ function queues_member ( $buffer, $parameters)
   $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["Name"]]["CallsTaken"] = (int) $parameters["CallsTaken"];
   $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["Name"]]["LastCall"] = (int) $parameters["LastCall"];
   $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["Name"]]["LastPause"] = 0;
-  $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["Name"]]["InCall"] = (boolean) $parameters["InCall"];
+  $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["Name"]]["InCall"] = (bool) $parameters["InCall"];
   $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["Name"]]["Status"] = (int) $parameters["Status"];
-  $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["Name"]]["Paused"] = (boolean) $parameters["Paused"];
+  $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["Name"]]["Paused"] = (bool) $parameters["Paused"];
   $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["Name"]]["PauseReason"] = ( $parameters["Paused"] ? $parameters["PausedReason"] : "");
   $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["Name"]]["RingInUse"] = 0;
   $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["Name"]]["WrapUpTime"] = 0;
@@ -610,11 +610,11 @@ function queues_member_add ( $buffer, $parameters)
   $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["CallsTaken"] = (int) $parameters["CallsTaken"];
   $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["LastCall"] = (int) $parameters["LastCall"];
   $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["LastPause"] = (int) $parameters["LastPause"];
-  $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["InCall"] = (boolean) $parameters["InCall"];
+  $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["InCall"] = (bool) $parameters["InCall"];
   $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["Status"] = (int) $parameters["Status"];
-  $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["Paused"] = (boolean) $parameters["Paused"];
+  $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["Paused"] = (bool) $parameters["Paused"];
   $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["PauseReason"] = ( $parameters["Paused"] ? $parameters["PausedReason"] : "");
-  $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["RingInUse"] = (boolean) $parameters["Ringinuse"];
+  $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["RingInUse"] = (bool) $parameters["Ringinuse"];
   $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["WrapUpTime"] = (int) $parameters["Wrapuptime"];
 
   // Notify router of event:
@@ -662,14 +662,14 @@ function queues_member_status ( $buffer, $parameters)
   $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["Penalty"] = (int) $parameters["Penalty"];
   $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["CallsTaken"] = (int) $parameters["CallsTaken"];
   $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["LastCall"] = (int) $parameters["LastCall"];
-  $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["InCall"] = (boolean) $parameters["InCall"];
+  $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["InCall"] = (bool) $parameters["InCall"];
   $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["Status"] = (int) $parameters["Status"];
-  $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["Paused"] = (boolean) $parameters["Paused"];
+  $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["Paused"] = (bool) $parameters["Paused"];
   $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["PauseReason"] = ( $parameters["Paused"] ? $parameters["PausedReason"] : "");
-  $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["RingInUse"] = (boolean) $parameters["Ringinuse"];
+  $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["RingInUse"] = (bool) $parameters["Ringinuse"];
 
   // Notify router of event:
-  $gm->doBackground ( "queues_member_update", json_encode ( array ( "ServerID" => $_in["daemon"]["serverid"], "Queue" => $parameters["Queue"], "Member" => $parameters["MemberName"], "Penalty" => (int) $parameters["Penalty"], "CallsTaken" => (int) $parameters["CallsTaken"], "LastCall" => (int) $parameters["LastCall"], "InCall" => (boolean) $parameters["InCall"], "Status" => (int) $parameters["Status"], "Paused" => (boolean) $parameters["Paused"], "PauseReason" => ( $parameters["Paused"] ? $parameters["PausedReason"] : ""), "RingInUse" => (boolean) $parameters["Ringinuse"])));
+  $gm->doBackground ( "queues_member_update", json_encode ( array ( "ServerID" => $_in["daemon"]["serverid"], "Queue" => $parameters["Queue"], "Member" => $parameters["MemberName"], "Penalty" => (int) $parameters["Penalty"], "CallsTaken" => (int) $parameters["CallsTaken"], "LastCall" => (int) $parameters["LastCall"], "InCall" => (bool) $parameters["InCall"], "Status" => (int) $parameters["Status"], "Paused" => (bool) $parameters["Paused"], "PauseReason" => ( $parameters["Paused"] ? $parameters["PausedReason"] : ""), "RingInUse" => (bool) $parameters["Ringinuse"])));
 
   // End event:
   return $buffer;
@@ -710,11 +710,11 @@ function queues_member_pause ( $buffer, $parameters)
   }
 
   // Update member status:
-  $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["Paused"] = (boolean) $parameters["Paused"];
+  $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["Paused"] = (bool) $parameters["Paused"];
   $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["PauseReason"] = ( $parameters["Paused"] ? $parameters["PausedReason"] : "");
 
   // Notify router of event:
-  $gm->doBackground ( "queues_member_update", json_encode ( array ( "ServerID" => $_in["daemon"]["serverid"], "Queue" => $parameters["Queue"], "Member" => $parameters["MemberName"], "Paused" => (boolean) $parameters["Paused"], "PauseReason" => ( $parameters["Paused"] ? $parameters["PausedReason"] : ""))));
+  $gm->doBackground ( "queues_member_update", json_encode ( array ( "ServerID" => $_in["daemon"]["serverid"], "Queue" => $parameters["Queue"], "Member" => $parameters["MemberName"], "Paused" => (bool) $parameters["Paused"], "PauseReason" => ( $parameters["Paused"] ? $parameters["PausedReason"] : ""))));
 
   // End event:
   return $buffer;
@@ -799,10 +799,10 @@ function queues_member_ringinuse ( $buffer, $parameters)
   }
 
   // Update member status:
-  $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["RingInUse"] = (boolean) $parameters["Ringinuse"];
+  $_in["Queues"][$parameters["Queue"]]["Members"][$parameters["MemberName"]]["RingInUse"] = (bool) $parameters["Ringinuse"];
 
   // Notify router of event:
-  $gm->doBackground ( "queues_member_update", json_encode ( array ( "ServerID" => $_in["daemon"]["serverid"], "Queue" => $parameters["Queue"], "Member" => $parameters["MemberName"], "RingInUse" => (boolean) $parameters["Ringinuse"])));
+  $gm->doBackground ( "queues_member_update", json_encode ( array ( "ServerID" => $_in["daemon"]["serverid"], "Queue" => $parameters["Queue"], "Member" => $parameters["MemberName"], "RingInUse" => (bool) $parameters["Ringinuse"])));
 
   // End event:
   return $buffer;

@@ -257,6 +257,7 @@ function audios_add_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Audio"), "link" => "/audios"),
     2 => array ( "title" => __ ( "Add"))
   ));
+  sys_set_menu_highlight ( "/audios");
 
   /**
    * Create page code
@@ -264,7 +265,7 @@ function audios_add_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"audio_add_form\">\n";
 
   // Add audio description field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"audio_add_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"audio_add_description\" placeholder=\"" . __ ( "Audio description") . "\" />\n";
@@ -272,7 +273,7 @@ function audios_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add audio file field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"audio_add_file\" class=\"control-label col-xs-2\">" . __ ( "File") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <div class=\"input-group\">\n";
@@ -359,7 +360,7 @@ function audios_add_page ( $buffer, $parameters)
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
+ * @return void
  */
 function audios_clone_function ( $buffer, $parameters)
 {
@@ -405,6 +406,7 @@ function audios_view_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Audio"), "link" => "/audios"),
     2 => array ( "title" => __ ( "View"))
   ));
+  sys_set_menu_highlight ( "/audios");
 
   /**
    * Create page code
@@ -476,6 +478,7 @@ function audios_edit_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Audio"), "link" => "/audios"),
     2 => array ( "title" => __ ( "Edit"))
   ));
+  sys_set_menu_highlight ( "/audios");
 
   /**
    * Create page code
@@ -483,7 +486,7 @@ function audios_edit_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"audio_edit_form\">\n";
 
   // Add audio description field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"audio_edit_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"audio_edit_description\" placeholder=\"" . __ ( "Audio description") . "\" />\n";
@@ -491,7 +494,7 @@ function audios_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add audio file field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"audio_edit_file\" class=\"control-label col-xs-2\">" . __ ( "File") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <div class=\"input-group\">\n";

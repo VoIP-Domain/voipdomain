@@ -1210,8 +1210,7 @@ function extensions_view_phone ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ExtensionPhone`.*, `Groups`.`Description` AS `GroupDescription`, `Groups`.`ID` AS `GroupID`, `CostCenters`.`Code` AS `CostCenterCode`, `CostCenters`.`Description` AS `CostCenterDescription` FROM `ExtensionPhone` INNER JOIN `Groups` ON `ExtensionPhone`.`Extension` = " . (int) $parameters["ID"] . " AND `ExtensionPhone`.`Group` = `Groups`.`ID` LEFT JOIN `CostCenters` ON `ExtensionPhone`.`CostCenter` = `CostCenters`.`ID` WHERE `Groups`.`Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_view_phone");
   }
   if ( ! $phone = $result->fetch_assoc ())
   {
@@ -1225,8 +1224,7 @@ function extensions_view_phone ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Groups`.`ID`, `Groups`.`Description` FROM `PhoneCapture` LEFT JOIN `Groups` ON `PhoneCapture`.`Group` = `Groups`.`ID` WHERE `Groups`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneCapture`.`Extension` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_view_phone");
   }
   $captures = array ();
   while ( $capture = $result->fetch_assoc ())
@@ -1239,8 +1237,7 @@ function extensions_view_phone ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`ID`, `Extensions`.`Description`, `Extensions`.`Number` FROM `PhoneTranshipment` LEFT JOIN `Extensions` ON `PhoneTranshipment`.`Transhipment` = `Extensions`.`ID`  WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneTranshipment`.`Extension` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_view_phone");
   }
   $transfers = array ();
   while ( $transfer = $result->fetch_assoc ())
@@ -1253,8 +1250,7 @@ function extensions_view_phone ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`ID`, `Extensions`.`Description`, `Extensions`.`Number` FROM `PhoneHint` LEFT JOIN `Extensions` ON `PhoneHint`.`Hint` = `Extensions`.`ID`  WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneHint`.`Extension` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_view_phone");
   }
   $hints = array ();
   while ( $hint = $result->fetch_assoc ())
@@ -1267,8 +1263,7 @@ function extensions_view_phone ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `PhoneAccounts`.*, `Equipments`.`Type`, CONCAT(`Equipments`.`Vendor`,' ',`Equipments`.`Model`) AS `Description` FROM `PhoneAccounts` LEFT JOIN `Equipments` ON `PhoneAccounts`.`Equipment` = `Equipments`.`ID` WHERE `PhoneAccounts`.`Extension` = " . (int) $parameters["ID"] . " ORDER BY `PhoneAccounts`.`Username`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_view_phone");
   }
   $accounts = array ();
   while ( $account = $result->fetch_assoc ())
@@ -1346,8 +1341,7 @@ function extensions_phone_sanitize ( $buffer, $parameters)
     $buffer["Accounts"][$index]["Type"] = (int) $account["Type"];
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Equipments` WHERE `ID` = " . (int) $account["Type"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_phone_sanitize");
     }
     if ( ! $equipment = $result->fetch_assoc ())
     {
@@ -1364,8 +1358,7 @@ function extensions_phone_sanitize ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Groups` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["Group"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_phone_sanitize");
   }
   if ( ! $buffer["GroupReg"] = $result->fetch_assoc ())
   {
@@ -1377,8 +1370,7 @@ function extensions_phone_sanitize ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Profiles`.*, `Countries`.`ISO3166-2` FROM `Profiles` LEFT JOIN `Countries` ON `Profiles`.`Country` = `Countries`.`Code` WHERE `Profiles`.`ID` = " . (int) $buffer["GroupReg"]["Profile"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_phone_sanitize");
   }
   if ( ! $buffer["ProfileReg"] = $result->fetch_assoc ())
   {
@@ -1393,8 +1385,7 @@ function extensions_phone_sanitize ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Number` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $transfer))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_phone_sanitize");
     }
     if ( $result->num_rows != 0)
     {
@@ -1410,8 +1401,7 @@ function extensions_phone_sanitize ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Number` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $hint))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_phone_sanitize");
     }
     if ( $result->num_rows != 0)
     {
@@ -1423,10 +1413,10 @@ function extensions_phone_sanitize ( $buffer, $parameters)
    * Create options data
    */
   $buffer["Options"] = array (
-    "VoiceMail" => (boolean) $parameters["VoiceMail"],
+    "VoiceMail" => (bool) $parameters["VoiceMail"],
     "VolRX" => (int) ( $parameters["VolRX"] >= -10 && $parameters["VolRX"] <= 10 ? $parameters["VolRX"] : 0),
     "VolTX" => (int) ( $parameters["VolTX"] >= -10 && $parameters["VolTX"] <= 10 ? $parameters["VolTX"] : 0),
-    "Monitor" => (boolean) $parameters["Monitor"]
+    "Monitor" => (bool) $parameters["Monitor"]
   );
 
   /**
@@ -1436,8 +1426,7 @@ function extensions_phone_sanitize ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `ExtensionPhone` WHERE `Extension` = " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_phone_sanitize");
     }
     if ( ! $data = $result->fetch_assoc ())
     {
@@ -1449,8 +1438,7 @@ function extensions_phone_sanitize ( $buffer, $parameters)
     $data["Accounts"] = array ();
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `PhoneAccounts`.*, `Equipments`.`UID` FROM `PhoneAccounts` LEFT JOIN `Equipments` ON `PhoneAccounts`.`Equipment` = `Equipments`.`ID` WHERE `PhoneAccounts`.`Extension` = " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_phone_sanitize");
     }
     while ( $account = $result->fetch_assoc ())
     {
@@ -1459,8 +1447,7 @@ function extensions_phone_sanitize ( $buffer, $parameters)
     $data["Captures"] = array ();
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Group` FROM `PhoneCapture` WHERE `Extension` = " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_phone_sanitize");
     }
     while ( $capture = $result->fetch_assoc ())
     {
@@ -1469,8 +1456,7 @@ function extensions_phone_sanitize ( $buffer, $parameters)
     $data["Hints"] = array ();
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Hint` FROM `PhoneHint` WHERE `Extension` = " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_phone_sanitize");
     }
     while ( $hint = $result->fetch_assoc ())
     {
@@ -1479,8 +1465,7 @@ function extensions_phone_sanitize ( $buffer, $parameters)
     $data["Transhipments"] = array ();
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Transhipment` FROM `PhoneTranshipment` WHERE `Extension` = " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_phone_sanitize");
     }
     while ( $transfer = $result->fetch_assoc ())
     {
@@ -1503,8 +1488,7 @@ function extensions_phone_sanitize ( $buffer, $parameters)
     {
       if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `PhoneAccounts` WHERE `Extension` = " . (int) $parameters["ID"] . " AND `Equipment` = " . (int) $account["Type"] . " AND `MAC` = '" . ( $account["MAC"] ? $_in["mysql"]["id"]->real_escape_string ( $account["MAC"]) : "") . "'"))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "extensions_phone_sanitize");
       }
       if ( ! $dbentry = $result->fetch_assoc ())
       {
@@ -1660,8 +1644,7 @@ function extensions_phone_validate ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Key` = 'Permissions'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_phone_validate");
   }
   if ( ! $permissions = json_decode ( $result->fetch_assoc ()["Data"], true))
   {
@@ -1701,8 +1684,7 @@ function extensions_phone_validate ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Groups` WHERE `ID` = " . (int) $parameters["Group"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_phone_validate");
     }
     if ( $result->num_rows == 0)
     {
@@ -1719,8 +1701,7 @@ function extensions_phone_validate ( $buffer, $parameters)
     {
       if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Groups` WHERE `ID` = " . (int) $capture))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "extensions_phone_validate");
       }
       if ( $result->num_rows != 1)
       {
@@ -1737,8 +1718,7 @@ function extensions_phone_validate ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Number` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $transfer))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_phone_validate");
     }
     if ( $result->num_rows == 0)
     {
@@ -1753,8 +1733,7 @@ function extensions_phone_validate ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Number` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $hint))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_phone_validate");
     }
     if ( $result->num_rows == 0)
     {
@@ -1774,8 +1753,7 @@ function extensions_phone_validate ( $buffer, $parameters)
     }
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Equipments` WHERE `ID` = " . (int) $account["Type"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_phone_validate");
     }
     if ( ! $equipment = $result->fetch_assoc ())
     {
@@ -1796,8 +1774,7 @@ function extensions_phone_validate ( $buffer, $parameters)
       }
       if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `PhoneAccounts` WHERE `Equipment` = " . (int) $equipment["ID"] . " AND `MAC` = '" . $_in["mysql"]["id"]->real_escape_string ( $account["MAC"]) . "'"))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "extensions_phone_validate");
       }
       if ( $result->num_rows != 0)
       {
@@ -1851,8 +1828,7 @@ function extensions_add_phone_post ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "START TRANSACTION"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_add_phone_post");
   }
 
   /**
@@ -1861,8 +1837,7 @@ function extensions_add_phone_post ( $buffer, $parameters)
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `ExtensionPhone` (`Extension`, `Email`, `Group`, `Password`, `Permissions`, `Options`, `CostCenter`) VALUES (" . (int) $parameters["ID"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Email"]) . "', " . (int) $parameters["GroupReg"]["ID"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Permissions"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Options"])) . "', " . ( $parameters["CostCenter"] != "" ? (int) $parameters["CostCenter"] : "null") . ")"))
   {
     @$_in["mysql"]["id"]->query ( "ROLLBACK");
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_add_phone_post");
   }
 
   /**
@@ -1873,8 +1848,7 @@ function extensions_add_phone_post ( $buffer, $parameters)
     if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `PhoneCapture` (`Extension`, `Group`) VALUES (" . (int) $parameters["ID"] . ", " . (int) $capture . ")"))
     {
       @$_in["mysql"]["id"]->query ( "ROLLBACK");
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_add_phone_post");
     }
   }
 
@@ -1886,8 +1860,7 @@ function extensions_add_phone_post ( $buffer, $parameters)
     if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `PhoneTranshipment` (`Extension`, `Transhipment`) VALUES (" . (int) $parameters["ID"] . ", " . (int) $transfer . ")"))
     {
       @$_in["mysql"]["id"]->query ( "ROLLBACK");
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_add_phone_post");
     }
   }
 
@@ -1899,8 +1872,7 @@ function extensions_add_phone_post ( $buffer, $parameters)
     if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `PhoneHint` (`Extension`, `Hint`) VALUES (" . (int) $parameters["ID"] . ", " . (int) $hint . ")"))
     {
       @$_in["mysql"]["id"]->query ( "ROLLBACK");
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_add_phone_post");
     }
   }
 
@@ -1917,8 +1889,7 @@ function extensions_add_phone_post ( $buffer, $parameters)
     if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `PhoneAccounts` (`Extension`, `Username`, `Password`, `Equipment`, `MAC`) VALUES (" . (int) $parameters["ID"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $account["Username"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $account["Password"]) . "', " . (int) $account["Type"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $account["MAC"]) . "')"))
     {
       @$_in["mysql"]["id"]->query ( "ROLLBACK");
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_add_phone_post");
     }
 
     /**
@@ -1936,7 +1907,7 @@ function extensions_add_phone_post ( $buffer, $parameters)
      */
     if ( ! empty ( $account["MAC"]))
     {
-      $notify = array ( "Number" => $parameters["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Name" => $parameters["Description"], "MAC" => $account["MAC"], "Type" => $account["UID"], "Domain" => $parameters["ProfileReg"]["Domain"], "NTP" => $parameters["Range"]["NTP"], "Country" => $parameters["ProfileReg"]["ISO3166-2"], "TimeZone" => $parameters["ProfileReg"]["TimeZone"], "Offset" => $parameters["ProfileReg"]["Offset"], "Prefix" => $parameters["ProfileReg"]["Prefix"], "EmergencyShortcut" => (boolean) $parameters["ProfileReg"]["EmergencyShortcut"], "Hints" => array_values ( $parameters["HintsNumbers"]));
+      $notify = array ( "Number" => $parameters["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Name" => $parameters["Description"], "MAC" => $account["MAC"], "Type" => $account["UID"], "Domain" => $parameters["ProfileReg"]["Domain"], "NTP" => $parameters["Range"]["NTP"], "Country" => $parameters["ProfileReg"]["ISO3166-2"], "TimeZone" => $parameters["ProfileReg"]["TimeZone"], "Offset" => $parameters["ProfileReg"]["Offset"], "Prefix" => $parameters["ProfileReg"]["Prefix"], "EmergencyShortcut" => (bool) $parameters["ProfileReg"]["EmergencyShortcut"], "Hints" => array_values ( $parameters["HintsNumbers"]));
       if ( framework_has_hook ( "extensions_phone_ap_add_notify"))
       {
         $notify = framework_call ( "extensions_phone_ap_add_notify", $parameters, false, $notify);
@@ -1950,8 +1921,7 @@ function extensions_add_phone_post ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "COMMIT"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_add_phone_post");
   }
 
   /**
@@ -1987,8 +1957,7 @@ function extensions_add_phone_post ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Number`, COUNT(*) AS `Total` FROM `PhoneHint` LEFT JOIN `Extensions` ON `PhoneHint`.`Hint` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneHint`.`Hint` = " . (int) $hint))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_add_phone_post");
     }
     $tmp = $result->fetch_assoc ();
     if ( $tmp["Total"] == 1)
@@ -2114,8 +2083,7 @@ function extensions_phones_account_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Profiles`.`Domain`, `Servers`.`Address`, `Servers`.`Port`, `Extensions`.`Description`, `PhoneAccounts`.`Username`, `PhoneAccounts`.`Password` FROM `Extensions` LEFT JOIN `PhoneAccounts` ON `PhoneAccounts`.`Extension` = `Extensions`.`ID` LEFT JOIN `Ranges` ON `Ranges`.`ID` = `Extensions`.`Range` LEFT JOIN `Servers` ON `Servers`.`ID` = `Ranges`.`Server` LEFT JOIN `ExtensionPhone` ON `ExtensionPhone`.`Extension` = `Extensions`.`ID` LEFT JOIN `Groups` ON `Groups`.`ID` = `ExtensionPhone`.`Group` LEFT JOIN `Profiles` ON `Profiles`.`ID` = `Groups`.`Profile` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Extensions`.`ID` = " . (int) $parameters["EID"] . " AND `PhoneAccounts`.`ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_phones_account_view");
   }
   if ( ! $extension = $result->fetch_assoc ())
   {
@@ -2168,8 +2136,7 @@ function extensions_edit_phone_post ( $buffer, $parameters)
     $account["MAC"] = strtoupper ( $account["MAC"]);
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `PhoneAccounts`.*, `Equipments`.`UID` AS `Type` FROM `PhoneAccounts` LEFT JOIN `Equipments` ON `PhoneAccounts`.`Equipment` = `Equipments`.`ID` WHERE `PhoneAccounts`.`Extension` = " . (int) $parameters["ID"] . " AND `PhoneAccounts`.`Equipment` = " . (int) $account["Type"] . " AND `PhoneAccounts`.`MAC` = '" . ( $account["MAC"] ? $_in["mysql"]["id"]->real_escape_string ( $account["MAC"]) : "") . "'"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_edit_phone_post");
     }
     if ( ! $dbentry = $result->fetch_assoc ())
     {
@@ -2192,8 +2159,7 @@ function extensions_edit_phone_post ( $buffer, $parameters)
   {
     if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `ExtensionPhone` SET `Password` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "', `Email` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Email"]) . "', `Group` = " . (int) $parameters["Group"] . ", `Password` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "', `Permissions` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parametewrs["Permissions"])) . "', `Options` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Options"])) . "', `CostCenter` = " . ( $parameters["CostCenter"] != "" ? (int) $parameters["CostCenter"] : "null") . " WHERE `Extension` = " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_edit_phone_post");
     }
   }
 
@@ -2204,15 +2170,13 @@ function extensions_edit_phone_post ( $buffer, $parameters)
   {
     if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `PhoneCapture` WHERE `Extension` = " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_edit_phone_post");
     }
     foreach ( $parameters["Captures"] as $capture)
     {
       if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `PhoneCapture` (`Extension`, `Group`) VALUES (" . (int) $parameters["ID"] . ", " . (int) $capture . ")"))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "extensions_edit_phone_post");
       }
     }
   }
@@ -2224,15 +2188,13 @@ function extensions_edit_phone_post ( $buffer, $parameters)
   {
     if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `PhoneTranshipment` WHERE `Extension` = " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_edit_phone_post");
     }
     foreach ( $parameters["Transhipments"] as $transfer)
     {
       if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `PhoneTranshipment` (`Extension`, `Transhipment`) VALUES (" . (int) $parameters["ID"] . ", " . (int) $transfer . ")"))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "extensions_edit_phone_post");
       }
     }
   }
@@ -2244,15 +2206,13 @@ function extensions_edit_phone_post ( $buffer, $parameters)
   {
     if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `PhoneHint` WHERE `Extension` = " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_edit_phone_post");
     }
     foreach ( $parameters["Hints"] as $hint)
     {
       if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `PhoneHint` (`Extension`, `Hint`) VALUES (" . (int) $parameters["ID"] . ", " . (int) $hint . ")"))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "extensions_edit_phone_post");
       }
     }
   }
@@ -2266,8 +2226,7 @@ function extensions_edit_phone_post ( $buffer, $parameters)
     {
       if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `PhoneAccounts` WHERE `ID` = " . (int) $account["ID"]))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "extensions_edit_phone_post");
       }
 
       /**
@@ -2307,8 +2266,7 @@ function extensions_edit_phone_post ( $buffer, $parameters)
        */
       if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `PhoneAccounts` (`Extension`, `Username`, `Password`, `Equipment`, `MAC`) VALUES (" . (int) $parameters["ID"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $account["Username"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $account["Password"]) . "', " . (int) $account["Type"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $account["MAC"]) . "')"))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "extensions_edit_phone_post");
       }
 
       /**
@@ -2328,7 +2286,7 @@ function extensions_edit_phone_post ( $buffer, $parameters)
          */
         if ( ! empty ( $account["MAC"]))
         {
-          $notify = array ( "Number" => $parameters["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Name" => $parameters["Description"], "MAC" => $account["MAC"], "Type" => $account["UID"], "Domain" => $parameters["ProfileReg"]["Domain"], "NTP" => $parameters["Range"]["NTP"], "Country" => $parameters["ProfileReg"]["ISO3166-2"], "TimeZone" => $parameters["ProfileReg"]["TimeZone"], "Offset" => $parameters["ProfileReg"]["Offset"], "Prefix" => $parameters["ProfileReg"]["Prefix"], "EmergencyShortcut" => (boolean) $parameters["ProfileReg"]["EmergencyShortcut"], "Hints" => array_values ( $parameters["HintsNumbers"]));
+          $notify = array ( "Number" => $parameters["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Name" => $parameters["Description"], "MAC" => $account["MAC"], "Type" => $account["UID"], "Domain" => $parameters["ProfileReg"]["Domain"], "NTP" => $parameters["Range"]["NTP"], "Country" => $parameters["ProfileReg"]["ISO3166-2"], "TimeZone" => $parameters["ProfileReg"]["TimeZone"], "Offset" => $parameters["ProfileReg"]["Offset"], "Prefix" => $parameters["ProfileReg"]["Prefix"], "EmergencyShortcut" => (bool) $parameters["ProfileReg"]["EmergencyShortcut"], "Hints" => array_values ( $parameters["HintsNumbers"]));
           if ( framework_has_hook ( "extensions_phone_ap_add_notify"))
           {
             $notify = framework_call ( "extensions_phone_ap_add_notify", $parameters, false, $notify);
@@ -2351,8 +2309,7 @@ function extensions_edit_phone_post ( $buffer, $parameters)
     {
       if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Number`, COUNT(*) AS `Total` FROM `PhoneHint` LEFT JOIN `Extensions` ON `PhoneHint`.`Hint` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Extensions`.`ID` = " . (int) $hint))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "extensions_edit_phone_post");
       }
       $tmp = $result->fetch_assoc ();
       if ( $tmp["Total"] == 0)
@@ -2373,8 +2330,7 @@ function extensions_edit_phone_post ( $buffer, $parameters)
     {
       if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Number`, COUNT(*) AS `Total` FROM `PhoneHint` LEFT JOIN `Extensions` ON `PhoneHint`.`Hint` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Extensions`.`ID` = " . (int) $hint))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "extensions_edit_phone_post");
       }
       $tmp = $result->fetch_assoc ();
       if ( $tmp["Total"] == 1)
@@ -2398,7 +2354,7 @@ function extensions_edit_phone_post ( $buffer, $parameters)
     {
       if ( $account["MAC"] && ( $parameters["Description"] != $parameters["ORIGINAL"]["Description"] || ! array_compare ( $parameters["ORIGINAL"]["Hints"], $parameters["Hints"])))
       {
-        $notify = array ( "Number" => $parameters["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Name" => $parameters["Description"], "MAC" => $account["MAC"], "Type" => $account["UID"], "Domain" => $parameters["ProfileReg"]["Domain"], "NTP" => $parameters["Range"]["NTP"], "Country" => $parameters["ProfileReg"]["ISO3166-2"], "TimeZone" => $parameters["ProfileReg"]["TimeZone"], "Offset" => $parameters["ProfileReg"]["Offset"], "Prefix" => $parameters["ProfileReg"]["Prefix"], "EmergencyShortcut" => (boolean) $parameters["ProfileReg"]["EmergencyShortcut"], "Hints" => array_values ( $parameters["HintsNumbers"]));
+        $notify = array ( "Number" => $parameters["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Name" => $parameters["Description"], "MAC" => $account["MAC"], "Type" => $account["UID"], "Domain" => $parameters["ProfileReg"]["Domain"], "NTP" => $parameters["Range"]["NTP"], "Country" => $parameters["ProfileReg"]["ISO3166-2"], "TimeZone" => $parameters["ProfileReg"]["TimeZone"], "Offset" => $parameters["ProfileReg"]["Offset"], "Prefix" => $parameters["ProfileReg"]["Prefix"], "EmergencyShortcut" => (bool) $parameters["ProfileReg"]["EmergencyShortcut"], "Hints" => array_values ( $parameters["HintsNumbers"]));
         if ( framework_has_hook ( "extensions_phone_ap_change_notify"))
         {
           $notify = framework_call ( "extensions_phone_ap_change_notify", $parameters, false, $notify);
@@ -2441,8 +2397,7 @@ function extensions_edit_phone_post ( $buffer, $parameters)
     {
       if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Number`, COUNT(*) AS `Total` FROM `PhoneHint` LEFT JOIN `Extensions` ON `PhoneHint`.`Hint` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Extensions`.`ID` = " . (int) $hint))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "extensions_edit_phone_post");
       }
       $tmp = $result->fetch_assoc ();
       if ( $tmp["Total"] == 0)
@@ -2490,7 +2445,7 @@ function extensions_edit_phone_post ( $buffer, $parameters)
 
       if ( ! empty ( $account["MAC"]))
       {
-        $notify = array ( "Number" => $parameters["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Name" => $parameters["Description"], "MAC" => $account["MAC"], "Type" => $account["Type"], "Domain" => $parameters["ProfileReg"]["Domain"], "NTP" => $parameters["Range"]["NTP"], "Country" => $parameters["ProfileReg"]["ISO3166-2"], "TimeZone" => $parameters["ProfileReg"]["TimeZone"], "Offset" => $parameters["ProfileReg"]["Offset"], "Prefix" => $parameters["ProfileReg"]["Prefix"], "EmergencyShortcut" => (boolean) $parameters["ProfileReg"]["EmergencyShortcut"], "Hints" => array_values ( $parameters["HintsNumbers"]));
+        $notify = array ( "Number" => $parameters["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Name" => $parameters["Description"], "MAC" => $account["MAC"], "Type" => $account["Type"], "Domain" => $parameters["ProfileReg"]["Domain"], "NTP" => $parameters["Range"]["NTP"], "Country" => $parameters["ProfileReg"]["ISO3166-2"], "TimeZone" => $parameters["ProfileReg"]["TimeZone"], "Offset" => $parameters["ProfileReg"]["Offset"], "Prefix" => $parameters["ProfileReg"]["Prefix"], "EmergencyShortcut" => (bool) $parameters["ProfileReg"]["EmergencyShortcut"], "Hints" => array_values ( $parameters["HintsNumbers"]));
         if ( framework_has_hook ( "extensions_phone_ap_add_notify"))
         {
           $notify = framework_call ( "extensions_phone_ap_add_notify", $parameters, false, $notify);
@@ -2509,7 +2464,7 @@ function extensions_edit_phone_post ( $buffer, $parameters)
 
       if ( ! empty ( $account["MAC"]))
       {
-        $notify = array ( "Number" => $parameters["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Name" => $parameters["Description"], "MAC" => $account["MAC"], "Type" => $account["UID"], "Domain" => $parameters["ProfileReg"]["Domain"], "NTP" => $parameters["Range"]["NTP"], "Country" => $parameters["ProfileReg"]["ISO3166-2"], "TimeZone" => $parameters["ProfileReg"]["TimeZone"], "Offset" => $parameters["ProfileReg"]["Offset"], "Prefix" => $parameters["ProfileReg"]["Prefix"], "EmergencyShortcut" => (boolean) $parameters["ProfileReg"]["EmergencyShortcut"], "Hints" => array_values ( $parameters["HintsNumbers"]));
+        $notify = array ( "Number" => $parameters["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Name" => $parameters["Description"], "MAC" => $account["MAC"], "Type" => $account["UID"], "Domain" => $parameters["ProfileReg"]["Domain"], "NTP" => $parameters["Range"]["NTP"], "Country" => $parameters["ProfileReg"]["ISO3166-2"], "TimeZone" => $parameters["ProfileReg"]["TimeZone"], "Offset" => $parameters["ProfileReg"]["Offset"], "Prefix" => $parameters["ProfileReg"]["Prefix"], "EmergencyShortcut" => (bool) $parameters["ProfileReg"]["EmergencyShortcut"], "Hints" => array_values ( $parameters["HintsNumbers"]));
         if ( framework_has_hook ( "extensions_phone_ap_add_notify"))
         {
           $notify = framework_call ( "extensions_phone_ap_add_notify", $parameters, false, $notify);
@@ -2525,8 +2480,7 @@ function extensions_edit_phone_post ( $buffer, $parameters)
     {
       if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Number`, COUNT(*) AS `Total` FROM `PhoneHint` LEFT JOIN `Extensions` ON `PhoneHint`.`Hint` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneHint`.`Hint` = " . (int) $hint))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "extensions_edit_phone_post");
       }
       $tmp = $result->fetch_assoc ();
       if ( $tmp["Total"] == 1)
@@ -2558,15 +2512,13 @@ function extensions_edit_phone_post ( $buffer, $parameters)
      */
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Number`, `Extensions`.`ID`, `Ranges`.`Server` FROM `PhoneTranshipment` LEFT JOIN `Extensions` ON `PhoneTranshipment`.`Extension` = `Extensions`.`ID` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneTranshipment`.`Transhipment` = " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_edit_phone_post");
     }
     while ( $data = $result->fetch_assoc ())
     {
       if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Number` FROM `PhoneTranshipment` LEFT JOIN `Extensions` ON `PhoneTranshipment`.`Transhipment` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneTranshipment`.`Extension` = " . (int) $data["ID"]))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "extensions_edit_phone_post");
       }
       $notify = array ();
       $notify["Number"] = $data["Number"];
@@ -2583,8 +2535,7 @@ function extensions_edit_phone_post ( $buffer, $parameters)
      */
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Number`, `Extensions`.`ID`, `Ranges`.`Server` FROM `PhoneHint` LEFT JOIN `Extensions` ON `PhoneHint`.`Extension` = `Extensions`.`ID` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneHint`.`Hint` = " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_edit_phone_post");
     }
     if ( $result->num_rows != 0)
     {
@@ -2627,13 +2578,11 @@ function extensions_remove_phone_pre ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `ExtensionPhone` WHERE `Extension` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_remove_phone_pre");
   }
   if ( ! $tmp = $result->fetch_assoc ())
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_remove_phone_pre");
   }
   $buffer["ORIGINAL"] = array_merge_recursive ( $buffer["ORIGINAL"], $tmp);
   $buffer["ORIGINAL"]["Permissions"] = json_decode ( $buffer["ORIGINAL"]["Permissions"], true);
@@ -2644,13 +2593,11 @@ function extensions_remove_phone_pre ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `PhoneCapture` WHERE `Extension` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_remove_phone_pre");
   }
   if ( $result->num_rows == 0)
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_remove_phone_pre");
   }
   $buffer["ORIGINAL"]["Captures"] = array ();
   while ( $capture = $result->fetch_assoc ())
@@ -2663,8 +2610,7 @@ function extensions_remove_phone_pre ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `PhoneTranshipment` WHERE `Extension` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_remove_phone_pre");
   }
   $buffer["ORIGINAL"]["Transhipments"] = array ();
   while ( $transfer = $result->fetch_assoc ())
@@ -2677,8 +2623,7 @@ function extensions_remove_phone_pre ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `PhoneHint` WHERE `Extension` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_remove_phone_pre");
   }
   $buffer["ORIGINAL"]["Hints"] = array ();
   while ( $hint = $result->fetch_assoc ())
@@ -2691,13 +2636,11 @@ function extensions_remove_phone_pre ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `PhoneAccounts` WHERE `Extension` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_remove_phone_pre");
   }
   if ( $result->num_rows == 0)
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_remove_phone_pre");
   }
   $buffer["ORIGINAL"]["Accounts"] = array ();
   while ( $account = $result->fetch_assoc ())
@@ -2710,8 +2653,7 @@ function extensions_remove_phone_pre ( $buffer, $parameters)
    */
   if ( ! $count = @$_in["mysql"]["id"]->query ( "DELETE FROM `PhoneHint` WHERE `Hint` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_remove_phone_pre");
   }
   if ( intval ( $count->affected_rows) != 0)
   {
@@ -2730,8 +2672,7 @@ function extensions_remove_phone_pre ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Number`, `Ranges`.`Server`, COUNT(*) AS `Total` FROM `PhoneHint` LEFT JOIN `Extensions` ON `PhoneHint`.`Hint` = `Extensions`.`ID` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneHint`.`Hint` = " . (int) $hint))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_remove_phone_pre");
     }
     $hintdata = $result->fetch_assoc ();
     if ( $hintdata["Total"] == 1)
@@ -2746,8 +2687,7 @@ function extensions_remove_phone_pre ( $buffer, $parameters)
   }
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `PhoneHint` WHERE `Extension` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_remove_phone_pre");
   }
 
   /**
@@ -2755,15 +2695,13 @@ function extensions_remove_phone_pre ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Number`, `Extensions`.`ID`, `Ranges`.`Server` FROM `PhoneTranshipment` LEFT JOIN `Extensions` ON `Extensions`.`ID` = `PhoneTranshipment`.`Extension` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneTranshipment`.`Transhipment` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_remove_phone_pre");
   }
   while ( $transfer = $result->fetch_assoc ())
   {
     if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Number` FROM `PhoneTranshipment` LEFT JOIN `Extensions` ON `PhoneTranshipment`.`Transhipment` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneTranshipment`.`Extension` = " . (int) $transfer["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_remove_phone_pre");
     }
     $transferdata = array ();
     while ( $tmp = $result2->fetch_assoc ())
@@ -2778,14 +2716,12 @@ function extensions_remove_phone_pre ( $buffer, $parameters)
     notify_server ( $transfer["Server"], "transhipment_change", $notify);
     if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `PhoneTranshipment` WHERE `Transhipment` = " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_remove_phone_pre");
     }
   }
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `PhoneTranshipment` WHERE `Extension` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_remove_phone_pre");
   }
 
   /**
@@ -2793,8 +2729,7 @@ function extensions_remove_phone_pre ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `PhoneCapture` WHERE `Extension` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_remove_phone_pre");
   }
 
   /**
@@ -2802,8 +2737,7 @@ function extensions_remove_phone_pre ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ExtensionPhone` WHERE `Extension` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_remove_phone_pre");
   }
 
   /**
@@ -2867,15 +2801,14 @@ function extensions_phones_server_reconfig ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`ID`, `Extensions`.`Number`, `Extensions`.`Description`, `ExtensionPhone`.`Email`, `ExtensionPhone`.`Password`, `ExtensionPhone`.`Group`, `ExtensionPhone`.`Permissions`, `ExtensionPhone`.`Options`, `CostCenters`.`Code` AS `CostCenter`, GROUP_CONCAT(`PhoneCapture`.`Group` SEPARATOR ',') AS `Captures`, `Profiles`.`Domain`, `Profiles`.`Prefix`, `Countries`.`ISO3166-2`, `Profiles`.`TimeZone`, `Profiles`.`Offset`, `Profiles`.`EmergencyShortcut`, `Servers`.`NTP` FROM `Extensions` LEFT JOIN `ExtensionPhone` ON `Extensions`.`ID` = `ExtensionPhone`.`Extension` LEFT JOIN `Groups` ON `ExtensionPhone`.`Group` = `Groups`.`ID` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` LEFT JOIN `Servers` ON `Ranges`.`Server` = `Servers`.`ID` LEFT JOIN `Profiles` ON `Groups`.`Profile` = `Profiles`.`ID` LEFT JOIN `Countries` ON `Profiles`.`Country` = `Countries`.`Code` LEFT JOIN `CostCenters` ON `ExtensionPhone`.`CostCenter` = `CostCenters`.`ID` LEFT JOIN `PhoneCapture` ON `PhoneCapture`.`Extension` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Extensions`.`Type` = 'phone' AND `Ranges`.`Server` = " . (int) $parameters["ID"] . " GROUP BY `Extensions`.`ID`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_phones_server_reconfig:fetch_extensions");
   }
   while ( $extension = $result->fetch_assoc ())
   {
     /**
      * Explode capture groups and permissions
      */
-    $extension["Captures"] = explode ( ",", $extension["Captures"]);
+    $extension["Captures"] = explode ( ",", $extension["Captures"] ?? "");
     $extension["Permissions"] = json_decode ( $extension["Permissions"], true);
     $extension["Options"] = json_decode ( $extension["Options"], true);
     $extension["NTP"] = json_decode ( $extension["NTP"], true);
@@ -2885,10 +2818,9 @@ function extensions_phones_server_reconfig ( $buffer, $parameters)
      */
     if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`Extensions`.`Number` SEPARATOR ',') AS `Transhipments` FROM `PhoneTranshipment` LEFT JOIN `Extensions` ON `PhoneTranshipment`.`Transhipment` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneTranshipment`.`Extension` = " . (int) $extension["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_phones_server_reconfig:fetch_transhipments");
     }
-    $extension["Transhipments"] = explode ( ",", $result2->fetch_assoc ()["Transhipments"]);
+    $extension["Transhipments"] = explode ( ",", $result2->fetch_assoc ()["Transhipments"] ?? "");
     if ( sizeof ( $extension["Transhipments"]) == 1 && $extension["Transhipments"][0] == "")
     {
       unset ( $extension["Transhipments"][0]);
@@ -2899,10 +2831,9 @@ function extensions_phones_server_reconfig ( $buffer, $parameters)
      */
     if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`Extensions`.`Number` SEPARATOR ',') AS `Hints` FROM `PhoneHint` LEFT JOIN `Extensions` ON `PhoneHint`.`Hint` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneHint`.`Extension` = " . (int) $extension["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_phones_server_reconfig:fetch_hints");
     }
-    $extension["Hints"] = explode ( ",", $result2->fetch_assoc ()["Hints"]);
+    $extension["Hints"] = explode ( ",", $result2->fetch_assoc ()["Hints"] ?? "");
     if ( sizeof ( $extension["Hints"]) == 1 && $extension["Hints"][0] == "")
     {
       unset ( $extension["Hints"][0]);
@@ -2915,8 +2846,7 @@ function extensions_phones_server_reconfig ( $buffer, $parameters)
     {
       if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT `CostCenters`.`Code` FROM `Groups` LEFT JOIN `CostCenters` ON `Groups`.`CostCenter` = `CostCenters`.`ID` WHERE `Groups`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Groups`.`ID` = " . (int) $extension["Group"]))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "extensions_phones_server_reconfig:fetch_costcenter");
       }
       $extension["CostCenter"] = $result2->fetch_assoc ()["Code"];
     }
@@ -2936,8 +2866,7 @@ function extensions_phones_server_reconfig ( $buffer, $parameters)
      */
     if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT `PhoneAccounts`.`ID`, `PhoneAccounts`.`Username`, `PhoneAccounts`.`Password`, `PhoneAccounts`.`MAC`, `Equipments`.`UID`, `Equipments`.`Type`, `Equipments`.`AutoProvision` FROM `PhoneAccounts` LEFT JOIN `Extensions` ON `PhoneAccounts`.`Extension` = `Extensions`.`ID` LEFT JOIN `Equipments` ON `PhoneAccounts`.`Equipment` = `Equipments`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneAccounts`.`Extension` = " . (int) $extension["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_phones_server_reconfig:fetch_accounts");
     }
     while ( $account = $result2->fetch_assoc ())
     {
@@ -2956,7 +2885,7 @@ function extensions_phones_server_reconfig ( $buffer, $parameters)
        */
       if ( ! empty ( $account["MAC"]))
       {
-        $notify = array ( "Number" => $extension["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Name" => $extension["Description"], "MAC" => $account["MAC"], "Type" => $account["UID"], "Domain" => $extension["Domain"], "NTP" => $extension["NTP"], "Country" => $extension["ISO3166-2"], "TimeZone" => $extension["TimeZone"], "Offset" => $extension["Offset"], "Prefix" => $extension["Prefix"], "EmergencyShortcut" => (boolean) $extension["EmergencyShortcut"], "Hints" => $extension["Hints"]);
+        $notify = array ( "Number" => $extension["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Name" => $extension["Description"], "MAC" => $account["MAC"], "Type" => $account["UID"], "Domain" => $extension["Domain"], "NTP" => $extension["NTP"], "Country" => $extension["ISO3166-2"], "TimeZone" => $extension["TimeZone"], "Offset" => $extension["Offset"], "Prefix" => $extension["Prefix"], "EmergencyShortcut" => (bool) $extension["EmergencyShortcut"], "Hints" => $extension["Hints"]);
         if ( framework_has_hook ( "extensions_add_ap_notify"))
         {
           $notify = framework_call ( "extensions_add_ap_notify", $parameters, false, $notify);
@@ -2971,8 +2900,7 @@ function extensions_phones_server_reconfig ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Number` FROM `PhoneHint` LEFT JOIN `Extensions` ON `Extensions`.`ID` = `PhoneHint`.`Hint` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Ranges`.`Server` = " . (int) $parameters["ID"] . " GROUP BY `Extensions`.`Number`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_phones_server_reconfig:fetch_all_hints");
   }
   while ( $hint = $result->fetch_assoc ())
   {

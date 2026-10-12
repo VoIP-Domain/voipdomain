@@ -67,7 +67,7 @@ class asterisk
     $this->username = array_key_exists ( "username", $options) ? $options["username"] : "";
     $this->password = array_key_exists ( "password", $options) ? $options["password"] : "";
     $this->auth_type = array_key_exists ( "auth_type", $options) ? $options["auth_type"] : "MD5";
-    $this->events = array_key_exists ( "events", $options) ? (boolean) $options["events"] : false;
+    $this->events = array_key_exists ( "events", $options) ? (bool) $options["events"] : false;
     $this->connect_timeout = array_key_exists ( "connect_timeout", $options) ? (int) $options["connect_timeout"] : 60;
     $this->timeout = array_key_exists ( "timeout", $options) ? (int) $options["timeout"] : 5;
 

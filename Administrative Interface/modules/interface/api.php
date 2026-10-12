@@ -571,21 +571,18 @@ function tasks_return ( $buffer, $parameters)
      */
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Group` FROM `GroupCommand` WHERE `Command` = " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "tasks_return");
     }
     if ( $result->num_rows != 0)
     {
       if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `GroupedCommands` SET `Left` = `Left` - 1 WHERE `ID` = " . (int) $result->fetch_assoc ()["Group"]))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "tasks_return");
       }
     }
     if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Commands` WHERE `ID` = " . (int) $parameters["ID"] . " AND `Server` = " . (int) $_in["session"]["Data"]["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "tasks_return");
     }
   }
 
@@ -594,8 +591,7 @@ function tasks_return ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Commands`.*, `Servers`.`Password` FROM `Commands`, `Servers` WHERE `Servers`.`ID` = `Commands`.`Server` AND `Commands`.`Server` = " . (int) $_in["session"]["Data"]["ID"] . ( $parameters["ID"] != 0 ? " AND `Commands`.`ID` < " . (int) $parameters["ID"] : "")))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tasks_return");
   }
   while ( $data = $result->fetch_assoc ())
   {
@@ -819,8 +815,7 @@ function user_login ( $buffer, $parameters)
      */
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Admins` WHERE `Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "'"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "user_login");
     }
     if ( ! $userdata = $result->fetch_assoc ())
     {
@@ -841,8 +836,7 @@ function user_login ( $buffer, $parameters)
   } else {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID` FROM `Tenants` WHERE `ID` = " . (int) get_tenant ( $parameters["Domain"])))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "user_login");
     }
     if ( ! $tenant = $result->fetch_assoc ())
     {
@@ -865,8 +859,7 @@ function user_login ( $buffer, $parameters)
      */
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Users` WHERE `Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "' AND `Tenant` = " . (int) $tenant["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "user_login");
     }
     if ( ! $userdata = $result->fetch_assoc ())
     {
@@ -909,8 +902,7 @@ function user_login ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `" . ( $parameters["Domain"] == "Multi-Tenant" ? "Admin" : "User") . "SFA` WHERE `UID` = " . (int) $userdata["ID"] . " AND `Status` = 'Active'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "user_login");
   }
   if ( $sfadata = $result->fetch_assoc ())
   {
@@ -918,8 +910,7 @@ function user_login ( $buffer, $parameters)
     {
       if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `" . ( $parameters["Domain"] == "Multi-Tenant" ? "Admin" : "") . "SFACache` WHERE `UID` = " . (int) $userdata["ID"] . "' AND `Key` = '" . $_in["mysql"]["id"]->real_escape_string ( $_COOKIE[$_in["general"]["cookie"] . "_sfa"]) . "'"))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "user_login");
       }
       if ( $result->num_rows == 1)
       {
@@ -954,8 +945,7 @@ function user_login ( $buffer, $parameters)
     $key = random_password ( 32);
     if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `" . ( $parameters["Domain"] == "Multi-Tenant" ? "Admin" : "") . "SFACache` (`UID`, `Key`) VALUES (" . (int) $userdata["ID"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $key) . "')"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "user_login");
     }
     setcookie ( $_in["general"]["cookie"] . "_" . ( $parameters["Domain"] == "Multi-Tenant" ? "adm" : "") . "sfa", $key, time () + 31536000, "/" . ( PHP_VERSION_ID < 70300 ? "; SameSite=Strict" : ""));
   }
@@ -998,8 +988,7 @@ function user_login ( $buffer, $parameters)
   $SID = hash ( "sha256", uniqid ( "", true));
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `" . ( $parameters["Domain"] == "Multi-Tenant" ? "Admin" : "") . "Sessions` (`SID`, `" . ( $parameters["Domain"] == "Multi-Tenant" ? "Admin" : "User") . "`, `LastSeen`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $SID) . "', " . (int) $_in["session"]["Data"]["ID"] . ", " . time () . ")"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "user_login");
   }
 
   /**
@@ -1322,6 +1311,139 @@ framework_add_hook (
                   "example" => 1000
                 )
               )
+            ),
+            "Counts" => array (
+              "type" => "object",
+              "description" => __ ( "Summary counts for the selected period and tenant."),
+              "properties" => array (
+                "TotalCalls" => array (
+                  "type" => "integer",
+                  "description" => __ ( "Total number of calls in the period."),
+                  "example" => 1500
+                ),
+                "Answered" => array (
+                  "type" => "integer",
+                  "description" => __ ( "Total number of answered calls in the period."),
+                  "example" => 1200
+                ),
+                "NoAnswer" => array (
+                  "type" => "integer",
+                  "description" => __ ( "Total number of unanswered calls in the period."),
+                  "example" => 200
+                ),
+                "Extensions" => array (
+                  "type" => "integer",
+                  "description" => __ ( "Total number of extensions in the tenant."),
+                  "example" => 150
+                ),
+                "Servers" => array (
+                  "type" => "integer",
+                  "description" => __ ( "Total number of servers in the tenant."),
+                  "example" => 3
+                ),
+                "ActiveGateways" => array (
+                  "type" => "integer",
+                  "description" => __ ( "Total number of active gateways in the tenant."),
+                  "example" => 5
+                )
+              )
+            ),
+            "DailyVolume" => array (
+              "type" => "array",
+              "description" => __ ( "Daily call volume breakdown by disposition for the selected period."),
+              "items" => array (
+                "type" => "object",
+                "properties" => array (
+                  "Date" => array (
+                    "type" => "string",
+                    "description" => __ ( "The date in YYYY-MM-DD format."),
+                    "example" => "2026-07-20"
+                  ),
+                  "Answered" => array (
+                    "type" => "integer",
+                    "description" => __ ( "Number of answered calls on this day."),
+                    "example" => 45
+                  ),
+                  "NoAnswer" => array (
+                    "type" => "integer",
+                    "description" => __ ( "Number of unanswered calls on this day."),
+                    "example" => 8
+                  ),
+                  "Busy" => array (
+                    "type" => "integer",
+                    "description" => __ ( "Number of busy calls on this day."),
+                    "example" => 3
+                  ),
+                  "Failed" => array (
+                    "type" => "integer",
+                    "description" => __ ( "Number of failed calls on this day."),
+                    "example" => 1
+                  )
+                )
+              )
+            ),
+            "ServerStatus" => array (
+              "type" => "array",
+              "description" => __ ( "Status of each server with pending command count."),
+              "items" => array (
+                "type" => "object",
+                "properties" => array (
+                  "ID" => array (
+                    "type" => "integer",
+                    "description" => __ ( "The server ID."),
+                    "example" => 1
+                  ),
+                  "Description" => array (
+                    "type" => "string",
+                    "description" => __ ( "The server description."),
+                    "example" => "Main PBX Server"
+                  ),
+                  "Pending" => array (
+                    "type" => "integer",
+                    "description" => __ ( "Number of pending commands for this server."),
+                    "example" => 3
+                  )
+                )
+              )
+            ),
+            "RecentCalls" => array (
+              "type" => "array",
+              "description" => __ ( "The last 10 calls regardless of period filter."),
+              "items" => array (
+                "type" => "object",
+                "properties" => array (
+                  "Source" => array (
+                    "type" => "string",
+                    "description" => __ ( "The call source number."),
+                    "example" => "1001"
+                  ),
+                  "Destination" => array (
+                    "type" => "string",
+                    "description" => __ ( "The call destination number."),
+                    "example" => "1002"
+                  ),
+                  "Date" => array (
+                    "type" => "string",
+                    "description" => __ ( "The call date and time."),
+                    "example" => "2026-07-23 14:30:00"
+                  ),
+                  "Duration" => array (
+                    "type" => "integer",
+                    "description" => __ ( "Total call duration in seconds."),
+                    "example" => 120
+                  ),
+                  "BillSec" => array (
+                    "type" => "integer",
+                    "description" => __ ( "Billable seconds of the call."),
+                    "example" => 95
+                  ),
+                  "Disposition" => array (
+                    "type" => "string",
+                    "description" => __ ( "Call disposition (ANSWERED, NO ANSWER, BUSY, FAILED)."),
+                    "example" => "ANSWERED"
+                  )
+                )
+              )
             )
           )
         )
@@ -1443,15 +1565,13 @@ function dashboard_information ( $page, $parameters)
    */
   if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `disposition` = 'ANSWERED' AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "dashboard_information");
   }
   $asr = intval ( $count->fetch_assoc ()["Total"]);
   $count->free ();
   if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "dashboard_information");
   }
   $total = intval ( $count->fetch_assoc ()["Total"]);
   $count->free ();
@@ -1462,8 +1582,7 @@ function dashboard_information ( $page, $parameters)
    */
   if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND (`disposition` = 'ANSWERED' OR `disposition` = 'NO ANSWER' OR `disposition` = 'BUSY') AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "dashboard_information");
   }
   $ner = intval ( $count->fetch_assoc ()["Total"]);
   $count->free ();
@@ -1474,15 +1593,13 @@ function dashboard_information ( $page, $parameters)
    */
   if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `disposition` = 'BUSY' AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "dashboard_information");
   }
   $sbr = intval ( $count->fetch_assoc ()["Total"]);
   $count->free ();
   if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND (`disposition` = 'ANSWERED' OR `disposition` = 'BUSY') AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "dashboard_information");
   }
   $total = intval ( $count->fetch_assoc ()["Total"]);
   $count->free ();
@@ -1493,15 +1610,13 @@ function dashboard_information ( $page, $parameters)
    */
   if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `disposition` = 'ANSWERED' AND `billsec` <= 60 AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "dashboard_information");
   }
   $scr = intval ( $count->fetch_assoc ()["Total"]);
   $count->free ();
   if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `disposition` = 'ANSWERED' AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "dashboard_information");
   }
   $total = intval ( $count->fetch_assoc ()["Total"]);
   $count->free ();
@@ -1512,8 +1627,7 @@ function dashboard_information ( $page, $parameters)
    */
   if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `disposition` = 'ANSWERED' AND `billsec` >= 300 AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "dashboard_information");
   }
   $lcr = intval ( $count->fetch_assoc ()["Total"]);
   $count->free ();
@@ -1524,15 +1638,13 @@ function dashboard_information ( $page, $parameters)
    */
   if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "dashboard_information");
   }
   $total = intval ( $count->fetch_assoc ()["Total"]);
   $count->free ();
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Start`, `Finish` FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "dashboard_information");
   }
   $ranges = 0;
   while ( $range = $result->fetch_assoc ())
@@ -1548,6 +1660,134 @@ function dashboard_information ( $page, $parameters)
   }
 
   /**
+   * Get summary counts
+   */
+  $dateFilter = " AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'";
+  $tenantFilter = " WHERE `Tenant` = " . (int) $_in["session"]["Tenant"];
+
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr`" . $tenantFilter . $dateFilter))
+  {
+    database_query_error ( "dashboard_information");
+  }
+  $totalCalls = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr`" . $tenantFilter . " AND `disposition` = 'ANSWERED'" . $dateFilter))
+  {
+    database_query_error ( "dashboard_information");
+  }
+  $answered = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr`" . $tenantFilter . " AND `disposition` = 'NO ANSWER'" . $dateFilter))
+  {
+    database_query_error ( "dashboard_information");
+  }
+  $noAnswer = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Extensions`" . $tenantFilter))
+  {
+    database_query_error ( "dashboard_information");
+  }
+  $extensions = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Servers`" . $tenantFilter))
+  {
+    database_query_error ( "dashboard_information");
+  }
+  $servers = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Gateways`" . $tenantFilter . " AND `Active` = 1"))
+  {
+    database_query_error ( "dashboard_information");
+  }
+  $gateways = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+
+  $data["Counts"] = array (
+    "TotalCalls" => $totalCalls,
+    "Answered" => $answered,
+    "NoAnswer" => $noAnswer,
+    "Extensions" => $extensions,
+    "Servers" => $servers,
+    "ActiveGateways" => $gateways
+  );
+
+  /**
+   * Get daily call volume for chart
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT DATE(`calldate`) AS `Day`, `disposition`, COUNT(*) AS `Count` FROM `cdr`" . $tenantFilter . $dateFilter . " GROUP BY `Day`, `disposition` ORDER BY `Day` ASC"))
+  {
+    database_query_error ( "dashboard_information");
+  }
+  $dailyVolume = array ();
+  while ( $row = $result->fetch_assoc ())
+  {
+    $day = $row["Day"];
+    if ( ! isset ( $dailyVolume[$day]))
+    {
+      $dailyVolume[$day] = array ( "Date" => $day, "Answered" => 0, "NoAnswer" => 0, "Busy" => 0, "Failed" => 0);
+    }
+    switch ( $row["disposition"])
+    {
+      case "ANSWERED":
+        $dailyVolume[$day]["Answered"] = intval ( $row["Count"]);
+        break;
+      case "NO ANSWER":
+        $dailyVolume[$day]["NoAnswer"] = intval ( $row["Count"]);
+        break;
+      case "BUSY":
+        $dailyVolume[$day]["Busy"] = intval ( $row["Count"]);
+        break;
+      default:
+        $dailyVolume[$day]["Failed"] += intval ( $row["Count"]);
+        break;
+    }
+  }
+  $result->free ();
+  $data["DailyVolume"] = array_values ( $dailyVolume);
+
+  /**
+   * Get server status (pending commands per server)
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Servers`.`ID`, `Servers`.`Description`, COUNT(`Commands`.`ID`) AS `Pending` FROM `Servers` LEFT JOIN `Commands` ON `Servers`.`ID` = `Commands`.`Server`" . $tenantFilter . " GROUP BY `Servers`.`ID` ORDER BY `Pending` DESC"))
+  {
+    database_query_error ( "dashboard_information");
+  }
+  $serverStatus = array ();
+  while ( $row = $result->fetch_assoc ())
+  {
+    $serverStatus[] = array ( "ID" => intval ( $row["ID"]), "Description" => $row["Description"], "Pending" => intval ( $row["Pending"]));
+  }
+  $result->free ();
+  $data["ServerStatus"] = $serverStatus;
+
+  /**
+   * Get recent calls (last 10)
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `src`, `dst`, `calldate`, `duration`, `billsec`, `disposition` FROM `cdr`" . $tenantFilter . " ORDER BY `calldate` DESC LIMIT 10"))
+  {
+    database_query_error ( "dashboard_information");
+  }
+  $recentCalls = array ();
+  while ( $row = $result->fetch_assoc ())
+  {
+    $recentCalls[] = array (
+      "Source" => $row["src"],
+      "Destination" => $row["dst"],
+      "Date" => $row["calldate"],
+      "Duration" => intval ( $row["duration"]),
+      "BillSec" => intval ( $row["billsec"]),
+      "Disposition" => $row["disposition"]
+    );
+  }
+  $result->free ();
+  $data["RecentCalls"] = $recentCalls;
+
+  /**
    * Call post hook if exist
    */
   if ( framework_has_hook ( "dashboard_information_post"))
@@ -1561,6 +1801,749 @@ function dashboard_information ( $page, $parameters)
   if ( framework_has_hook ( "dashboard_information_finish"))
   {
     framework_call ( "dashboard_information_finish", $parameters);
+  }
+
+  /**
+   * Return structured data
+   */
+  return array_merge_recursive ( isset ( $buffer) && is_array ( $buffer) ? $buffer : array (), $data);
+}
+
+/**
+ * Add framework master dashboard information hook.
+ */
+framework_add_hook (
+  "dashboard_master",
+  "dashboard_master_information",
+  IN_HOOK_INSERT_FIRST,
+  array (
+    "requests" => array (
+      "type" => "object",
+      "properties" => array (
+        "Start" => array (
+          "type" => "date",
+          "description" => __ ( "The date of report start. If empty, 1 month early will be set."),
+          "required" => false,
+          "example" => "2020-05-01"
+        ),
+        "End" => array (
+          "type" => "date-time",
+          "description" => __ ( "The date of report end. If empty, will be set today."),
+          "required" => false,
+          "example" => "2020-05-01"
+        )
+      )
+    ),
+    "response" => array (
+      200 => array (
+        "description" => __ ( "An array containing the system-wide master dashboard data."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "ASR" => array (
+              "type" => "object",
+              "description" => __ ( "Answer-Seizure Ratio (ASR) — system-wide."),
+              "properties" => array (
+                "Percent" => array (
+                  "type" => "double",
+                  "description" => __ ( "ASR percentage."),
+                  "example" => 98.6
+                ),
+                "Value" => array (
+                  "type" => "integer",
+                  "description" => __ ( "ASR read value."),
+                  "example" => 986
+                ),
+                "Total" => array (
+                  "type" => "integer",
+                  "description" => __ ( "ASR total value."),
+                  "example" => 1000
+                )
+              )
+            ),
+            "NER" => array (
+              "type" => "object",
+              "description" => __ ( "Network Efficiency Ratio (NER) — system-wide."),
+              "properties" => array (
+                "Percent" => array (
+                  "type" => "double",
+                  "description" => __ ( "NER percentage."),
+                  "example" => 100
+                ),
+                "Value" => array (
+                  "type" => "integer",
+                  "description" => __ ( "NER read value."),
+                  "example" => 1000
+                ),
+                "Total" => array (
+                  "type" => "integer",
+                  "description" => __ ( "NER total value."),
+                  "example" => 1000
+                )
+              )
+            ),
+            "SBR" => array (
+              "type" => "object",
+              "description" => __ ( "Subscriber Busy Ratio (SBR) — system-wide."),
+              "properties" => array (
+                "Percent" => array (
+                  "type" => "double",
+                  "description" => __ ( "SBR percentage."),
+                  "example" => 15.2
+                ),
+                "Value" => array (
+                  "type" => "integer",
+                  "description" => __ ( "SBR read value."),
+                  "example" => 152
+                ),
+                "Total" => array (
+                  "type" => "integer",
+                  "description" => __ ( "SBR total value."),
+                  "example" => 1000
+                )
+              )
+            ),
+            "SCR" => array (
+              "type" => "object",
+              "description" => __ ( "Short Calls Ratio (SCR) — system-wide."),
+              "properties" => array (
+                "Percent" => array (
+                  "type" => "double",
+                  "description" => __ ( "SCR percentage."),
+                  "example" => 87.3
+                ),
+                "Value" => array (
+                  "type" => "integer",
+                  "description" => __ ( "SCR read value."),
+                  "example" => 873
+                ),
+                "Total" => array (
+                  "type" => "integer",
+                  "description" => __ ( "SCR total value."),
+                  "example" => 1000
+                )
+              )
+            ),
+            "LCR" => array (
+              "type" => "object",
+              "description" => __ ( "Long Calls Ratio (LCR) — system-wide."),
+              "properties" => array (
+                "Percent" => array (
+                  "type" => "double",
+                  "description" => __ ( "LCR percentage."),
+                  "example" => 12.7
+                ),
+                "Value" => array (
+                  "type" => "integer",
+                  "description" => __ ( "LCR read value."),
+                  "example" => 127
+                ),
+                "Total" => array (
+                  "type" => "integer",
+                  "description" => __ ( "LCR total value."),
+                  "example" => 1000
+                )
+              )
+            ),
+            "Allocation" => array (
+              "type" => "object",
+              "description" => __ ( "Allocation Ratio — system-wide."),
+              "properties" => array (
+                "Percent" => array (
+                  "type" => "double",
+                  "description" => __ ( "Allocation percentage."),
+                  "example" => 50.5
+                ),
+                "Value" => array (
+                  "type" => "integer",
+                  "description" => __ ( "Allocation read value."),
+                  "example" => 505
+                ),
+                "Total" => array (
+                  "type" => "integer",
+                  "description" => __ ( "Allocation total value."),
+                  "example" => 1000
+                )
+              )
+            ),
+            "Counts" => array (
+              "type" => "object",
+              "description" => __ ( "System-wide summary counts."),
+              "properties" => array (
+                "Tenants" => array (
+                  "type" => "integer",
+                  "description" => __ ( "Total number of active tenants."),
+                  "example" => 12
+                ),
+                "TenantsSuspended" => array (
+                  "type" => "integer",
+                  "description" => __ ( "Total number of suspended tenants."),
+                  "example" => 2
+                ),
+                "TotalCalls" => array (
+                  "type" => "integer",
+                  "description" => __ ( "Total number of calls across all tenants in the period."),
+                  "example" => 15000
+                ),
+                "Answered" => array (
+                  "type" => "integer",
+                  "description" => __ ( "Total number of answered calls across all tenants in the period."),
+                  "example" => 12000
+                ),
+                "NoAnswer" => array (
+                  "type" => "integer",
+                  "description" => __ ( "Total number of unanswered calls across all tenants in the period."),
+                  "example" => 2000
+                ),
+                "Extensions" => array (
+                  "type" => "integer",
+                  "description" => __ ( "Total number of extensions across all tenants."),
+                  "example" => 1500
+                ),
+                "Servers" => array (
+                  "type" => "integer",
+                  "description" => __ ( "Total number of servers across all tenants."),
+                  "example" => 10
+                ),
+                "ActiveGateways" => array (
+                  "type" => "integer",
+                  "description" => __ ( "Total number of active gateways across all tenants."),
+                  "example" => 25
+                )
+              )
+            ),
+            "TenantBreakdown" => array (
+              "type" => "array",
+              "description" => __ ( "Top tenants ranked by call volume in the period."),
+              "items" => array (
+                "type" => "object",
+                "properties" => array (
+                  "ID" => array (
+                    "type" => "integer",
+                    "description" => __ ( "The tenant ID."),
+                    "example" => 1
+                  ),
+                  "Name" => array (
+                    "type" => "string",
+                    "description" => __ ( "The tenant name."),
+                    "example" => "Acme Corp"
+                  ),
+                  "TotalCalls" => array (
+                    "type" => "integer",
+                    "description" => __ ( "Total calls for this tenant in the period."),
+                    "example" => 3500
+                  ),
+                  "Answered" => array (
+                    "type" => "integer",
+                    "description" => __ ( "Answered calls for this tenant in the period."),
+                    "example" => 3000
+                  ),
+                  "NoAnswer" => array (
+                    "type" => "integer",
+                    "description" => __ ( "Unanswered calls for this tenant in the period."),
+                    "example" => 350
+                  )
+                )
+              )
+            ),
+            "DailyVolume" => array (
+              "type" => "array",
+              "description" => __ ( "Daily call volume breakdown by disposition — system-wide."),
+              "items" => array (
+                "type" => "object",
+                "properties" => array (
+                  "Date" => array (
+                    "type" => "string",
+                    "description" => __ ( "The date in YYYY-MM-DD format."),
+                    "example" => "2026-07-20"
+                  ),
+                  "Answered" => array (
+                    "type" => "integer",
+                    "description" => __ ( "Number of answered calls on this day."),
+                    "example" => 450
+                  ),
+                  "NoAnswer" => array (
+                    "type" => "integer",
+                    "description" => __ ( "Number of unanswered calls on this day."),
+                    "example" => 80
+                  ),
+                  "Busy" => array (
+                    "type" => "integer",
+                    "description" => __ ( "Number of busy calls on this day."),
+                    "example" => 30
+                  ),
+                  "Failed" => array (
+                    "type" => "integer",
+                    "description" => __ ( "Number of failed calls on this day."),
+                    "example" => 10
+                  )
+                )
+              )
+            ),
+            "ServerStatus" => array (
+              "type" => "array",
+              "description" => __ ( "Status of all servers across all tenants with pending command count."),
+              "items" => array (
+                "type" => "object",
+                "properties" => array (
+                  "ID" => array (
+                    "type" => "integer",
+                    "description" => __ ( "The server ID."),
+                    "example" => 1
+                  ),
+                  "Description" => array (
+                    "type" => "string",
+                    "description" => __ ( "The server description including tenant name."),
+                    "example" => "Main PBX Server (Acme Corp)"
+                  ),
+                  "Pending" => array (
+                    "type" => "integer",
+                    "description" => __ ( "Number of pending commands for this server."),
+                    "example" => 3
+                  )
+                )
+              )
+            ),
+            "RecentCalls" => array (
+              "type" => "array",
+              "description" => __ ( "The last 10 calls across the entire system."),
+              "items" => array (
+                "type" => "object",
+                "properties" => array (
+                  "Tenant" => array (
+                    "type" => "string",
+                    "description" => __ ( "The tenant name."),
+                    "example" => "Acme Corp"
+                  ),
+                  "Source" => array (
+                    "type" => "string",
+                    "description" => __ ( "The call source number."),
+                    "example" => "1001"
+                  ),
+                  "Destination" => array (
+                    "type" => "string",
+                    "description" => __ ( "The call destination number."),
+                    "example" => "1002"
+                  ),
+                  "Date" => array (
+                    "type" => "string",
+                    "description" => __ ( "The call date and time."),
+                    "example" => "2026-07-23 14:30:00"
+                  ),
+                  "Duration" => array (
+                    "type" => "integer",
+                    "description" => __ ( "Total call duration in seconds."),
+                    "example" => 120
+                  ),
+                  "BillSec" => array (
+                    "type" => "integer",
+                    "description" => __ ( "Billable seconds of the call."),
+                    "example" => 95
+                  ),
+                  "Disposition" => array (
+                    "type" => "string",
+                    "description" => __ ( "Call disposition (ANSWERED, NO ANSWER, BUSY, FAILED)."),
+                    "example" => "ANSWERED"
+                  )
+                )
+              )
+            )
+          )
+        )
+      ),
+      422 => array (
+        "description" => __ ( "An error occurred while processing the request. An invalid parameter or missing required parameter was found."),
+        "schema" => array (
+          "type" => "object",
+          "properties" => array (
+            "Start" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "Invalid start date.")
+            ),
+            "End" => array (
+              "type" => "string",
+              "description" => __ ( "The text description of this field error."),
+              "example" => __ ( "Invalid end date.")
+            )
+          )
+        )
+      )
+    )
+  )
+);
+framework_add_api_call (
+  "/dashboard/master",
+  "Read",
+  "dashboard_master",
+  array (
+    "permissions" => array ( "Super-Administrator"),
+    "title" => __ ( "Master dashboard"),
+    "description" => __ ( "Generate the system-wide master dashboard statistics.")
+  )
+);
+
+/**
+ * Function to generate master dashboard information (system-wide).
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $page Buffer from plugin system if processed by other function
+ *                     before
+ * @param array $parameters Framework page structure
+ * @return array Framework page structure with generated content
+ */
+function dashboard_master_information ( $page, $parameters)
+{
+  global $_in;
+
+  /**
+   * Call start hook if exist
+   */
+  if ( framework_has_hook ( "dashboard_master_start"))
+  {
+    $parameters = framework_call ( "dashboard_master_start", $parameters);
+  }
+
+  /**
+   * Validate received parameters
+   */
+  $data = array ();
+  $start = format_form_date ( $parameters["Start"]);
+  if ( empty ( $start))
+  {
+    $data["Start"] = __ ( "Invalid start date.");
+  }
+  $end = format_form_date ( $parameters["End"]);
+  if ( empty ( $end))
+  {
+    $data["End"] = __ ( "Invalid end date.");
+  }
+
+  /**
+   * Call validate hook if exist
+   */
+  if ( framework_has_hook ( "dashboard_master_validate"))
+  {
+    $data = framework_call ( "dashboard_master_validate", $parameters);
+  }
+
+  /**
+   * Return error data if some error occurred
+   */
+  if ( sizeof ( $data) != 0)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+    return $data;
+  }
+
+  /**
+   * Sanitize parameters
+   */
+  $parameters["Start"] = strtotime ( array_key_exists ( "Start", $parameters) ? format_form_date ( $parameters["Start"]) : "29 days ago");
+  $parameters["End"] = array_key_exists ( "End", $parameters) ? strtotime ( format_form_date ( $parameters["End"])) : mktime ();
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "dashboard_master_sanitize"))
+  {
+    $parameters = framework_call ( "dashboard_master_sanitize", $parameters, false, $parameters);
+  }
+
+  /**
+   * Call pre hook if exist
+   */
+  if ( framework_has_hook ( "dashboard_master_pre"))
+  {
+    $parameters = framework_call ( "dashboard_master_pre", $parameters, false, $parameters);
+  }
+
+  /**
+   * Get system-wide usage information (no tenant filter)
+   */
+  $data = array ();
+  $dateFilter = " AND `calldate` >= '" . date ( "Y-m-d", $parameters["Start"]) . " 00:00:00' AND `calldate` <= '" . date ( "Y-m-d", $parameters["End"]) . " 23:59:59'";
+
+  /**
+   * Get ASR (Answer-Seizure Ratio) — system-wide
+   */
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `disposition` = 'ANSWERED'" . $dateFilter))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $asr = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE 1=1" . $dateFilter))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $total = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+  $data["ASR"] = array ( "Percent" => ( $total != 0 ? round (( $asr * 100) / $total) : 0), "Value" => $asr, "Total" => $total);
+
+  /**
+   * Get NER (Network Efficiency Ratio) — system-wide
+   */
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE (`disposition` = 'ANSWERED' OR `disposition` = 'NO ANSWER' OR `disposition` = 'BUSY')" . $dateFilter))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $ner = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+  $data["NER"] = array ( "Percent" => ( $total != 0 ? round (( $ner * 100) / $total) : 0), "Value" => $ner, "Total" => $total);
+
+  /**
+   * Get SBR (Subscriber Busy Ratio) — system-wide
+   */
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `disposition` = 'BUSY'" . $dateFilter))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $sbr = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE (`disposition` = 'ANSWERED' OR `disposition` = 'BUSY')" . $dateFilter))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $sbrTotal = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+  $data["SBR"] = array ( "Percent" => ( $sbrTotal != 0 ? round (( $sbr * 100) / $sbrTotal) : 0), "Value" => $sbr, "Total" => $sbrTotal);
+
+  /**
+   * Get SCR (Short Calls Ratio) — system-wide
+   */
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `disposition` = 'ANSWERED' AND `billsec` <= 60" . $dateFilter))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $scr = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `disposition` = 'ANSWERED'" . $dateFilter))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $scrTotal = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+  $data["SCR"] = array ( "Percent" => ( $scrTotal != 0 ? round (( $scr * 100) / $scrTotal) : 0), "Value" => $scr, "Total" => $scrTotal);
+
+  /**
+   * Get LCR (Long Calls Ratio) — system-wide
+   */
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `disposition` = 'ANSWERED' AND `billsec` >= 300" . $dateFilter))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $lcr = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+  $data["LCR"] = array ( "Percent" => ( $scrTotal != 0 ? round (( $lcr * 100) / $scrTotal) : 0), "Value" => $lcr, "Total" => $scrTotal);
+
+  /**
+   * Get allocations percentage — system-wide
+   */
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Extensions`"))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $extTotal = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Start`, `Finish` FROM `Ranges`"))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $ranges = 0;
+  while ( $range = $result->fetch_assoc ())
+  {
+    $ranges += $range["Finish"] - $range["Start"];
+  }
+  $result->free ();
+  if ( ! $ranges)
+  {
+    $data["Allocation"] = array ( "Percent" => 0, "Value" => $extTotal, "Total" => $ranges);
+  } else {
+    $data["Allocation"] = array ( "Percent" => round (( $extTotal * 100) / $ranges), "Value" => $extTotal, "Total" => $ranges);
+  }
+
+  /**
+   * Get summary counts — system-wide
+   */
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Tenants` WHERE `Status` = 'Active'"))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $tenantsActive = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Tenants` WHERE `Status` = 'Suspended'"))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $tenantsSuspended = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE 1=1" . $dateFilter))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $totalCalls = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `disposition` = 'ANSWERED'" . $dateFilter))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $answered = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `cdr` WHERE `disposition` = 'NO ANSWER'" . $dateFilter))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $noAnswer = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Extensions`"))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $extensions = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Servers`"))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $servers = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+
+  if ( ! $count = @$_in["mysql"]["id"]->query ( "SELECT COUNT(*) AS `Total` FROM `Gateways` WHERE `Active` = 1"))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $gateways = intval ( $count->fetch_assoc ()["Total"]);
+  $count->free ();
+
+  $data["Counts"] = array (
+    "Tenants" => $tenantsActive,
+    "TenantsSuspended" => $tenantsSuspended,
+    "TotalCalls" => $totalCalls,
+    "Answered" => $answered,
+    "NoAnswer" => $noAnswer,
+    "Extensions" => $extensions,
+    "Servers" => $servers,
+    "ActiveGateways" => $gateways
+  );
+
+  /**
+   * Get tenant breakdown (top 10 by call volume)
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `cdr`.`Tenant`, `Tenants`.`Name`, COUNT(*) AS `TotalCalls`, SUM(CASE WHEN `cdr`.`disposition` = 'ANSWERED' THEN 1 ELSE 0 END) AS `Answered`, SUM(CASE WHEN `cdr`.`disposition` = 'NO ANSWER' THEN 1 ELSE 0 END) AS `NoAnswer` FROM `cdr` LEFT JOIN `Tenants` ON `cdr`.`Tenant` = `Tenants`.`ID` WHERE 1=1" . $dateFilter . " GROUP BY `cdr`.`Tenant` ORDER BY `TotalCalls` DESC LIMIT 10"))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $tenantBreakdown = array ();
+  while ( $row = $result->fetch_assoc ())
+  {
+    $tenantBreakdown[] = array (
+      "ID" => intval ( $row["Tenant"]),
+      "Name" => $row["Name"] ? $row["Name"] : "Unknown",
+      "TotalCalls" => intval ( $row["TotalCalls"]),
+      "Answered" => intval ( $row["Answered"]),
+      "NoAnswer" => intval ( $row["NoAnswer"])
+    );
+  }
+  $result->free ();
+  $data["TenantBreakdown"] = $tenantBreakdown;
+
+  /**
+   * Get daily call volume for chart — system-wide
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT DATE(`calldate`) AS `Day`, `disposition`, COUNT(*) AS `Count` FROM `cdr` WHERE 1=1" . $dateFilter . " GROUP BY `Day`, `disposition` ORDER BY `Day` ASC"))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $dailyVolume = array ();
+  while ( $row = $result->fetch_assoc ())
+  {
+    $day = $row["Day"];
+    if ( ! isset ( $dailyVolume[$day]))
+    {
+      $dailyVolume[$day] = array ( "Date" => $day, "Answered" => 0, "NoAnswer" => 0, "Busy" => 0, "Failed" => 0);
+    }
+    switch ( $row["disposition"])
+    {
+      case "ANSWERED":
+        $dailyVolume[$day]["Answered"] = intval ( $row["Count"]);
+        break;
+      case "NO ANSWER":
+        $dailyVolume[$day]["NoAnswer"] = intval ( $row["Count"]);
+        break;
+      case "BUSY":
+        $dailyVolume[$day]["Busy"] = intval ( $row["Count"]);
+        break;
+      default:
+        $dailyVolume[$day]["Failed"] += intval ( $row["Count"]);
+        break;
+    }
+  }
+  $result->free ();
+  $data["DailyVolume"] = array_values ( $dailyVolume);
+
+  /**
+   * Get server status — all servers with tenant name
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Servers`.`ID`, `Servers`.`Description`, `Tenants`.`Name` AS `TenantName`, COUNT(`Commands`.`ID`) AS `Pending` FROM `Servers` LEFT JOIN `Tenants` ON `Servers`.`Tenant` = `Tenants`.`ID` LEFT JOIN `Commands` ON `Servers`.`ID` = `Commands`.`Server` GROUP BY `Servers`.`ID` ORDER BY `Pending` DESC"))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $serverStatus = array ();
+  while ( $row = $result->fetch_assoc ())
+  {
+    $serverStatus[] = array (
+      "ID" => intval ( $row["ID"]),
+      "Description" => $row["Description"] . " (" . ( $row["TenantName"] ? $row["TenantName"] : "N/A") . ")",
+      "Pending" => intval ( $row["Pending"])
+    );
+  }
+  $result->free ();
+  $data["ServerStatus"] = $serverStatus;
+
+  /**
+   * Get recent calls (last 10) — system-wide with tenant name
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `cdr`.`src`, `cdr`.`dst`, `cdr`.`calldate`, `cdr`.`duration`, `cdr`.`billsec`, `cdr`.`disposition`, `Tenants`.`Name` AS `TenantName` FROM `cdr` LEFT JOIN `Tenants` ON `cdr`.`Tenant` = `Tenants`.`ID` ORDER BY `cdr`.`calldate` DESC LIMIT 10"))
+  {
+    database_query_error ( "dashboard_master_information");
+  }
+  $recentCalls = array ();
+  while ( $row = $result->fetch_assoc ())
+  {
+    $recentCalls[] = array (
+      "Tenant" => $row["TenantName"] ? $row["TenantName"] : "Unknown",
+      "Source" => $row["src"],
+      "Destination" => $row["dst"],
+      "Date" => $row["calldate"],
+      "Duration" => intval ( $row["duration"]),
+      "BillSec" => intval ( $row["billsec"]),
+      "Disposition" => $row["disposition"]
+    );
+  }
+  $result->free ();
+  $data["RecentCalls"] = $recentCalls;
+
+  /**
+   * Call post hook if exist
+   */
+  if ( framework_has_hook ( "dashboard_master_post"))
+  {
+    $data = framework_call ( "dashboard_master_post", $parameters, false, $data);
+  }
+
+  /**
+   * Execute finish hook if exist
+   */
+  if ( framework_has_hook ( "dashboard_master_finish"))
+  {
+    framework_call ( "dashboard_master_finish", $parameters);
   }
 
   /**
@@ -1689,8 +2672,7 @@ function calls_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `uniqueid` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "calls_view");
   }
   if ( ! $call = $result->fetch_assoc ())
   {
@@ -1871,8 +2853,7 @@ function calls_sipdump_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `uniqueid` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "calls_sipdump_view");
   }
   if ( ! $call = $result->fetch_assoc ())
   {
@@ -2047,8 +3028,7 @@ function calls_recording_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `uniqueid` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["ID"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "calls_recording_view");
   }
   if ( ! $call = $result->fetch_assoc ())
   {
@@ -2317,8 +3297,7 @@ function config_tenant_add_post ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Permissions', " . (int) $parameters["ID"] . ", '{\"Landline\":{\"Local\":\"y\",\"Interstate\":\"y\",\"International\":\"y\"},\"Mobile\":{\"Local\":\"y\",\"Interstate\":\"y\",\"International\":\"y\"},\"Marine\":{\"Local\":\"y\",\"Interstate\":\"y\",\"International\":\"y\"},\"Tollfree\":{\"Local\":\"y\",\"International\":\"y\"},\"PRN\":{\"Local\":\"n\",\"International\":\"n\"},\"Satellite\":{\"Local\":\"p\",\"International\":\"p\"}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "config_tenant_add_post");
   }
 
   /**

@@ -190,6 +190,7 @@ function tokens_add_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Tokens"), "link" => "/tokens"),
     2 => array ( "title" => __ ( "Add"))
   ));
+  sys_set_menu_highlight ( "/tokens");
 
   /**
    * Add page CSS requirements
@@ -208,7 +209,7 @@ function tokens_add_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"token_add_form\">\n";
 
   // Add token description field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"token_add_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"token_add_description\" placeholder=\"" . __ ( "Token description") . "\" />\n";
@@ -216,7 +217,7 @@ function tokens_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add token field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"token_add_token\" class=\"control-label col-xs-2\">" . __ ( "Token") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <div class=\"input-group\">\n";
@@ -229,7 +230,7 @@ function tokens_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add token access field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"token_add_access\" class=\"control-label col-xs-2\">" . __ ( "CIDR") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Access\" class=\"form-control\" id=\"token_add_access\" placeholder=\"" . __ ( "Token access CIDR") . "\" maxlength=\"18\" />\n";
@@ -237,7 +238,7 @@ function tokens_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add token permissions field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"token_add_permissions\" class=\"control-label col-xs-2\">" . __ ( "Permissions") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <select name=\"Permissions\" id=\"token_add_permissions\" class=\"form-control\" data-placeholder=\"" . __ ( "Token permissions") . "\" multiple=\"multiple\"></select>\n";
@@ -245,7 +246,7 @@ function tokens_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add token validity field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"token_add_validity\" class=\"control-label col-xs-2\">" . __ ( "Validity") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <div class=\"input-group date\">\n";
@@ -359,7 +360,7 @@ function tokens_add_page ( $buffer, $parameters)
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
+ * @return void
  */
 function tokens_clone_function ( $buffer, $parameters)
 {
@@ -421,6 +422,7 @@ function tokens_view_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Tokens"), "link" => "/tokens"),
     2 => array ( "title" => __ ( "View"))
   ));
+  sys_set_menu_highlight ( "/tokens");
 
   /**
    * Create page code
@@ -564,6 +566,7 @@ function tokens_edit_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Tokens"), "link" => "/tokens"),
     2 => array ( "title" => __ ( "Edit"))
   ));
+  sys_set_menu_highlight ( "/tokens");
 
   /**
    * Add page CSS requirements
@@ -582,7 +585,7 @@ function tokens_edit_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"token_edit_form\">\n";
 
   // Add token description field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"token_edit_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"token_edit_description\" placeholder=\"" . __ ( "Token description") . "\" />\n";
@@ -590,7 +593,7 @@ function tokens_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add token field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"token_edit_token\" class=\"control-label col-xs-2\">" . __ ( "Token") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <div class=\"input-group\">\n";
@@ -603,7 +606,7 @@ function tokens_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add token access field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"token_edit_access\" class=\"control-label col-xs-2\">" . __ ( "CIDR") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Access\" class=\"form-control\" id=\"token_edit_access\" placeholder=\"" . __ ( "Token access CIDR") . "\" />\n";
@@ -611,7 +614,7 @@ function tokens_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add token permissions field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"token_edit_permissions\" class=\"control-label col-xs-2\">" . __ ( "Permissions") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <select name=\"Permissions\" id=\"token_edit_permissions\" class=\"form-control\" data-placeholder=\"" . __ ( "Token permissions") . "\" multiple=\"multiple\"></select>\n";
@@ -619,7 +622,7 @@ function tokens_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add token validity field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"token_edit_validity\" class=\"control-label col-xs-2\">" . __ ( "Validity") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <div class=\"input-group date\">\n";

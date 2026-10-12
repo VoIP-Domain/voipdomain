@@ -244,8 +244,7 @@ function sampleitems_search ( $buffer, $parameters)
   $sql .= " ORDER BY `Name`";
   if ( ! $results = @$_in["mysql"]["id"]->query ( $sql))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "sampleitems_search");
   }
 
   /**
@@ -447,8 +446,7 @@ function sampleitems_view ( $buffer, $parameters)
   $sql = "SELECT `ID`, `Name`, `Description` FROM `SampleItems` WHERE `ID` = " . (int) $parameters["ID"];
   if ( ! $result = @$_in["mysql"]["id"]->query ( $sql))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "sampleitems_view");
   }
   if ( ! $item = $result->fetch_assoc())
   {
@@ -636,8 +634,7 @@ function sampleitems_add ( $buffer, $parameters)
   $sql = "INSERT INTO `SampleItems` (`Name`, `Description`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "')";
   if ( ! $result = @$_in["mysql"]["id"]->query ( $sql))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "sampleitems_add");
   }
   $parameters["ID"] = $result->insert_id;
 
@@ -826,8 +823,7 @@ function sampleitems_edit ( $buffer, $parameters)
   $sql = "UPDATE `SampleItems` SET `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "' WHERE `ID` = " . (int) $parameters["ID"];
   if ( ! $result = @$_in["mysql"]["id"]->query ( $sql))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "sampleitems_edit");
   }
 
   /**
@@ -982,8 +978,7 @@ function sampleitems_remove ( $buffer, $parameters)
   $sql = "DELETE FROM `SampleItems` WHERE `ID` = " . (int) $parameters["ID"];
   if ( ! $result = @$_in["mysql"]["id"]->query ( $sql))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "sampleitems_remove");
   }
 
   /**

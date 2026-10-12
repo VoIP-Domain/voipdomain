@@ -100,7 +100,7 @@ function config_page ( $output, $parameters)
   $output .= "      <div class=\"form-group\">\n";
   $output .= "        <label for=\"config_number_length\" class=\"control-label col-xs-2\">" . __ ( "Numbers length") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
-  $output .= "          <select name=\"Length\" id=\"config_length\" class=\"form-control\" data-placeholder=\"" . __ ( "Select the number of digits") . "\">\n";
+  $output .= "          <select name=\"NumbersLength\" id=\"config_length\" class=\"form-control\" data-placeholder=\"" . __ ( "Select the number of digits") . "\">\n";
   $output .= "            <option value=\"\"></option>\n";
   $output .= "            <option value=\"2\">2 " . __ ( "digits") . "</option>\n";
   $output .= "            <option value=\"3\">3 " . __ ( "digits") . "</option>\n";
@@ -904,7 +904,6 @@ function plugins_page ( $output, $parameters)
   $output = "<table id=\"datatables\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\">\n";
   $output .= "  <thead>\n";
   $output .= "    <tr>\n";
-  $output .= "      <th></th>\n";
   $output .= "      <th>" . __ ( "Name") . "</th>\n";
   $output .= "      <th>" . __ ( "Version") . "</th>\n";
   $output .= "      <th>" . __ ( "Description") . "</th>\n";
@@ -990,23 +989,16 @@ function plugins_page ( $output, $parameters)
    */
   sys_addjs ( "$('#datatables').data ( 'dt', $('#datatables').DataTable (\n" .
               "{\n" .
-              "  columnDefs: [\n" .
-              "                { orderable: false, targets: [ 0, 5 ]},\n" .
-              "                { searchable: false, targets: [ 0, 5 ]},\n" .
-              "                { data: 'links', render: function ( data, type, full) { return '<span class=\"btn-group\"><button class=\"btn btn-xs btn-toggle btn-' + ( full[4] == 'on' ? 'warning' : 'info') + '\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"' + ( full[4] == 'on' ? '" . __ ( "Disable") . "' : '" . __ ( "Enable") . "') + '\" data-status=\"' + full[4] + '\" data-dirname=\"' + full[0] + '\" role=\"button\" title=\"\"><i class=\"fa fa-toggle-' + ( full[4] == 'on' ? 'off' : 'on') + '\"></i></button><button class=\"btn btn-xs btn-danger\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Remove") . "\" role=\"button\" title=\"\" data-dirname=\"' + full[0] + '\" data-dirname=\"' + full[0] + '\" data-name=\"' + full[1] + '\" data-description=\"' + full[3] + '\"' + ( full[4] == 'on' ? ' disabled=\"disabled\"' : '') + '><i class=\"fa fa-times\"></i></button></span>'; }, targets: [ 5 ]},\n" .
-              "                { 'render': function ( data, type, full) { return '<span class=\"label label-' + ( full[4] == 'on' ? 'success' : 'danger') + '\" title=\"\">' + ( full[4] == 'on' ? '" . __ ( "Enabled") . "' : '" . __ ( "Disabled") . "') + '</span>'; }, 'targets': [ 4 ]}\n" .
-              "              ],\n" .
               "  columns: [\n" .
-              "             { class: 'none'},\n" .
-              "             { width: '20%', class: 'export all'},\n" .
-              "             { width: '5%', class: 'export all'},\n" .
-              "             { width: '60%', class: 'export min-tablet-l'},\n" .
-              "             { width: '10%', class: 'export all'},\n" .
-              "             { width: '5%', class: 'all'}\n" .
+              "             { data: 'Name', title: '" . __ ( "Name") . "', width: '25%', class: 'export all'},\n" .
+              "             { data: 'Version', title: '" . __ ( "Version") . "', width: '5%', class: 'export all'},\n" .
+              "             { data: 'Description', title: '" . __ ( "Description") . "', width: '50%', class: 'export min-tablet-l'},\n" .
+              "             { data: 'Status', title: '" . __ ( "Status") . "', width: '10%', class: 'export all', render: function ( data, type, row) { return '<span class=\"label label-' + ( data ? 'success' : 'danger') + '\">' + ( data ? '" . __ ( "Enabled") . "' : '" . __ ( "Disabled") . "') + '</span>'; }},\n" .
+              "             { data: 'NULL', title: '" . __ ( "Actions") . "', width: '10%', class: 'all', orderable: false, searchable: false, render: function ( data, type, row) { return '<span class=\"btn-group\"><button class=\"btn btn-xs btn-toggle btn-' + ( row.Status ? 'warning' : 'info') + '\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"' + ( row.Status ? '" . __ ( "Disable") . "' : '" . __ ( "Enable") . "') + '\" data-status=\"' + ( row.Status ? 'on' : 'off') + '\" data-dirname=\"' + row.Dirname + '\" role=\"button\" title=\"\"><i class=\"fa fa-toggle-' + ( row.Status ? 'off' : 'on') + '\"></i></button><button class=\"btn btn-xs btn-danger\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Remove") . "\" role=\"button\" title=\"\" data-dirname=\"' + row.Dirname + '\" data-name=\"' + row.Name + '\" data-description=\"' + row.Description + '\"' + ( row.Status ? ' disabled=\"disabled\"' : '') + '><i class=\"fa fa-times\"></i></button></span>'; }}\n" .
               "           ],\n" .
               "  order: [[ 0, 'asc' ]]\n" .
               "}));\n" .
-              "VoIP.dataTablesUpdate ( { path: '/config/plugin', fields: 'Dirname,Name,Version,Description,Status'}, $('#datatables').data ( 'dt'));\n" .
+              "VoIP.dataTablesUpdate ( { path: '/config/plugin', fields: 'Dirname,Name,Version,Description,Status,NULL'}, $('#datatables').data ( 'dt'));\n" .
               "$('#addbutton').html ( '<button class=\"btn btn-success\" href=\"/config/plugin/add\"><i class=\"fa fa-asterisk\"></i> " . __ ( "Add") . "</button>').css ( 'margin-right', '5px').find ( 'button').on ( 'click', function ( e)\n" .
               "{\n" .
               "  e && e.preventDefault ();\n" .
@@ -1057,7 +1049,7 @@ function plugins_page ( $output, $parameters)
               "    $(data.context).find ( 'button.cancel').attr ( 'disabled', 'disabled');\n" .
               "    $(data.context).find ( 'button.start').removeClass ( 'start');\n" .
               "  } else {\n" .
-              "    var newData = VoIP.APIsearch ( { path: '/config/plugin', fields: 'Dirname,Name,Version,Description,Status'});\n" .
+              "    var newData = VoIP.APIsearch ( { path: '/config/plugin', fields: 'Dirname,Name,Version,Description,Status,NULL'});\n" .
               "    $('#datatables').data ( 'dt').clear ();\n" .
               "    $('#datatables').data ( 'dt').rows.add ( newData);\n" .
               "    $('#datatables').data ( 'dt').draw ();\n" .
@@ -1087,7 +1079,7 @@ function plugins_page ( $output, $parameters)
               "  VoIP.rest ( '/config/plugin/' + encodeURIComponent ( $(this).data ( 'dirname')) + '/toggle', 'PATCH').done ( function ( data, textStatus, jqXHR)\n" .
               "  {\n" .
               "    new PNotify ( { title: '" . __ ( "Plugin toggle") . "', text: '" . __ ( "Plugin toggled successfully!") . "', type: 'success'});\n" .
-              "    var newData = VoIP.APIsearch ( { path: '/config/plugin', fields: 'Dirname,Name,Version,Description,Status'});\n" .
+              "    var newData = VoIP.APIsearch ( { path: '/config/plugin', fields: 'Dirname,Name,Version,Description,Status,NULL'});\n" .
               "    $('#datatables').data ( 'dt').clear ();\n" .
               "    $('#datatables').data ( 'dt').rows.add ( newData);\n" .
               "    $('#datatables').data ( 'dt').draw ();\n" .

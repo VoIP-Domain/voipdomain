@@ -56,8 +56,7 @@ if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE))
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Sessions`.`SID`, `Sessions`.`LastSeen`, `Users`.* FROM `Sessions` LEFT JOIN `Users` ON `Sessions`.`User` = `Users`.`ID` WHERE `Sessions`.`SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_COOKIE[$_in["general"]["cookie"
 ]]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "session_init");
   }
   if ( ! $session = $result->fetch_assoc ())
   {
@@ -125,8 +124,7 @@ if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE))
     /**
      * Return error
      */
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "session_timeout");
   }
 
   /**
@@ -173,13 +171,11 @@ if ( strpos ( $id, ".mp3") !== false)
  */
 if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `uniqueid` = '" . $_in["mysql"]["id"]->real_escape_string ( $id) . "'"))
 {
-  header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-  exit ();
+  database_query_error ( "call_record_lookup");
 }
 if ( ! $call = $result->fetch_assoc ())
 {
-  header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-  exit ();
+  database_query_error ( "call_record_lookup");
 }
 
 /**

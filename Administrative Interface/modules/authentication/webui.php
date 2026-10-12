@@ -306,8 +306,7 @@ function authentication_login_page_generate ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $tenantid . " AND `Key` = 'Authentication'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_login_page_generate");
   }
   if ( ! $config = json_decode ( $result->fetch_assoc ()["Data"], true) || $config["Status"] === false)
   {
@@ -320,8 +319,7 @@ function authentication_login_page_generate ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $tenantid . " AND `Key` LIKE 'Authentication_%'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_login_page_generate");
   }
   $plugins = array ();
   while ( $entry = $result->fetch_assoc ())

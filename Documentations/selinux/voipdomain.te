@@ -1,4 +1,4 @@
-policy_module(voipdomain, 1.0.0)
+policy_module(voipdomain, 1.2.0)
 
 ########################################
 #
@@ -156,13 +156,55 @@ optional_policy(`
 optional_policy(`
     gen_require(`
         type asterisk_t;
+        type asterisk_exec_t;
+        type asterisk_etc_t;
+        type asterisk_var_lib_t;
+        type asterisk_log_t;
         type asterisk_port_t;
     ')
+
+    # Allow VoIP Domain daemon to execute /usr/bin/asterisk CLI
+    # (asterisk -rx "..." for file convert, module reload, moh reload, etc.)
+    allow voipdomain_t asterisk_exec_t:file { execute execute_no_trans open read getattr map };
+
+    # Allow VoIP Domain daemon to manage Asterisk config files in /etc/asterisk/voipdomain/
+    # (bootstrap generation, config file writes, directory creation)
+    allow voipdomain_t asterisk_etc_t:dir manage_dir_perms;
+    allow voipdomain_t asterisk_etc_t:file manage_file_perms;
+
+    # Allow VoIP Domain daemon to manage Asterisk sounds/data files
+    # (/var/lib/asterisk/sounds/voipdomain/ for audio, file convert)
+    allow voipdomain_t asterisk_var_lib_t:dir manage_dir_perms;
+    allow voipdomain_t asterisk_var_lib_t:file manage_file_perms;
+
+    # Allow VoIP Domain daemon to read Asterisk log directory
+    # (/var/log/asterisk/cdr.db for SQLite3 CDR sync)
+    allow voipdomain_t asterisk_log_t:dir list_dir_perms;
+    allow voipdomain_t asterisk_log_t:file rw_file_perms;
 
     # Allow Asterisk to read VoIP Domain configuration files in /etc/asterisk/voipdomain/
     allow asterisk_t voipdomain_etc_t:dir list_dir_perms;
     allow asterisk_t voipdomain_etc_t:file read_file_perms;
 
+    # Allow Asterisk to read/write sounds managed by VoIP Domain
+    # (already allowed by asterisk_var_lib_t default policy, but explicit for clarity)
+
     # Allow Asterisk to connect to FastAGI port (4573)
     allow asterisk_t asterisk_port_t:tcp_socket name_connect;
+')
+
+########################################
+#
+# TFTP provisioning (optional)
+#
+
+optional_policy(`
+    gen_require(`
+        type tftpdir_rw_t;
+    ')
+
+    # Allow VoIP Domain daemon to manage TFTP provisioning files in /var/lib/tftpboot/
+    # (equipment firmware, auto-provisioning configs)
+    allow voipdomain_t tftpdir_rw_t:dir manage_dir_perms;
+    allow voipdomain_t tftpdir_rw_t:file manage_file_perms;
 ')

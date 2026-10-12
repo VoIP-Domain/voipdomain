@@ -40,6 +40,7 @@
  */
 framework_add_filter ( "page_menu_registers", "ivr_menu");
 framework_add_filter ( "get_ivrs", "get_ivrs");
+framework_add_filter ( "audio_inuse", "ivr_audio_inuse");
 
 /**
  * Function to add entry to registers menu.
@@ -94,6 +95,43 @@ function get_ivrs ( $buffer, $parameters)
     {
       $data[] = $ivr;
     }
+  }
+
+  /**
+   * Return structured data
+   */
+  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
+}
+
+/**
+ * Function to check if an audio file is in use by any IVR workflow.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return array Output of the found data
+ */
+function ivr_audio_inuse ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Search IVR workflows referencing audio file
+   */
+  $id = (int) $parameters["ID"];
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT DISTINCT w.`IVR` FROM `IVRWorkflows` w INNER JOIN `IVRs` i ON w.`IVR` = i.`ID` WHERE i.`Tenant` = " . (int) get_tenant () . " AND ( w.`Workflow` LIKE '%\"File\":" . $id . ",%' OR w.`Workflow` LIKE '%\"File\":" . $id . "}%' OR w.`Workflow` LIKE '%\"InvalidFile\":" . $id . ",%' OR w.`Workflow` LIKE '%\"InvalidFile\":" . $id . "}%')"))
+  {
+    database_query_error ( "ivr_audio_inuse");
+  }
+
+  /**
+   * Format data
+   */
+  $data = array ();
+  while ( $row = $result->fetch_assoc ())
+  {
+    $data[] = array ( "Type" => "IVR", "ID" => $row["IVR"]);
   }
 
   /**

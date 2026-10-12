@@ -24,6 +24,7 @@
 | Arquitetura e fluxos de dados | [ARQUITETURA.md](ARQUITETURA.md) |
 | Metodologia de testes | [METODOLOGIA-DE-TESTES.md](METODOLOGIA-DE-TESTES.md) |
 | Recursos implementados recentemente | [RECURSOS-IMPLEMENTADOS.md](RECURSOS-IMPLEMENTADOS.md) |
+| Guia do desenvolvedor de plugins | [PLUGINS.md](PLUGINS.md) |
 | Plugin de exemplo | [../../Plugins/sampleitems/README.md](../../Plugins/sampleitems/README.md) |
 
 ---

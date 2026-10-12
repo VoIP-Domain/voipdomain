@@ -47,10 +47,28 @@ framework_add_hook ( "queue_pause_member", "queue_pause_member");
 framework_add_hook ( "queue_resume_member", "queue_resume_member");
 
 /**
+ * Bootstrap hook: queues configuration includes
+ */
+framework_add_hook ( "asterisk_queues_queues", "queue_queues_hook");
+
+/**
  * Cleanup functions
  */
 framework_add_hook ( "queue_wipe", "queue_wipe");
 cleanup_register ( "Queues", "queue_wipe");
+
+/**
+ * Bootstrap hook: include generated queue configuration files.
+ *
+ * @param string $buffer Buffer from plugin system
+ * @param array $parameters Optional parameters
+ * @return string
+ */
+function queue_queues_hook ( $buffer, $parameters)
+{
+  $buffer .= "#include voipdomain/configs/queue-*.conf\n";
+  return $buffer;
+}
 
 /**
  * Function to create a new queue.

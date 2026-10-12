@@ -100,8 +100,7 @@ function tellows_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'Tellows'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tellows_view");
   }
   $data = array ( "Tellows" => array ( "Key" => "", "AntiSpam" => "", "Score" => ""));
   while ( $entry = $result->fetch_assoc ())
@@ -226,8 +225,7 @@ function tellows_edit_pre ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'Tellows'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tellows_edit_pre");
   }
   $data = array ( "ORIGINAL" => array ( "Tellows" => array ( "Key" => "", "AntiSpam" => "", "Score" => "")));
   while ( $entry = $result->fetch_assoc ())
@@ -242,7 +240,7 @@ function tellows_edit_pre ( $buffer, $parameters)
   /**
    * Sanitize Tellows variables
    */
-  $data["Tellows"] = array ( "Key" => $parameters["Tellows"]["Key"], "AntiSpam" => (boolean) $parameters["Tellows"]["AntiSpam"], "Score" => (int) $parameters["Tellows"]["Score"]);
+  $data["Tellows"] = array ( "Key" => $parameters["Tellows"]["Key"], "AntiSpam" => (bool) $parameters["Tellows"]["AntiSpam"], "Score" => (int) $parameters["Tellows"]["Score"]);
   unset ( $buffer["Tellows"]);
 
   /**
@@ -269,8 +267,7 @@ function tellows_edit_post ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Tellows', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Tellows"])) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Tellows"])) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tellows_edit_post");
   }
 
   /**

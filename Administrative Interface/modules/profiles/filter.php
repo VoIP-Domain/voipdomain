@@ -40,7 +40,7 @@
  */
 framework_add_filter ( "page_menu_registers", "profiles_menu");
 framework_add_filter ( "get_profiles", "get_profiles");
-framework_add_filter ( "audio_inuse", "profiles_moh");
+framework_add_filter ( "audio_inuse", "profile_audio_inuse");
 
 /**
  * Function to add entry to registers menu.
@@ -112,7 +112,7 @@ function get_profiles ( $buffer, $parameters)
  * @param array $parameters Optional parameters to the function
  * @return array Menus structure
  */
-function profiles_moh ( $buffer, $parameters)
+function profile_audio_inuse ( $buffer, $parameters)
 {
   global $_in;
 
@@ -121,8 +121,7 @@ function profiles_moh ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Profiles` WHERE `Tenant` = " . (int) get_tenant () . " AND `MOH` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "profile_audio_inuse");
   }
 
   /**

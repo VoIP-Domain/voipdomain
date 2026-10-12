@@ -145,8 +145,7 @@ function e164_identify ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Countries`.*, `CountryCodes`.`Code` AS `CountryCode` FROM `Countries` RIGHT JOIN `CountryCodes` ON `Countries`.`Code` = `CountryCodes`.`Country` ORDER BY LENGTH(`CountryCode`) DESC, `CountryCode` DESC"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "e164_identify");
   }
   while ( $country = $result->fetch_assoc ())
   {

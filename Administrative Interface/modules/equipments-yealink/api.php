@@ -312,118 +312,95 @@ function equipments_yealink_tenant_add_post ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_cp920', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"G729\",\"G722\",\"ULAW\",\"ALAW\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t19pe2', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"G729\",\"ALAW\",\"ULAW\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t21pe2', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ALAW\",\"ULAW\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t22p', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t26p', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"G722\",\"ULAW\",\"ALAW\",\"G729\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t29g', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ALAW\",\"ULAW\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t30p', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ILBC\",\"ALAW\",\"ULAW\",\"G726\",\"G723\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t40p', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ALAW\",\"ULAW\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t46s', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"G722\",\"ULAW\",\"ALAW\",\"G729\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t20p', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t27g', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t38g', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t23p', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t23g', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t27p', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t48s', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t31', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t31p', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t31g', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t28p', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_vp530', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G729\",\"G722\"],\"VideoCodecs\":[\"H264\",\"H263\",\"MPEG4\"],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t18p', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_t21p', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"user\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"admin\",\"Password\":\"vdadmin\"}}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_yealink_tenant_add_post");
   }
 
   /**

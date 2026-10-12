@@ -193,6 +193,7 @@ function groups_add_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Groups"), "link" => "/groups"),
     2 => array ( "title" => __ ( "Add"))
   ));
+  sys_set_menu_highlight ( "/groups");
 
   /**
    * Create page code
@@ -200,7 +201,7 @@ function groups_add_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"group_add_form\">\n";
 
   // Add group description field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"group_add_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"group_add_description\" placeholder=\"" . __ ( "Group description") . "\" />\n";
@@ -208,7 +209,7 @@ function groups_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add group profile selector
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"group_add_profile\" class=\"control-label col-xs-2\">" . __ ( "Profile") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <select name=\"Profile\" id=\"group_add_profile\" class=\"form-control\" data-placeholder=\"" . __ ( "Group profile") . "\"><option value=\"\"></option></select>\n";
@@ -216,7 +217,7 @@ function groups_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add group cost center selector
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"group_add_costcenter\" class=\"control-label col-xs-2\">" . __ ( "Cost center") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <select name=\"CostCenter\" id=\"group_add_costcenter\" class=\"form-control\" data-placeholder=\"" . __ ( "Group cost center") . "\"><option value=\"\"></option></select>\n";
@@ -287,7 +288,7 @@ function groups_add_page ( $buffer, $parameters)
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
+ * @return void
  */
 function groups_clone_function ( $buffer, $parameters)
 {
@@ -335,6 +336,7 @@ function groups_view_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Groups"), "link" => "/groups"),
     2 => array ( "title" => __ ( "View"))
   ));
+  sys_set_menu_highlight ( "/groups");
 
   /**
    * Create page code
@@ -416,6 +418,7 @@ function groups_edit_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Groups"), "link" => "/groups"),
     2 => array ( "title" => __ ( "Edit"))
   ));
+  sys_set_menu_highlight ( "/groups");
 
   /**
    * Create page code
@@ -423,7 +426,7 @@ function groups_edit_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"group_edit_form\">\n";
 
   // Add group description field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"group_edit_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"group_edit_description\" placeholder=\"" . __ ( "Group description") . "\" />\n";
@@ -431,7 +434,7 @@ function groups_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add group profile selector
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"group_edit_profile\" class=\"control-label col-xs-2\">" . __ ( "Profile") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <select name=\"Profile\" id=\"group_edit_profile\" class=\"form-control\" data-placeholder=\"" . __ ( "Group profile") . "\"><option value=\"\"></option></select>\n";
@@ -439,7 +442,7 @@ function groups_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add group cost center selector
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"group_edit_costcenter\" class=\"control-label col-xs-2\">" . __ ( "Cost center") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <select name=\"CostCenter\" id=\"group_edit_costcenter\" class=\"form-control\" data-placeholder=\"" . __ ( "Group cost center") . "\"><option value=\"\"></option></select>\n";
@@ -525,6 +528,7 @@ function groups_report_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Groups"), "link" => "/groups"),
     2 => array ( "title" => __ ( "Report"))
   ));
+  sys_set_menu_highlight ( "/groups");
 
   // Generate call report page through hook call:
   return framework_call ( "call_report_page_generate", array (

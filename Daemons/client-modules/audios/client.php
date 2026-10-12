@@ -66,6 +66,8 @@ cleanup_register ( "Audios", "audio_wipe");
  */
 function audio_add ( $buffer, $parameters)
 {
+  global $_in;
+
   /**
    * Call start hook if exist
    */
@@ -183,18 +185,20 @@ function audio_add ( $buffer, $parameters)
   $filename = substr ( $parameters["Filename"], 0, strrpos ( $parameters["Filename"], "."));
   $formats = array ( "WAV", "wav16", "wav", "vox", "sln192", "sln96", "sln48", "sln44", "sln32", "sln24", "sln16", "sln12", "sln", "siren7", "siren14", "g722", "ulaw", "alaw", "ogg", "opus", "ilbc", "gsm", "g729", "g726-16", "g726-24", "g726-32", "g726-40", "g726aal2", "g723", "adpcm", "speex", "speex16", "speex32", "g719", "lpc10", "codec2", "silk8", "silk12", "silk16", "silk24");
   $parameters["AvailableFormats"] = array ();
+  $failedFormats = array ();
   foreach ( $formats as $format)
   {
-    exec ( "asterisk -rx \"file convert voipdomain/audio-" . $parameters["ID"] . "/audio.raw voipdomain/audio-" . $parameters["ID"] . "/audio." . $format . "\" 2>&1", $astoutput, $astresult);
+    $audiopath = rtrim ( $_in["general"]["soundsdir"], "/") . "/audio-" . $parameters["ID"];
+    exec ( "asterisk -rx \"file convert " . $audiopath . "/audio.raw " . $audiopath . "/audio." . $format . "\" 2>&1", $astoutput, $astresult);
     if ( rename_config ( "audio", "audio-" . $parameters["ID"] . "/audio." . $format, "audio-" . $parameters["ID"] . "/" . $filename . "." . $format))
     {
       $parameters["AvailableFormats"][] = $format;
-    } else if ( $astresult != 0 || ! empty ( $astoutput))
-    {
-      writeLog ( "audio_add(" . $parameters["ID"] . ") - Asterisk file convert to " . $format . " failed (exit " . $astresult . "): " . implode ( " ", $astoutput), VoIP_LOG_WARNING);
+    } else {
+      $failedFormats[] = $format;
     }
     $astoutput = array ();
   }
+  writeLog ( "audio_add(" . $parameters["ID"] . ") - Converted " . count ( $parameters["AvailableFormats"]) . "/" . count ( $formats) . " formats." . ( ! empty ( $failedFormats) ? " Failed: " . implode ( ", ", $failedFormats) : ""), ! empty ( $failedFormats) ? VoIP_LOG_DEBUG : VoIP_LOG_DEBUG);
   unlink_config ( "audio", "audio-" . $parameters["ID"] . "/audio.raw");
   if ( empty ( $parameters["AvailableFormats"]))
   {
@@ -204,7 +208,7 @@ function audio_add ( $buffer, $parameters)
   // Create Music on Hold for this audio file
   $moh = "[vd_moh_" . $parameters["ID"] . "]\n" .
          "mode=files\n" .
-         "directory=voipdomain/audio-" . $parameters["ID"] . "\n";
+         "directory=" . rtrim ( $_in["general"]["soundsdir"], "/") . "/audio-" . $parameters["ID"] . "\n";
 
   // Write Music on Hold configuration file
   if ( ! write_config ( "config", "moh-" . $parameters["ID"], $moh))
@@ -265,6 +269,8 @@ function audio_add ( $buffer, $parameters)
  */
 function audio_change ( $buffer, $parameters)
 {
+  global $_in;
+
   /**
    * Call start hook if exist
    */
@@ -398,18 +404,20 @@ function audio_change ( $buffer, $parameters)
   $filename = substr ( $parameters["NewFilename"], 0, strrpos ( $parameters["NewFilename"], "."));
   $formats = array ( "WAV", "wav16", "wav", "vox", "sln192", "sln96", "sln48", "sln44", "sln32", "sln24", "sln16", "sln12", "sln", "siren7", "siren14", "g722", "ulaw", "alaw", "ogg", "opus", "ilbc", "gsm", "g729", "g726-16", "g726-24", "g726-32", "g726-40", "g726aal2", "g723", "adpcm", "speex", "speex16", "speex32", "g719", "lpc10", "codec2", "silk8", "silk12", "silk16", "silk24");
   $parameters["AvailableFormats"] = array ();
+  $failedFormats = array ();
   foreach ( $formats as $format)
   {
-    exec ( "asterisk -rx \"file convert voipdomain/audio-" . $parameters["ID"] . "/audio.raw voipdomain/audio-" . $parameters["ID"] . "/audio." . $format . "\" 2>&1", $astoutput, $astresult);
+    $audiopath = rtrim ( $_in["general"]["soundsdir"], "/") . "/audio-" . $parameters["ID"];
+    exec ( "asterisk -rx \"file convert " . $audiopath . "/audio.raw " . $audiopath . "/audio." . $format . "\" 2>&1", $astoutput, $astresult);
     if ( rename_config ( "audio", "audio-" . $parameters["ID"] . "/audio." . $format, "audio-" . $parameters["ID"] . "/" . $filename . "." . $format))
     {
       $parameters["AvailableFormats"][] = $format;
-    } else if ( $astresult != 0 || ! empty ( $astoutput))
-    {
-      writeLog ( "audio_change(" . $parameters["ID"] . ") - Asterisk file convert to " . $format . " failed (exit " . $astresult . "): " . implode ( " ", $astoutput), VoIP_LOG_WARNING);
+    } else {
+      $failedFormats[] = $format;
     }
     $astoutput = array ();
   }
+  writeLog ( "audio_change(" . $parameters["ID"] . ") - Converted " . count ( $parameters["AvailableFormats"]) . "/" . count ( $formats) . " formats." . ( ! empty ( $failedFormats) ? " Failed: " . implode ( ", ", $failedFormats) : ""), ! empty ( $failedFormats) ? VoIP_LOG_DEBUG : VoIP_LOG_DEBUG);
   unlink_config ( "audio", "audio-" . $parameters["ID"] . "/audio.raw");
   if ( empty ( $parameters["AvailableFormats"]))
   {
@@ -597,29 +605,40 @@ function audio_wipe ( $buffer, $parameters)
     framework_call ( "audio_wipe_pre", $parameters, false, true);
   }
 
+  global $_in;
+
   // Remove MoH configs by glob (catches orphans)
   foreach ( list_config ( "config", "moh-*") as $filename)
   {
     unlink_config ( "config", $filename);
   }
 
-  // Remove audio files (needs datafile data for filenames/formats)
+  // Remove audio datafiles
   foreach ( list_config ( "datafile", "audio") as $filename)
   {
-    $data = read_config ( "datafile", $filename);
-    if ( is_array ( $data) && array_key_exists ( "ID", $data) && array_key_exists ( "Filename", $data))
+    unlink_config ( "datafile", $filename);
+  }
+
+  // Recursively remove all audio-* directories from soundsdir (catches orphans without datafiles)
+  $soundsdir = rtrim ( $_in["general"]["soundsdir"], "/") . "/";
+  $audiodirs = glob ( $soundsdir . "audio-*", GLOB_ONLYDIR);
+  if ( is_array ( $audiodirs))
+  {
+    foreach ( $audiodirs as $audiodir)
     {
-      unlink_config ( "audio", "audio-" . $data["ID"] . "/" . $data["Filename"] . "-originalfile.bin");
-      if ( is_array ( $data["AvailableFormats"]))
+      $files = glob ( $audiodir . "/*");
+      if ( is_array ( $files))
       {
-        foreach ( $data["AvailableFormats"] as $format)
+        foreach ( $files as $file)
         {
-          unlink_config ( "audio", "audio-" . $data["ID"] . "/" . str_replace ( "[", "\\[", str_replace ( "]", "\\]", str_replace ( "\\", "\\\\", substr ( $data["Filename"], 0, strrpos ( $data["Filename"], "."))))) . "." . $format);
+          if ( is_file ( $file))
+          {
+            @unlink ( $file);
+          }
         }
       }
-      unlink_config ( "audiodir", "audio-" . $data["ID"]);
+      @rmdir ( $audiodir);
     }
-    unlink_config ( "datafile", $filename);
   }
 
   /**

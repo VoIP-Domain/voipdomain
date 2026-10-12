@@ -54,6 +54,14 @@ function get_locale ( $buffer, $parameters)
   global $_in;
 
   /**
+   * Lazy-load locale names for current language if not yet available
+   */
+  if ( ! isset ( $_in["locales"][$_in["general"]["language"]]) && is_readable ( dirname ( __FILE__) . "/locales-" . $_in["general"]["language"] . ".php"))
+  {
+    require ( dirname ( __FILE__) . "/locales-" . $_in["general"]["language"] . ".php");
+  }
+
+  /**
    * Search locale
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Locales` WHERE `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "'"))
@@ -65,7 +73,7 @@ function get_locale ( $buffer, $parameters)
     return $buffer;
   }
   $locale["NameEN"] = $locale["Name"];
-  $locale["Name"] = ( array_key_exists ( $locale["Code"], $_in["locales"][$_in["general"]["language"]]) ? $_in["locales"][$_in["general"]["language"]][$locale["Code"]] : $locale["NameEN"]);
+  $locale["Name"] = ( isset ( $_in["locales"][$_in["general"]["language"]]) && is_array ( $_in["locales"][$_in["general"]["language"]]) && array_key_exists ( $locale["Code"], $_in["locales"][$_in["general"]["language"]]) ? $_in["locales"][$_in["general"]["language"]][$locale["Code"]] : $locale["NameEN"]);
 
   /**
    * Return structured data

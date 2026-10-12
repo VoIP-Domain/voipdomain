@@ -186,43 +186,35 @@ function equipments_grandstream_tenant_add_post ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_gxp1160', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G723\",\"G729\",\"G722\",\"ILBC\",\"G726\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"UserPassword\":\"vduser\",\"AdminPassword\":\"vdadmin\"}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_grandstream_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_gxp1165', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G723\",\"G729\",\"G722\",\"ILBC\",\"G726\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"UserPassword\":\"vduser\",\"AdminPassword\":\"vdadmin\"}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_grandstream_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_gxp1610', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G723\",\"G729\",\"G722\",\"ILBC\",\"G726\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"UserPassword\":\"vduser\",\"AdminPassword\":\"vdadmin\"}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_grandstream_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_gxp1615', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G723\",\"G729\",\"G722\",\"ILBC\",\"G726\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"UserPassword\":\"vduser\",\"AdminPassword\":\"vdadmin\"}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_grandstream_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_gxp1620', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G723\",\"G729\",\"G722\",\"ILBC\",\"G726\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"UserPassword\":\"vduser\",\"AdminPassword\":\"vdadmin\"}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_grandstream_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_gxp1625', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G723\",\"G729\",\"G722\",\"ILBC\",\"G726\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"UserPassword\":\"vduser\",\"AdminPassword\":\"vdadmin\"}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_grandstream_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_gxp1628', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ALAW\",\"ULAW\",\"G723\",\"G729\",\"ILBC\",\"G726\",\"GSM\"],\"VideoCodecs\":[],\"ExtraSettings\":[]}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_grandstream_tenant_add_post");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_gxp1630', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ALAW\",\"ULAW\",\"G723\",\"G729\",\"ILBC\",\"G726\",\"GSM\"],\"VideoCodecs\":[],\"ExtraSettings\":[]}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_grandstream_tenant_add_post");
   }
 
   /**

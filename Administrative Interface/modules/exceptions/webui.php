@@ -189,6 +189,7 @@ function exceptions_add_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Exceptions"), "link" => "/exceptions"),
     2 => array ( "title" => __ ( "Add"))
   ));
+  sys_set_menu_highlight ( "/exceptions");
 
   /**
    * Add page JavaScript requirements
@@ -201,7 +202,7 @@ function exceptions_add_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"exception_add_form\">\n";
 
   // Add exception description field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"exception_add_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"exception_add_description\" placeholder=\"" . __ ( "Exception description") . "\" />\n";
@@ -209,7 +210,7 @@ function exceptions_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add exception number field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"exception_add_number\" class=\"control-label col-xs-2\">" . __ ( "Number") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"tel\" name=\"Number\" class=\"form-control\" id=\"exception_add_number\" placeholder=\"" . __ ( "Exception number (E.164 standard)") . "\" maxlength=\"16\" />\n";
@@ -270,7 +271,7 @@ function exceptions_add_page ( $buffer, $parameters)
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
+ * @return void
  */
 function exceptions_clone_function ( $buffer, $parameters)
 {
@@ -316,6 +317,7 @@ function exceptions_view_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Exceptions"), "link" => "/exceptions"),
     2 => array ( "title" => __ ( "View"))
   ));
+  sys_set_menu_highlight ( "/exceptions");
 
   /**
    * Create page code
@@ -387,6 +389,7 @@ function exceptions_edit_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Exceptions"), "link" => "/exceptions"),
     2 => array ( "title" => __ ( "Edit"))
   ));
+  sys_set_menu_highlight ( "/exceptions");
 
   /**
    * Add page JavaScript requirements
@@ -399,7 +402,7 @@ function exceptions_edit_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"exception_edit_form\">\n";
 
   // Add exception description field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"exception_edit_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"exception_edit_description\" placeholder=\"" . __ ( "Exception description") . "\" />\n";
@@ -407,7 +410,7 @@ function exceptions_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add exception number field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"exception_edit_number\" class=\"control-label col-xs-2\">" . __ ( "Number") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"tel\" name=\"Number\" class=\"form-control\" id=\"exception_edit_number\" placeholder=\"" . __ ( "Exception number (E.164 standard)") . "\" maxlength=\"16\" />\n";

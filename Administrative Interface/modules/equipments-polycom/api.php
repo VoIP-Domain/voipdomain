@@ -53,8 +53,7 @@ function equipments_polycom_tenant_add_post ( $buffer, $parameters)
   {
     if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_" . $_in["mysql"]["id"]->real_escape_string ( $uid) . "', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":[]}')"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "equipments_polycom_tenant_add_post");
     }
   }
 

@@ -137,6 +137,7 @@ function equipments_view_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Equipments"), "link" => "/equipments"),
     2 => array ( "title" => __ ( "View"))
   ));
+  sys_set_menu_highlight ( "/equipments");
 
   /**
    * Add page CSS requirements
@@ -702,6 +703,7 @@ function equipments_configure_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Equipments"), "link" => "/equipments"),
     2 => array ( "title" => __ ( "Configure"))
   ));
+  sys_set_menu_highlight ( "/equipments");
 
   /**
    * Add page CSS requirements
@@ -875,7 +877,7 @@ function equipments_configure_page ( $buffer, $parameters)
   $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in\" id=\"equipment_configure_tab_audio_codecs\">\n";
 
   // Add equipment audio codecs selector
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"equipment_configure_audio_codecs\" class=\"control-label col-xs-2\">" . __ ( "Audio codecs") . "</label>\n";
   if ( ! in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
   {

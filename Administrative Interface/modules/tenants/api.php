@@ -290,8 +290,7 @@ function tenants_search ( $buffer, $parameters)
   }
   if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `Tenants`.`ID`, `Tenants`.`Name`, `Tenants`.`Domain`, `Tenants`.`Country`, `Tenants`.`TimeZone`, `Tenants`.`Offset`, `Currencies`.`Code` AS `Currency`, `Tenants`.`Status`, `Tenants`.`CreatedAt`, `Tenants`.`UpdatedAt`, COALESCE(`Users`.`Count`, 0) AS `UserCount`, COALESCE(`Extensions`.`Count`, 0) AS `ExtensionCount`, COALESCE(`Gateways`.`Count`, 0) AS `GatewayCount` FROM `Tenants` LEFT JOIN (SELECT `Tenant`, COUNT(*) AS `Count` FROM `Users` GROUP BY `Tenant`) `Users` ON `Tenants`.`ID` = `Users`.`Tenant` LEFT JOIN (SELECT `Tenant`, COUNT(*) AS `Count` FROM `Extensions` GROUP BY `Tenant`) `Extensions` ON `Tenants`.`ID` = `Extensions`.`Tenant` LEFT JOIN (SELECT `Tenant`, COUNT(*) AS `Count` FROM `Gateways` GROUP BY `Tenant`) `Gateways` ON `Tenants`.`ID` = `Gateways`.`Tenant` LEFT JOIN `Currencies` ON `Tenants`.`Currency` = `Currencies`.`ISO4217`" . $where))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tenants_search");
   }
 
   /**
@@ -575,8 +574,7 @@ function tenants_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Tenants`.`ID`, `Tenants`.`Name`, `Tenants`.`Domain`, `Tenants`.`Status`, `Tenants`.`Country`, `Tenants`.`TimeZone`, `Tenants`.`Offset`, `Currencies`.`Code` AS `Currency`, `Tenants`.`Language`, `Tenants`.`CreatedAt`, `Tenants`.`UpdatedAt`, `Countries`.`Name` AS `CountryName`, `Countries`.`ISO3166-2` AS `CountryISO`, COALESCE(`Users`.`Count`, 0) AS `UserCount`, COALESCE(`Extensions`.`Count`, 0) AS `ExtensionCount`, COALESCE(`Gateways`.`Count`, 0) AS `GatewayCount` FROM `Tenants` LEFT JOIN (SELECT `Tenant`, COUNT(*) AS `Count` FROM `Users` GROUP BY `Tenant`) `Users` ON `Tenants`.`ID` = `Users`.`Tenant` LEFT JOIN (SELECT `Tenant`, COUNT(*) AS `Count` FROM `Extensions` GROUP BY `Tenant`) `Extensions` ON `Tenants`.`ID` = `Extensions`.`Tenant` LEFT JOIN (SELECT `Tenant`, COUNT(*) AS `Count` FROM `Gateways` GROUP BY `Tenant`) `Gateways` ON `Tenants`.`ID` = `Gateways`.`Tenant` LEFT JOIN `Countries` ON `Tenants`.`Country` = `Countries`.`Code` LEFT JOIN `Currencies` ON `Tenants`.`Currency` = `Currencies`.`ISO4217` WHERE `Tenants`.`ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tenants_view");
   }
   if ( ! $tenant = $result->fetch_assoc ())
   {
@@ -589,8 +587,7 @@ function tenants_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Name`, `Username`, `Email` FROM `Users` WHERE `Tenant` = " . (int) $parameters["ID"] . " ORDER BY `ID` ASC LIMIT 0,1"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tenants_view");
   }
   if ( ! $tenantadmin = $result->fetch_assoc ())
   {
@@ -601,7 +598,7 @@ function tenants_view ( $buffer, $parameters)
   /**
    * Format data
    */
-  $tenant["Country"] = array ( "ID" => $tenant["Country"], "NameEN" => $tenant["CountryName"], "Name" => ( array_key_exists ( $tenant["CountryISO"], $_in["countries"][$_in["general"]["language"]]) ? $_in["countries"][$_in["general"]["language"]][$tenant["CountryISO"]] : $tenant["CountryName"]), "ISO3166-2" => $tenant["CountryISO"]);
+  $tenant["Country"] = array ( "ID" => $tenant["Country"], "NameEN" => $tenant["CountryName"], "Name" => ( isset ( $_in["countries"][$_in["general"]["language"]][$tenant["CountryISO"]]) ? $_in["countries"][$_in["general"]["language"]][$tenant["CountryISO"]] : $tenant["CountryName"]), "ISO3166-2" => $tenant["CountryISO"]);
   $tenant["Language"] = filters_call ( "get_locale", array ( "Code" => $tenant["Language"]));
   $tenant["StatusEN"] = $tenant["Status"];
   $tenant["Status"] = __ ( $tenant["Status"]);
@@ -874,8 +871,7 @@ function tenants_add ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Currencies` WHERE `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Currency"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tenants_add");
   }
   if ( ! $currency = $result->fetch_assoc ())
   {
@@ -890,8 +886,7 @@ function tenants_add ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Countries` WHERE `ISO3166-2` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Country"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tenants_add");
   }
   if ( ! $country = $result->fetch_assoc ())
   {
@@ -908,8 +903,7 @@ function tenants_add ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Tenants` WHERE `Domain` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Domain"]) . "'"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "tenants_add");
     }
     if ( $result->num_rows != 0)
     {
@@ -976,8 +970,7 @@ function tenants_add ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Tenants` (`Name`, `Domain`, `Status`, `Settings`, `Country`, `TimeZone`, `Offset`, `Currency`, `Language`, `PublicKey`, `PrivateKey`, `CreatedAt`, `UpdatedAt`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Domain"]) . "', 'Active', '[]', ". (int) $country["Code"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["TimeZone"]) . "', " . (float) $parameters["Offset"] . ", " . (int) $currency["ISO4217"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Language"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $pubKey) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $privKey) . "', NOW(), NOW())"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tenants_add");
   }
   $parameters["ID"] = $_in["mysql"]["id"]->insert_id;
 
@@ -986,8 +979,7 @@ function tenants_add ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Users` (`Tenant`, `Name`, `Username`, `Password`, `Permissions`, `Email`, `Since`, `Salt`, `Iterations`, `Language`) VALUES (" . (int) $parameters["ID"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["AdminName"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "', '" . hash_pbkdf2 ( "sha256", $parameters["Password"], $parameters["Salt"], ( $_in["security"]["iterations"] != 0 ? $_in["security"]["iterations"] : 40000), 64) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Permissions"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Email"]) . "', NOW(), '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Salt"]) . "', " . ( $_in["security"]["iterations"] != 0 ? $_in["security"]["iterations"] : 40000) . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Language"]) . "')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tenants_add");
   }
 
   /**
@@ -1195,8 +1187,7 @@ function tenants_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Currencies` WHERE `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Currency"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tenants_edit");
   }
   if ( ! $currency = $result->fetch_assoc ())
   {
@@ -1211,8 +1202,7 @@ function tenants_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Countries` WHERE `ISO3166-2` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Country"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tenants_edit");
   }
   if ( ! $country = $result->fetch_assoc ())
   {
@@ -1229,8 +1219,7 @@ function tenants_edit ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Tenants` WHERE `Domain` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Domain"]) . "' AND `ID` != " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "tenants_edit");
     }
     if ( $result->num_rows != 0)
     {
@@ -1243,8 +1232,7 @@ function tenants_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Tenants` WHERE `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tenants_edit");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -1296,8 +1284,7 @@ function tenants_edit ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Tenants` SET `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', `Domain` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Domain"]) . "', `Country` = ". (int) $country["Code"] . ", `TimeZone` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["TimeZone"]) . "', `Offset` = " . (float) $parameters["Offset"] . ", `Currency` = " . (int) $currency["ISO4217"] . ", `Language` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Language"]) . "' WHERE `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tenants_edit");
   }
 
   /**
@@ -1426,8 +1413,7 @@ function tenants_remove ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Tenants` WHERE `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tenants_remove");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -1448,8 +1434,7 @@ function tenants_remove ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Tenants` WHERE `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tenants_remove");
   }
 
   /**

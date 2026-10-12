@@ -235,10 +235,27 @@ var VoIP = ( function ()
               $('ul.sidebar-menu').find ( 'li.active').removeClass ( 'active');
 
               // Make current menu entry as active
+              var currentHref = location.href.indexOf ( '#') != -1 ? location.href.substring ( 0, location.href.indexOf ( '#')) : location.href;
               var element = $('ul.sidebar-menu a').filter ( function ()
               {
-                return this.href == ( location.href.indexOf ( '#') != -1 ? location.href.substring ( 0, location.href.indexOf ( '#')) : location.href) && $(this).attr ( 'href');
-              }).parent ( 'li').addClass ( 'active');
+                return this.href == currentHref && $(this).attr ( 'href');
+              });
+
+              // If no exact match, try altpaths alternative paths
+              if ( $(element).length == 0 && 'altpaths' in modules[module])
+              {
+                var origin = location.protocol + '//' + location.hostname + ( location.port ? ':' + location.port : '');
+                for ( var h = 0; h < modules[module].altpaths.length && $(element).length == 0; h++)
+                {
+                  var highlightHref = origin + modules[module].altpaths[h];
+                  element = $('ul.sidebar-menu a').filter ( function ()
+                  {
+                    return this.href == highlightHref && $(this).attr ( 'href');
+                  });
+                }
+              }
+
+              element = $(element).parent ( 'li').addClass ( 'active');
               if ( $(element).length == 1)
               {
                 while ( ! $(element).hasClass ( 'sidebar-menu'))
@@ -311,6 +328,18 @@ var VoIP = ( function ()
               // Add page content
               $('#content').html ( modules[module].content);
 
+              // If there's page-specific i18n data, register it
+              if ( 'i18n' in modules[module])
+              {
+                for ( var key in modules[module].i18n)
+                {
+                  if ( modules[module].i18n.hasOwnProperty ( key))
+                  {
+                    VoIP.i18n.add ( key, modules[module].i18n[key]);
+                  }
+                }
+              }
+
               // If there's custom JavaScript code, add it
               if ( 'inlinejs' in modules[module])
               {
@@ -349,7 +378,7 @@ var VoIP = ( function ()
             }
 
             // Execute page start event if hash event wasn't fired:
-            if ( ! hasheventfired && 'startevent' in modules[module] && $._data ( $('#' + modules[module].startevent.id)[0], 'events') && modules[module].startevent.event in $._data ( $('#' + modules[module].startevent.id)[0], 'events') && $._data ( $('#' + modules[module].startevent.id)[0], 'events')[modules[module].startevent.event].length > 0)
+            if ( ! hasheventfired && 'startevent' in modules[module] && $('#' + modules[module].startevent.id)[0] && $._data ( $('#' + modules[module].startevent.id)[0], 'events') && modules[module].startevent.event in $._data ( $('#' + modules[module].startevent.id)[0], 'events') && $._data ( $('#' + modules[module].startevent.id)[0], 'events')[modules[module].startevent.event].length > 0)
             {
               $('#' + modules[module].startevent.id).trigger ( modules[module].startevent.event, modules[module].startevent.data);
             }
@@ -1407,13 +1436,14 @@ var VoIP = ( function ()
                 }
               }).fail ( function ( jqXHR, textStatus, errorThrown)
               {
-                if ( opts.form.fail)
-                {
-                  new PNotify ( { title: opts.form.title, text: opts.form.fail, type: 'error'});
-                }
+                var handled = false;
                 if ( typeof ( opts.form.onfail) == 'function')
                 {
-                  opts.form.onfail ( data);
+                  handled = opts.form.onfail ( jqXHR) === false;
+                }
+                if ( ! handled && opts.form.fail)
+                {
+                  new PNotify ( { title: opts.form.title, text: opts.form.fail, type: 'error'});
                 }
                 try
                 {

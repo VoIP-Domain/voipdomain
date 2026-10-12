@@ -818,6 +818,18 @@ function debug_api_export ( $buffer, $parameters)
         continue;
       }
 
+      // Determine primary module from hook functions:
+      $primarymodule = "";
+      foreach ( $_plugins["hooks"][$methoddata["hook"]] as $function)
+      {
+        $module = $_plugins["map"][$function] == "" ? "interface" : $_plugins["map"][$function];
+        if ( $primarymodule == "")
+        {
+          $primarymodule = $module;
+          break;
+        }
+      }
+
       if ( array_key_exists ( "parameters", $methoddata))
       {
         // Path parameters:
@@ -825,27 +837,29 @@ function debug_api_export ( $buffer, $parameters)
         {
           foreach ( $methoddata["parameters"] as $parameter)
           {
-            $parameter = format_parameters ( $parameter, "path");
+            $parameter = format_parameters ( $parameter, "path", $primarymodule);
             if ( is_array ( $parameter))
             {
               unset ( $name);
-              if ( $parameter["style"] == "simple" && $parameter["explode"] == true)
+              $pstyle = $parameter["style"] ?? "";
+              $pexplode = $parameter["explode"] ?? false;
+              if ( $pstyle == "simple" && $pexplode == true)
               {
                 $name = $parameter["name"] . "*";
               }
-              if ( $parameter["style"] == "label" && $parameter["explode"] == false)
+              if ( $pstyle == "label" && $pexplode == false)
               {
                 $name = "." . $parameter["name"];
               }
-              if ( $parameter["style"] == "label" && $parameter["explode"] == true)
+              if ( $pstyle == "label" && $pexplode == true)
               {
                 $name = "." . $parameter["name"] . "*";
               }
-              if ( $parameter["style"] == "matrix" && $parameter["explode"] == false)
+              if ( $pstyle == "matrix" && $pexplode == false)
               {
                 $name = ";" . $parameter["name"];
               }
-              if ( $parameter["style"] == "matrix" && $parameter["explode"] == true)
+              if ( $pstyle == "matrix" && $pexplode == true)
               {
                 $name = ";" . $parameter["name"] . "*";
               }
@@ -886,8 +900,8 @@ function debug_api_export ( $buffer, $parameters)
 
       // Basic path method variables:
       $paths[$newpath][$method]["tags"] = $tags;
-      $paths[$newpath][$method]["summary"] = $methoddata["title"];
-      $paths[$newpath][$method]["description"] = $methoddata["description"];
+      $paths[$newpath][$method]["summary"] = __ ( $methoddata["title"], false, false, $primarymodule);
+      $paths[$newpath][$method]["description"] = __ ( $methoddata["description"], false, false, $primarymodule);
       $paths[$newpath][$method]["operationId"] = str_replace ( "/", "_", $method . $newpath);
 
       // Path method security requirements:
@@ -956,12 +970,15 @@ function debug_api_export ( $buffer, $parameters)
 
       // Path method parameters:
       $parameters = array ();
-      foreach ( $_plugins["hooks"][$methoddata["hook"]]["parameters"] as $parameter)
+      if ( array_key_exists ( "parameters", $_plugins["hooks"][$methoddata["hook"]]) && is_array ( $_plugins["hooks"][$methoddata["hook"]]["parameters"]))
       {
-        $parameter = format_parameters ( $parameter, ( $method == "get" ? "query" : null));
-        if ( is_array ( $parameter))
+        foreach ( $_plugins["hooks"][$methoddata["hook"]]["parameters"] as $parameter)
         {
-          $parameters[] = $parameter;
+          $parameter = format_parameters ( $parameter, ( $method == "get" ? "query" : null), $primarymodule);
+          if ( is_array ( $parameter))
+          {
+            $parameters[] = $parameter;
+          }
         }
       }
 
@@ -970,13 +987,18 @@ function debug_api_export ( $buffer, $parameters)
       $required = false;
       foreach ( $_plugins["hooks"][$methoddata["hook"]] as $function)
       {
+        if ( ! is_array ( $_plugins["functions"][$function]["requests"] ?? null))
+        {
+          continue;
+        }
+        $fnmodule = $_plugins["map"][$function] == "" ? "interface" : $_plugins["map"][$function];
         if ( array_key_exists ( "required", $_plugins["functions"][$function]["requests"]) && $_plugins["functions"][$function]["requests"]["required"])
         {
           $required = true;
         }
         if ( sizeof ( $_plugins["functions"][$function]["requests"]) != 0)
         {
-          $request = format_schema ( $_plugins["functions"][$function]["requests"]);
+          $request = format_schema ( $_plugins["functions"][$function]["requests"], $fnmodule);
           if ( is_array ( $request))
           {
             $requests = array_merge_recursive_distinct_with_sequencial ( $requests, $request);
@@ -1049,21 +1071,22 @@ function debug_api_export ( $buffer, $parameters)
       {
         $paths[$newpath][$method]["responses"]["204"] = array ( "description" => __ ( "Object removed successfully."));
       }
-      $paths[$newpath][$method]["responses"]["400"] = array ( "description" => __ ( "Object not found."));
+      $paths[$newpath][$method]["responses"]["400"] = array ( "description" => __ ( "Bad request."));
       $paths[$newpath][$method]["responses"]["401"] = array ( "description" => __ ( "Invalid authentication used."));
       $paths[$newpath][$method]["responses"]["403"] = array ( "description" => __ ( "Access privileges do not match the request."));
       $paths[$newpath][$method]["responses"]["404"] = array ( "description" => __ ( "Requested endpoint not found."));
       $paths[$newpath][$method]["responses"]["405"] = array ( "description" => __ ( "Method not allowed to requested path. See `Allow` response header for valid methods."));
       $paths[$newpath][$method]["responses"]["406"] = array ( "description" => __ ( "Invalid response parameters content type."));
       $paths[$newpath][$method]["responses"]["415"] = array ( "description" => __ ( "Invalid parameters content type."));
-      if ( $method == "post")
+      if ( $method == "post" || $method == "put" || $method == "patch")
       {
-        $paths[$newpath][$method]["responses"]["422"] = array ( "description" => __ ( "Error processing object creation parameters."));
+        $paths[$newpath][$method]["responses"]["422"] = array ( "description" => __ ( "Error processing request parameters."));
       }
-      $paths[$newpath][$method]["responses"]["500"] = array ( "description" => __ ( "Internal server error."));
-      $paths[$newpath][$method]["responses"]["503"] = array ( "description" => __ ( "Internal server communication error."));
+      $paths[$newpath][$method]["responses"]["500"] = array ( "description" => __ ( "Internal server error."), "content" => array ( "application/json" => array ( "schema" => array ( "\$ref" => "#/components/schemas/ErrorResponse"))));
+      $paths[$newpath][$method]["responses"]["503"] = array ( "description" => __ ( "Internal server communication error (e.g. database failure). Returns structured JSON with error details when debug mode is active."), "content" => array ( "application/json" => array ( "schema" => array ( "\$ref" => "#/components/schemas/ErrorResponse"))));
       foreach ( $_plugins["hooks"][$methoddata["hook"]] as $function)
       {
+        $fnmodule = $_plugins["map"][$function] == "" ? "interface" : $_plugins["map"][$function];
         foreach ( $_plugins["functions"][$function]["response"] as $code => $response)
         {
           if ( sizeof ( $response) == 0)
@@ -1073,10 +1096,14 @@ function debug_api_export ( $buffer, $parameters)
           }
           if ( array_key_exists ( "description", $response))
           {
-            $paths[$newpath][$method]["responses"][$code]["description"] = $response["description"];
+            $paths[$newpath][$method]["responses"][$code]["description"] = __ ( $response["description"], false, false, $fnmodule);
           }
           if ( array_key_exists ( "headers", $response))
           {
+            if ( ! array_key_exists ( "headers", $paths[$newpath][$method]["responses"][$code]) || ! is_array ( $paths[$newpath][$method]["responses"][$code]["headers"]))
+            {
+              $paths[$newpath][$method]["responses"][$code]["headers"] = array ();
+            }
             $paths[$newpath][$method]["responses"][$code]["headers"] = array_merge_recursive ( $paths[$newpath][$method]["responses"][$code]["headers"], $response["headers"]);
           }
           if ( ! array_key_exists ( "schema", $response))
@@ -1087,7 +1114,7 @@ function debug_api_export ( $buffer, $parameters)
           {
             $paths[$newpath][$method]["responses"][$code]["content"] = array ( "application/json" => array ( "schema" => array ()), "application/xml" => array ( "schema" => array ( "xml" => array ( "name" => "response"))), "application/javascript" => array ( "schema" => array ( "type" => "string", "example" => __ ( "callback ( 'variables')", true, false))), "application/x-php" => array ( "schema" => array ( "type" => "string", "example" => serialize ( array ()))));
           }
-          $formattedschema = format_schema ( $response["schema"]);
+          $formattedschema = format_schema ( $response["schema"], $fnmodule);
           if ( ! is_array ( $formattedschema))
           {
             $formattedschema = array ();
@@ -1101,13 +1128,17 @@ function debug_api_export ( $buffer, $parameters)
               $paths[$newpath][$method]["responses"][$code]["content"]["application/json"]["schema"] = $response["schema"];
             }
             $paths[$newpath][$method]["responses"][$code]["content"]["application/xml"]["schema"] = array ( "allOf" => array ( $paths[$newpath][$method]["responses"][$code]["content"]["application/xml"]["schema"], $response["schema"]));
-            $paths[$newpath][$method]["responses"][$code]["content"]["application/x-php"]["schema"]["example"] = serialize ( array_merge_recursive_distinct_with_sequencial ( unserialize ( $paths[$newpath][$method]["responses"][$code]["content"]["application/x-php"]["schema"]["example"]), format_php_schema ( $_plugins["components"][substr ( $response["schema"]["\$ref"], strrpos ( $response["schema"]["\$ref"], "/") + 1)], false)));
+            $tmp_unserialized = unserialize ( $paths[$newpath][$method]["responses"][$code]["content"]["application/x-php"]["schema"]["example"]);
+            $tmp_phpschema = format_php_schema ( $_plugins["components"][substr ( $response["schema"]["\$ref"], strrpos ( $response["schema"]["\$ref"], "/") + 1)], false);
+            $paths[$newpath][$method]["responses"][$code]["content"]["application/x-php"]["schema"]["example"] = serialize ( array_merge_recursive_distinct_with_sequencial ( $tmp_unserialized, $tmp_phpschema));
           } else {
             if ( sizeof ( $formattedschema) != 0)
             {
               $paths[$newpath][$method]["responses"][$code]["content"]["application/json"]["schema"] = array_merge_recursive_distinct_with_sequencial ( $paths[$newpath][$method]["responses"][$code]["content"]["application/json"]["schema"], $formattedschema);
               $paths[$newpath][$method]["responses"][$code]["content"]["application/xml"]["schema"] = array_merge_recursive_distinct_with_sequencial ( $paths[$newpath][$method]["responses"][$code]["content"]["application/xml"]["schema"], $formattedschema);
-              $paths[$newpath][$method]["responses"][$code]["content"]["application/x-php"]["schema"]["example"] = serialize ( array_merge_recursive_distinct_with_sequencial ( unserialize ( $paths[$newpath][$method]["responses"][$code]["content"]["application/x-php"]["schema"]["example"]), format_php_schema ( $formattedschema, false)));
+              $tmp_unserialized = unserialize ( $paths[$newpath][$method]["responses"][$code]["content"]["application/x-php"]["schema"]["example"]);
+              $tmp_phpschema = format_php_schema ( $formattedschema, false);
+              $paths[$newpath][$method]["responses"][$code]["content"]["application/x-php"]["schema"]["example"] = serialize ( array_merge_recursive_distinct_with_sequencial ( $tmp_unserialized, $tmp_phpschema));
             }
           }
         }
@@ -1159,8 +1190,55 @@ function debug_api_export ( $buffer, $parameters)
     $data["components"]["schemas"] = array ();
     foreach ( $_plugins["components"] as $component => $plugin)
     {
-      $data["components"]["schemas"][$component] = format_schema ( $plugin);
+      $compmodule = array_key_exists ( $component, $_plugins["componentmap"]) ? ( $_plugins["componentmap"][$component] == "" ? "interface" : $_plugins["componentmap"][$component]) : "";
+      $data["components"]["schemas"][$component] = format_schema ( $plugin, $compmodule);
     }
+    $data["components"]["schemas"]["ErrorResponse"] = array (
+      "type" => "object",
+      "description" => __ ( "Structured error response returned by all API error paths."),
+      "required" => array ( "result", "error"),
+      "properties" => array (
+        "result" => array ( "type" => "boolean", "example" => false, "description" => __ ( "Always false for error responses.")),
+        "error" => array ( "type" => "string", "example" => "Database query failed", "description" => __ ( "Short error identifier.")),
+        "message" => array ( "type" => "string", "example" => "Service temporarily unavailable", "description" => __ ( "Human-readable description (optional).")),
+        "context" => array ( "type" => "string", "example" => "extensions_phones_server_reconfig", "description" => __ ( "Function or operation where the error occurred (debug mode only).")),
+        "mysql_error" => array ( "type" => "string", "example" => "Table 'vd.Conferences' doesn't exist", "description" => __ ( "MySQL error message (debug mode only).")),
+        "mysql_errno" => array ( "type" => "integer", "example" => 1146, "description" => __ ( "MySQL error number (debug mode only).")),
+        "query" => array ( "type" => "string", "description" => __ ( "Failed SQL query (debug mode only, when provided).")),
+        "_debug" => array ( "\$ref" => "#/components/schemas/DebugInfo")
+      )
+    );
+    $data["components"]["schemas"]["DebugInfo"] = array (
+      "type" => "object",
+      "description" => __ ( "Debug information included in error responses when debug mode is active."),
+      "properties" => array (
+        "backtrace" => array (
+          "type" => "array",
+          "description" => __ ( "PHP call stack at the error point."),
+          "items" => array (
+            "type" => "object",
+            "properties" => array (
+              "file" => array ( "type" => "string", "example" => "api.php"),
+              "line" => array ( "type" => "integer", "example" => 142),
+              "function" => array ( "type" => "string", "example" => "database_query_error")
+            )
+          )
+        ),
+        "php_errors" => array (
+          "type" => "array",
+          "description" => __ ( "PHP warnings, notices, and deprecations captured during request execution."),
+          "items" => array (
+            "type" => "object",
+            "properties" => array (
+              "type" => array ( "type" => "string", "enum" => array ( "warning", "notice", "deprecated", "strict", "user_warning", "user_notice", "user_deprecated", "user_error"), "example" => "deprecated"),
+              "message" => array ( "type" => "string", "example" => "explode(): Passing null to parameter #2"),
+              "file" => array ( "type" => "string", "example" => "api.php"),
+              "line" => array ( "type" => "integer", "example" => 2891)
+            )
+          )
+        )
+      )
+    );
   } else {
     $var1 = is_array ( $buffer["paths"]) ? $buffer["paths"] : array ();
     $buffer["paths"] = array_merge_recursive_distinct_with_sequencial ( $var1, $paths);
@@ -1199,9 +1277,17 @@ function debug_api_export ( $buffer, $parameters)
 function format_php_schema ( $schema, $serialize = true)
 {
   $result = array ();
+  if ( ! is_array ( $schema) || ! array_key_exists ( "properties", $schema) || ! is_array ( $schema["properties"]))
+  {
+    return $serialize ? serialize ( $result) : $result;
+  }
   foreach ( $schema["properties"] as $name => $parameters)
   {
-    $result[$name] = $parameters["type"] != "object" ? $parameters["example"] : format_php_schema ( $parameters, false);
+    if ( ! is_array ( $parameters))
+    {
+      continue;
+    }
+    $result[$name] = ( array_key_exists ( "type", $parameters) && $parameters["type"] == "object") ? format_php_schema ( $parameters, false) : ( $parameters["example"] ?? null);
   }
   return $serialize ? serialize ( $result) : $result;
 }
@@ -1212,9 +1298,10 @@ function format_php_schema ( $schema, $serialize = true)
  *
  * @param array $parameters Structure to be validated.
  * @param string[optional] $in Default type of parameter.
+ * @param string[optional] $context Module context for i18n lookups.
  * @return array Sanitized values.
  */
-function format_parameters ( $parameters, $in = "query")
+function format_parameters ( $parameters, $in = "query", $context = "")
 {
   $result = array ();
 
@@ -1226,26 +1313,16 @@ function format_parameters ( $parameters, $in = "query")
   $result["name"] = $parameters["name"];
   $result["schema"] = array ();
 
-  // Check object type consistency:
-  if ( $parameters["type"] == "object" && ( ! array_key_exists ( "properties", $parameters) && ! array_key_exists ( "additionalProperties", $parameters)))
-  {
-    return;
-  }
-  if ( $parameters["type"] == "array" && ! array_key_exists ( "items", $parameters))
-  {
-    return;
-  }
-
   // Add description if available:
   if ( array_key_exists ( "description", $parameters))
   {
-    $result["description"] = $parameters["description"];
+    $result["description"] = is_string ( $parameters["description"]) ? __ ( $parameters["description"], false, false, $context) : $parameters["description"];
   }
 
   // Add example if available:
   if ( array_key_exists ( "example", $parameters))
   {
-    $result["example"] = $parameters["example"];
+    $result["example"] = is_string ( $parameters["example"]) ? __ ( $parameters["example"], false, false, $context) : $parameters["example"];
   }
 
   // Add enum if available:
@@ -1281,7 +1358,7 @@ function format_parameters ( $parameters, $in = "query")
   // Process typed or subschema:
   if ( array_key_exists ( "schema", $parameters) && ! array_key_exists ( "type", $parameters))
   {
-    $result["schema"] = format_schema ( $parameters["schema"]);
+    $result["schema"] = format_schema ( $parameters["schema"], $context);
   } else {
     switch ( $parameters["type"])
     {
@@ -1296,6 +1373,7 @@ function format_parameters ( $parameters, $in = "query")
       case "byte":
       case "date":
       case "date-time":
+      case "time":
       case "password":
       case "email":
       case "uuid":
@@ -1316,6 +1394,10 @@ function format_parameters ( $parameters, $in = "query")
         $result["schema"]["type"] = "number";
         $result["schema"]["format"] = $parameters["type"];
         break;
+    }
+    if ( array_key_exists ( "format", $parameters) && ! array_key_exists ( "format", $result["schema"]))
+    {
+      $result["schema"]["format"] = $parameters["format"];
     }
   }
 
@@ -1412,10 +1494,6 @@ function format_parameters ( $parameters, $in = "query")
       {
         $result["schema"]["default"] = $parameters["default"];
       }
-      if ( array_key_exists ( "nullable", $parameters) && ! $result["required"])
-      {
-        $result["schema"]["nullable"] = (boolean) $parameters["nullable"];
-      }
       break;
     case "string":
       if ( array_key_exists ( "maxLength", $parameters))
@@ -1434,7 +1512,7 @@ function format_parameters ( $parameters, $in = "query")
     case "boolean":
       if ( array_key_exists ( "default", $parameters) && is_bool ( $parameters["default"]))
       {
-        $result["schema"]["default"] = (boolean) $parameters["default"];
+        $result["schema"]["default"] = (bool) $parameters["default"];
       }
       break;
     case "object":
@@ -1451,7 +1529,7 @@ function format_parameters ( $parameters, $in = "query")
         $result["schema"]["properties"] = array ();
         foreach ( $parameters["properties"] as $property => $schema)
         {
-          $result["schema"]["properties"][$property] = format_schema ( $schema);
+          $result["schema"]["properties"][$property] = format_schema ( $schema, $context);
         }
       }
       if ( array_key_exists ( "additionalProperties", $parameters))
@@ -1461,27 +1539,30 @@ function format_parameters ( $parameters, $in = "query")
           $result["schema"]["additionalProperties"] = array ();
           foreach ( $parameters["additionalProperties"] as $property => $schema)
           {
-            $result["schema"]["additionalProperties"][$property] = format_schema ( $schema);
+            $result["schema"]["additionalProperties"][$property] = format_schema ( $schema, $context);
           }
         } else {
-          $result["schema"]["additionalProperties"] = (boolean) $parameters["additionalProperties"];
+          $result["schema"]["additionalProperties"] = (bool) $parameters["additionalProperties"];
         }
       }
-      $required = array ();
-      foreach ( $result["schema"]["properties"] as $property => $schema)
+      if ( array_key_exists ( "properties", $result["schema"]) && is_array ( $result["schema"]["properties"]))
       {
-        if ( array_key_exists ( "required", $schema))
+        $required = array ();
+        foreach ( $result["schema"]["properties"] as $property => $schema)
         {
-          if ( $schema["required"])
+          if ( is_array ( $schema) && array_key_exists ( "required", $schema))
           {
-            $required[] = $property;
+            if ( $schema["required"])
+            {
+              $required[] = $property;
+            }
+            unset ( $result["schema"]["properties"][$property]["required"]);
           }
-          unset ( $result["schema"]["properties"][$property]["required"]);
         }
-      }
-      if ( sizeof ( $required) != 0)
-      {
-        $result["schema"]["required"] = $required;
+        if ( sizeof ( $required) != 0)
+        {
+          $result["schema"]["required"] = $required;
+        }
       }
       break;
     case "array":
@@ -1497,13 +1578,28 @@ function format_parameters ( $parameters, $in = "query")
       {
         $result["schema"]["uniqueItems"] = $parameters["uniqueItems"];
       }
-      if ( array_key_exists ( "type", $parameters["items"]) && sizeof ( $parameters["items"]) == 1)
+      if ( array_key_exists ( "items", $parameters))
       {
-        $result["schema"]["items"] = $parameters["items"];
-      } else {
-        $result["schema"]["items"] = format_schema ( $parameters["items"]);
+        if ( is_array ( $parameters["items"]) && array_key_exists ( "type", $parameters["items"]) && sizeof ( $parameters["items"]) == 1)
+        {
+          $result["schema"]["items"] = $parameters["items"];
+        } else {
+          $result["schema"]["items"] = format_schema ( $parameters["items"], $context);
+        }
       }
       break;
+  }
+
+  // Add nullable if available (valid for any type in OAS 3.0):
+  if ( array_key_exists ( "nullable", $parameters) && ! ( array_key_exists ( "required", $result) && $result["required"]))
+  {
+    $result["schema"]["nullable"] = (bool) $parameters["nullable"];
+  }
+
+  // Add deprecated if available:
+  if ( array_key_exists ( "deprecated", $parameters) && $parameters["deprecated"])
+  {
+    $result["deprecated"] = true;
   }
 
   return $result;
@@ -1514,10 +1610,16 @@ function format_parameters ( $parameters, $in = "query")
  * method will filter all valid values received and return a sanitized array.
  *
  * @param array $parameters Structure to be validated.
+ * @param string[optional] $context Module context for i18n lookups.
  * @return array Sanitized values.
  */
-function format_schema ( $parameters)
+function format_schema ( $parameters, $context = "")
 {
+  if ( ! is_array ( $parameters))
+  {
+    return $parameters;
+  }
+
   $result = array ();
 
   // If it's a reference, return it:
@@ -1532,7 +1634,7 @@ function format_schema ( $parameters)
     $result["allOf"] = array ();
     foreach ( $parameters["allOf"] as $parameter)
     {
-      $result["allOf"][] = format_schema ( $parameter);
+      $result["allOf"][] = format_schema ( $parameter, $context);
     }
   }
   if ( array_key_exists ( "oneOf", $parameters))
@@ -1540,7 +1642,7 @@ function format_schema ( $parameters)
     $result["oneOf"] = array ();
     foreach ( $parameters["oneOf"] as $parameter)
     {
-      $result["oneOf"][] = format_schema ( $parameter);
+      $result["oneOf"][] = format_schema ( $parameter, $context);
     }
   }
   if ( array_key_exists ( "anyOf", $parameters))
@@ -1548,7 +1650,7 @@ function format_schema ( $parameters)
     $result["anyOf"] = array ();
     foreach ( $parameters["anyOf"] as $parameter)
     {
-      $result["anyOf"][] = format_schema ( $parameter);
+      $result["anyOf"][] = format_schema ( $parameter, $context);
     }
   }
   if ( array_key_exists ( "not", $parameters))
@@ -1556,7 +1658,7 @@ function format_schema ( $parameters)
     $result["not"] = array ();
     foreach ( $parameters["not"] as $parameter)
     {
-      $result["not"][] = format_schema ( $parameter);
+      $result["not"][] = format_schema ( $parameter, $context);
     }
   }
 
@@ -1571,56 +1673,54 @@ function format_schema ( $parameters)
     }
   }
 
-  // Check object type consistency:
-  if ( $parameters["type"] == "object" && ( ! array_key_exists ( "properties", $parameters) && ! array_key_exists ( "additionalProperties", $parameters)))
-  {
-    return;
-  }
-  if ( $parameters["type"] == "array" && ! array_key_exists ( "items", $parameters))
-  {
-    return;
-  }
-
   // Process schema with sub schema:
   if ( array_key_exists ( "schema", $parameters))
   {
-    $result["schema"] = format_schema ( $parameters["schema"]);
+    $result["schema"] = format_schema ( $parameters["schema"], $context);
   }
 
   // Process typed schema:
-  switch ( $parameters["type"])
+  if ( array_key_exists ( "type", $parameters))
   {
-    case "array":
-    case "object":
-    case "string":
-    case "boolean":
-    case "integer":
-    case "null":
-      $result["type"] = $parameters["type"];
-      break;
-    case "byte":
-    case "date":
-    case "date-time":
-    case "password":
-    case "email":
-    case "uuid":
-      $result["type"] = "string";
-      $result["format"] = $parameters["type"];
-      break;
-    case "int32":
-    case "int64":
-      $result["type"] = "integer";
-      $result["format"] = $parameters["type"];
-      break;
-    case "long":
-      $result["type"] = "integer";
-      $result["format"] = "int64";
-      break;
-    case "float":
-    case "double":
-      $result["type"] = "number";
-      $result["format"] = $parameters["type"];
-      break;
+    switch ( $parameters["type"])
+    {
+      case "array":
+      case "object":
+      case "string":
+      case "boolean":
+      case "integer":
+      case "null":
+        $result["type"] = $parameters["type"];
+        break;
+      case "byte":
+      case "date":
+      case "date-time":
+      case "time":
+      case "password":
+      case "email":
+      case "uuid":
+        $result["type"] = "string";
+        $result["format"] = $parameters["type"];
+        break;
+      case "int32":
+      case "int64":
+        $result["type"] = "integer";
+        $result["format"] = $parameters["type"];
+        break;
+      case "long":
+        $result["type"] = "integer";
+        $result["format"] = "int64";
+        break;
+      case "float":
+      case "double":
+        $result["type"] = "number";
+        $result["format"] = $parameters["type"];
+        break;
+    }
+  }
+  if ( array_key_exists ( "format", $parameters) && ! array_key_exists ( "format", $result))
+  {
+    $result["format"] = $parameters["format"];
   }
   if ( ! array_key_exists ( "type", $result) && ! array_key_exists ( "schema", $parameters))
   {
@@ -1637,7 +1737,7 @@ function format_schema ( $parameters)
       {
         case "attribute":
         case "wrapped":
-          $result["xml"][$xmlattribute] = (boolean) $xmlvalue;
+          $result["xml"][$xmlattribute] = (bool) $xmlvalue;
           break;
         case "name":
         case "namespace":
@@ -1651,19 +1751,25 @@ function format_schema ( $parameters)
   // Add description if available:
   if ( array_key_exists ( "description", $parameters))
   {
-    $result["description"] = $parameters["description"];
+    $result["description"] = is_string ( $parameters["description"]) ? __ ( $parameters["description"], false, false, $context) : $parameters["description"];
   }
 
   // Add example if available:
   if ( array_key_exists ( "example", $parameters))
   {
-    $result["example"] = $parameters["example"];
+    $result["example"] = is_string ( $parameters["example"]) ? __ ( $parameters["example"], false, false, $context) : $parameters["example"];
   }
 
   // Add enum if available:
   if ( array_key_exists ( "enum", $parameters) && is_array ( $parameters["enum"]))
   {
     $result["enum"] = $parameters["enum"];
+  }
+
+  // Add const as single-value enum (OAS 3.0 compatible):
+  if ( array_key_exists ( "const", $parameters))
+  {
+    $result["enum"] = array ( $parameters["const"]);
   }
 
   // Add pattern if available:
@@ -1679,7 +1785,7 @@ function format_schema ( $parameters)
   }
 
   // Process type specific parameters:
-  switch ( $result["type"])
+  switch ( array_key_exists ( "type", $result) ? $result["type"] : "")
   {
     case "integer":
     case "number":
@@ -1707,10 +1813,6 @@ function format_schema ( $parameters)
       {
         $result["default"] = $parameters["default"];
       }
-      if ( array_key_exists ( "nullable", $parameters) && ! $result["required"])
-      {
-        $result["nullable"] = (boolean) $parameters["nullable"];
-      }
       break;
     case "string":
       if ( array_key_exists ( "maxLength", $parameters))
@@ -1729,7 +1831,7 @@ function format_schema ( $parameters)
     case "boolean":
       if ( array_key_exists ( "default", $parameters) && is_bool ( $parameters["default"]))
       {
-        $result["default"] = (boolean) $parameters["default"];
+        $result["default"] = (bool) $parameters["default"];
       }
       break;
     case "object":
@@ -1755,7 +1857,7 @@ function format_schema ( $parameters)
               $result["properties"]["discriminator"]["mapping"] = $parameters["properties"]["discriminator"]["mapping"];
             }
           } else {
-            $result["properties"][$property] = ( $property == "allOf" || $property == "oneOf" || $property == "anyOf" || $property == "not" ? format_schema ( array ( $property => $schema))[$property] : format_schema ( $schema));
+            $result["properties"][$property] = ( $property == "allOf" || $property == "oneOf" || $property == "anyOf" || $property == "not" ? format_schema ( array ( $property => $schema), $context)[$property] : format_schema ( $schema, $context));
           }
         }
       }
@@ -1766,27 +1868,30 @@ function format_schema ( $parameters)
           $result["additionalProperties"] = array ();
           foreach ( $parameters["additionalProperties"] as $property => $schema)
           {
-            $result["additionalProperties"][$property] = ( $property == "allOf" || $property == "oneOf" || $property == "anyOf" || $property == "not" ? format_schema ( array ( $property => $schema))[$property] : format_schema ( $schema));
+            $result["additionalProperties"][$property] = ( $property == "allOf" || $property == "oneOf" || $property == "anyOf" || $property == "not" ? format_schema ( array ( $property => $schema), $context)[$property] : format_schema ( $schema, $context));
           }
         } else {
-          $result["additionalProperties"] = (boolean) $parameters["additionalProperties"];
+          $result["additionalProperties"] = (bool) $parameters["additionalProperties"];
         }
       }
-      $required = array ();
-      foreach ( $result["properties"] as $property => $schema)
+      if ( array_key_exists ( "properties", $result) && is_array ( $result["properties"]))
       {
-        if ( array_key_exists ( "required", $schema))
+        $required = array ();
+        foreach ( $result["properties"] as $property => $schema)
         {
-          if ( $schema["required"])
+          if ( is_array ( $schema) && array_key_exists ( "required", $schema))
           {
-            $required[] = $property;
+            if ( $schema["required"])
+            {
+              $required[] = $property;
+            }
+            unset ( $result["properties"][$property]["required"]);
           }
-          unset ( $result["properties"][$property]["required"]);
         }
-      }
-      if ( sizeof ( $required) != 0)
-      {
-        $result["required"] = $required;
+        if ( sizeof ( $required) != 0)
+        {
+          $result["required"] = $required;
+        }
       }
       break;
     case "array":
@@ -1802,13 +1907,38 @@ function format_schema ( $parameters)
       {
         $result["uniqueItems"] = $parameters["uniqueItems"];
       }
-      if ( array_key_exists ( "type", $parameters["items"]) && sizeof ( $parameters["items"]) == 1)
+      if ( array_key_exists ( "items", $parameters))
       {
-        $result["items"] = $parameters["items"];
-      } else {
-        $result["items"] = format_schema ( $parameters["items"]);
+        if ( is_array ( $parameters["items"]) && array_key_exists ( "type", $parameters["items"]) && sizeof ( $parameters["items"]) == 1)
+        {
+          $result["items"] = $parameters["items"];
+        } else {
+          $result["items"] = format_schema ( $parameters["items"], $context);
+        }
       }
       break;
+  }
+
+  // Add nullable if available (valid for any type in OAS 3.0):
+  if ( array_key_exists ( "nullable", $parameters) && ! ( array_key_exists ( "required", $result) && $result["required"]))
+  {
+    $result["nullable"] = (bool) $parameters["nullable"];
+  }
+
+  // Add deprecated if available:
+  if ( array_key_exists ( "deprecated", $parameters) && $parameters["deprecated"])
+  {
+    $result["deprecated"] = true;
+  }
+
+  // Add readOnly / writeOnly if available:
+  if ( array_key_exists ( "readOnly", $parameters) && $parameters["readOnly"])
+  {
+    $result["readOnly"] = true;
+  }
+  if ( array_key_exists ( "writeOnly", $parameters) && $parameters["writeOnly"])
+  {
+    $result["writeOnly"] = true;
   }
 
   return ( sizeof ( $result) == 0 ? "" : $result);

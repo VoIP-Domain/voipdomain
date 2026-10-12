@@ -115,11 +115,16 @@ declare -A ASTERISK_BOOTSTRAPS=(
   ["extensions.conf"]="voipdomain/bootstrap/dialplan.conf"
   ["manager.conf"]="voipdomain/bootstrap/manager.conf"
   ["queues.conf"]="voipdomain/bootstrap/queues.conf"
+  ["confbridge.conf"]="voipdomain/bootstrap/confbridge.conf"
   ["voicemail.conf"]="voipdomain/bootstrap/voicemail.conf"
   ["musiconhold.conf"]="voipdomain/bootstrap/musiconhold.conf"
   ["agents.conf"]="voipdomain/bootstrap/agents.conf"
   ["pjsip_notify.conf"]="voipdomain/bootstrap/pjsip_notify.conf"
   ["indications.conf"]="voipdomain/bootstrap/indications.conf"
+  ["cdr.conf"]="voipdomain/bootstrap/cdr.conf"
+  ["cdr_manager.conf"]="voipdomain/bootstrap/cdr_manager.conf"
+  ["cdr_sqlite3_custom.conf"]="voipdomain/bootstrap/cdr_sqlite3_custom.conf"
+  ["cel.conf"]="voipdomain/bootstrap/cel.conf"
 )
 
 #
@@ -136,6 +141,7 @@ declare -a CONFIG_PLACEHOLDERS=(
   "dialplan-gateway-000000.conf"
   "dialplan-globals.conf"
   "dialplan-hint-000000.conf"
+  "confbridge-000000.conf"
   "dialplan-ivr-000000.conf"
   "dialplan-profile-000000.conf"
   "dialplan-range-000000.conf"
@@ -272,7 +278,7 @@ create_placeholder() {
   if [[ ! -f "${dir}/${file}" ]]; then
     local prefix="${file%-000000.conf}"
     echo "; Placeholder so the ${prefix}-*.conf glob is never empty on fresh installs." > "${dir}/${file}"
-    chown root:asterisk "${dir}/${file}"
+    chown asterisk:asterisk "${dir}/${file}"
     chmod 644 "${dir}/${file}"
   fi
 }
@@ -594,9 +600,11 @@ msg_done
 #
 msg_step "Creating VoIP Domain directories"
 mkdir -p /etc/asterisk/voipdomain/{bootstrap,configs}
-chown -R root:asterisk /etc/asterisk/voipdomain
+chown root:asterisk /etc/asterisk/voipdomain
 chmod 750 /etc/asterisk/voipdomain
+chown asterisk:asterisk /etc/asterisk/voipdomain/bootstrap
 chmod 755 /etc/asterisk/voipdomain/bootstrap
+chown asterisk:asterisk /etc/asterisk/voipdomain/configs
 chmod 750 /etc/asterisk/voipdomain/configs
 msg_done
 
@@ -621,8 +629,9 @@ for config in "${!ASTERISK_BOOTSTRAPS[@]}"; do
   echo -ne "  ${BOLD}${config}${RESET} -> ${bootstrap}... "
 
   if [[ ! -f "/etc/asterisk/${config}" ]]; then
-    echo -e "${YELLOW}not found, skipped${RESET}"
-    continue
+    touch "/etc/asterisk/${config}"
+    chown root:asterisk "/etc/asterisk/${config}"
+    chmod 644 "/etc/asterisk/${config}"
   fi
 
   if grep -q "^#include ${bootstrap}" "/etc/asterisk/${config}" 2>/dev/null; then
@@ -668,7 +677,7 @@ write = system,call,log,verbose,command,agent,user,config,dtmf,reporting,cdr,dia
 writetimeout = 5000
 EOF
 chmod 640 /etc/asterisk/voipdomain/configs/manager-voipdomain.conf
-chown root:asterisk /etc/asterisk/voipdomain/configs/manager-voipdomain.conf
+chown asterisk:asterisk /etc/asterisk/voipdomain/configs/manager-voipdomain.conf
 msg_done
 
 #
@@ -761,14 +770,21 @@ cat > /etc/asterisk/voipdomain/configs/indications-voipdomain.conf << EOF
 [general]
 country = ${INDICATION_COUNTRY}
 EOF
-chown root:asterisk /etc/asterisk/voipdomain/configs/indications-voipdomain.conf
+chown asterisk:asterisk /etc/asterisk/voipdomain/configs/indications-voipdomain.conf
 chmod 644 /etc/asterisk/voipdomain/configs/indications-voipdomain.conf
 msg_done
 
 msg_step "Configuring VoIP Domain FastAGI daemon"
-sed -i "s/^username = .*\$/username = ${MARIADB_UUSER}/" /etc/voipdomain/fastagi.conf
-sed -i "s/^password = .*\$/password = ${MARIADB_UPASS}/" /etc/voipdomain/fastagi.conf
-sed -i "s/^database = .*\$/database = ${MARIADB_DB}/" /etc/voipdomain/fastagi.conf
+if grep -q "^\[gearman\]" /etc/voipdomain/fastagi.conf; then
+  sed -i "/^\[gearman\]/,/^\[/{s/^hostname = .*/hostname = {{{GEARMAN_HOST}}}/;s/^port = .*/port = {{{GEARMAN_PORT}}}/}" /etc/voipdomain/fastagi.conf
+else
+  cat >> /etc/voipdomain/fastagi.conf << 'EOF'
+
+[gearman]
+hostname = {{{GEARMAN_HOST}}}
+port = {{{GEARMAN_PORT}}}
+EOF
+fi
 msg_done
 
 msg_step "Configuring VoIP Domain monitor daemon"

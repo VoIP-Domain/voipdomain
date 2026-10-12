@@ -4,6 +4,73 @@ div .workflow-itens > .btn
   margin-bottom: 5px;
 }
 
+div .workflow-itens .workflow-group
+{
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 10px;
+  margin-bottom: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px 8px 4px;
+}
+
+div .workflow-itens .workflow-group .workflow-group-label
+{
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 5px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  text-align: center;
+}
+
+div .workflow-itens .workflow-group .workflow-group-label.btn-default
+{
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+div .workflow-itens .workflow-group .workflow-group-label.btn-info
+{
+  background-color: #5bc0de;
+  color: #fff;
+}
+
+div .workflow-itens .workflow-group .workflow-group-label.btn-success
+{
+  background-color: #5cb85c;
+  color: #fff;
+}
+
+div .workflow-itens .workflow-group .workflow-group-label.btn-primary
+{
+  background-color: #337ab7;
+  color: #fff;
+}
+
+div .workflow-itens .workflow-group .workflow-group-label.btn-warning
+{
+  background-color: #f0ad4e;
+  color: #fff;
+}
+
+div .workflow-itens .workflow-group .workflow-group-label.btn-danger
+{
+  background-color: #d9534f;
+  color: #fff;
+}
+
+div .workflow-itens .workflow-group .btn
+{
+  cursor: grab;
+  margin-bottom: 4px;
+  margin-right: 3px;
+}
+
 .workflow_container
 {
   max-width: 100%;
@@ -39,6 +106,13 @@ div .workflow-itens > .btn
   cursor: pointer;
   margin-right: 4px;
   padding: 4px;
+}
+
+.workflow_controls > i.disabled
+{
+  background-color: #a0b5c4;
+  cursor: default;
+  opacity: 0.5;
 }
 
 .flowchart-operator-title

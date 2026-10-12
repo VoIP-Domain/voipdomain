@@ -191,6 +191,7 @@ function ranges_add_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Ranges"), "link" => "/ranges"),
     2 => array ( "title" => __ ( "Add"))
   ));
+  sys_set_menu_highlight ( "/ranges");
 
   /**
    * Add page JavaScript requirements
@@ -203,7 +204,7 @@ function ranges_add_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"range_add_form\">\n";
 
   // Add range description field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"range_add_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"range_add_description\" placeholder=\"" . __ ( "Range description") . "\" />\n";
@@ -211,7 +212,7 @@ function ranges_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add range server selector
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"range_add_server\" class=\"control-label col-xs-2\">" . __ ( "Server") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <select name=\"Server\" id=\"range_add_server\" class=\"form-control\" data-placeholder=\"" . __ ( "Range server") . "\"><option value=\"\"></option></select>\n";
@@ -219,7 +220,7 @@ function ranges_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add range start field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"range_add_start\" class=\"control-label col-xs-2\">" . __ ( "Start") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Start\" class=\"form-control\" id=\"range_add_start\" placeholder=\"" . __ ( "Range start") . "\" />\n";
@@ -227,7 +228,7 @@ function ranges_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add range finish field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"range_add_finish\" class=\"control-label col-xs-2\">" . __ ( "Finish") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Finish\" class=\"form-control\" id=\"range_add_finish\" placeholder=\"" . __ ( "Range finish") . "\" />\n";
@@ -294,7 +295,7 @@ function ranges_add_page ( $buffer, $parameters)
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
+ * @return void
  */
 function ranges_clone_function ( $buffer, $parameters)
 {
@@ -342,6 +343,7 @@ function ranges_view_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Ranges"), "link" => "/ranges"),
     2 => array ( "title" => __ ( "View"))
   ));
+  sys_set_menu_highlight ( "/ranges");
 
   /**
    * Create page code
@@ -432,6 +434,7 @@ function ranges_edit_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Ranges"), "link" => "/ranges"),
     2 => array ( "title" => __ ( "Edit"))
   ));
+  sys_set_menu_highlight ( "/ranges");
 
   /**
    * Add page JavaScript requirements
@@ -444,7 +447,7 @@ function ranges_edit_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"range_edit_form\">\n";
 
   // Add range description field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"range_edit_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"range_edit_description\" placeholder=\"" . __ ( "Range description") . "\" />\n";
@@ -452,7 +455,7 @@ function ranges_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add range server selector
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"range_edit_server\" class=\"control-label col-xs-2\">" . __ ( "Server") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <select name=\"Server\" id=\"range_edit_server\" class=\"form-control\" data-placeholder=\"" . __ ( "Range server") . "\"><option value=\"\"></option></select>\n";
@@ -460,7 +463,7 @@ function ranges_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add range start field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"range_edit_start\" class=\"control-label col-xs-2\">" . __ ( "Start") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Start\" class=\"form-control\" id=\"range_edit_start\" placeholder=\"" . __ ( "Range start") . "\" />\n";
@@ -468,7 +471,7 @@ function ranges_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add range finish field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"range_edit_finish\" class=\"control-label col-xs-2\">" . __ ( "Finish") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Finish\" class=\"form-control\" id=\"range_edit_finish\" placeholder=\"" . __ ( "Range finish") . "\" />\n";

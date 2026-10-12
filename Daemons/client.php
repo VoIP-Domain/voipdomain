@@ -39,9 +39,8 @@
 /**
  * Set error reporting level
  */
-error_reporting ( E_ERROR);
+error_reporting ( E_ALL);
 ini_set ( "display_errors", "false");
-// error_reporting ( E_ALL); ini_set ( "display_errors", "true");
 
 /**
  * Check if script is running from CLI
@@ -60,6 +59,18 @@ require_once ( dirname ( __FILE__) . "/includes/plugins.inc.php");
 require_once ( dirname ( __FILE__) . "/includes/file-transfer.inc.php");
 require_once ( dirname ( __FILE__) . "/includes/systemd.inc.php");
 require_once ( dirname ( __FILE__) . "/includes/plugin-install.inc.php");
+require_once ( dirname ( __FILE__) . "/includes/bootstrap.inc.php");
+require_once ( dirname ( __FILE__) . "/includes/error-handler.inc.php");
+
+/**
+ * Register error handlers for clear crash reporting
+ */
+daemon_register_error_handlers ();
+
+/**
+ * Ensure single instance
+ */
+daemon_lock ( "client");
 
 /**
  * Parse configuration file. You should put your configuration file OUTSIDE
@@ -300,6 +311,42 @@ foreach ( glob ( dirname ( __FILE__) . "/client-modules/*/client.php") as $filen
 echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
 
 /**
+ * Include all plugin files from client-plugins/
+ */
+$_in["loaded_plugins"] = array ();
+$pluginsdir = dirname ( __FILE__) . "/client-plugins";
+if ( is_dir ( $pluginsdir))
+{
+  echo "Executing: Loading plugins... ";
+  foreach ( scandir ( $pluginsdir) as $entry)
+  {
+    if ( $entry == "." || $entry == "..")
+    {
+      continue;
+    }
+    $pluginpath = $pluginsdir . "/" . $entry;
+    if ( is_dir ( $pluginpath) && is_readable ( $pluginpath . "/client.php"))
+    {
+      require_once ( $pluginpath . "/client.php");
+      $_in["loaded_plugins"][] = $entry;
+    }
+  }
+  echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m (" . sizeof ( $_in["loaded_plugins"]) . " plugins)\n";
+}
+
+/**
+ * Resolve deferred hook registrations
+ */
+framework_resolve_deferred_hooks ();
+
+/**
+ * Restore pending VDFT file transfer sessions from disk
+ */
+echo "Executing: Restoring file transfer sessions... ";
+$restored = file_transfer_restore_sessions ();
+echo chr ( 27) . "[1;37m" . $restored . " session(s)" . chr ( 27) . "[1;0m\n";
+
+/**
  * If possible, change process name
  */
 if ( extension_loaded ( "proctitle"))
@@ -371,7 +418,6 @@ echo "\n";
 /**
  * Fork process to daemon mode (except if in debug mode)
  */
-error_reporting ( E_ERROR);
 set_time_limit ( 0);
 if ( ! $_in["debug"])
 {
@@ -448,6 +494,16 @@ echo "Finished flusing pending events, requesting a task flush!\n";
 system_event ( "task_replay", array ());
 
 /**
+ * Fire daemon startup hook (bootstrap regeneration, module verification, etc.)
+ */
+echo "Executing: Running startup hooks... ";
+if ( framework_has_hook ( "daemon_startup"))
+{
+  framework_call ( "daemon_startup", array (), false, "");
+}
+echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
+
+/**
  * Start the main loop
  */
 while ( $_in["gearman"]["worker"]->work ());
@@ -513,7 +569,7 @@ function check_cleanup_registers ()
   // Process each dependency:
   foreach ( $_in["cleanup"]["raw"] as $handler => $entry)
   {
-    if ( array_key_exists ( "Before", $entry["Configuration"]))
+    if ( array_key_exists ( "Before", $entry["Configuration"]) && is_array ( $entry["Configuration"]["Before"]))
     {
       foreach ( $entry["Configuration"]["Before"] as $dep)
       {
@@ -524,6 +580,9 @@ function check_cleanup_registers ()
           $_in["cleanup"]["entries"][$dep]["Deps"][] = $handler;
         }
       }
+    }
+    if ( array_key_exists ( "After", $entry["Configuration"]) && is_array ( $entry["Configuration"]["After"]))
+    {
       foreach ( $entry["Configuration"]["After"] as $dep)
       {
         if ( ! array_key_exists ( $dep, $_in["cleanup"]["entries"]))
@@ -700,7 +759,14 @@ function task_manager ( $job)
       {
         if ( ! array_key_exists ( "result", $eventdata) || ! ( $eventdata["result"] >= 200 && $eventdata["result"] <= 299))
         {
-          $result = framework_call ( $eventdata["event"], $eventdata["data"]);
+          try
+          {
+            $result = framework_call ( $eventdata["event"], $eventdata["data"]);
+          } catch ( Throwable $e)
+          {
+            $result = array ( "code" => 500, "message" => "Exception: " . $e->getMessage ());
+            writeLog ( $eventdata["event"] . "(" . $payload["id"] . " group) threw " . get_class ( $e) . ": " . $e->getMessage () . " in " . $e->getFile () . ":" . $e->getLine (), VoIP_LOG_WARNING);
+          }
           if ( ! is_array ( $result) || ! array_key_exists ( "code", $result) || ! array_key_exists ( "message", $result))
           {
             $eventgroup[$eventid]["result"] = $result;
@@ -749,7 +815,19 @@ function task_manager ( $job)
       writeLog ( "Grouped event (" . $payload["id"] . ") - Rerunning, pending events with error.", VoIP_LOG_WARNING);
     }
   } else {
-    $result = framework_call ( $payload["event"], $payload["data"]);
+    try
+    {
+      $result = framework_call ( $payload["event"], $payload["data"]);
+    } catch ( Throwable $e)
+    {
+      $result = array ( "code" => 500, "message" => "Exception: " . $e->getMessage ());
+      writeLog ( $payload["event"] . "(" . $payload["id"] . ") threw " . get_class ( $e) . ": " . $e->getMessage () . " in " . $e->getFile () . ":" . $e->getLine (), VoIP_LOG_WARNING);
+      $trace_lines = explode ( "\n", $e->getTraceAsString ());
+      foreach ( array_slice ( $trace_lines, 0, 5) as $trace_line)
+      {
+        writeLog ( "  " . $trace_line, VoIP_LOG_WARNING);
+      }
+    }
     if ( ! is_array ( $result) || ! array_key_exists ( "code", $result) || ! array_key_exists ( "message", $result))
     {
       $_in["processed"][$payload["id"]] = $result;
@@ -767,7 +845,7 @@ function task_manager ( $job)
     } else {
       reply_event ( $payload["id"], $result);
       $_in["processed"][$payload["id"]] = $result["code"];
-      writeLog ( $payload["event"] . "(" . $payload["id"] . ") - Result " . $result["code"] . ": " . $result["message"] . ( $result["content"] ? " (Content: " . json_encode ( $result["content"]) . ")" : ""), ( $result["code"] < 200 || $result["code"] > 299 ? VoIP_LOG_WARNING : VoIP_LOG_NOTICE));
+      writeLog ( $payload["event"] . "(" . $payload["id"] . ") - Result " . $result["code"] . ": " . $result["message"] . ( ! empty ( $result["content"]) ? " (Content: " . json_encode ( $result["content"]) . ")" : ""), ( $result["code"] < 200 || $result["code"] > 299 ? VoIP_LOG_WARNING : VoIP_LOG_NOTICE));
     }
   }
 }

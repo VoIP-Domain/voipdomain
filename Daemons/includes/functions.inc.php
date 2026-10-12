@@ -41,11 +41,58 @@ define ( "VoIP_LOG_NOTICE", 0);
 define ( "VoIP_LOG_WARNING", 1);
 define ( "VoIP_LOG_ERROR", 2);
 define ( "VoIP_LOG_FATAL", 3);
+define ( "VoIP_LOG_DEBUG", 4);
 
 /**
  * Global log file handle (opened before privilege drop, kept open)
  */
 $_loghandle = null;
+
+/**
+ * Global PID lock file handle (must remain open for the lifetime of the process)
+ */
+$_pidlock_handle = null;
+
+/**
+ * Acquire an exclusive lock for a daemon process using flock(). Prevents
+ * multiple instances of the same daemon type from running simultaneously.
+ * The lock is automatically released when the process terminates (even SIGKILL).
+ *
+ * @param string $daemon Daemon identifier (e.g. "client", "router", "monitor", "fastagi")
+ * @return void Exits with code 1 if another instance is already running
+ */
+function daemon_lock ( $daemon)
+{
+  global $_pidlock_handle;
+
+  $rundir = "/run/voipdomain";
+  if ( ! is_dir ( $rundir))
+  {
+    @mkdir ( $rundir, 0755, true);
+  }
+
+  $pidfile = $rundir . "/" . $daemon . ".pid";
+  $_pidlock_handle = @fopen ( $pidfile, "c+");
+  if ( $_pidlock_handle === false)
+  {
+    echo "FATAL: Cannot open PID file: " . $pidfile . "\n";
+    exit ( 1);
+  }
+
+  if ( ! flock ( $_pidlock_handle, LOCK_EX | LOCK_NB))
+  {
+    $existing_pid = trim ( fread ( $_pidlock_handle, 32));
+    fclose ( $_pidlock_handle);
+    $_pidlock_handle = null;
+    echo "FATAL: Another " . $daemon . " daemon is already running (PID " . $existing_pid . ").\n";
+    exit ( 1);
+  }
+
+  ftruncate ( $_pidlock_handle, 0);
+  rewind ( $_pidlock_handle);
+  fwrite ( $_pidlock_handle, (string) getmypid ());
+  fflush ( $_pidlock_handle);
+}
 
 /**
  * Function to calculate the distance between two geographic positions
@@ -553,6 +600,12 @@ function writeLog ( $msg, $severity = VoIP_LOG_NOTICE)
 {
   global $_in, $_loghandle, $_lastlog, $_lasttime, $_lastdate;
 
+  // Skip debug messages when not in debug mode
+  if ( $severity == VoIP_LOG_DEBUG && ( ! isset ( $_in["debug"]) || ! $_in["debug"]))
+  {
+    return;
+  }
+
   // Check if last message are equal
   if ( $_lastlog == $msg)
   {
@@ -576,7 +629,7 @@ function writeLog ( $msg, $severity = VoIP_LOG_NOTICE)
 
   // Write message to log file
   $msgdate = date ( "M") . " " . sprintf ( "% 2s", date ( "j")) . " " . date ( "H:i:s") . " " . php_uname ( "n") . " voipdomain[" . getmypid () . "]: ";
-  $message = ( $severity == VoIP_LOG_ERROR ? "ERROR: " : "") . ( $severity == VoIP_LOG_WARNING ? "WARNING: " : "") . ( $severity == VoIP_LOG_FATAL ? "FATAL: " : "") . $msg . "\n";
+  $message = ( $severity == VoIP_LOG_ERROR ? "ERROR: " : "") . ( $severity == VoIP_LOG_WARNING ? "WARNING: " : "") . ( $severity == VoIP_LOG_FATAL ? "FATAL: " : "") . ( $severity == VoIP_LOG_DEBUG ? "DEBUG: " : "") . $msg . "\n";
   _writeToLog ( $msgdate . $message);
   echo $message;
   if ( $severity == VoIP_LOG_FATAL || $severity == VoIP_LOG_ERROR)
@@ -635,7 +688,9 @@ function reply_event ( $rid, $code)
  */
 function asterisk_exec_enable_buffer ()
 {
-  if ( ! is_array ( $_in["AsteriskExecBuffer"]))
+  global $_in;
+
+  if ( ! array_key_exists ( "AsteriskExecBuffer", $_in) || ! is_array ( $_in["AsteriskExecBuffer"]))
   {
     $_in["AsteriskExecBuffer"] = array ();
   }
@@ -650,6 +705,8 @@ function asterisk_exec_enable_buffer ()
  */
 function asterisk_exec_empty_buffer ( $disable = false)
 {
+  global $_in;
+
   if ( $disable)
   {
     unset ( $_in["AsteriskExecBuffer"]);
@@ -668,6 +725,13 @@ function asterisk_exec_empty_buffer ( $disable = false)
  */
 function asterisk_exec_flush_buffer ( $disable = true, $removeduplicated = true)
 {
+  global $_in;
+
+  if ( ! array_key_exists ( "AsteriskExecBuffer", $_in) || ! is_array ( $_in["AsteriskExecBuffer"]))
+  {
+    return;
+  }
+
   // Execute all commands
   $executed = array ();
   foreach ( $_in["AsteriskExecBuffer"] as $command)
@@ -689,6 +753,74 @@ function asterisk_exec_flush_buffer ( $disable = true, $removeduplicated = true)
 }
 
 /**
+ * Write content to a file with pre-checks for directory existence and
+ * permissions. Logs a clear diagnostic message on failure.
+ *
+ * @param string $filepath Full path to the file to write
+ * @param string $content Content to write
+ * @return boolean True on success, false on failure
+ */
+function safe_file_put_contents ( $filepath, $content)
+{
+  $dir = dirname ( $filepath);
+  if ( ! is_dir ( $dir))
+  {
+    writeLog ( "safe_file_put_contents: Directory \"" . $dir . "\" does not exist. Cannot write \"" . basename ( $filepath) . "\".", VoIP_LOG_WARNING);
+    return false;
+  }
+  if ( ! is_writable ( $dir))
+  {
+    writeLog ( "safe_file_put_contents: Directory \"" . $dir . "\" is not writable (owner: " . posix_getpwuid ( fileowner ( $dir))["name"] . ", current user: " . posix_getpwuid ( posix_geteuid ())["name"] . "). Check permissions or SELinux.", VoIP_LOG_WARNING);
+    return false;
+  }
+  if ( file_exists ( $filepath) && ! is_writable ( $filepath))
+  {
+    writeLog ( "safe_file_put_contents: File \"" . $filepath . "\" exists but is not writable (owner: " . posix_getpwuid ( fileowner ( $filepath))["name"] . "). Check permissions or SELinux.", VoIP_LOG_WARNING);
+    return false;
+  }
+  if ( @file_put_contents ( $filepath, $content) === false)
+  {
+    writeLog ( "safe_file_put_contents: Failed to write \"" . $filepath . "\". Likely SELinux denial (permissive checks passed).", VoIP_LOG_WARNING);
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Create a directory with pre-checks for parent existence and permissions.
+ * Logs a clear diagnostic message on failure.
+ *
+ * @param string $dir Full path to the directory to create
+ * @param int $mode Permission mode (default 0777)
+ * @param boolean $recursive Create parent directories (default true)
+ * @return boolean True on success or if already exists, false on failure
+ */
+function safe_mkdir ( $dir, $mode = 0777, $recursive = true)
+{
+  if ( is_dir ( $dir))
+  {
+    return true;
+  }
+  $parent = dirname ( $dir);
+  if ( ! $recursive && ! is_dir ( $parent))
+  {
+    writeLog ( "safe_mkdir: Parent directory \"" . $parent . "\" does not exist. Cannot create \"" . basename ( $dir) . "\".", VoIP_LOG_WARNING);
+    return false;
+  }
+  if ( is_dir ( $parent) && ! is_writable ( $parent))
+  {
+    writeLog ( "safe_mkdir: Parent directory \"" . $parent . "\" is not writable (owner: " . posix_getpwuid ( fileowner ( $parent))["name"] . ", current user: " . posix_getpwuid ( posix_geteuid ())["name"] . "). Check permissions or SELinux.", VoIP_LOG_WARNING);
+    return false;
+  }
+  if ( ! @mkdir ( $dir, $mode, $recursive))
+  {
+    writeLog ( "safe_mkdir: Failed to create \"" . $dir . "\". Likely SELinux denial (permissive checks passed).", VoIP_LOG_WARNING);
+    return false;
+  }
+  return true;
+}
+
+/**
  * Function to send command to the Asterisk server.
  *
  * @global array $_in Framework global configuration variable
@@ -699,7 +831,7 @@ function asterisk_exec ( $command)
 {
   global $_in;
 
-  if ( is_array ( $_in["AsteriskExecBuffer"]))
+  if ( array_key_exists ( "AsteriskExecBuffer", $_in) && is_array ( $_in["AsteriskExecBuffer"]))
   {
     $_in["AsteriskExecBuffer"][] = $command;
   } else {
@@ -852,7 +984,7 @@ function system_event ( $event, $data)
   /**
    * Connect to gearman as client (if not connected)
    */
-  if ( ! $_in["gearman"]["client"])
+  if ( ! array_key_exists ( "gearman", $_in) || ! array_key_exists ( "client", $_in["gearman"]) || ! $_in["gearman"]["client"])
   {
     $gearman_host = ! empty ( $_in["gearman"]["hostname"]) ? $_in["gearman"]["hostname"] : "127.0.0.1";
     $gearman_port = ! empty ( $_in["gearman"]["port"]) ? (int) $_in["gearman"]["port"] : 4730;
@@ -1460,7 +1592,7 @@ function list_config ( $type, $search = "*")
     case "datafile":
       foreach ( $files as $index => $file)
       {
-        $files[$index] = substr ( basename ( $file), 0, strlen ( basename ( $file)) - strlen ( $postfix));
+        $files[$index] = substr ( basename ( $file), strlen ( $prefix), strlen ( basename ( $file)) - strlen ( $prefix) - strlen ( $postfix));
       }
       break;
     case "audio":
@@ -1648,7 +1780,11 @@ function rename_config ( $type, $source, $target)
   $source = $dir . $prefix . preg_replace ( "/^\/+/", "", $source) . $postfix;
   $target = $dir . $prefix . preg_replace ( "/^\/+/", "", $target) . $postfix;
 
-  // Copy file content:
+  // Rename file (check existence first to avoid spurious warnings):
+  if ( ! file_exists ( $source))
+  {
+    return false;
+  }
   return rename ( $source, $target);
 }
 
@@ -1904,7 +2040,7 @@ function write_config ( $type, $filename, $content)
       $dir = $_in["general"]["confdir"];
       $prefix = "dialplan-db-";
       $postfix = ".conf";
-      $output = "exten => " . $content["name"] . ",1,ExecIf(\"\${ARG1}\" != \"\"]?Set(prefix=\${ARG1}_):Set(prefix=_))\n";
+      $output = "exten => " . $content["name"] . ",1,ExecIf(\$[\"\${ARG1}\" != \"\"]?Set(prefix=\${ARG1}_):Set(prefix=_))\n";
       foreach ( $content["data"] as $key => $value)
       {
         $output .= " same => n,ExecIf(\$[\"\${ARG2}\" = \"\" | \"\${ARG2}\" = \"" . $key . "\"]?Set(\${prefix}vd_" . $key . "=" . $value . "))\n";

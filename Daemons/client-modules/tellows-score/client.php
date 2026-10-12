@@ -50,7 +50,7 @@ cleanup_register ( "Tellows", "tellows_wipe");
 
 /**
  * Function to configure Tellows Score.
- * Required parameters are: (string) Key, (boolean) AntiSpam, (integer) Score
+ * Required parameters are: (string) Key, (bool) AntiSpam, (int) Score
  * Possible results:
  *   - 200: OK, configuration created (overwritten)
  *   - 201: OK, configuration created

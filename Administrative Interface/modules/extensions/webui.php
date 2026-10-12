@@ -191,6 +191,7 @@ function extensions_add_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Extensions"), "link" => "/extensions"),
     2 => array ( "title" => __ ( "Add"))
   ));
+  sys_set_menu_highlight ( "/extensions");
 
   /**
    * Add page CSS requirements
@@ -227,7 +228,7 @@ function extensions_add_page ( $buffer, $parameters)
   $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in active\" id=\"extension_add_tab_basic\">\n";
 
   // Add extension number field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"extension_add_extension\" class=\"control-label col-xs-2\">" . __ ( "Number") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <div class=\"input-group\">\n";
@@ -240,7 +241,7 @@ function extensions_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add extension description field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"extension_add_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"extension_add_description\" placeholder=\"" . __ ( "Extension description") . "\" >\n";
@@ -248,7 +249,7 @@ function extensions_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add extension type selector
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"extension_add_type\" class=\"control-label col-xs-2\">" . __ ( "Type") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"Type\" id=\"extension_add_type\" class=\"form-control\" data-placeholder=\"" . __ ( "Extension type") . "\"><option value=\"\"></option></select>\n";
@@ -411,7 +412,7 @@ function extensions_add_page ( $buffer, $parameters)
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
+ * @return void
  */
 function extensions_clone_function ( $buffer, $parameters)
 {
@@ -482,6 +483,7 @@ function extensions_view_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Extensions"), "link" => "/extensions"),
     2 => array ( "title" => __ ( "View"))
   ));
+  sys_set_menu_highlight ( "/extensions");
 
   /**
    * First, we call sub extension view hooks to populate tabs
@@ -623,6 +625,7 @@ function extensions_edit_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Extensions"), "link" => "/extensions"),
     2 => array ( "title" => __ ( "Edit"))
   ));
+  sys_set_menu_highlight ( "/extensions");
 
   /**
    * Add page CSS requirements
@@ -659,7 +662,7 @@ function extensions_edit_page ( $buffer, $parameters)
   $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in active\" id=\"extension_edit_tab_basic\">\n";
 
   // Add extension number field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"extension_ndit_number\" class=\"control-label col-xs-2\">" . __ ( "Number") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Number\" class=\"form-control\" id=\"extension_edit_number\" placeholder=\"" . __ ( "Extension number") . "\" />\n";
@@ -667,7 +670,7 @@ function extensions_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add extension description field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"extension_edit_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"extension_edit_description\" placeholder=\"" . __ ( "Extension description") . "\" >\n";
@@ -817,6 +820,7 @@ function extensions_report_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Extensions"), "link" => "/extensions"),
     2 => array ( "title" => __ ( "Report"))
   ));
+  sys_set_menu_highlight ( "/extensions");
 
   // Generate call report page through hook call:
   return framework_call ( "call_report_page_generate", array (

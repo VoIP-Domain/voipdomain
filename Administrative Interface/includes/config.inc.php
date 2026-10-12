@@ -111,6 +111,7 @@ $_in["session"]["Data"] = array ();
 $_in["page"]["title"] = "";
 $_in["page"]["subtitle"] = "";
 $_in["page"]["path"] = array ();
+$_in["page"]["altpaths"] = array ();
 $_in["page"]["i18n"] = array ();
 
 /**
@@ -147,6 +148,11 @@ if ( ! array_key_exists ( "title", $_in["general"]))
 {
   $_in["general"]["title"] = "VoIP Domain";
 }
+
+/**
+ * Initialize loaded modules registry
+ */
+$_in["modules"] = array ();
 
 /**
  * Include basic available languages
@@ -352,11 +358,11 @@ function sys_clear_css ()
  * Function to add new CSS file or code to the framework.
  *
  * @global array $_in Framework global configuration variable
- * @param array $script Array containing the "src" variable pointing the file
- *                      path or CSS code, "name" is optional, and refers to the
- *                      script name (if not provided, will be the name of the
- *                      script, without path and suffix) and "dep" as an array
- *                      listing the script dependencies (default is no deps)
+ * @param string|array $script Array containing the "src" variable pointing the file
+ *                             path or CSS code, "name" is optional, and refers to the
+ *                             script name (if not provided, will be the name of the
+ *                             script, without path and suffix) and "dep" as an array
+ *                             listing the script dependencies (default is no deps)
  * @return void
  */
 function sys_addcss ( $script)
@@ -420,12 +426,12 @@ function sys_clear_js ()
  * Function to add new JavaScript file or code to the framework.
  *
  * @global array $_in Framework global configuration variable
- * @param array $script Array containing the "src" variable pointing the file
- *                      path or JavaScript code, "name" is optional, and refers
- *                      to the script name (if not provided, will be the name of
- *                      the script, without path and suffix) and "dep" as an
- *                      array listing the script dependencies (default is no
- *                      deps)
+ * @param string|array $script Array containing the "src" variable pointing the file
+ *                             path or JavaScript code, "name" is optional, and refers
+ *                             to the script name (if not provided, will be the name of
+ *                             the script, without path and suffix) and "dep" as an
+ *                             array listing the script dependencies (default is no
+ *                             deps)
  * @return void
  */
 function sys_addjs ( $script)
@@ -531,6 +537,22 @@ function sys_set_path ( $path)
 }
 
 /**
+ * Function to add a menu highlight alternative path. When the current page path
+ * does not match any sidebar menu entry exactly, the system will try each
+ * registered alternative in order until one matches a menu link.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $path Alternative path to highlight in the sidebar menu
+ * @return void
+ */
+function sys_set_menu_highlight ( $path)
+{
+  global $_in;
+
+  $_in["page"]["altpaths"][] = $path;
+}
+
+/**
  * Function to set framework page hash event.
  *
  * @global array $_in Framework global configuration variable
@@ -562,9 +584,70 @@ function sys_set_startevent ( $id, $event, $data = array ())
 }
 
 /**
+ * Register a module or plugin in the global modules registry. Scans the module
+ * directory for standard files and populates version/author metadata from the
+ * appropriate source (MODULE_*_VERSION constants for core, plugin.json for plugins).
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $name Module directory name (e.g. "blocks", "sampleitems")
+ * @param string $type Module type: "core" or "plugin"
+ * @param string $path Filesystem path to the module directory
+ * @param array $metadata Optional overrides (loaded, status, etc.)
+ * @return void
+ */
+function sys_register_module ( $name, $type, $path, $metadata = array ())
+{
+  global $_in;
+
+  $standard_files = array ( "api.php", "config.php", "filter.php", "functions.php", "functions-webui.php", "install.php", "language.php", "webui.php");
+  $files = array ();
+  foreach ( $standard_files as $file)
+  {
+    $files[$file] = is_readable ( $path . "/" . $file);
+  }
+
+  $entry = array (
+    "type" => $type,
+    "version" => "",
+    "author" => "",
+    "loaded" => array_key_exists ( "loaded", $metadata) ? $metadata["loaded"] : true,
+    "path" => realpath ( $path) !== false ? realpath ( $path) : $path,
+    "files" => $files
+  );
+
+  if ( $type == "core")
+  {
+    $const_name = "MODULE_" . strtoupper ( str_replace ( "-", "_", $name)) . "_VERSION";
+    $entry["version"] = defined ( $const_name) ? constant ( $const_name) : "";
+    $entry["author"] = "VoIP Domain";
+  } else {
+    $manifest_path = $path . "/plugin.json";
+    if ( is_readable ( $manifest_path))
+    {
+      $manifest = json_decode ( file_get_contents ( $manifest_path), true);
+      if ( is_array ( $manifest))
+      {
+        $entry["version"] = $manifest["version"] ?? "";
+        $entry["author"] = is_array ( $manifest["author"] ?? null) ? ( $manifest["author"]["name"] ?? "") : ( $manifest["author"] ?? "");
+        $entry["display_name"] = $manifest["display_name"] ?? "";
+        $entry["description"] = $manifest["description"] ?? "";
+        $entry["license"] = $manifest["license"] ?? "";
+      }
+    }
+    $entry["status"] = array_key_exists ( "status", $metadata) ? $metadata["status"] : ( $entry["loaded"] ? "A" : "I");
+  }
+
+  $_in["modules"][$name] = $entry;
+}
+
+/**
  * Restore module cache globals from cache.json (ignore null / invalid keys).
  *
  * @param array $cache Decoded modules/cache.json
+ * @global array $_plugins The main plugin system variable
+ * @global array $_paths Framework global path configuration variable
+ * @global array $_in Framework global configuration variable
+ * @global array $_filters Framework global filter configuration variable
  * @return void
  */
 function voipdomain_apply_modules_cache ( $cache)
@@ -594,6 +677,7 @@ function voipdomain_apply_modules_cache ( $cache)
   $_paths = is_array ( $cache["paths"] ?? null) ? $cache["paths"] : array ();
   $_in["i18n"] = is_array ( $cache["i18n"] ?? null) ? $cache["i18n"] : array ();
   $_filters = is_array ( $cache["filters"] ?? null) ? $cache["filters"] : array ();
+  $_in["modules"] = is_array ( $cache["modules"] ?? null) ? $cache["modules"] : array ();
 }
 
 /**
@@ -688,10 +772,14 @@ function filters_call ( $filter, $parameters = array (), $buffer = array ())
     {
       if ( ! is_loaded ( $module, "filter"))
       {
-        if ( is_readable ( dirname ( __FILE__) . "/../modules/" . $module . "/filter.php"))
+        foreach ( array ( "modules", "plugins") as $_search_dir)
         {
-          require_once ( dirname ( __FILE__) . "/../modules/" . $module . "/filter.php");
+          if ( is_readable ( dirname ( __FILE__) . "/../" . $_search_dir . "/" . $module . "/filter.php"))
+          {
+            require_once ( dirname ( __FILE__) . "/../" . $_search_dir . "/" . $module . "/filter.php");
+          }
         }
+        unset ( $_search_dir);
       }
       if ( ! function_exists ( $function))
       {
@@ -800,7 +888,7 @@ function match_hook_entry ( $hook)
  * @global array $_in Framework global configuration variable
  * @param string $permission The token key to the permission
  * @param string $description The permission description
- * @return void
+ * @return boolean
  */
 function framework_add_permission ( $permission, $description)
 {
@@ -950,8 +1038,8 @@ function framework_add_api_call ( $path, $route, $hook, $options = array ())
 /**
  * Function to validate fields in a permitted list.
  *
- * @param string $fields List of fields to be validated.
- * @param string $permitted List of allowed fields.
+ * @param string|array $fields List of fields to be validated.
+ * @param string|array $permitted List of allowed fields.
  * @return boolean True if the fields are all valid.
  */
 function api_filter_validate ( $fields, $permitted)
@@ -1035,6 +1123,8 @@ function api_filter_entry ( $fields, $data)
  * @global array $_api Framework global API configuration variable
  * @global array $_in Framework global configuration variable
  * @param string $path Path to be processed
+ * @param string $route The API route to be called (e.g. create, read, update, delete)
+ * @param array $parameters Optional parameters to be passed to the hook call
  * @return boolean|string Return false if no hook has fired, otherwise return the
  *                        hook call result
  */
@@ -1178,9 +1268,9 @@ function api_call ( $path, $route, $parameters = array ())
  * Function to check if a path matches a system path with possible variables use
  * (:var) in the path. If match, return an array with variables and values.
  *
- * @param $match string System path to check for needle.
- * @param $needle string The user requested path.
- * @param $parameters array Array with submitted parameters (for variable
+ * @param string $match System path to check for needle.
+ * @param string $needle The user requested path.
+ * @param array $parameters Array with submitted parameters (for variable
  *                          substitution).
  * @return boolean|array False if not match, or array containing key/value pair.
  */
@@ -1277,8 +1367,7 @@ function check_table_modification ( $table)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Updated` FROM `Cache` WHERE " . $where))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "check_table_modification");
   }
   if ( $result->num_rows == 1)
   {

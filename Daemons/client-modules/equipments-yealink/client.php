@@ -736,7 +736,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
   switch ( $parameters["Filename"])
   {
     case "18.0.0.162.rom":	// Yealink SIP-T18(P)
-      if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T18P") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T18P", 0777, true))
+      if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T18P"))
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
@@ -748,7 +748,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       return array ( "code" => 200, "message" => "Firmware file added.");
       break;
     case "53.84.0.160.rom":	// Yealink SIP-T19(P) E2
-      if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T19PE2") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T19PE2", 0777, true))
+      if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T19PE2"))
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
@@ -760,7 +760,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       return array ( "code" => 200, "message" => "Firmware file added.");
       break;
     case "9.73.0.50.rom":	// Yealink SIP-T20P
-      if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T20P") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T20P", 0777, true))
+      if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T20P"))
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
@@ -772,7 +772,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       return array ( "code" => 200, "message" => "Firmware file added.");
       break;
     case "34.72.0.200.rom":	// Yealink SIP-T21(P)
-      if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T21P") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T21P", 0777, true))
+      if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T21P"))
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
@@ -784,7 +784,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       return array ( "code" => 200, "message" => "Firmware file added.");
       break;
     case "52.84.0.160.rom":	// Yealink SIP-T21(P) E2
-      if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T21PE2") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T21PE2", 0777, true))
+      if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T21PE2"))
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
@@ -796,7 +796,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       return array ( "code" => 200, "message" => "Firmware file added.");
       break;
     case "7.73.0.50.rom":	// Yealink SIP-T22P
-      if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T22P") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T22P", 0777, true))
+      if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T22P"))
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
@@ -810,7 +810,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
     case "44.84.0.160.rom":	// Yealink SIP-T23P and SIP-T23G
       if ( $parameters["UID"] == "t23p")
       {
-        if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T23P") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T23P", 0777, true))
+        if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T23P"))
         {
           return array ( "code" => 500, "message" => "Error creating directory structure.");
         }
@@ -821,7 +821,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       }
       if ( $parameters["UID"] == "t23g")
       {
-        if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T23G") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T23G", 0777, true))
+        if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T23G"))
         {
           return array ( "code" => 500, "message" => "Error creating directory structure.");
         }
@@ -834,7 +834,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       return array ( "code" => 200, "message" => "Firmware file added.");
       break;
     case "6.73.0.50.rom":	// Yealink SIP-T26P
-      if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T26P") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T26P", 0777, true))
+      if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T26P"))
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
@@ -846,7 +846,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       return array ( "code" => 200, "message" => "Firmware file added.");
       break;
     case "45.83.0.160.rom":	// Yealink SIP-T27P
-      if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T27P") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T27P", 0777, true))
+      if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T27P"))
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
@@ -858,7 +858,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       return array ( "code" => 200, "message" => "Firmware file added.");
       break;
     case "69.86.0.160.rom":	// Yealink SIP-T27G
-      if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T27G") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T27G", 0777, true))
+      if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T27G"))
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
@@ -870,7 +870,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       return array ( "code" => 200, "message" => "Firmware file added.");
       break;
     case "2.73.0.50.rom":	// Yealink SIP-T28P
-      if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T28P") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T28P", 0777, true))
+      if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T28P"))
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
@@ -882,7 +882,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       return array ( "code" => 200, "message" => "Firmware file added.");
       break;
     case "46.83.0.160.rom":	// Yealink SIP-T29G
-      if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T29G") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T29G", 0777, true))
+      if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T29G"))
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
@@ -900,7 +900,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
     case "124.86.0.40.rom":	// Yealink SIP-T30(P), Yealink SIP-T31, Yealink SIP-T31P & Yealink SIP-T31G
       if ( $parameters["UID"] == "t30p")
       {
-        if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T30P") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T30P", 0777, true))
+        if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T30P"))
         {
           return array ( "code" => 500, "message" => "Error creating directory structure.");
         }
@@ -911,7 +911,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       }
       if ( $parameters["UID"] == "t31")
       {
-        if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T31") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T31", 0777, true))
+        if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T31"))
         {
           return array ( "code" => 500, "message" => "Error creating directory structure.");
         }
@@ -922,7 +922,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       }
       if ( $parameters["UID"] == "t31p")
       {
-        if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T31P") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T31P", 0777, true))
+        if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T31P"))
         {
           return array ( "code" => 500, "message" => "Error creating directory structure.");
         }
@@ -933,7 +933,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       }
       if ( $parameters["UID"] == "t31g")
       {
-        if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T31G") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T31G", 0777, true))
+        if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T31G"))
         {
           return array ( "code" => 500, "message" => "Error creating directory structure.");
         }
@@ -946,7 +946,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       return array ( "code" => 200, "message" => "Firmware file added.");
       break;
     case "38.70.0.221.rom":	// Yealink SIP-T38G
-      if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T38G") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T38G", 0777, true))
+      if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T38G"))
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
@@ -962,7 +962,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       return array ( "code" => 200, "message" => "Firmware file added.");
       break;
     case "54.84.0.160.rom":	// Yealink SIP-T40P
-      if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T40P") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T40P", 0777, true))
+      if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T40P"))
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
@@ -976,7 +976,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
     case "66.86.0.160.rom":	// Yealink SIP-T46S or SIP-T48S
       if ( $parameters["UID"] == "t46s")
       {
-        if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T46S") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T46S", 0777, true))
+        if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T46S"))
         {
           return array ( "code" => 500, "message" => "Error creating directory structure.");
         }
@@ -991,7 +991,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       }
       if ( $parameters["UID"] == "t48s")
       {
-        if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T48S") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T48S", 0777, true))
+        if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T48S"))
         {
           return array ( "code" => 500, "message" => "Error creating directory structure.");
         }
@@ -1008,7 +1008,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       return array ( "code" => 200, "message" => "Firmware file added.");
       break;
     case "78.86.0.160.rom":	// Yealink CP920
-      if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/CP920") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/CP920", 0777, true))
+      if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/CP920"))
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
@@ -1020,7 +1020,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       return array ( "code" => 200, "message" => "Firmware file added.");
       break;
     case "23.70.0.63.rom":	// Yealink VP530
-      if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Yealink/VP530") && ! mkdir ( $_in["general"]["tftpdir"] . "/Yealink/VP530", 0777, true))
+      if ( ! safe_mkdir ( $_in["general"]["tftpdir"] . "/Yealink/VP530"))
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
@@ -1182,7 +1182,7 @@ function equipment_model_yealink_remove_firmware ( $buffer, $parameters)
         @unlink ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T46S/VoIP\ Domain.jpeg");
         @rmdir ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T46S");
       }
-      if ( $parameters["UID"] == "t46s")
+      if ( $parameters["UID"] == "t48s")
       {
         @unlink ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T48S/" . $parameters["Filename"]);
         @unlink ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T48S/VoIP\ Domain.jpeg");
@@ -1236,6 +1236,7 @@ function ap_type_yealink_t18p ( $buffer, $parameters)
 
   // Get equipment system configuration:
   $equipmentconfig = read_config ( "datafile", "equipment-" . $parameters["Type"]);
+  if ( ! is_array ( $equipmentconfig)) { $equipmentconfig = array ( "AudioCodecs" => array (), "ExtraSettings" => array ( "User" => array ( "Name" => "user", "Password" => "user"), "Admin" => array ( "Name" => "admin", "Password" => "admin"))); }
 
   // Account configuration:
   $content = str_replace ( "{{{username}}}", $parameters["Username"], $content);
@@ -1243,7 +1244,7 @@ function ap_type_yealink_t18p ( $buffer, $parameters)
   $content = str_replace ( "{{{displayname}}}", $parameters["Name"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
-  $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
+  $content = str_replace ( "{{{server1port}}}", ( ! empty ( $_in["general"]["port"]) ? $_in["general"]["port"] : "5060"), $content);
 
   // Configure equipment codecs:
   $codecconfig = "";
@@ -1261,7 +1262,7 @@ function ap_type_yealink_t18p ( $buffer, $parameters)
   $priority = 0;
   foreach ( $codecs as $cfgname => $codec)
   {
-    if ( in_array ( $codec, $equipmentconfig["AudioCodecs"]))
+    if ( in_array ( $codec, ( is_array ( $equipmentconfig) && ! empty ( $equipmentconfig["AudioCodecs"]) ? $equipmentconfig["AudioCodecs"] : array ())))
     {
       $codecconfig .= "account.1.codec." . $cfgname . ".priority = " . $priority . "\n";
       $codecconfig .= "account.1.codec." . $cfgname . ".enable = 1\n";
@@ -2440,7 +2441,7 @@ function ap_type_yealink_t18p ( $buffer, $parameters)
   $content = str_replace ( "{{{tftpserver}}}", "tftp://" . $_in["general"]["address"] . "/", $content);
 
   // Write auto provision file
-  if ( file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content) === false)
+  if ( ! safe_file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -2478,6 +2479,7 @@ function ap_type_yealink_t19pe2 ( $buffer, $parameters)
 
   // Get equipment system configuration:
   $equipmentconfig = read_config ( "datafile", "equipment-" . $parameters["Type"]);
+  if ( ! is_array ( $equipmentconfig)) { $equipmentconfig = array ( "AudioCodecs" => array (), "ExtraSettings" => array ( "User" => array ( "Name" => "user", "Password" => "user"), "Admin" => array ( "Name" => "admin", "Password" => "admin"))); }
 
   // Account configuration:
   $content = str_replace ( "{{{username}}}", $parameters["Username"], $content);
@@ -2485,7 +2487,7 @@ function ap_type_yealink_t19pe2 ( $buffer, $parameters)
   $content = str_replace ( "{{{displayname}}}", $parameters["Name"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
-  $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
+  $content = str_replace ( "{{{server1port}}}", ( ! empty ( $_in["general"]["port"]) ? $_in["general"]["port"] : "5060"), $content);
 
   // Configure equipment codecs:
   $codecconfig = "";
@@ -2504,7 +2506,7 @@ function ap_type_yealink_t19pe2 ( $buffer, $parameters)
   $priority = 0;
   foreach ( $codecs as $cfgname => $codec)
   {
-    if ( in_array ( $codec, $equipmentconfig["AudioCodecs"]))
+    if ( in_array ( $codec, ( is_array ( $equipmentconfig) && ! empty ( $equipmentconfig["AudioCodecs"]) ? $equipmentconfig["AudioCodecs"] : array ())))
     {
       $codecconfig .= "account.1.codec." . $cfgname . ".priority = " . $priority . "\n";
       $codecconfig .= "account.1.codec." . $cfgname . ".enable = 1\n";
@@ -3683,7 +3685,7 @@ function ap_type_yealink_t19pe2 ( $buffer, $parameters)
   $content = str_replace ( "{{{tftpserver}}}", "tftp://" . $_in["general"]["address"] . "/", $content);
 
   // Write auto provision file
-  if ( file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content) === false)
+  if ( ! safe_file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -3721,6 +3723,7 @@ function ap_type_yealink_t20p ( $buffer, $parameters)
 
   // Get equipment system configuration:
   $equipmentconfig = read_config ( "datafile", "equipment-" . $parameters["Type"]);
+  if ( ! is_array ( $equipmentconfig)) { $equipmentconfig = array ( "AudioCodecs" => array (), "ExtraSettings" => array ( "User" => array ( "Name" => "user", "Password" => "user"), "Admin" => array ( "Name" => "admin", "Password" => "admin"))); }
 
   // Account configuration:
   $content = str_replace ( "{{{username}}}", $parameters["Username"], $content);
@@ -3728,7 +3731,7 @@ function ap_type_yealink_t20p ( $buffer, $parameters)
   $content = str_replace ( "{{{displayname}}}", $parameters["Name"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
-  $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
+  $content = str_replace ( "{{{server1port}}}", ( ! empty ( $_in["general"]["port"]) ? $_in["general"]["port"] : "5060"), $content);
 
   // Configure equipment codecs:
   $codecconfig = "";
@@ -4852,7 +4855,7 @@ function ap_type_yealink_t20p ( $buffer, $parameters)
   $content = str_replace ( "{{{tftpserver}}}", "tftp://" . $_in["general"]["address"] . "/", $content);
 
   // Write auto provision file
-  if ( file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content) === false)
+  if ( ! safe_file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -4890,6 +4893,7 @@ function ap_type_yealink_t21p ( $buffer, $parameters)
 
   // Get equipment system configuration:
   $equipmentconfig = read_config ( "datafile", "equipment-" . $parameters["Type"]);
+  if ( ! is_array ( $equipmentconfig)) { $equipmentconfig = array ( "AudioCodecs" => array (), "ExtraSettings" => array ( "User" => array ( "Name" => "user", "Password" => "user"), "Admin" => array ( "Name" => "admin", "Password" => "admin"))); }
 
   // Account configuration:
   $content = str_replace ( "{{{username}}}", $parameters["Username"], $content);
@@ -4897,7 +4901,7 @@ function ap_type_yealink_t21p ( $buffer, $parameters)
   $content = str_replace ( "{{{displayname}}}", $parameters["Name"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
-  $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
+  $content = str_replace ( "{{{server1port}}}", ( ! empty ( $_in["general"]["port"]) ? $_in["general"]["port"] : "5060"), $content);
 
   // Configure equipment codecs:
   $codecconfig = "";
@@ -4916,7 +4920,7 @@ function ap_type_yealink_t21p ( $buffer, $parameters)
   $priority = 0;
   foreach ( $codecs as $cfgname => $codec)
   {
-    if ( in_array ( $codec, $equipmentconfig["AudioCodecs"]))
+    if ( in_array ( $codec, ( is_array ( $equipmentconfig) && ! empty ( $equipmentconfig["AudioCodecs"]) ? $equipmentconfig["AudioCodecs"] : array ())))
     {
       $codecconfig .= "account.1.codec." . $cfgname . ".priority = " . $priority . "\n";
       $codecconfig .= "account.1.codec." . $cfgname . ".enable = 1\n";
@@ -6017,7 +6021,7 @@ function ap_type_yealink_t21p ( $buffer, $parameters)
   $content = str_replace ( "{{{tftpserver}}}", "tftp://" . $_in["general"]["address"] . "/", $content);
 
   // Write auto provision file
-  if ( file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content) === false)
+  if ( ! safe_file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -6055,6 +6059,7 @@ function ap_type_yealink_t21pe2 ( $buffer, $parameters)
 
   // Get equipment system configuration:
   $equipmentconfig = read_config ( "datafile", "equipment-" . $parameters["Type"]);
+  if ( ! is_array ( $equipmentconfig)) { $equipmentconfig = array ( "AudioCodecs" => array (), "ExtraSettings" => array ( "User" => array ( "Name" => "user", "Password" => "user"), "Admin" => array ( "Name" => "admin", "Password" => "admin"))); }
 
   // Account configuration:
   $content = str_replace ( "{{{username}}}", $parameters["Username"], $content);
@@ -6062,7 +6067,7 @@ function ap_type_yealink_t21pe2 ( $buffer, $parameters)
   $content = str_replace ( "{{{displayname}}}", $parameters["Name"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
-  $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
+  $content = str_replace ( "{{{server1port}}}", ( ! empty ( $_in["general"]["port"]) ? $_in["general"]["port"] : "5060"), $content);
 
   // Configure equipment codecs:
   $codecconfig = "";
@@ -6081,7 +6086,7 @@ function ap_type_yealink_t21pe2 ( $buffer, $parameters)
   $priority = 0;
   foreach ( $codecs as $cfgname => $codec)
   {
-    if ( in_array ( $codec, $equipmentconfig["AudioCodecs"]))
+    if ( in_array ( $codec, ( is_array ( $equipmentconfig) && ! empty ( $equipmentconfig["AudioCodecs"]) ? $equipmentconfig["AudioCodecs"] : array ())))
     {
       $codecconfig .= "account.1.codec." . $cfgname . ".priority = " . $priority . "\n";
       $codecconfig .= "account.1.codec." . $cfgname . ".enable = 1\n";
@@ -7202,7 +7207,7 @@ function ap_type_yealink_t21pe2 ( $buffer, $parameters)
   $content = str_replace ( "{{{tftpserver}}}", "tftp://" . $_in["general"]["address"] . "/", $content);
 
   // Write auto provision file
-  if ( file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content) === false)
+  if ( ! safe_file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -7240,6 +7245,7 @@ function ap_type_yealink_t22p ( $buffer, $parameters)
 
   // Get equipment system configuration:
   $equipmentconfig = read_config ( "datafile", "equipment-" . $parameters["Type"]);
+  if ( ! is_array ( $equipmentconfig)) { $equipmentconfig = array ( "AudioCodecs" => array (), "ExtraSettings" => array ( "User" => array ( "Name" => "user", "Password" => "user"), "Admin" => array ( "Name" => "admin", "Password" => "admin"))); }
 
   // Account configuration:
   $content = str_replace ( "{{{username}}}", $parameters["Username"], $content);
@@ -7247,7 +7253,7 @@ function ap_type_yealink_t22p ( $buffer, $parameters)
   $content = str_replace ( "{{{displayname}}}", $parameters["Name"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
-  $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
+  $content = str_replace ( "{{{server1port}}}", ( ! empty ( $_in["general"]["port"]) ? $_in["general"]["port"] : "5060"), $content);
 
   // Configure equipment codecs:
   $codecconfig = "";
@@ -8406,7 +8412,7 @@ function ap_type_yealink_t22p ( $buffer, $parameters)
   $content = str_replace ( "{{{tftpserver}}}", "tftp://" . $_in["general"]["address"] . "/", $content);
 
   // Write auto provision file
-  if ( file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content) === false)
+  if ( ! safe_file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -8445,6 +8451,7 @@ function ap_type_yealink_t23pg ( $buffer, $parameters)
 
   // Get equipment system configuration:
   $equipmentconfig = read_config ( "datafile", "equipment-" . $parameters["Type"]);
+  if ( ! is_array ( $equipmentconfig)) { $equipmentconfig = array ( "AudioCodecs" => array (), "ExtraSettings" => array ( "User" => array ( "Name" => "user", "Password" => "user"), "Admin" => array ( "Name" => "admin", "Password" => "admin"))); }
 
   // Account configuration:
   $content = str_replace ( "{{{username}}}", $parameters["Username"], $content);
@@ -8452,7 +8459,7 @@ function ap_type_yealink_t23pg ( $buffer, $parameters)
   $content = str_replace ( "{{{displayname}}}", $parameters["Name"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
-  $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
+  $content = str_replace ( "{{{server1port}}}", ( ! empty ( $_in["general"]["port"]) ? $_in["general"]["port"] : "5060"), $content);
 
   // Configure equipment codecs:
   $codecconfig = "";
@@ -9623,7 +9630,7 @@ function ap_type_yealink_t23pg ( $buffer, $parameters)
   $content = str_replace ( "{{{tftpserver}}}", "tftp://" . $_in["general"]["address"] . "/", $content);
 
   // Write auto provision file
-  if ( file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content) === false)
+  if ( ! safe_file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -9661,6 +9668,7 @@ function ap_type_yealink_t26p ( $buffer, $parameters)
 
   // Get equipment system configuration:
   $equipmentconfig = read_config ( "datafile", "equipment-" . $parameters["Type"]);
+  if ( ! is_array ( $equipmentconfig)) { $equipmentconfig = array ( "AudioCodecs" => array (), "ExtraSettings" => array ( "User" => array ( "Name" => "user", "Password" => "user"), "Admin" => array ( "Name" => "admin", "Password" => "admin"))); }
 
   // Account configuration:
   $content = str_replace ( "{{{username}}}", $parameters["Username"], $content);
@@ -9668,7 +9676,7 @@ function ap_type_yealink_t26p ( $buffer, $parameters)
   $content = str_replace ( "{{{displayname}}}", $parameters["Name"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
-  $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
+  $content = str_replace ( "{{{server1port}}}", ( ! empty ( $_in["general"]["port"]) ? $_in["general"]["port"] : "5060"), $content);
 
   // Configure equipment codecs:
   $codecconfig = "";
@@ -10840,7 +10848,7 @@ function ap_type_yealink_t26p ( $buffer, $parameters)
   $content = str_replace ( "{{{tftpserver}}}", "tftp://" . $_in["general"]["address"] . "/", $content);
 
   // Write auto provision file
-  if ( file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content) === false)
+  if ( ! safe_file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -10879,6 +10887,7 @@ function ap_type_yealink_t27pg ( $buffer, $parameters)
 
   // Get equipment system configuration:
   $equipmentconfig = read_config ( "datafile", "equipment-" . $parameters["Type"]);
+  if ( ! is_array ( $equipmentconfig)) { $equipmentconfig = array ( "AudioCodecs" => array (), "ExtraSettings" => array ( "User" => array ( "Name" => "user", "Password" => "user"), "Admin" => array ( "Name" => "admin", "Password" => "admin"))); }
 
   // Account configuration:
   $content = str_replace ( "{{{username}}}", $parameters["Username"], $content);
@@ -10886,7 +10895,7 @@ function ap_type_yealink_t27pg ( $buffer, $parameters)
   $content = str_replace ( "{{{displayname}}}", $parameters["Name"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
-  $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
+  $content = str_replace ( "{{{server1port}}}", ( ! empty ( $_in["general"]["port"]) ? $_in["general"]["port"] : "5060"), $content);
 
   // Configure equipment codecs:
   $codecconfig = "";
@@ -12177,7 +12186,7 @@ function ap_type_yealink_t27pg ( $buffer, $parameters)
   $content = str_replace ( "{{{tftpserver}}}", "tftp://" . $_in["general"]["address"] . "/", $content);
 
   // Write auto provision file
-  if ( file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content) === false)
+  if ( ! safe_file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -12215,6 +12224,7 @@ function ap_type_yealink_t28p ( $buffer, $parameters)
 
   // Get equipment system configuration:
   $equipmentconfig = read_config ( "datafile", "equipment-" . $parameters["Type"]);
+  if ( ! is_array ( $equipmentconfig)) { $equipmentconfig = array ( "AudioCodecs" => array (), "ExtraSettings" => array ( "User" => array ( "Name" => "user", "Password" => "user"), "Admin" => array ( "Name" => "admin", "Password" => "admin"))); }
 
   // Account configuration:
   $content = str_replace ( "{{{username}}}", $parameters["Username"], $content);
@@ -12222,7 +12232,7 @@ function ap_type_yealink_t28p ( $buffer, $parameters)
   $content = str_replace ( "{{{displayname}}}", $parameters["Name"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
-  $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
+  $content = str_replace ( "{{{server1port}}}", ( ! empty ( $_in["general"]["port"]) ? $_in["general"]["port"] : "5060"), $content);
 
   // Configure equipment codecs:
   $codecconfig = "";
@@ -13513,7 +13523,7 @@ function ap_type_yealink_t28p ( $buffer, $parameters)
   $content = str_replace ( "{{{tftpserver}}}", "tftp://" . $_in["general"]["address"] . "/", $content);
 
   // Write auto provision file
-  if ( file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content) === false)
+  if ( ! safe_file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -13551,6 +13561,7 @@ function ap_type_yealink_t29g ( $buffer, $parameters)
 
   // Get equipment system configuration:
   $equipmentconfig = read_config ( "datafile", "equipment-" . $parameters["Type"]);
+  if ( ! is_array ( $equipmentconfig)) { $equipmentconfig = array ( "AudioCodecs" => array (), "ExtraSettings" => array ( "User" => array ( "Name" => "user", "Password" => "user"), "Admin" => array ( "Name" => "admin", "Password" => "admin"))); }
 
   // Account configuration:
   $content = str_replace ( "{{{username}}}", $parameters["Username"], $content);
@@ -13558,7 +13569,7 @@ function ap_type_yealink_t29g ( $buffer, $parameters)
   $content = str_replace ( "{{{displayname}}}", $parameters["Name"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
-  $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
+  $content = str_replace ( "{{{server1port}}}", ( ! empty ( $_in["general"]["port"]) ? $_in["general"]["port"] : "5060"), $content);
 
   // Configure equipment codecs:
   $codecconfig = "";
@@ -13578,7 +13589,7 @@ function ap_type_yealink_t29g ( $buffer, $parameters)
   $priority = 0;
   foreach ( $codecs as $cfgname => $codec)
   {
-    if ( in_array ( $codec, $equipmentconfig["AudioCodecs"]))
+    if ( in_array ( $codec, ( is_array ( $equipmentconfig) && ! empty ( $equipmentconfig["AudioCodecs"]) ? $equipmentconfig["AudioCodecs"] : array ())))
     {
       $codecconfig .= "account.1.codec." . $cfgname . ".priority = " . $priority . "\n";
       $codecconfig .= "account.1.codec." . $cfgname . ".enable = 1\n";
@@ -14776,7 +14787,7 @@ function ap_type_yealink_t29g ( $buffer, $parameters)
   $content = str_replace ( "{{{tftpserver}}}", "tftp://" . $_in["general"]["address"] . "/", $content);
 
   // Write auto provision file
-  if ( file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content) === false)
+  if ( ! safe_file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -14814,6 +14825,7 @@ function ap_type_yealink_t38g ( $buffer, $parameters)
 
   // Get equipment system configuration:
   $equipmentconfig = read_config ( "datafile", "equipment-" . $parameters["Type"]);
+  if ( ! is_array ( $equipmentconfig)) { $equipmentconfig = array ( "AudioCodecs" => array (), "ExtraSettings" => array ( "User" => array ( "Name" => "user", "Password" => "user"), "Admin" => array ( "Name" => "admin", "Password" => "admin"))); }
 
   // Account configuration:
   $content = str_replace ( "{{{username}}}", $parameters["Username"], $content);
@@ -14821,7 +14833,7 @@ function ap_type_yealink_t38g ( $buffer, $parameters)
   $content = str_replace ( "{{{displayname}}}", $parameters["Name"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
-  $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
+  $content = str_replace ( "{{{server1port}}}", ( ! empty ( $_in["general"]["port"]) ? $_in["general"]["port"] : "5060"), $content);
 
   // Configure equipment codecs:
   $codecconfig = "";
@@ -14841,7 +14853,7 @@ function ap_type_yealink_t38g ( $buffer, $parameters)
   $priority = 0;
   foreach ( $codecs as $cfgname => $codec)
   {
-    if ( in_array ( $codec, $equipmentconfig["AudioCodecs"]))
+    if ( in_array ( $codec, ( is_array ( $equipmentconfig) && ! empty ( $equipmentconfig["AudioCodecs"]) ? $equipmentconfig["AudioCodecs"] : array ())))
     {
       $codecconfig .= "account.1.codec." . $cfgname . ".priority = " . $priority . "\n";
       $codecconfig .= "account.1.codec." . $cfgname . ".enable = 1\n";
@@ -16066,7 +16078,7 @@ function ap_type_yealink_t38g ( $buffer, $parameters)
   $content = str_replace ( "{{{tftpserver}}}", "tftp://" . $_in["general"]["address"] . "/", $content);
 
   // Write auto provision file
-  if ( file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content) === false)
+  if ( ! safe_file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -16108,6 +16120,7 @@ function ap_type_yealink_t4xs ( $buffer, $parameters)
 
   // Get equipment system configuration:
   $equipmentconfig = read_config ( "datafile", "equipment-" . $parameters["Type"]);
+  if ( ! is_array ( $equipmentconfig)) { $equipmentconfig = array ( "AudioCodecs" => array (), "ExtraSettings" => array ( "User" => array ( "Name" => "user", "Password" => "user"), "Admin" => array ( "Name" => "admin", "Password" => "admin"))); }
 
   // Account configuration:
   $content = str_replace ( "{{{username}}}", $parameters["Username"], $content);
@@ -16115,7 +16128,7 @@ function ap_type_yealink_t4xs ( $buffer, $parameters)
   $content = str_replace ( "{{{displayname}}}", $parameters["Name"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
-  $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
+  $content = str_replace ( "{{{server1port}}}", ( ! empty ( $_in["general"]["port"]) ? $_in["general"]["port"] : "5060"), $content);
 
   // Configure equipment codecs:
   $codecconfig = "";
@@ -16135,7 +16148,7 @@ function ap_type_yealink_t4xs ( $buffer, $parameters)
   $priority = 0;
   foreach ( $codecs as $cfgname => $codec)
   {
-    if ( in_array ( $codec, $equipmentconfig["AudioCodecs"]))
+    if ( in_array ( $codec, ( is_array ( $equipmentconfig) && ! empty ( $equipmentconfig["AudioCodecs"]) ? $equipmentconfig["AudioCodecs"] : array ())))
     {
       $codecconfig .= "account.1.codec." . $cfgname . ".priority = " . $priority . "\n";
       $codecconfig .= "account.1.codec." . $cfgname . ".enable = 1\n";
@@ -17333,7 +17346,7 @@ function ap_type_yealink_t4xs ( $buffer, $parameters)
   $content = str_replace ( "{{{tftpserver}}}", "tftp://" . $_in["general"]["address"] . "/", $content);
 
   // Write auto provision file
-  if ( file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content) === false)
+  if ( ! safe_file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -17371,6 +17384,7 @@ function ap_type_yealink_t30p ( $buffer, $parameters)
 
   // Get equipment system configuration:
   $equipmentconfig = read_config ( "datafile", "equipment-" . $parameters["Type"]);
+  if ( ! is_array ( $equipmentconfig)) { $equipmentconfig = array ( "AudioCodecs" => array (), "ExtraSettings" => array ( "User" => array ( "Name" => "user", "Password" => "user"), "Admin" => array ( "Name" => "admin", "Password" => "admin"))); }
 
   // Account configuration:
   $content = str_replace ( "{{{username}}}", $parameters["Username"], $content);
@@ -17378,7 +17392,7 @@ function ap_type_yealink_t30p ( $buffer, $parameters)
   $content = str_replace ( "{{{displayname}}}", $parameters["Name"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
-  $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
+  $content = str_replace ( "{{{server1port}}}", ( ! empty ( $_in["general"]["port"]) ? $_in["general"]["port"] : "5060"), $content);
 
   // Configure equipment codecs:
   $codecconfig = "";
@@ -17398,7 +17412,7 @@ function ap_type_yealink_t30p ( $buffer, $parameters)
   $priority = 0;
   foreach ( $codecs as $cfgname => $codec)
   {
-    if ( in_array ( $codec, $equipmentconfig["AudioCodecs"]))
+    if ( in_array ( $codec, ( is_array ( $equipmentconfig) && ! empty ( $equipmentconfig["AudioCodecs"]) ? $equipmentconfig["AudioCodecs"] : array ())))
     {
       $codecconfig .= "account.1.codec." . $cfgname . ".priority = " . $priority . "\n";
       $codecconfig .= "account.1.codec." . $cfgname . ".enable = 1\n";
@@ -18603,7 +18617,7 @@ function ap_type_yealink_t30p ( $buffer, $parameters)
   $content = str_replace ( "{{{tftpserver}}}", "tftp://" . $_in["general"]["address"] . "/", $content);
 
   // Write auto provision file
-  if ( file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content) === false)
+  if ( ! safe_file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -18644,6 +18658,7 @@ function ap_type_yealink_t31 ( $buffer, $parameters)
 
   // Get equipment system configuration:
   $equipmentconfig = read_config ( "datafile", "equipment-" . $parameters["Type"]);
+  if ( ! is_array ( $equipmentconfig)) { $equipmentconfig = array ( "AudioCodecs" => array (), "ExtraSettings" => array ( "User" => array ( "Name" => "user", "Password" => "user"), "Admin" => array ( "Name" => "admin", "Password" => "admin"))); }
 
   // Account configuration:
   $content = str_replace ( "{{{username}}}", $parameters["Username"], $content);
@@ -18651,7 +18666,7 @@ function ap_type_yealink_t31 ( $buffer, $parameters)
   $content = str_replace ( "{{{displayname}}}", $parameters["Name"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
-  $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
+  $content = str_replace ( "{{{server1port}}}", ( ! empty ( $_in["general"]["port"]) ? $_in["general"]["port"] : "5060"), $content);
 
   // Configure equipment codecs:
   $codecconfig = "";
@@ -18673,7 +18688,7 @@ function ap_type_yealink_t31 ( $buffer, $parameters)
   $priority = 0;
   foreach ( $codecs as $cfgname => $codec)
   {
-    if ( in_array ( $codec, $equipmentconfig["AudioCodecs"]))
+    if ( in_array ( $codec, ( is_array ( $equipmentconfig) && ! empty ( $equipmentconfig["AudioCodecs"]) ? $equipmentconfig["AudioCodecs"] : array ())))
     {
       $codecconfig .= "account.1.codec." . $cfgname . ".priority = " . $priority . "\n";
       $codecconfig .= "account.1.codec." . $cfgname . ".enable = 1\n";
@@ -19911,7 +19926,7 @@ function ap_type_yealink_t31 ( $buffer, $parameters)
   $content = str_replace ( "{{{tftpserver}}}", "tftp://" . $_in["general"]["address"] . "/", $content);
 
   // Write auto provision file
-  if ( file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content) === false)
+  if ( ! safe_file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -19949,6 +19964,7 @@ function ap_type_yealink_t40p ( $buffer, $parameters)
 
   // Get equipment system configuration:
   $equipmentconfig = read_config ( "datafile", "equipment-" . $parameters["Type"]);
+  if ( ! is_array ( $equipmentconfig)) { $equipmentconfig = array ( "AudioCodecs" => array (), "ExtraSettings" => array ( "User" => array ( "Name" => "user", "Password" => "user"), "Admin" => array ( "Name" => "admin", "Password" => "admin"))); }
 
   // Account configuration:
   $content = str_replace ( "{{{username}}}", $parameters["Username"], $content);
@@ -19956,7 +19972,7 @@ function ap_type_yealink_t40p ( $buffer, $parameters)
   $content = str_replace ( "{{{displayname}}}", $parameters["Name"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
-  $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
+  $content = str_replace ( "{{{server1port}}}", ( ! empty ( $_in["general"]["port"]) ? $_in["general"]["port"] : "5060"), $content);
 
   // Configure equipment codecs:
   $codecconfig = "";
@@ -19975,7 +19991,7 @@ function ap_type_yealink_t40p ( $buffer, $parameters)
   $priority = 0;
   foreach ( $codecs as $cfgname => $codec)
   {
-    if ( in_array ( $codec, $equipmentconfig["AudioCodecs"]))
+    if ( in_array ( $codec, ( is_array ( $equipmentconfig) && ! empty ( $equipmentconfig["AudioCodecs"]) ? $equipmentconfig["AudioCodecs"] : array ())))
     {
       $codecconfig .= "account.1.codec." . $cfgname . ".priority = " . $priority . "\n";
       $codecconfig .= "account.1.codec." . $cfgname . ".enable = 1\n";
@@ -21181,7 +21197,7 @@ function ap_type_yealink_t40p ( $buffer, $parameters)
   $content = str_replace ( "{{{tftpserver}}}", "tftp://" . $_in["general"]["address"] . "/", $content);
 
   // Write auto provision file
-  if ( file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content) === false)
+  if ( ! safe_file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -21219,6 +21235,7 @@ function ap_type_yealink_cp920 ( $buffer, $parameters)
 
   // Get equipment system configuration:
   $equipmentconfig = read_config ( "datafile", "equipment-" . $parameters["Type"]);
+  if ( ! is_array ( $equipmentconfig)) { $equipmentconfig = array ( "AudioCodecs" => array (), "ExtraSettings" => array ( "User" => array ( "Name" => "user", "Password" => "user"), "Admin" => array ( "Name" => "admin", "Password" => "admin"))); }
 
   // Account configuration:
   $content = str_replace ( "{{{username}}}", $parameters["Username"], $content);
@@ -21226,7 +21243,7 @@ function ap_type_yealink_cp920 ( $buffer, $parameters)
   $content = str_replace ( "{{{displayname}}}", $parameters["Name"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
-  $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
+  $content = str_replace ( "{{{server1port}}}", ( ! empty ( $_in["general"]["port"]) ? $_in["general"]["port"] : "5060"), $content);
 
   // Configure equipment codecs:
   $codecconfig = "";
@@ -21251,7 +21268,7 @@ function ap_type_yealink_cp920 ( $buffer, $parameters)
   $priority = 0;
   foreach ( $codecs as $cfgname => $codec)
   {
-    if ( in_array ( $codec, $equipmentconfig["AudioCodecs"]))
+    if ( in_array ( $codec, ( is_array ( $equipmentconfig) && ! empty ( $equipmentconfig["AudioCodecs"]) ? $equipmentconfig["AudioCodecs"] : array ())))
     {
       $codecconfig .= "account.1.codec." . $cfgname . ".priority = " . $priority . "\n";
       $codecconfig .= "account.1.codec." . $cfgname . ".enable = 1\n";
@@ -22456,7 +22473,7 @@ function ap_type_yealink_cp920 ( $buffer, $parameters)
   $content = str_replace ( "{{{tftpserver}}}", "tftp://" . $_in["general"]["address"] . "/", $content);
 
   // Write auto provision file
-  if ( file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content) === false)
+  if ( ! safe_file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -22494,6 +22511,7 @@ function ap_type_yealink_vp530 ( $buffer, $parameters)
 
   // Get equipment system configuration:
   $equipmentconfig = read_config ( "datafile", "equipment-" . $parameters["Type"]);
+  if ( ! is_array ( $equipmentconfig)) { $equipmentconfig = array ( "AudioCodecs" => array (), "ExtraSettings" => array ( "User" => array ( "Name" => "user", "Password" => "user"), "Admin" => array ( "Name" => "admin", "Password" => "admin"))); }
 
   // Account configuration:
   $content = str_replace ( "{{{username}}}", $parameters["Username"], $content);
@@ -22501,7 +22519,7 @@ function ap_type_yealink_vp530 ( $buffer, $parameters)
   $content = str_replace ( "{{{displayname}}}", $parameters["Name"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
-  $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
+  $content = str_replace ( "{{{server1port}}}", ( ! empty ( $_in["general"]["port"]) ? $_in["general"]["port"] : "5060"), $content);
 
   // Configure equipment audio codecs:
   $codecconfig = "";
@@ -23492,7 +23510,7 @@ function ap_type_yealink_vp530 ( $buffer, $parameters)
   $content = str_replace ( "{{{tftpserver}}}", "tftp://" . $_in["general"]["address"] . "/", $content);
 
   // Write auto provision file
-  if ( file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content) === false)
+  if ( ! safe_file_put_contents ( $_in["general"]["tftpdir"] . "/" . strtolower ( $parameters["MAC"]) . ".cfg", $content))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }

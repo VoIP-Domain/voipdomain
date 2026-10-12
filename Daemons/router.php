@@ -40,9 +40,8 @@
 /**
  * Set error reporting level
  */
-error_reporting ( E_ERROR);
+error_reporting ( E_ALL);
 ini_set ( "display_errors", "false");
-// error_reporting ( E_ALL); ini_set ( "display_errors", "true");
 
 /**
  * Check if script is running from CLI
@@ -73,6 +72,17 @@ if ( ! extension_loaded ( "pcntl"))
 require_once ( dirname ( __FILE__) . "/includes/functions.inc.php");
 require_once ( dirname ( __FILE__) . "/includes/plugins.inc.php");
 require_once ( dirname ( __FILE__) . "/includes/systemd.inc.php");
+require_once ( dirname ( __FILE__) . "/includes/error-handler.inc.php");
+
+/**
+ * Register error handlers for clear crash reporting
+ */
+daemon_register_error_handlers ();
+
+/**
+ * Ensure single instance
+ */
+daemon_lock ( "router");
 
 /**
  * Parse configuration file. You should put your configuration file OUTSIDE
@@ -162,6 +172,35 @@ foreach ( glob ( dirname ( __FILE__) . "/router-modules/*/router.php") as $filen
   require_once ( $filename);
 }
 echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
+
+/**
+ * Include all plugin files from router-plugins/
+ */
+$_in["loaded_plugins"] = array ();
+$pluginsdir = dirname ( __FILE__) . "/router-plugins";
+if ( is_dir ( $pluginsdir))
+{
+  echo "Executing: Loading plugins... ";
+  foreach ( scandir ( $pluginsdir) as $entry)
+  {
+    if ( $entry == "." || $entry == "..")
+    {
+      continue;
+    }
+    $pluginpath = $pluginsdir . "/" . $entry;
+    if ( is_dir ( $pluginpath) && is_readable ( $pluginpath . "/router.php"))
+    {
+      require_once ( $pluginpath . "/router.php");
+      $_in["loaded_plugins"][] = $entry;
+    }
+  }
+  echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m (" . sizeof ( $_in["loaded_plugins"]) . " plugins)\n";
+}
+
+/**
+ * Resolve deferred hook registrations
+ */
+framework_resolve_deferred_hooks ();
 
 /**
  * Add internal event hooks
@@ -272,7 +311,6 @@ echo "\n";
 /**
  * Fork process to daemon mode (except if in debug mode)
  */
-error_reporting ( E_ERROR);
 set_time_limit ( 0);
 ob_implicit_flush ();
 if ( function_exists ( "pcntl_async_signals"))
@@ -362,6 +400,12 @@ while ( true)
   }
 
   /**
+   * Register task worker for plugin system dispatch
+   */
+  $gm->addFunction ( "vd_router_task", "router_gearman_task_handler");
+  writeLog ( "Gearman task worker registered: vd_router_task");
+
+  /**
    * Loop waiting for work!
    */
   while ( true)
@@ -405,8 +449,8 @@ function gearman_event ( $job)
 {
   global $_in;
 
-  // Dump event if debbug enabled
-  if ( $_in["general"]["debug"])
+  // Dump event if debug enabled
+  if ( ! empty ( $_in["general"]["debug"]))
   {
     echo "Event \"" . $job->functionName () . "\" received: ";
   }
@@ -414,8 +458,20 @@ function gearman_event ( $job)
   // Get workload
   $workload = json_decode ( $job->workload (), 1);
 
-  // Call job hook
-  $result = framework_call ( $job->functionName (), $workload, false, array ( "events" => array (), "return" => ""));
+  // Call job hook with exception protection
+  try
+  {
+    $result = framework_call ( $job->functionName (), $workload, false, array ( "events" => array (), "return" => ""));
+  } catch ( Throwable $e)
+  {
+    writeLog ( "Event \"" . $job->functionName () . "\" threw " . get_class ( $e) . ": " . $e->getMessage () . " in " . $e->getFile () . ":" . $e->getLine (), VoIP_LOG_WARNING);
+    $trace_lines = explode ( "\n", $e->getTraceAsString ());
+    foreach ( array_slice ( $trace_lines, 0, 5) as $trace_line)
+    {
+      writeLog ( "  " . $trace_line, VoIP_LOG_WARNING);
+    }
+    return "";
+  }
 
   // Check for notification events:
   foreach ( $result["events"] as $event)
@@ -435,6 +491,33 @@ function gearman_event ( $job)
 
   // Return event data:
   return $result["return"];
+}
+
+/**
+ * Gearman task handler for plugin system dispatch (config sync, module deploy, etc.)
+ *
+ * @param $job object Gearman Job object.
+ * @return string JSON response.
+ */
+function router_gearman_task_handler ( $job)
+{
+  $payload = json_decode ( $job->workload (), true);
+  if ( ! is_array ( $payload) || ! array_key_exists ( "hook", $payload))
+  {
+    writeLog ( "Gearman task received with invalid payload.", VoIP_LOG_WARNING);
+    return json_encode ( array ( "result" => false, "error" => "Invalid payload"));
+  }
+  writeLog ( "Gearman task received: " . $payload["hook"]);
+  $taskdata = array_key_exists ( "data", $payload) ? $payload["data"] : array ();
+  try
+  {
+    $result = framework_call ( $payload["hook"], $taskdata, false, "");
+  } catch ( Throwable $e)
+  {
+    writeLog ( "Task \"" . $payload["hook"] . "\" threw " . get_class ( $e) . ": " . $e->getMessage () . " in " . $e->getFile () . ":" . $e->getLine (), VoIP_LOG_WARNING);
+    return json_encode ( array ( "result" => false, "error" => $e->getMessage ()));
+  }
+  return json_encode ( array ( "result" => true, "data" => $result));
 }
 
 function dump ( $buffer, $parameters)
@@ -485,7 +568,7 @@ function check_rules ( &$rules, $parameters)
                 $rules[$key][$id]["result"] = (float) $parameters[$rule["field"]] == (float) $rule["value"];
                 break;
               case "boolean":
-                $rules[$key][$id]["result"] = (boolean) $parameters[$rule["field"]] == (boolean) $rule["value"];
+                $rules[$key][$id]["result"] = (bool) $parameters[$rule["field"]] == (bool) $rule["value"];
                 break;
             }
             break;
@@ -673,13 +756,50 @@ function router_reload_cache ( $buffer, $parameters)
 }
 
 /**
- * Handle systemd reload by refreshing caches in-process.
+ * Handle systemd reload by detecting new plugins and restarting if needed,
+ * or just refreshing caches if no plugin changes detected.
  *
  * @param int $signo Signal number
  * @return void
  */
 function router_systemd_reload_handler ( $signo)
 {
+  global $_in;
+
+  $pluginsdir = dirname ( __FILE__) . "/router-plugins";
+  $new_plugins_detected = false;
+  if ( is_dir ( $pluginsdir))
+  {
+    $current_plugins = array ();
+    foreach ( scandir ( $pluginsdir) as $entry)
+    {
+      if ( $entry == "." || $entry == "..")
+      {
+        continue;
+      }
+      if ( is_dir ( $pluginsdir . "/" . $entry))
+      {
+        $current_plugins[] = $entry;
+      }
+    }
+    if ( ! array_key_exists ( "loaded_plugins", $_in))
+    {
+      $_in["loaded_plugins"] = array ();
+    }
+    $diff = array_diff ( $current_plugins, $_in["loaded_plugins"]);
+    if ( sizeof ( $diff) > 0)
+    {
+      $new_plugins_detected = true;
+      writeLog ( "New plugin(s) detected in router-plugins/: " . implode ( ", ", $diff) . ". Exiting for restart.", VoIP_LOG_NOTICE);
+    }
+  }
+
+  if ( $new_plugins_detected)
+  {
+    writeLog ( "Router exiting cleanly for systemd restart to load new plugins (signal " . $signo . ").", VoIP_LOG_NOTICE);
+    exit ( 0);
+  }
+
   router_reload_cache ( array ( "events" => array (), "return" => ""), array ());
   writeLog ( "Router cache reloaded from systemd signal " . $signo . ".", VoIP_LOG_NOTICE);
 }
@@ -771,7 +891,7 @@ function process_pending_commands ( $gm_client)
       $gm_client->doBackground ( $task_name, $task_data);
       $processed++;
 
-      if ( $_in["general"]["debug"])
+      if ( ! empty ( $_in["general"]["debug"]))
       {
         writeLog ( "Watchdog: Re-sent command #" . $command["ID"] . " to server #" . $command["Server"], VoIP_LOG_NOTICE);
       }

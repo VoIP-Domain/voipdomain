@@ -40,7 +40,7 @@
  */
 framework_add_filter ( "page_menu_configurations", "config_menu");
 framework_add_filter ( "page_menu_resources", "tools_menu");
-framework_add_filter ( "audio_inuse", "config_moh");
+framework_add_filter ( "audio_inuse", "config_audio_inuse");
 
 /**
  * Function to add entries to configurations menu.
@@ -81,7 +81,7 @@ function tools_menu ( $buffer, $parameters)
  * @param array $parameters Optional parameters to the function
  * @return array Menus structure
  */
-function config_moh ( $buffer, $parameters)
+function config_audio_inuse ( $buffer, $parameters)
 {
   global $_in;
 
@@ -90,8 +90,7 @@ function config_moh ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) get_tenant () . " AND `Key` = 'MOH' AND `Data` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "config_audio_inuse");
   }
 
   /**

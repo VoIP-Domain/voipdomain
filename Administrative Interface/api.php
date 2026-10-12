@@ -46,9 +46,76 @@ ini_set ( "display_errors", 0);
 // error_reporting ( E_ALL); ini_set ( "display_errors", 1);
 
 /**
+ * Start output buffer to prevent any stray PHP output from corrupting JSON
+ */
+ob_start ();
+
+/**
  * Bootstrap webroot and load configuration (does not depend on PHP-FPM chdir).
  */
 require_once ( __DIR__ . "/includes/bootstrap.inc.php");
+
+/**
+ * Custom error handler: captures all PHP errors, warnings, notices, and
+ * deprecations into a structured array instead of letting them output as HTML.
+ */
+$_in["php_errors"] = array ();
+set_error_handler ( function ( $errno, $errstr, $errfile, $errline) {
+  global $_in;
+  $types = array (
+    E_WARNING => "warning", E_NOTICE => "notice",
+    E_DEPRECATED => "deprecated", E_USER_WARNING => "user_warning",
+    E_USER_NOTICE => "user_notice", E_USER_DEPRECATED => "user_deprecated",
+    E_USER_ERROR => "user_error"
+  );
+  $_in["php_errors"][] = array (
+    "type" => isset ( $types[$errno]) ? $types[$errno] : "unknown(" . $errno . ")",
+    "message" => $errstr,
+    "file" => basename ( $errfile),
+    "line" => $errline
+  );
+  return true;
+}, E_ALL & ~E_ERROR & ~E_PARSE & ~E_CORE_ERROR & ~E_COMPILE_ERROR);
+
+/**
+ * Uncaught exception handler: catches TypeError, ValueError, and other throwables
+ * that PHP 8+ promotes to exceptions instead of fatal errors.
+ */
+set_exception_handler ( function ( $e) {
+  global $_in;
+  if ( ob_get_level ())
+  {
+    ob_end_clean ();
+  }
+  if ( ! headers_sent ())
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 500 Internal Server Error");
+    header ( "Content-Type: application/json");
+  }
+  $response = array ( "result" => false, "error" => "Uncaught exception");
+  if ( is_array ( $_in) && array_key_exists ( "general", $_in) && ! empty ( $_in["general"]["debug"]))
+  {
+    $response["message"] = $e->getMessage ();
+    $response["_debug"] = array (
+      "exception" => array (
+        "class" => get_class ( $e),
+        "message" => $e->getMessage (),
+        "file" => basename ( $e->getFile ()),
+        "line" => $e->getLine (),
+        "trace" => array_map ( function ( $frame) {
+          return array (
+            "file" => isset ( $frame["file"]) ? basename ( $frame["file"]) : "[internal]",
+            "line" => $frame["line"] ?? 0,
+            "function" => ( isset ( $frame["class"]) ? $frame["class"] . $frame["type"] : "") . ( $frame["function"] ?? "")
+          );
+        }, array_slice ( $e->getTrace (), 0, 10))
+      ),
+      "php_errors" => isset ( $_in["php_errors"]) ? $_in["php_errors"] : array ()
+    );
+  }
+  echo json_encode ( $response);
+  exit ( 1);
+});
 
 /**
  * Register shutdown function (post execution hook)
@@ -56,6 +123,41 @@ require_once ( __DIR__ . "/includes/bootstrap.inc.php");
 function shutdown ()
 {
   global $_in;
+
+  /**
+   * Check for fatal errors that bypassed the custom error handler.
+   * Fatal errors (E_ERROR, E_PARSE, E_COMPILE_ERROR) cannot be caught by
+   * set_error_handler but are visible via error_get_last() in the shutdown function.
+   */
+  $lastError = error_get_last ();
+  if ( $lastError && in_array ( $lastError["type"], array ( E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR)))
+  {
+    if ( ob_get_level ())
+    {
+      ob_end_clean ();
+    }
+    if ( ! headers_sent ())
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 500 Internal Server Error");
+      header ( "Content-Type: application/json");
+    }
+    $response = array ( "result" => false, "error" => "Fatal error");
+    if ( is_array ( $_in) && array_key_exists ( "general", $_in) && ! empty ( $_in["general"]["debug"]))
+    {
+      $response["message"] = $lastError["message"];
+      $response["_debug"] = array (
+        "fatal" => array (
+          "type" => $lastError["type"],
+          "message" => $lastError["message"],
+          "file" => basename ( $lastError["file"]),
+          "line" => $lastError["line"]
+        ),
+        "php_errors" => isset ( $_in["php_errors"]) ? $_in["php_errors"] : array ()
+      );
+    }
+    echo json_encode ( $response);
+    return;
+  }
 
   /**
    * Pre-shutdown hook: Used to be executed before closing connection to client
@@ -121,30 +223,7 @@ register_shutdown_function ( "shutdown");
  */
 if ( array_key_exists ( "debug", $_in["general"]) && $_in["general"]["debug"] == true)
 {
-  function send_internal_debug ()
-  {
-    if ( http_response_code () >= 500 && http_response_code () < 600)
-    {
-      $backtrack = array_reverse ( $GLOBALS["_in"]["dbg"]);
-      array_pop ( $backtrack);
-      foreach ( $backtrack as $index => $data)
-      {
-        if ( array_key_exists ( "file", $data))
-        {
-          $backtrack[$index]["file"] = substr ( $backtrack[$index]["file"], strlen ( __DIR__));
-        }
-      }
-      echo "\n__X_VD_DEBUG__:" . json_encode ( $backtrack, true) . "\n";
-    }
-  }
-  framework_add_hook ( "pre_shutdown", "send_internal_debug");
-
-  function write_dbg_stack ()
-  {
-    $GLOBALS["_in"]["dbg"] = debug_backtrace ();
-  }
-  register_tick_function ( "write_dbg_stack");
-  declare ( ticks = 1);
+  error_reporting ( E_ALL);
 }
 
 /**
@@ -269,6 +348,12 @@ if ( $_SERVER["REMOTE_ADDR"] != "127.0.0.1")
 }
 
 /**
+ * Resolve any deferred hook registrations (from framework_add_hook_at calls
+ * where the reference function was not yet registered at call time)
+ */
+framework_resolve_deferred_hooks ();
+
+/**
  * Enable CORS to any origin
  */
 header ( "Access-Control-Allow-Origin: *");
@@ -301,8 +386,7 @@ if ( $_in["mode"] != "install" && ( array_key_exists ( "HTTP_X_" . strtoupper ( 
   // Get token from database:
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Tokens` WHERE `Token` = '" . $_in["mysql"]["id"]->real_escape_string ( ( array_key_exists ( "HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_TOKEN", $_SERVER) ? $_SERVER["HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_TOKEN"] : $_GET["token"])) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "token_lookup");
   }
   if ( $token = $result->fetch_assoc ())
   {
@@ -348,8 +432,7 @@ if ( $_in["mode"] != "install" && array_key_exists ( "HTTP_X_" . strtoupper ( $_
   // Get server from database:
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = '" . $_in["mysql"]["id"]->real_escape_string ( (int) $_SERVER["HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_SID"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "server_auth_lookup");
   }
   if ( $server = $result->fetch_assoc ())
   {
@@ -378,8 +461,7 @@ if ( $_in["mode"] != "install" && array_key_exists ( $_in["general"]["cookie"] .
   // Get server from database:
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `AuthenticationToken` WHERE `Token` = '" . $_in["mysql"]["id"]->real_escape_string ( $_COOKIE[$_in["general"]["cookie"] . "_authtoken"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authtoken_lookup");
   }
   if ( $authtoken = $result->fetch_assoc ())
   {
@@ -403,8 +485,7 @@ if ( $_in["mode"] != "install" && array_key_exists ( $_in["general"]["cookie"], 
 {
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Sessions`.`SID`, `Sessions`.`LastSeen`, `Users`.* FROM `Sessions`, `Users` WHERE `Sessions`.`SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_COOKIE[$_in["general"]["cookie"]]) . "' AND `Sessions`.`User` = `Users`.`ID`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "session_lookup");
   }
   if ( $session = $result->fetch_assoc ())
   {
@@ -461,8 +542,7 @@ if ( $_in["mode"] != "install" && array_key_exists ( $_in["general"]["cookie"] .
 {
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `AdminSessions`.`SID`, `AdminSessions`.`LastSeen`, `Admins`.* FROM `AdminSessions`, `Admins` WHERE `AdminSessions`.`SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_COOKIE[$_in["general"]["cookie"] . "_adm"]) . "' AND `AdminSessions`.`Admin` = `Admins`.`ID`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "admin_session_lookup");
   }
   if ( $session = $result->fetch_assoc ())
   {
@@ -777,6 +857,25 @@ if ( ! array_key_exists ( $outputFormat, $apiResponseFormats))
  * Process request
  */
 $outputData = api_call ( $_SERVER["REQUEST_URI"], ( $inputRoute == "test" ? "read" : $inputRoute), $inputData);
+
+/**
+ * Discard any buffered stray output (PHP warnings captured by error handler)
+ */
+if ( ob_get_level ())
+{
+  ob_end_clean ();
+}
+
+/**
+ * In debug mode, inject captured PHP errors into the response for JSON output
+ */
+if ( array_key_exists ( "debug", $_in["general"]) && $_in["general"]["debug"] == true && ! empty ( $_in["php_errors"]))
+{
+  if ( is_array ( $outputData))
+  {
+    $outputData["_debug"] = array ( "php_errors" => $_in["php_errors"]);
+  }
+}
 
 /**
  * Format output

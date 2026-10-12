@@ -33,6 +33,14 @@ Install a fresh Asterisk server and include the lines below in each
 configuration file:
 - agents.conf:
   #include voipdomain/bootstrap/agents.conf
+- cdr.conf:
+  #include voipdomain/bootstrap/cdr.conf
+- cdr_manager.conf:
+  #include voipdomain/bootstrap/cdr_manager.conf
+- cdr_sqlite3_custom.conf:
+  #include voipdomain/bootstrap/cdr_sqlite3_custom.conf
+- cel.conf:
+  #include voipdomain/bootstrap/cel.conf
 - extensions.conf:
   #include voipdomain/bootstrap/dialplan.conf
 - musiconhold.conf:

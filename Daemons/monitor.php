@@ -39,9 +39,8 @@
 /**
  * Set error reporting level
  */
-error_reporting ( E_ERROR);
+error_reporting ( E_ALL);
 ini_set ( "display_errors", "false");
-// error_reporting ( E_ALL); ini_set ( "display_errors", "true");
 
 /**
  * Check if script is running from CLI
@@ -59,6 +58,17 @@ require_once ( dirname ( __FILE__) . "/includes/functions.inc.php");
 require_once ( dirname ( __FILE__) . "/includes/plugins.inc.php");
 require_once ( dirname ( __FILE__) . "/includes/asterisk.inc.php");
 require_once ( dirname ( __FILE__) . "/includes/systemd.inc.php");
+require_once ( dirname ( __FILE__) . "/includes/error-handler.inc.php");
+
+/**
+ * Register error handlers for clear crash reporting
+ */
+daemon_register_error_handlers ();
+
+/**
+ * Ensure single instance
+ */
+daemon_lock ( "monitor");
 
 /**
  * Parse configuration file. You should put your configuration file OUTSIDE
@@ -75,6 +85,33 @@ foreach ( glob ( dirname ( __FILE__) . "/monitor-modules/*/monitor.php") as $fil
 {
   require_once ( $filename);
 }
+
+/**
+ * Include all plugin files from monitor-plugins/
+ */
+$_in["loaded_plugins"] = array ();
+$pluginsdir = dirname ( __FILE__) . "/monitor-plugins";
+if ( is_dir ( $pluginsdir))
+{
+  foreach ( scandir ( $pluginsdir) as $entry)
+  {
+    if ( $entry == "." || $entry == "..")
+    {
+      continue;
+    }
+    $pluginpath = $pluginsdir . "/" . $entry;
+    if ( is_dir ( $pluginpath) && is_readable ( $pluginpath . "/monitor.php"))
+    {
+      require_once ( $pluginpath . "/monitor.php");
+      $_in["loaded_plugins"][] = $entry;
+    }
+  }
+}
+
+/**
+ * Resolve deferred hook registrations
+ */
+framework_resolve_deferred_hooks ();
 
 /**
  * Check for mandatory basic configurations (if didn't exist, set default)
@@ -254,7 +291,6 @@ writeLog ( "VoIP Domain monitor daemon initialized.");
 /**
  * Fork process to daemon mode (except if in debug mode)
  */
-error_reporting ( E_ERROR);
 set_time_limit ( 0);
 if ( ! $debug)
 {
@@ -275,6 +311,49 @@ if ( ! $debug)
 daemon_register_systemd_reload_handler ();
 
 /**
+ * Initialize non-blocking Gearman worker for plugin task processing
+ */
+$_in["gearman_worker"] = null;
+try
+{
+  $_in["gearman_worker"] = new GearmanWorker ();
+  $_in["gearman_worker"]->addServer ( $gearman_host, $gearman_port);
+  $_in["gearman_worker"]->addOptions ( GEARMAN_WORKER_NON_BLOCKING);
+  $_in["gearman_worker"]->setTimeout ( 0);
+
+  $serverid = ! empty ( $_in["daemon"]["serverid"]) ? $_in["daemon"]["serverid"] : "0";
+  $_in["gearman_worker"]->addFunction ( "vd_monitor_" . $serverid . "_task", "monitor_gearman_task_handler");
+  writeLog ( "Gearman worker registered: vd_monitor_" . $serverid . "_task");
+} catch ( Exception $e) {
+  writeLog ( "Gearman worker init failed: " . $e->getMessage (), VoIP_LOG_WARNING);
+  $_in["gearman_worker"] = null;
+}
+
+/**
+ * Gearman task handler for monitor plugins
+ */
+function monitor_gearman_task_handler ( $job)
+{
+  $payload = json_decode ( $job->workload (), true);
+  if ( ! is_array ( $payload) || ! array_key_exists ( "hook", $payload))
+  {
+    writeLog ( "Gearman task received with invalid payload.", VoIP_LOG_WARNING);
+    return json_encode ( array ( "result" => false, "error" => "Invalid payload"));
+  }
+  writeLog ( "Gearman task received: " . $payload["hook"]);
+  $taskdata = array_key_exists ( "data", $payload) ? $payload["data"] : array ();
+  try
+  {
+    $result = framework_call ( $payload["hook"], $taskdata, false, "");
+  } catch ( Throwable $e)
+  {
+    writeLog ( "Task \"" . $payload["hook"] . "\" threw " . get_class ( $e) . ": " . $e->getMessage () . " in " . $e->getFile () . ":" . $e->getLine (), VoIP_LOG_WARNING);
+    return json_encode ( array ( "result" => false, "error" => $e->getMessage ()));
+  }
+  return json_encode ( array ( "result" => true, "data" => $result));
+}
+
+/**
  * Register the Asterisk server shutdown event.
  *
  * @global object $gm Gearman client object
@@ -286,7 +365,7 @@ function shutdown ( $buffer, $parameters)
 {
   global $gm, $ami, $reconnect;
 
-  $gm->doBackground ( "event", json_encode ( array ( "ServerID" => $_in["daemon"]["serverid"], "Event" => "Shutdown", "Mode" => $parameters["Shutdown"], "Restart" => (boolean) $parameters["Restart"])));
+  $gm->doBackground ( "event", json_encode ( array ( "ServerID" => $_in["daemon"]["serverid"], "Event" => "Shutdown", "Mode" => $parameters["Shutdown"], "Restart" => (bool) $parameters["Restart"])));
   $ami->disconnect ();
   $reconnect = true;
 
@@ -365,7 +444,18 @@ while ( true)
     if ( array_key_exists ( $event["Event"], $_plugins["hooks"]))
     {
       echo "Framework call: " . $event["Event"] . "\n";
-      framework_call ( $event["Event"], $event);
+      try
+      {
+        framework_call ( $event["Event"], $event);
+      } catch ( Throwable $e)
+      {
+        writeLog ( "Event \"" . $event["Event"] . "\" threw " . get_class ( $e) . ": " . $e->getMessage () . " in " . $e->getFile () . ":" . $e->getLine (), VoIP_LOG_WARNING);
+        $trace_lines = explode ( "\n", $e->getTraceAsString ());
+        foreach ( array_slice ( $trace_lines, 0, 5) as $trace_line)
+        {
+          writeLog ( "  " . $trace_line, VoIP_LOG_WARNING);
+        }
+      }
     } else {
       echo "Unknown event received: " . $event["Event"] . "\n";
     }
@@ -374,6 +464,18 @@ while ( true)
     if ( $ami->checkbuffer ())
     {
       $lastevent = time ();
+    }
+  }
+
+  /**
+   * Poll Gearman worker for pending tasks (non-blocking)
+   */
+  if ( $_in["gearman_worker"] !== null)
+  {
+    @$_in["gearman_worker"]->work ();
+    if ( $_in["gearman_worker"]->returnCode () != GEARMAN_SUCCESS && $_in["gearman_worker"]->returnCode () != GEARMAN_IO_WAIT && $_in["gearman_worker"]->returnCode () != GEARMAN_NO_JOBS)
+    {
+      writeLog ( "Gearman worker error: " . $_in["gearman_worker"]->error (), VoIP_LOG_WARNING);
     }
   }
 }

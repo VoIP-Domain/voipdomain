@@ -191,6 +191,7 @@ function queues_add_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Queues"), "link" => "/queues"),
     2 => array ( "title" => __ ( "Add"))
   ));
+  sys_set_menu_highlight ( "/queues");
 
   /**
    * Add page JavaScript requirements
@@ -203,7 +204,7 @@ function queues_add_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"queue_add_form\">\n";
 
   // Add queue name field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"queue_add_name\" class=\"control-label col-xs-2\">" . __ ( "Name") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Name\" class=\"form-control\" id=\"queue_add_name\" placeholder=\"" . __ ( "Queue name") . "\" />\n";
@@ -211,7 +212,7 @@ function queues_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add queue description field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"queue_add_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"queue_add_description\" placeholder=\"" . __ ( "Queue description") . "\" />\n";
@@ -219,7 +220,7 @@ function queues_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add queue type selector
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"queue_add_strategy\" class=\"control-label col-xs-2\">" . __ ( "Strategy") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <select name=\"Strategy\" id=\"queue_add_strategy\" class=\"form-control\" data-placeholder=\"" . __ ( "Queue strategy") . "\">\n";
@@ -287,7 +288,7 @@ function queues_add_page ( $buffer, $parameters)
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
+ * @return void
  */
 function queues_clone_function ( $buffer, $parameters)
 {
@@ -337,6 +338,7 @@ function queues_view_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Queues"), "link" => "/queues"),
     2 => array ( "title" => __ ( "View"))
   ));
+  sys_set_menu_highlight ( "/queues");
 
   /**
    * Create page code
@@ -427,6 +429,7 @@ function queues_edit_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Queues"), "link" => "/queues"),
     2 => array ( "title" => __ ( "Edit"))
   ));
+  sys_set_menu_highlight ( "/queues");
 
   /**
    * Add page JavaScript requirements
@@ -439,7 +442,7 @@ function queues_edit_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"queue_edit_form\">\n";
 
   // Add queue name field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"queue_edit_name\" class=\"control-label col-xs-2\">" . __ ( "Name") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Name\" class=\"form-control\" id=\"queue_edit_name\" placeholder=\"" . __ ( "Queue name") . "\" />\n";
@@ -447,7 +450,7 @@ function queues_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add queue description field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"queue_edit_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"queue_edit_description\" placeholder=\"" . __ ( "Queue description") . "\" />\n";
@@ -455,7 +458,7 @@ function queues_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add queue type selector
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"queue_edit_strategy\" class=\"control-label col-xs-2\">" . __ ( "Strategy") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <select name=\"Strategy\" id=\"queue_edit_strategy\" class=\"form-control\" data-placeholder=\"" . __ ( "Queue strategy") . "\">\n";

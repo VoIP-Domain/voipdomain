@@ -26,6 +26,21 @@
 /**
  * VoIP Domain remote file transfer client handlers.
  *
+ * Transfer protocol:
+ *   1. file_transfer_begin  — creates UUID-named temp file pre-allocated to
+ *      final size, with a .data JSON sidecar for progress tracking
+ *   2. file_transfer_chunk  — validates each chunk (SHA1), writes to correct
+ *      offset in the temp file, records hash in .data
+ *   3. file_transfer_commit — verifies all chunks received, validates full file
+ *      hash (SHA256), dispatches TargetEvent
+ *   4. file_transfer_abort  — removes session and temp files
+ *
+ * Multiple files per logical event are handled as separate TransferIDs, each
+ * independently managed.
+ *
+ * On daemon startup, pending .data files are scanned and reloaded so
+ * interrupted transfers resume without re-transferring received chunks.
+ *
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
@@ -41,6 +56,9 @@ framework_add_hook ( "file_transfer_abort", "file_transfer_abort");
 
 /**
  * Start a remote file transfer session.
+ *
+ * Creates a UUID-named temporary file pre-allocated to the expected final size,
+ * and a .data JSON sidecar that tracks per-chunk SHA1 hashes and progress.
  *
  * @param string $buffer Buffer from plugin system if processed by other function before
  * @param array $parameters Optional parameters to the function
@@ -68,7 +86,7 @@ function file_transfer_begin ( $buffer, $parameters)
   {
     return array ( "code" => 406, "message" => "Invalid parameters.");
   }
-  if ( ! is_array ( $parameters["Metadata"]))
+  if ( ! array_key_exists ( "Metadata", $parameters) || ! is_array ( $parameters["Metadata"]))
   {
     $parameters["Metadata"] = array ();
   }
@@ -78,32 +96,43 @@ function file_transfer_begin ( $buffer, $parameters)
   {
     mkdir ( file_transfer_staging_dir (), 0755, true);
   }
-  if ( ! touch ( file_transfer_part_path ( $parameters["TransferID"])))
+
+  $uuid = file_transfer_uuid ();
+  if ( ! file_transfer_preallocate ( file_transfer_tmp_path ( $uuid), (int) $parameters["Size"]))
   {
     return array ( "code" => 500, "message" => "Error creating transfer staging file.");
   }
 
   $session = array (
     "TransferID" => $parameters["TransferID"],
+    "UUID" => $uuid,
     "Context" => array_key_exists ( "Context", $parameters) ? $parameters["Context"] : "generic",
     "TargetEvent" => $parameters["TargetEvent"],
     "Metadata" => $parameters["Metadata"],
+    "Filename" => array_key_exists ( "Filename", $parameters["Metadata"]) ? $parameters["Metadata"]["Filename"] : null,
     "Size" => (int) $parameters["Size"],
     "Hash" => strtolower ( $parameters["Hash"]),
     "Chunks" => (int) $parameters["Chunks"],
-    "Received" => array ()
+    "ChunkHashes" => array (),
+    "Received" => array (),
+    "CreatedAt" => date ( "c")
   );
   if ( ! file_transfer_save_session ( $session))
   {
-    file_transfer_cleanup_session ( $parameters["TransferID"]);
+    @unlink ( file_transfer_tmp_path ( $uuid));
     return array ( "code" => 500, "message" => "Error creating transfer session.");
   }
 
+  writeLog ( "VDFT begin: TransferID=" . $parameters["TransferID"] . " UUID=" . $uuid . " Size=" . $parameters["Size"] . " Chunks=" . $parameters["Chunks"], VoIP_LOG_NOTICE);
   return array ( "code" => 200, "message" => "Transfer session started.");
 }
 
 /**
  * Receive one chunk of a remote file transfer session.
+ *
+ * Validates the chunk data against its SHA1 hash, writes it at the correct
+ * offset in the pre-allocated temp file, and records the hash in the .data
+ * sidecar for resumability.
  *
  * @param string $buffer Buffer from plugin system if processed by other function before
  * @param array $parameters Optional parameters to the function
@@ -147,12 +176,15 @@ function file_transfer_chunk ( $buffer, $parameters)
     return array ( "code" => 406, "message" => "Invalid parameters.", "content" => array ( "Data" => "Invalid content"));
   }
   $content = base64_decode ( $parameters["Data"], true);
+
+  $chunkSha1 = sha1 ( $content);
   if ( hash ( "sha256", $content) !== strtolower ( $parameters["Hash"]))
   {
     return array ( "code" => 409, "message" => "Transfer chunk hash mismatch.");
   }
 
-  $handle = fopen ( file_transfer_part_path ( $parameters["TransferID"]), "c+b");
+  $tmpPath = file_transfer_tmp_path ( $session["UUID"]);
+  $handle = fopen ( $tmpPath, "c+b");
   if ( ! $handle)
   {
     return array ( "code" => 500, "message" => "Error writing transfer chunk.");
@@ -171,6 +203,7 @@ function file_transfer_chunk ( $buffer, $parameters)
 
   $session["Received"][] = $chunk;
   sort ( $session["Received"]);
+  $session["ChunkHashes"][$chunk] = $chunkSha1;
   if ( ! file_transfer_save_session ( $session))
   {
     return array ( "code" => 500, "message" => "Error updating transfer session.");
@@ -181,6 +214,9 @@ function file_transfer_chunk ( $buffer, $parameters)
 
 /**
  * Finalize a remote file transfer session and dispatch the target handler.
+ *
+ * Validates all chunks were received, checks the complete file hash (SHA256),
+ * then passes the temp file path to the TargetEvent handler.
  *
  * @param string $buffer Buffer from plugin system if processed by other function before
  * @param array $parameters Optional parameters to the function
@@ -204,23 +240,26 @@ function file_transfer_commit ( $buffer, $parameters)
   {
     return array ( "code" => 409, "message" => "Transfer incomplete.");
   }
-  if ( ! is_readable ( file_transfer_part_path ( $parameters["TransferID"])))
+
+  $tmpPath = file_transfer_tmp_path ( $session["UUID"]);
+  if ( ! is_readable ( $tmpPath))
   {
+    file_transfer_cleanup_session ( $parameters["TransferID"]);
     return array ( "code" => 500, "message" => "Transfer staging file missing.");
   }
-  if ( filesize ( file_transfer_part_path ( $parameters["TransferID"])) != (int) $session["Size"])
+  if ( filesize ( $tmpPath) != (int) $session["Size"])
   {
     file_transfer_cleanup_session ( $parameters["TransferID"]);
     return array ( "code" => 409, "message" => "Transfer size mismatch.");
   }
-  if ( hash_file ( "sha256", file_transfer_part_path ( $parameters["TransferID"])) !== $session["Hash"])
+  if ( hash_file ( "sha256", $tmpPath) !== $session["Hash"])
   {
     file_transfer_cleanup_session ( $parameters["TransferID"]);
     return array ( "code" => 409, "message" => "Transfer hash mismatch.");
   }
 
   $payload = is_array ( $session["Metadata"]) ? $session["Metadata"] : array ();
-  $payload["FilePath"] = file_transfer_part_path ( $parameters["TransferID"]);
+  $payload["FilePath"] = $tmpPath;
   $payload["TransferID"] = $parameters["TransferID"];
 
   if ( ! framework_has_hook ( $session["TargetEvent"]))
@@ -231,9 +270,10 @@ function file_transfer_commit ( $buffer, $parameters)
 
   if ( $_in["debug"])
   {
-    file_put_contents ( $_in["eventsfile"], "File transfer target event: " . $session["TargetEvent"] . " (TransferID: " . $parameters["TransferID"] . ")\n" . print_r ( $payload, true) . "\n", FILE_APPEND);
+    file_put_contents ( $_in["eventsfile"], "File transfer target event: " . $session["TargetEvent"] . " (TransferID: " . $parameters["TransferID"] . ", UUID: " . $session["UUID"] . ")\n" . print_r ( $payload, true) . "\n", FILE_APPEND);
   }
 
+  writeLog ( "VDFT commit: TransferID=" . $parameters["TransferID"] . " UUID=" . $session["UUID"] . " Event=" . $session["TargetEvent"], VoIP_LOG_NOTICE);
   $result = framework_call ( $session["TargetEvent"], $payload);
   file_transfer_cleanup_session ( $parameters["TransferID"]);
 
@@ -260,6 +300,7 @@ function file_transfer_abort ( $buffer, $parameters)
     return array ( "code" => 406, "message" => "Invalid parameters.", "content" => array ( "TransferID" => "Missing parameter"));
   }
 
+  writeLog ( "VDFT abort: TransferID=" . $parameters["TransferID"], VoIP_LOG_NOTICE);
   file_transfer_cleanup_session ( $parameters["TransferID"]);
   return array ( "code" => 200, "message" => "Transfer aborted.");
 }

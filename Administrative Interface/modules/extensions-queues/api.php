@@ -249,8 +249,7 @@ function extensions_view_queue ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Queues`.`ID`, `Queues`.`Description`, `Queues`.`Strategy` FROM `Queues` LEFT JOIN `ExtensionQueue` ON `ExtensionQueue`.`Queue` = `Queues`.`ID` WHERE `Queues`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionQueue`.`Extension` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_view_queue");
   }
   $queue = $result->fetch_assoc ();
 
@@ -299,8 +298,7 @@ function extensions_queue_validate ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["Queue"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_queue_validate");
     }
     if ( $result->num_rows != 1)
     {
@@ -315,8 +313,7 @@ function extensions_queue_validate ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Queue` FROM `ExtensionQueue` WHERE `Extension` = " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_queue_validate");
     }
     if ( ! $buffer["ORIGINAL"]["Queue"] = $result->fetch_assoc ()["Queue"])
     {
@@ -350,8 +347,7 @@ function extensions_add_queue_post ( $buffer, $parameters)
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `ExtensionQueue` (`Queue`, `Extension`) VALUES (" . (int) $parameters["Queue"] . ", " . (int) $parameters["ID"] . ")"))
   {
     framework_call ( "extensions_add_abort", $parameters);
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_add_queue_post");
   }
 
   /**
@@ -360,14 +356,12 @@ function extensions_add_queue_post ( $buffer, $parameters)
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["Queue"]))
   {
     framework_call ( "extensions_add_abort", $parameters);
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_add_queue_post");
   }
   if ( ! $queue = $result->fetch_assoc ())
   {
     framework_call ( "extensions_add_abort", $parameters);
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_add_queue_post");
   }
 
   /**
@@ -407,8 +401,7 @@ function extensions_edit_queue_post ( $buffer, $parameters)
     if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `ExtensionQueue` SET `Queue` = " . (int) $parameters["Queue"] . " WHERE `Extension` = " . (int) $parameters["ID"]))
     {
       framework_call ( "extensions_edit_abort", $parameters);
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "extensions_edit_queue_post");
     }
   }
 
@@ -418,14 +411,12 @@ function extensions_edit_queue_post ( $buffer, $parameters)
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["Queue"]))
   {
     framework_call ( "extensions_edit_abort", $parameters);
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_edit_queue_post");
   }
   if ( ! $queue = $result->fetch_assoc ())
   {
     framework_call ( "extensions_edit_abort", $parameters);
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_edit_queue_post");
   }
 
   /**
@@ -462,8 +453,7 @@ function extensions_remove_queue_pre ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Queue` FROM `ExtensionQueue` WHERE `Extension` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_remove_queue_pre");
   }
   if ( ! $buffer["ORIGINAL"]["Queue"] = $result->fetch_assoc ()["Queue"])
   {
@@ -476,8 +466,7 @@ function extensions_remove_queue_pre ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ExtensionQueue` WHERE `Extension` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_remove_queue_pre");
   }
 
   /**
@@ -485,8 +474,7 @@ function extensions_remove_queue_pre ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Number` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_remove_queue_pre");
   }
   if ( $result->num_rows != 1)
   {
@@ -530,8 +518,7 @@ function extensions_queue_server_reconfig ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Queues`.`Name` AS `Queue`, `Extensions`.`Number` FROM `ExtensionQueue` LEFT JOIN `Extensions` ON `ExtensionQueue`.`Extension` = `Extensions`.`ID` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` LEFT JOIN `Queues` ON `ExtensionQueue`.`Queue` = `Queues`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Ranges`.`Server` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "extensions_queue_server_reconfig");
   }
   while ( $queue = $result->fetch_assoc ())
   {

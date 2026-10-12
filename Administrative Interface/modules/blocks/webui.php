@@ -51,6 +51,9 @@ framework_add_hook ( "blocks_clone_function", "blocks_clone_function", IN_HOOK_I
 framework_add_path ( "/blocks/:id/view", "blocks_view_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "blocks_view_page", "blocks_view_page", IN_HOOK_INSERT_FIRST);
 
+framework_add_path ( "/blocks/:id/report", "blocks_report_page", array ( "permissions" => array ( "Administrator")));
+framework_add_hook ( "blocks_report_page", "blocks_report_page", IN_HOOK_INSERT_FIRST);
+
 framework_add_path ( "/blocks/:id/edit", "blocks_edit_page", array ( "permissions" => array ( "Administrator")));
 framework_add_hook ( "blocks_edit_page", "blocks_edit_page", IN_HOOK_INSERT_FIRST);
 
@@ -133,7 +136,7 @@ function blocks_search_page ( $buffer, $parameters)
               "  columns: [\n" .
               "             { data: 'Description', title: '" . __ ( "Description") . "', width: '60%', class: 'export all'},\n" .
               "             { data: 'Number', title: '" . __ ( "Number") . "', width: '30%', class: 'export all'},\n" .
-              "             { data: 'NULL', title: '" . __ ( "Actions") . "', width: '10%', class: 'all', render: function ( data, type, row, meta) { return '<span class=\"btn-group\"><a class=\"btn btn-xs btn-info\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "View") . "\" role=\"button\" title=\"\" href=\"/blocks/' + row.ID + '/view\"><i class=\"fa fa-search\"></i></a><a class=\"btn btn-xs btn-warning\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Edit") . "\" role=\"button\" title=\"\" href=\"/blocks/' + row.ID + '/edit\"><i class=\"fa fa-pencil-alt\"></i></a><a class=\"btn btn-xs btn-primary\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Clone") . "\" role=\"button\" title=\"\" href=\"/blocks/' + row.ID + '/clone\" data-nohistory=\"nohistory\"><i class=\"fa fa-clone\"></i></a><button class=\"btn btn-xs btn-danger\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Remove") . "\" role=\"button\" title=\"\" data-id=\"' + row.ID + '\" data-description=\"' + row.Description + '\" data-number=\"' + row.Number + '\"><i class=\"fa fa-times\"></i></button></span>'; }, orderable: false, searchable: false}\n" .
+              "             { data: 'NULL', title: '" . __ ( "Actions") . "', width: '10%', class: 'all', render: function ( data, type, row, meta) { return '<span class=\"btn-group\"><a class=\"btn btn-xs btn-info\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "View") . "\" role=\"button\" title=\"\" href=\"/blocks/' + row.ID + '/view\"><i class=\"fa fa-search\"></i></a><a class=\"btn btn-xs btn-success\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Report") . "\" role=\"button\" title=\"\" href=\"/blocks/' + row.ID + '/report\"><i class=\"fa fa-list\"></i></a><a class=\"btn btn-xs btn-warning\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Edit") . "\" role=\"button\" title=\"\" href=\"/blocks/' + row.ID + '/edit\"><i class=\"fa fa-pencil-alt\"></i></a><a class=\"btn btn-xs btn-primary\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Clone") . "\" role=\"button\" title=\"\" href=\"/blocks/' + row.ID + '/clone\" data-nohistory=\"nohistory\"><i class=\"fa fa-clone\"></i></a><button class=\"btn btn-xs btn-danger\" data-toggle=\"tooltip\" data-placement=\"top\" data-original-title=\"" . __ ( "Remove") . "\" role=\"button\" title=\"\" data-id=\"' + row.ID + '\" data-description=\"' + row.Description + '\" data-number=\"' + row.Number + '\"><i class=\"fa fa-times\"></i></button></span>'; }, orderable: false, searchable: false}\n" .
               "           ]\n" .
               "}));\n" .
               "VoIP.dataTablesUpdate ( { path: '/blocks', fields: 'ID,Description,Number,NULL'}, $('#datatables').data ( 'dt'));\n" .
@@ -188,6 +191,7 @@ function blocks_add_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Blocks"), "link" => "/blocks"),
     2 => array ( "title" => __ ( "Add"))
   ));
+  sys_set_menu_highlight ( "/blocks");
 
   /**
    * Add page JavaScript requirements
@@ -200,7 +204,7 @@ function blocks_add_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"block_add_form\">\n";
 
   // Add block description field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"block_add_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"block_add_description\" placeholder=\"" . __ ( "Block description") . "\" />\n";
@@ -208,7 +212,7 @@ function blocks_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add block number field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"block_add_number\" class=\"control-label col-xs-2\">" . __ ( "Number") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"tel\" name=\"Number\" class=\"form-control\" id=\"block_add_number\" placeholder=\"" . __ ( "Block number (E.164 format)") . "\" maxlength=\"16\" />\n";
@@ -269,7 +273,7 @@ function blocks_add_page ( $buffer, $parameters)
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
+ * @return void
  */
 function blocks_clone_function ( $buffer, $parameters)
 {
@@ -315,6 +319,7 @@ function blocks_view_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Blocks"), "link" => "/blocks"),
     2 => array ( "title" => __ ( "View"))
   ));
+  sys_set_menu_highlight ( "/blocks");
 
   /**
    * Create page code
@@ -386,6 +391,7 @@ function blocks_edit_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Blocks"), "link" => "/blocks"),
     2 => array ( "title" => __ ( "Edit"))
   ));
+  sys_set_menu_highlight ( "/blocks");
 
   /**
    * Add page JavaScript requirements
@@ -398,7 +404,7 @@ function blocks_edit_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"block_edit_form\">\n";
 
   // Add block description field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"block_edit_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"block_edit_description\" placeholder=\"" . __ ( "Block description") . "\" />\n";
@@ -406,7 +412,7 @@ function blocks_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add block number field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"block_edit_number\" class=\"control-label col-xs-2\">" . __ ( "Number") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"tel\" name=\"Number\" class=\"form-control\" id=\"block_edit_number\" placeholder=\"" . __ ( "Block number (E.164 format)") . "\" maxlength=\"16\" />\n";
@@ -458,6 +464,86 @@ function blocks_edit_page ( $buffer, $parameters)
               "               }\n" .
               "  }\n" .
               "});");
+
+  return $output;
+}
+
+/**
+ * Function to generate the block report page code.
+ *
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function blocks_report_page ( $buffer, $parameters)
+{
+  /**
+   * Set page title
+   */
+  sys_set_title ( __ ( "Blocks"));
+  sys_set_subtitle ( __ ( "blocked calls report"));
+  sys_set_path ( array (
+    1 => array ( "title" => __ ( "Blocks"), "link" => "/blocks"),
+    2 => array ( "title" => __ ( "Report"))
+  ));
+  sys_set_menu_highlight ( "/blocks");
+
+  /**
+   * Add page CSS requirements
+   */
+  sys_addcss ( array ( "name" => "dataTables", "src" => "/vendors/datatables/media/css/dataTables.bootstrap.css", "dep" => array ( "bootstrap")));
+  sys_addcss ( array ( "name" => "buttons", "src" => "/vendors/buttons/css/buttons.bootstrap.css", "dep" => array ()));
+  sys_addcss ( array ( "name" => "dataTables-buttons", "src" => "/vendors/buttons/css/buttons.dataTables.css", "dep" => array ( "buttons", "dataTables")));
+  sys_addcss ( array ( "name" => "dataTables-responsive", "src" => "/vendors/responsive/css/responsive.bootstrap.css", "dep" => array ( "dataTables")));
+
+  /**
+   * Add page JavaScript requirements
+   */
+  sys_addjs ( array ( "name" => "jquery-dataTables", "src" => "/vendors/datatables/media/js/jquery.dataTables.js", "dep" => array ( "moment")));
+  sys_addjs ( array ( "name" => "dataTables", "src" => "/vendors/datatables/media/js/dataTables.bootstrap.js", "dep" => array ( "bootstrap", "jquery-dataTables")));
+  sys_addjs ( array ( "name" => "dataTables-buttons", "src" => "/vendors/buttons/js/dataTables.buttons.js", "dep" => array ( "dataTables")));
+  sys_addjs ( array ( "name" => "dataTables-buttons-html5", "src" => "/vendors/buttons/js/buttons.html5.js", "dep" => array ( "dataTables-buttons", "jszip", "pdfmake", "vfs_fonts")));
+  sys_addjs ( array ( "name" => "dataTables-buttons-print", "src" => "/vendors/buttons/js/buttons.print.js", "dep" => array ( "dataTables-buttons")));
+  sys_addjs ( array ( "name" => "dataTables-responsive", "src" => "/vendors/responsive/js/dataTables.responsive.js", "dep" => array ( "dataTables")));
+  sys_addjs ( array ( "name" => "dataTables-bootstrap-responsive", "src" => "/vendors/responsive/js/responsive.bootstrap.js", "dep" => array ( "dataTables-responsive")));
+  sys_addjs ( array ( "name" => "jszip", "src" => "/vendors/jszip/dist/jszip.js", "dep" => array ()));
+  sys_addjs ( array ( "name" => "vfs_fonts", "src" => "/vendors/pdfmake/build/vfs_fonts.js", "dep" => array ( "pdfmake")));
+  sys_addjs ( array ( "name" => "pdfmake", "src" => "/vendors/pdfmake/build/pdfmake.js", "dep" => array ( "jszip")));
+  sys_addjs ( array ( "name" => "dataTables-processing", "src" => "/js/processing.js", "dep" => array ( "dataTables")));
+  sys_addjs ( array ( "name" => "system-dataTables", "src" => "/js/datatables.js", "dep" => array ( "dataTables", "dataTables-buttons", "dataTables-mark", "stickytableheaders")));
+  sys_addjs ( array ( "name" => "accent-neutralise", "src" => "/js/accent-neutralise.js", "dep" => array ( "dataTables")));
+  sys_addjs ( array ( "name" => "mark", "src" => "/vendors/mark/dist/jquery.mark.js", "dep" => array ()));
+  sys_addjs ( array ( "name" => "dataTables-mark", "src" => "/vendors/datatables-mark/dist/datatables.mark.js", "dep" => array ( "mark")));
+  sys_addjs ( array ( "name" => "stickytableheaders", "src" => "/vendors/StickyTableHeaders/js/jquery.stickytableheaders.js", "dep" => array ()));
+
+  /**
+   * Block report table
+   */
+  $output = "<table id=\"datatables\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"></table>\n";
+
+  /**
+   * Add report table JavaScript code
+   */
+  sys_addjs ( "$('#datatables').data ( 'dt', $('#datatables').DataTable (\n" .
+              "{\n" .
+              "  columns: [\n" .
+              "             { data: 'Date', title: '" . __ ( "Date") . "', width: '20%', class: 'export all'},\n" .
+              "             { data: 'Source', title: '" . __ ( "Source") . "', width: '20%', class: 'export all'},\n" .
+              "             { data: 'Destination', title: '" . __ ( "Destination") . "', width: '20%', class: 'export all'},\n" .
+              "             { data: 'Duration', title: '" . __ ( "Duration") . "', width: '15%', class: 'export all'},\n" .
+              "             { data: 'Disposition', title: '" . __ ( "Status") . "', width: '15%', class: 'export all'},\n" .
+              "             { data: 'Server', title: '" . __ ( "Server") . "', width: '10%', class: 'export all'}\n" .
+              "           ],\n" .
+              "  order: [[ 0, 'desc' ]]\n" .
+              "}));\n" .
+              "VoIP.rest ( '/blocks/' + encodeURIComponent ( VoIP.parameters.id) + '/report', 'GET').done ( function ( data, textStatus, jqXHR)\n" .
+              "{\n" .
+              "  $('#datatables').data ( 'dt').rows.add ( data).draw ();\n" .
+              "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
+              "{\n" .
+              "  new PNotify ( { title: '" . __ ( "Block report") . "', text: '" . __ ( "Error loading report data!") . "', type: 'error'});\n" .
+              "});\n");
 
   return $output;
 }

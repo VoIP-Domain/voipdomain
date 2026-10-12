@@ -78,8 +78,7 @@ function avatar_users_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Avatar` FROM `UserAvatar` WHERE `User` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "avatar_users_view");
   }
   if ( ! $avatar = $result->fetch_assoc ())
   {
@@ -233,8 +232,7 @@ function avatar_user_get ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `UserAvatar`.`Avatar` FROM `UserAvatar` LEFT JOIN `Users` ON `UserAvatar`.`User` = `Users`.`ID` WHERE `Users`.`Tenant` = " . (int) get_tenant ( $_SERVER["HTTP_HOST"]) . " AND `Users`.`Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "avatar_user_get");
   }
 
   /**
@@ -394,8 +392,7 @@ function avatar_user_remove ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `UserAvatar` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `User` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "avatar_user_remove");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -416,8 +413,7 @@ function avatar_user_remove ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `UserAvatar` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `User` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "avatar_user_remove");
   }
 
   /**
@@ -577,8 +573,7 @@ function avatar_user_set ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Users`.*, `UserAvatar`.`Avatar` FROM `Users` LEFT JOIN `UserAvatar` ON `Users`.`ID` = `UserAvatar`.`User` WHERE `Users`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Users`.`ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "avatar_user_set");
   }
   if ( ! $user = $result->fetch_assoc ())
   {
@@ -600,8 +595,7 @@ function avatar_user_set ( $buffer, $parameters)
   $avatar = uniqid ( "", true);
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `UserAvatar` (`User`, `Avatar`) VALUES (" . (int) $parameters["ID"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $avatar) . "') ON DUPLICATE KEY UPDATE `Avatar` = '" . $_in["mysql"]["id"]->real_escape_string ( $avatar) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "avatar_user_set");
   }
 
   /**
@@ -610,16 +604,14 @@ function avatar_user_set ( $buffer, $parameters)
   $parameters["Avatar"] = base64_decode ( $parameters["Avatar"]);
   if ( ! $image = imagecreatefromstring ( $parameters["Avatar"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "avatar_user_set");
   }
   list ( $width, $height) = getimagesizefromstring ( $parameters["Avatar"]);
   $resized = imagecreatetruecolor ( 215, 215);
   imagecopyresampled ( $resized, $image, 0, 0, 0, 0, 215, 215, $width, $height);
   if ( ! imagejpeg ( $resized, $_in["general"]["storagedir"] . "/avatars/profile-" . $avatar . ".jpg"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "avatar_user_set");
   }
   imagedestroy ( $resized);
   imagedestroy ( $image);

@@ -291,13 +291,11 @@ function permissions_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'Permissions'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "permissions_view");
   }
   if ( ! $config = $result->fetch_assoc ())
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "permissions_view");
   }
 
   /**
@@ -591,13 +589,11 @@ function permissions_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'Permissions'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "permissions_edit");
   }
   if ( ! $parameters["ORIGINAL"] = json_decode ( $result->fetch_assoc ()["Data"], true))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "permissions_edit");
   }
 
   /**
@@ -649,8 +645,7 @@ function permissions_edit ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Config` SET `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Permissions"])) . "' WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'Permissions'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "permissions_edit");
   }
 
   /**
@@ -1266,8 +1261,7 @@ function configs_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND (`Key` = 'NumbersLength' OR `Key` = 'Operator' OR `Key` = 'MOH' OR `Key` = 'NTP')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "configs_view");
   }
   $data = array ( "NumbersLength" => "", "Operator" => "", "MOH" => "", "NTP" => array ());
   while ( $entry = $result->fetch_assoc ())
@@ -1284,8 +1278,7 @@ function configs_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT COUNT(`Tenant`) AS `Total` FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "configs_view");
   }
   $ranges = $result->fetch_assoc ();
   $data["ImmutableLength"] = $ranges["Total"] != 0;
@@ -1295,15 +1288,14 @@ function configs_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Tenants`.`Country`, `Tenants`.`TimeZone`, `Tenants`.`Offset`, `Currencies`.`Code` AS `Currency`, `Tenants`.`Language`, `Countries`.`Name` AS `CountryName`, `Countries`.`ISO3166-2` AS `CountryISO` FROM `Tenants` LEFT JOIN `Countries` ON `Tenants`.`Country` = `Countries`.`Code` LEFT JOIN `Currencies` ON `Tenants`.`Currency` = `Currencies`.`ISO4217` WHERE `Tenants`.`ID` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "configs_view");
   }
   if ( ! $tenantdata = $result->fetch_assoc ())
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "configs_view");
   }
-  $data["Country"] = array ( "ID" => $tenantdata["Country"], "NameEN" => $tenantdata["CountryName"], "Name" => ( array_key_exists ( $tenantdata["CountryISO"], $_in["countries"][$_in["general"]["language"]]) ? $_in["countries"][$_in["general"]["language"]][$tenantdata["CountryISO"]] : $tenantdata["CountryName"]), "ISO3166-2" => $tenantdata["CountryISO"]);
+  $countryList = isset ( $_in["countries"][$_in["general"]["language"]]) ? $_in["countries"][$_in["general"]["language"]] : array ();
+  $data["Country"] = array ( "ID" => $tenantdata["Country"], "NameEN" => $tenantdata["CountryName"], "Name" => ( is_array ( $countryList) && array_key_exists ( $tenantdata["CountryISO"], $countryList) ? $countryList[$tenantdata["CountryISO"]] : $tenantdata["CountryName"]), "ISO3166-2" => $tenantdata["CountryISO"]);
   $data["TimeZone"] = $tenantdata["TimeZone"];
   $data["Offset"] = $tenantdata["Offset"];
   $data["Currency"] = $tenantdata["Currency"];
@@ -1513,8 +1505,7 @@ function configs_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Data` FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'NumbersLength'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "configs_edit");
   }
   $parameters["ORIGINAL"] = array ();
   if ( ! $parameters["ORIGINAL"]["NumbersLength"] = $result->fetch_assoc ()["Data"])
@@ -1523,12 +1514,11 @@ function configs_edit ( $buffer, $parameters)
   }
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT COUNT(`Tenant`) AS `Total` FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "configs_edit");
   }
   $ranges = $result->fetch_assoc ();
   $immutablelength = $ranges["Total"] != 0;
-  if ( ! empty ( $parameters["NumbersLength"]) && ! array_key_exists ( "NumbersLength", $data) && $parameters["NumberLength"] != $parameters["ORIGINAL"]["NumbersLength"] && $immutablelength)
+  if ( ! empty ( $parameters["NumbersLength"]) && ! array_key_exists ( "NumbersLength", $data) && $parameters["NumbersLength"] != $parameters["ORIGINAL"]["NumbersLength"] && $immutablelength)
   {
     $data["NumbersLength"] = __ ( "The number length is immutable.");
   }
@@ -1538,8 +1528,7 @@ function configs_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Currencies` WHERE `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Currency"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "configs_edit");
   }
   if ( ! $currency = $result->fetch_assoc ())
   {
@@ -1554,8 +1543,7 @@ function configs_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Countries` WHERE `ISO3166-2` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Country"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "configs_edit");
   }
   if ( ! $country = $result->fetch_assoc ())
   {
@@ -1581,8 +1569,7 @@ function configs_edit ( $buffer, $parameters)
     }
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Type` IN (" . implode ( ",", $dialable) . ") AND `ID` = " . (int) $parameters["Operator"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "configs_edit");
     }
     if ( ! $operatorextension = $result->fetch_assoc ()["Number"])
     {
@@ -1597,8 +1584,7 @@ function configs_edit ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["MOH"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "configs_edit");
     }
     if ( $result->num_rows != 1)
     {
@@ -1665,12 +1651,11 @@ function configs_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Key`, `Data` FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND (`Key` = 'Operator' OR `Key` = 'MOH' OR `Key` = 'NTP')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "configs_edit");
   }
-  $parmeters["ORIGINAL"]["Operator"] = "";
-  $parmeters["ORIGINAL"]["MOH"] = "";
-  $parmeters["ORIGINAL"]["NTP"] = array ();
+  $parameters["ORIGINAL"]["Operator"] = 0;
+  $parameters["ORIGINAL"]["MOH"] = 0;
+  $parameters["ORIGINAL"]["NTP"] = array ();
   while ( $entry = $result->fetch_assoc ())
   {
     if ( is_json ( $entry["Data"]))
@@ -1679,21 +1664,21 @@ function configs_edit ( $buffer, $parameters)
     }
     $parameters["ORIGINAL"][$entry["Key"]] = $entry["Data"];
   }
+  $parameters["ORIGINAL"]["Operator"] = (int) $parameters["ORIGINAL"]["Operator"];
+  $parameters["ORIGINAL"]["MOH"] = (int) $parameters["ORIGINAL"]["MOH"];
 
   /**
    * Get tenant configurations from database
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Tenants`.`Country`, `Tenants`.`TimeZone`, `Tenants`.`Offset`, `Currencies`.`Code` AS `Currency`, `Tenants`.`Language`, `Countries`.`Name` AS `CountryName`, `Countries`.`ISO3166-2` AS `CountryISO` FROM `Tenants` LEFT JOIN `Countries` ON `Tenants`.`Country` = `Countries`.`Code` LEFT JOIN `Currencies` ON `Tenants`.`Currency` = `Currencies`.`ISO4217` WHERE `Tenants`.`ID` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "configs_edit");
   }
   if ( ! $tenantdata = $result->fetch_assoc ())
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "configs_edit");
   }
-  $parameters["ORIGINAL"]["Country"] = $tenantdata["Country"];
+  $parameters["ORIGINAL"]["Country"] = $tenantdata["CountryISO"];
   $parameters["ORIGINAL"]["TimeZone"] = $tenantdata["TimeZone"];
   $parameters["ORIGINAL"]["Offset"] = $tenantdata["Offset"];
   $parameters["ORIGINAL"]["Currency"] = $tenantdata["Currency"];
@@ -1704,34 +1689,30 @@ function configs_edit ( $buffer, $parameters)
    */
   if ( $parameters["ORIGINAL"]["NumbersLength"] != $parameters["NumbersLength"])
   {
-    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('NumbersLength', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["NumbersLength"]) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Language"]) . "'"))
+    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('NumbersLength', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["NumbersLength"]) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["NumbersLength"]) . "'"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "configs_edit");
     }
   }
   if ( ! empty ( $parameters["MOH"]))
   {
     if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('MOH', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["MOH"]) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["MOH"]) . "'"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "configs_edit");
     }
   }
   if ( ! empty ( $parameters["Operator"]))
   {
     if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Operator', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Operator"]) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Operator"]) . "'"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "configs_edit");
     }
   }
   if ( sizeof ( $parameters["NTP"]) != 0)
   {
     if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('NTP', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["NTP"])) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["NTP"])) . "'"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "configs_edit");
     }
   }
 
@@ -1742,10 +1723,10 @@ function configs_edit ( $buffer, $parameters)
   {
     voipdomain_timezonepicker_apply_parameters ( $parameters);
   }
-  if ( $country["Code"] != $parameters["ORIGINAL"]["Country"] || $parameters["TimeZone"] != $parameters["ORIGINAL"]["TimeZone"] || $parameters["Offset"] != $parameters["ORIGINAL"]["Offset"] || $currency["ISO4217"] != $parameters["ORIGINAL"]["Currency"] || $parameters["Language"] != $parameters["ORIGINAL"]["Language"])
+  if ( $parameters["Country"] != $parameters["ORIGINAL"]["Country"] || $parameters["TimeZone"] != $parameters["ORIGINAL"]["TimeZone"] || $parameters["Offset"] != $parameters["ORIGINAL"]["Offset"] || $currency["ISO4217"] != $parameters["ORIGINAL"]["Currency"] || $parameters["Language"] != $parameters["ORIGINAL"]["Language"])
   {
     $updates = "";
-    if ( $country["Code"] != $parameters["ORIGINAL"]["Country"])
+    if ( $parameters["Country"] != $parameters["ORIGINAL"]["Country"])
     {
       $updates .= ", `Country` = " . (int) $country["Code"];
     }
@@ -1767,8 +1748,7 @@ function configs_edit ( $buffer, $parameters)
     }
     if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Tenants` SET" . substr ( $updates, 2) . " WHERE `ID` = " . (int) $_in["session"]["Tenant"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "configs_edit");
     }
   }
 
@@ -1930,9 +1910,27 @@ function plugins_import ( $buffer, $parameters)
       /**
        * Move uploaded plugin file to spool plugin directory
        */
-      $parameters["zipfile"] = $_in["general"]["spooldir"] . "/plugins/" . basename ( $_FILES["plugin"]["name"]);
-      $parameters["tmpdir"] = $_in["general"]["spooldir"] . "/plugins/" . md5 ( uniqid ( rand (), true));
-      move_uploaded_file ( $_FILES["plugin"]["tmp_name"], $parameters["zipfile"]);
+      $pluginspool = $_in["general"]["spooldir"] . "/plugins";
+      if ( ! is_dir ( $pluginspool))
+      {
+        if ( ! @mkdir ( $pluginspool, 0770, true))
+        {
+          $data["Message"] = sprintf ( __ ( "Cannot create spool directory: %s"), $pluginspool);
+        }
+      }
+      if ( ! array_key_exists ( "Message", $data) && ! is_writable ( $pluginspool))
+      {
+        $data["Message"] = sprintf ( __ ( "Spool directory is not writable: %s"), $pluginspool);
+      }
+      if ( ! array_key_exists ( "Message", $data))
+      {
+        $parameters["zipfile"] = $pluginspool . "/" . basename ( $_FILES["plugin"]["name"]);
+        $parameters["tmpdir"] = $pluginspool . "/" . md5 ( uniqid ( rand (), true));
+        if ( ! @move_uploaded_file ( $_FILES["plugin"]["tmp_name"], $parameters["zipfile"]))
+        {
+          $data["Message"] = sprintf ( __ ( "Cannot move uploaded file to: %s"), $parameters["zipfile"]);
+        }
+      }
     }
   } else {
     $data["Message"] = __ ( "Invalid plugin file.");
@@ -1988,13 +1986,13 @@ function plugins_import ( $buffer, $parameters)
   $parameters["name"] = "";
   if ( ! array_key_exists ( "file", $data))
   {
-    $zip = zip_open ( $parameters["zipfile"]);
-    $consistency = array ( "reqFile" => false, "confFile" => false, "directory" => true);
-    if ( is_resource ( $zip))
+    $zip = new ZipArchive ();
+    $consistency = array ( "reqFile" => false, "manifestFile" => false, "directory" => true);
+    if ( $zip->open ( $parameters["zipfile"]) === true)
     {
-      while ( $file = zip_read ( $zip))
+      for ( $i = 0; $i < $zip->numFiles; $i++)
       {
-        $filename = zip_entry_name ( $file);
+        $filename = $zip->getNameIndex ( $i);
         $parameters["files"][] = $filename;
         if ( substr ( $filename, -1) == "/")
         {
@@ -2002,15 +2000,18 @@ function plugins_import ( $buffer, $parameters)
           {
             $parameters["name"] = substr ( $filename, 0, strrpos ( $filename, "/"));
           }
-          mkdir ( $parameters["tmpdir"] . "/" . $filename);
+          @mkdir ( $parameters["tmpdir"] . "/" . $filename, 0755, true);
         } else {
-          zip_entry_open ( $zip, $file, "rb");
-          file_put_contents ( $parameters["tmpdir"] . "/" . $filename, zip_entry_read ( $file, zip_entry_filesize ( $file)));
-          zip_entry_close ( $file);
+          $dirname = dirname ( $parameters["tmpdir"] . "/" . $filename);
+          if ( ! is_dir ( $dirname))
+          {
+            @mkdir ( $dirname, 0755, true);
+          }
+          file_put_contents ( $parameters["tmpdir"] . "/" . $filename, $zip->getFromIndex ( $i));
         }
-        if ( $filename == $parameters["name"] . "/" . $parameters["name"] . ".cfg")
+        if ( $filename == $parameters["name"] . "/plugin.json")
         {
-          $consistency["confFile"] = true;
+          $consistency["manifestFile"] = true;
         }
         if ( $filename == $parameters["name"] . "/api.php")
         {
@@ -2048,70 +2049,45 @@ function plugins_import ( $buffer, $parameters)
       {
         $data["message"] = __ ( "Invalid plugin file structure.");
       }
-      if ( ! array_key_exists ( "message", $data) && $consistency["confFile"] != true)
+      if ( ! array_key_exists ( "message", $data) && $consistency["manifestFile"] != true)
       {
-        $data["message"] = __ ( "Plugin configuration file missing.");
+        $data["message"] = __ ( "Plugin manifest (plugin.json) missing.");
       }
       if ( ! array_key_exists ( "message", $data) && $consistency["reqFile"] != true)
       {
         $data["message"] = __ ( "Plugin file doesn't have the minimum required files.");
       }
-      zip_close ( $zip);
+      $zip->close ();
     } else {
       $data["message"] = __ ( "Error opening plugin zip file.");
     }
   }
 
   /**
-   * Check basic plugin information
+   * Parse plugin.json manifest
    */
-  if ( ! array_key_exists ( "message", $data) && $consistency["confFile"] == true)
+  if ( ! array_key_exists ( "message", $data) && $consistency["manifestFile"] == true)
   {
-    $config = parse_ini_file ( $parameters["tmpdir"] . "/" . $parameters["name"] . "/" . $parameters["name"] . ".cfg", true);
-    if ( ! array_key_exists ( $parameters["name"], $config))
+    $manifestpath = $parameters["tmpdir"] . "/" . $parameters["name"] . "/plugin.json";
+    $manifest = plugin_validate_manifest ( $manifestpath);
+    if ( $manifest === false)
     {
-      $data["message"] = __ ( "Plugin configuration file is missing its own plugin section.");
+      $data["message"] = __ ( "Invalid or incomplete plugin.json manifest.");
     }
-    if ( ! array_key_exists ( "message", $data) && ! array_key_exists ( "version", $config[$parameters["name"]]))
+    if ( ! array_key_exists ( "message", $data) && $manifest["name"] != $parameters["name"])
     {
-      $data["message"] = __ ( "Plugin configuration file is missing its own plugin section.");
-    }
-    if ( ! array_key_exists ( "message", $data) && ! array_key_exists ( "name", $config[$parameters["name"]]))
-    {
-      $data["message"] = __ ( "Plugin configuration file is missing its own plugin name.");
-    }
-    if ( ! array_key_exists ( "message", $data) && ! array_key_exists ( "description", $config[$parameters["name"]]))
-    {
-      $data["message"] = __ ( "Plugin configuration file is missing its own plugin section.");
-    }
-    if ( ! array_key_exists ( "message", $data) && ! array_key_exists ( "author", $config[$parameters["name"]]))
-    {
-      $data["message"] = __ ( "Plugin configuration file is missing its own plugin section.");
-    }
-    if ( ! array_key_exists ( "message", $data) && ! array_key_exists ( "license", $config[$parameters["name"]]))
-    {
-      $data["message"] = __ ( "Plugin configuration file is missing its own plugin section.");
-    }
-    if ( ! array_key_exists ( "message", $data) && ! array_key_exists ( "require", $config[$parameters["name"]]))
-    {
-      $data["message"] = __ ( "Plugin configuration file is missing its own plugin section.");
+      $data["message"] = __ ( "Plugin manifest name does not match directory name.");
     }
     if ( ! array_key_exists ( "message", $data))
     {
-      $parameters["config"] = array ();
-      $parameters["config"]["name"] = $config[$parameters["name"]]["name"];
-      $parameters["config"]["version"] = $config[$parameters["name"]]["version"];
-      $parameters["config"]["description"] = $config[$parameters["name"]]["description"];
-      $parameters["config"]["author"] = $config[$parameters["name"]]["author"];
-      $parameters["config"]["email"] = $config[$parameters["name"]]["email"];
-      $parameters["config"]["license"] = $config[$parameters["name"]]["license"];
-      $parameters["config"]["require"] = explode ( ",", $config[$parameters["name"]]["require"]);
+      $parameters["config"] = plugin_manifest_to_config ( $manifest);
+      $parameters["manifest"] = $manifest;
       $parameters["config"]["filesize"] = filesize ( $parameters["zipfile"]);
       $parameters["config"]["supported"] = true;
       $parameters["config"]["missing"] = array ();
       foreach ( $parameters["config"]["require"] as $reqstring)
       {
-        if ( ! preg_match ( "/^(\w+) (=|==|<|<=|=<|>|>=|=>|!=|<>) ([\d]+(\.[\d+])?)$/", trim ( $reqstring), $matches))
+        if ( ! preg_match ( "/^(\w[\w-]*) (=|==|<|<=|=<|>|>=|=>|!=|<>) ([\d]+(\.[\d]+)*(\.[\d]+)*)$/", trim ( $reqstring), $matches))
         {
           $data["message"] = __ ( "Error parsing plugin minimum system requirements.");
           break;
@@ -2120,72 +2096,67 @@ function plugins_import ( $buffer, $parameters)
         if ( sizeof ( $matches) > 2)
         {
           $reqcond = $matches[2];
-          $reqversion = (float) $matches[3];
+          $reqversion = $matches[3];
         } else {
           $reqcond = ">=";
-          $reqversion = 0;
+          $reqversion = "0.0.0";
         }
         if ( $reqmodule == "core")
         {
-          $reqmoduleversion = (float) $_in["version"];
+          $reqmoduleversion = defined ( "MODULE_CORE_VERSION") ? MODULE_CORE_VERSION : "1.0.0";
         } else {
-          if ( ! array_key_exists ( $reqmodule, $_in["modules"]))
+          if ( $reqmodule == "php")
           {
-            $parameters["config"]["supported"] = false;
-            $parameters["config"]["missing"][] = array ( "module" => $reqmodule, "condition" => $reqcond, "version" => $reqversion);
-            continue;
+            $reqmoduleversion = PHP_VERSION;
+          } else {
+            if ( ! array_key_exists ( $reqmodule, $_in["modules"]))
+            {
+              $pluginversion = @$_in["mysql"]["id"]->query ( "SELECT `Version` FROM `Plugins` WHERE `Dirname` = '" . $_in["mysql"]["id"]->real_escape_string ( $reqmodule) . "' AND `Status` = 'A'");
+              if ( $pluginversion && $pluginversion->num_rows > 0)
+              {
+                $pvrow = $pluginversion->fetch_assoc ();
+                $reqmoduleversion = $pvrow["Version"];
+              } else {
+                $parameters["config"]["supported"] = false;
+                $parameters["config"]["missing"][] = array ( "module" => $reqmodule, "condition" => $reqcond, "version" => $reqversion);
+                continue;
+              }
+            } else {
+              $reqmoduleversion = $_in["modules"][$reqmodule]["version"];
+            }
           }
-          $reqmoduleversion = (float) $_in["modules"][$reqmodule]["version"];
         }
-        switch ( $reqcond)
+        $op = $reqcond;
+        if ( $op == "=>" ) $op = ">=";
+        if ( $op == "=<" ) $op = "<=";
+        if ( $op == "=" ) $op = "==";
+        if ( ! version_compare ( $reqmoduleversion, $reqversion, $op))
         {
-          case ">=":
-          case "=>":
-            if ( $reqmoduleversion < $reqversion)
-            {
-              $parameters["config"]["supported"] = false;
-              $parameters["config"]["missing"][] = array ( "module" => $reqmodule, "condition" => $reqcond, "version" => $reqversion);
-            }
-            break;
-          case ">":
-            if ( $reqmoduleversion <= $reqversion)
-            {
-              $parameters["config"]["supported"] = false;
-              $parameters["config"]["missing"][] = array ( "module" => $reqmodule, "condition" => $reqcond, "version" => $reqversion);
-            }
-            break;
-          case "<=":
-          case "=<":
-            if ( $reqmoduleversion > $reqversion)
-            {
-              $parameters["config"]["supported"] = false;
-              $parameters["config"]["missing"][] = array ( "module" => $reqmodule, "condition" => $reqcond, "version" => $reqversion);
-            }
-            break;
-          case "<":
-            if ( $reqmoduleversion >= $reqversion)
-            {
-              $parameters["config"]["supported"] = false;
-              $parameters["config"]["missing"][] = array ( "module" => $reqmodule, "condition" => $reqcond, "version" => $reqversion);
-            }
-            break;
-          case "=":
-          case "==":
-            if ( $reqmoduleversion != $reqversion)
-            {
-              $parameters["config"]["supported"] = false;
-              $parameters["config"]["missing"][] = array ( "module" => $reqmodule, "condition" => $reqcond, "version" => $reqversion);
-            }
-            break;
-          case "!=":
-          case "<>":
-            if ( $reqmoduleversion == $reqversion)
-            {
-              $parameters["config"]["supported"] = false;
-              $parameters["config"]["missing"][] = array ( "module" => $reqmodule, "condition" => $reqcond, "version" => $reqversion);
-            }
-            break;
+          $parameters["config"]["supported"] = false;
+          $parameters["config"]["missing"][] = array ( "module" => $reqmodule, "condition" => $reqcond, "version" => $reqversion);
         }
+      }
+    }
+  }
+
+  /**
+   * Check for conflicting plugins
+   */
+  if ( ! array_key_exists ( "message", $data) && array_key_exists ( "config", $parameters) && ! empty ( $parameters["config"]["conflicts"]))
+  {
+    foreach ( $parameters["config"]["conflicts"] as $conflict)
+    {
+      $conflict = trim ( $conflict);
+      if ( empty ( $conflict))
+      {
+        continue;
+      }
+      $confresult = @$_in["mysql"]["id"]->query ( "SELECT `Name`, `Dirname` FROM `Plugins` WHERE `Dirname` = '" . $_in["mysql"]["id"]->real_escape_string ( $conflict) . "' AND `Status` = 'A'");
+      if ( $confresult && $confresult->num_rows > 0)
+      {
+        $confrow = $confresult->fetch_assoc ();
+        $data["message"] = sprintf ( __ ( "Plugin conflicts with active plugin: %s"), $confrow["Name"]);
+        break;
       }
     }
   }
@@ -2200,7 +2171,9 @@ function plugins_import ( $buffer, $parameters)
    */
   if ( ! array_key_exists ( "message", $data))
   {
-    $apiurl = "http" . ( $_SERVER["HTTPS"] == "on" ? "s" : "") . "://" . $_SERVER["SERVER_NAME"] . ( ( $_SERVER["HTTPS"] == "on" && $_SERVER["SERVER_PORT"] != "443") || ( $_SERVER["HTTPS"] != "on" && $_SERVER["SERVER_PORT"] != "80") ? ":" . $_SERVER["SERVER_PORT"] : "") . "/api/config/testfile";
+    $apischeme = ( isset ( $_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") ? "https" : "http";
+    $apiport = $_SERVER["SERVER_PORT"] ?? ( $apischeme == "https" ? "443" : "80");
+    $apiurl = $apischeme . "://127.0.0.1:" . $apiport . "/api/config/testfile";
     foreach ( $parameters["integrity"] as $filedesc => $filetype)
     {
       $socket = curl_init ();
@@ -2211,16 +2184,16 @@ function plugins_import ( $buffer, $parameters)
       curl_setopt ( $socket, CURLOPT_TIMEOUT, 60);
       curl_setopt ( $socket, CURLOPT_SSL_VERIFYPEER, false);
       curl_setopt ( $socket, CURLOPT_SSL_VERIFYHOST, false);
-      curl_setopt ( $socket, CURLOPT_HTTPHEADER, array ( "Content-Type: application/json", "Accept: application/json", "X-HTTP-Method-Override: GET"));
+      curl_setopt ( $socket, CURLOPT_HTTPHEADER, array ( "Content-Type: application/json", "Accept: application/json", "X-HTTP-Method-Override: GET", "Host: " . $_SERVER["SERVER_NAME"]));
       curl_setopt ( $socket, CURLOPT_HEADER, false);
       curl_setopt ( $socket, CURLOPT_RETURNTRANSFER, true);
       $result = @curl_exec ( $socket);
-      curl_close ( $socket);
+      $curlerror = curl_error ( $socket);
       $parameters["integrity"][$filedesc] = json_decode ( $result, true);
       if ( $result == "" || json_last_error () != JSON_ERROR_NONE)
       {
-        $parameters["integrity"][$filedesc] = array ( "result" => false, "message" => $result);
-        $data["message"] = __ ( "Plugin parser error.");
+        $parameters["integrity"][$filedesc] = array ( "result" => false, "message" => ( $curlerror != "" ? $curlerror : $result));
+        $data["message"] = __ ( "Plugin parser error.") . ( $curlerror != "" ? " (" . $curlerror . ")" : "");
       }
     }
   }
@@ -2244,13 +2217,12 @@ function plugins_import ( $buffer, $parameters)
     }
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Plugins` WHERE `Dirname` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "'"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "plugins_import");
     }
     if ( $result->num_rows != 0)
     {
       $parameters["ORIGINAL"] = $result->fetch_assoc ();
-      if ( (float) $parameters["config"]["version"] <= (float) $parameters["ORIGINAL"]["Version"])
+      if ( version_compare ( $parameters["config"]["version"], $parameters["ORIGINAL"]["Version"], "<="))
       {
         $data["message"] = __ ( "Plugin already installed.");
       } else {
@@ -2276,21 +2248,40 @@ function plugins_import ( $buffer, $parameters)
   }
 
   /**
+   * Verify plugin signature
+   */
+  $verification = plugin_verify_signature ( $parameters["tmpdir"], $parameters["name"]);
+  $policy_error = plugin_apply_signing_policy ( $verification);
+  if ( $policy_error !== null)
+  {
+    unlink ( $parameters["zipfile"]);
+    unlink_recursive ( $parameters["tmpdir"]);
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+    return array ( "message" => $policy_error);
+  }
+  if ( $verification["valid"] && ! empty ( $verification["developer"]))
+  {
+    $parameters["config"]["signed_by"] = $verification["developer"];
+    if ( $verification["official"])
+    {
+      $parameters["config"]["signed_by"] = "voipdomain-official";
+    }
+  }
+
+  /**
    * Add or update plugin in database
    */
   if ( $parameters["upgrade"])
   {
-    if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Plugins` SET `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["name"]) . "', `Version` = '" . (float) $parameters["config"]["version"] . "', `Author` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["author"]) . "', `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["description"]) . "', `License` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["license"]) . "', `Requires` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["config"]["require"])) . "' WHERE `Dirname` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "'"))
+    if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Plugins` SET `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["name"]) . "', `Version` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["version"]) . "', `Author` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["author"]) . "', `AuthorEmail` = " . ( ! empty ( $parameters["config"]["email"]) ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["email"]) . "'" : "NULL") . ", `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["description"]) . "', `License` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["license"]) . "', `SupportURL` = " . ( ! empty ( $parameters["config"]["support_url"]) ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["support_url"]) . "'" : "NULL") . ", `PublishedAt` = " . ( ! empty ( $parameters["config"]["published"]) ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["published"]) . "'" : "NULL") . ", `Daemons` = " . ( ! empty ( $parameters["config"]["daemons"]) ? "'" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $parameters["config"]["daemons"])) . "'" : "NULL") . ", `SignedBy` = " . ( ! empty ( $parameters["config"]["signed_by"]) ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["signed_by"]) . "'" : "NULL") . ", `Conflicts` = " . ( ! empty ( $parameters["config"]["conflicts"]) ? "'" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["config"]["conflicts"])) . "'" : "NULL") . ", `Requires` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["config"]["require"])) . "' WHERE `Dirname` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "'"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "plugins_import");
     }
     $data["message"] = sprintf ( __ ( "Plugin %s (version %s) successfully upgraded."), $parameters["config"]["name"], $parameters["config"]["version"]);
   } else {
-    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Plugins` (`Dirname`, `Name`, `Version`, `Author`, `Description`, `License`, `Status`, `Requires`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["name"]) . "', '" . (float) $parameters["config"]["version"] . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["author"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["license"]) . "', 'A', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["config"]["require"])) . "')"))
+    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Plugins` (`Dirname`, `Name`, `Version`, `Author`, `AuthorEmail`, `Description`, `License`, `SupportURL`, `PublishedAt`, `Daemons`, `SignedBy`, `Conflicts`, `Status`, `Requires`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["version"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["author"]) . "', " . ( ! empty ( $parameters["config"]["email"]) ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["email"]) . "'" : "NULL") . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["license"]) . "', " . ( ! empty ( $parameters["config"]["support_url"]) ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["support_url"]) . "'" : "NULL") . ", " . ( ! empty ( $parameters["config"]["published"]) ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["published"]) . "'" : "NULL") . ", " . ( ! empty ( $parameters["config"]["daemons"]) ? "'" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $parameters["config"]["daemons"])) . "'" : "NULL") . ", " . ( ! empty ( $parameters["config"]["signed_by"]) ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["signed_by"]) . "'" : "NULL") . ", " . ( ! empty ( $parameters["config"]["conflicts"]) ? "'" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["config"]["conflicts"])) . "'" : "NULL") . ", 'A', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["config"]["require"])) . "')"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "plugins_import");
     }
     $data["message"] = sprintf ( __ ( "Plugin %s (version %s) successfully installed."), $parameters["config"]["name"], $parameters["config"]["version"]);
   }
@@ -2299,6 +2290,23 @@ function plugins_import ( $buffer, $parameters)
    * Move plugin to system plugins directory
    */
   $pluginspath = plugin_get_plugins_path ();
+  if ( ! is_dir ( $pluginspath))
+  {
+    if ( ! @mkdir ( $pluginspath, 0755, true))
+    {
+      unlink ( $parameters["zipfile"]);
+      unlink_recursive ( $parameters["tmpdir"]);
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+      return array ( "message" => sprintf ( __ ( "Cannot create plugins directory: %s"), $pluginspath));
+    }
+  }
+  if ( ! is_writable ( $pluginspath))
+  {
+    unlink ( $parameters["zipfile"]);
+    unlink_recursive ( $parameters["tmpdir"]);
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+    return array ( "message" => sprintf ( __ ( "Plugins directory is not writable: %s"), $pluginspath));
+  }
   $plugindir = $pluginspath . $parameters["name"];
   if ( $parameters["upgrade"] && file_exists ( $plugindir))
   {
@@ -2308,7 +2316,13 @@ function plugins_import ( $buffer, $parameters)
   {
     unlink_recursive ( $pluginspath . "disabled_" . $parameters["name"]);
   }
-  rename ( $parameters["tmpdir"] . "/" . $parameters["name"], $plugindir);
+  if ( ! @rename ( $parameters["tmpdir"] . "/" . $parameters["name"], $plugindir))
+  {
+    unlink ( $parameters["zipfile"]);
+    unlink_recursive ( $parameters["tmpdir"]);
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+    return array ( "message" => sprintf ( __ ( "Cannot move plugin files to: %s"), $plugindir));
+  }
 
   /**
    * Run plugin install/update scripts, lifecycle hooks and deploy daemon modules
@@ -2662,10 +2676,9 @@ framework_add_hook (
                 "example" => __ ( "Users avatar")
               ),
               "Version" => array (
-                "type" => "integer",
-                "format" => "float",
-                "description" => __ ( "The version of the plugin."),
-                "example" => 1.1
+                "type" => "string",
+                "description" => __ ( "The semantic version of the plugin."),
+                "example" => "1.1.0"
               ),
               "Author" => array (
                 "type" => "string",
@@ -2808,8 +2821,7 @@ function plugins_search ( $buffer, $parameters)
    */
   if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Plugins`" . ( ! empty ( $parameters["Filter"]) ? " WHERE `Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " ORDER BY `Name`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "plugins_search");
   }
 
   /**
@@ -2819,10 +2831,6 @@ function plugins_search ( $buffer, $parameters)
   $fields = api_filter_fields ( $parameters["Fields"], $parameters["function"]["DefaultFields"], $parameters["function"]["PermittedFields"]);
   while ( $result = $results->fetch_assoc ())
   {
-    if ( strpos ( (string) $result["Version"], ".") === false)
-    {
-      $result["Version"] = $result["Version"] . ".0";
-    }
     $result["Status"] = $result["Status"] == "A";
     $result["Requires"] = json_decode ( $result["Requires"], true);
     $data[] = api_filter_entry ( $fields, $result);
@@ -2995,13 +3003,11 @@ function plugins_toggle ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Plugins` WHERE `Dirname` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Plugin"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "plugins_toggle");
   }
   if ( ! $plugin = $result->fetch_assoc ())
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "plugins_toggle");
   }
 
   /**
@@ -3021,6 +3027,19 @@ function plugins_toggle ( $buffer, $parameters)
   }
 
   /**
+   * Enforce dependency constraints: cannot disable if other active plugins depend on this one
+   */
+  if ( $newstatus == "I" || $newstatus == "F")
+  {
+    $dep_check = plugin_check_dependents ( $parameters["Plugin"]);
+    if ( sizeof ( $dep_check) > 0)
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+      return array ( "message" => sprintf ( __ ( "Cannot disable plugin: the following active plugins depend on it: %s"), implode ( ", ", $dep_check)));
+    }
+  }
+
+  /**
    * Call pre hook if exist
    */
   if ( framework_has_hook ( "plugins_toggle_pre"))
@@ -3033,23 +3052,22 @@ function plugins_toggle ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Plugins` SET `Status` = '" . $_in["mysql"]["id"]->real_escape_string ( $newstatus) . "' WHERE `Dirname` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Plugin"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "plugins_toggle");
   }
 
   /**
    * Rename directory
    */
-  if ( ! rename ( dirname ( __FILE__) . "/../../plugins/" . ( $newstatus == "A" ? "disabled_" : "") . $parameters["Plugin"], dirname ( __FILE__) . "/../../plugins/" . ( $newstatus == "A" ? "" : "disabled_") . $parameters["Plugin"]))
+  $pluginspath = plugin_get_plugins_path ();
+  if ( ! rename ( $pluginspath . ( $newstatus == "A" ? "disabled_" : "") . $parameters["Plugin"], $pluginspath . ( $newstatus == "A" ? "" : "disabled_") . $parameters["Plugin"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "plugins_toggle");
   }
 
   /**
    * Sync daemon modules and lifecycle hooks for enable/disable
    */
-  $plugindir = plugin_get_plugins_path () . $parameters["Plugin"];
+  $plugindir = $pluginspath . ( $newstatus == "A" ? "" : "disabled_") . $parameters["Plugin"];
   $togglelifecycle = array (
     "name" => $parameters["Plugin"],
     "status" => $newstatus,
@@ -3057,6 +3075,14 @@ function plugins_toggle ( $buffer, $parameters)
   );
   if ( $newstatus == "A")
   {
+    foreach ( array ( "filter.php", "api.php") as $_pluginfile)
+    {
+      if ( is_readable ( $plugindir . "/" . $_pluginfile))
+      {
+        require_once ( $plugindir . "/" . $_pluginfile);
+      }
+    }
+    unset ( $_pluginfile);
     plugin_call_lifecycle ( $parameters["Plugin"], "enable", $togglelifecycle);
     $deploy = plugin_deploy_daemons ( $plugindir, $parameters["Plugin"]);
     if ( sizeof ( $deploy["deployed"]))
@@ -3069,6 +3095,16 @@ function plugins_toggle ( $buffer, $parameters)
         $data["reloaded"] = plugin_request_daemon_reload_all ( $reloadunits);
       }
     }
+    $toggledaemons = ! empty ( $plugin["Daemons"]) ? explode ( ",", $plugin["Daemons"]) : array ();
+    if ( sizeof ( $toggledaemons) && is_readable ( $plugindir . "/plugin.json"))
+    {
+      $togglemanifest = json_decode ( file_get_contents ( $plugindir . "/plugin.json"), true);
+      if ( is_array ( $togglemanifest) && array_key_exists ( "config", $togglemanifest) && sizeof ( $togglemanifest["config"]))
+      {
+        plugin_sync_config_to_daemons ( $parameters["Plugin"], $togglemanifest["config"], $toggledaemons);
+      }
+    }
+    notify_server ( 0, "server_rebuild", array ( "CleanUp" => false));
   } else {
     plugin_call_lifecycle ( $parameters["Plugin"], "disable", $togglelifecycle);
     $undeploy = plugin_undeploy_daemons ( $plugindir, $parameters["Plugin"]);
@@ -3082,6 +3118,12 @@ function plugins_toggle ( $buffer, $parameters)
         $data["reloaded"] = plugin_request_daemon_reload_all ( $reloadunits);
       }
     }
+    $toggledaemons = ! empty ( $plugin["Daemons"]) ? explode ( ",", $plugin["Daemons"]) : array ();
+    if ( sizeof ( $toggledaemons))
+    {
+      plugin_remove_config_from_daemons ( $parameters["Plugin"], $toggledaemons);
+    }
+    notify_server ( 0, "server_rebuild", array ( "CleanUp" => false));
   }
 
   /**
@@ -3136,8 +3178,7 @@ framework_add_hook (
               "example" => __ ( "Users avatar")
             ),
             "version" => array (
-              "type" => "integer",
-              "format" => "float",
+              "type" => "float",
               "description" => __ ( "The version of the plugin."),
               "example" => 1.1
             ),
@@ -3287,13 +3328,11 @@ function plugins_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Plugins` WHERE `Dirname` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Plugin"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "plugins_view");
   }
   if ( ! $plugin = $result->fetch_assoc ())
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "plugins_view");
   }
 
   /**
@@ -3302,7 +3341,7 @@ function plugins_view ( $buffer, $parameters)
   $data = array ();
   $data["plugin"] = $plugin["Dirname"];
   $data["name"] = $plugin["Name"];
-  $data["version"] = $plugin["Version"] . ( strpos ( (string) $plugin["Version"], ".") === false ? ".0" : "");
+  $data["version"] = $plugin["Version"];
   $data["author"] = $plugin["Author"];
   $data["description"] = $plugin["Description"];
   $data["license"] = $plugin["License"];
@@ -3436,13 +3475,21 @@ function plugins_remove ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Plugins` WHERE `Dirname` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Plugin"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "plugins_remove");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "plugins_remove");
+  }
+
+  /**
+   * Enforce dependency constraints: cannot remove if other active plugins depend on this one
+   */
+  $dep_check = plugin_check_dependents ( $parameters["Plugin"]);
+  if ( sizeof ( $dep_check) > 0)
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
+    return array ( "message" => sprintf ( __ ( "Cannot remove plugin: the following active plugins depend on it: %s"), implode ( ", ", $dep_check)));
   }
 
   /**
@@ -3468,8 +3515,7 @@ function plugins_remove ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Plugins` WHERE `Dirname` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Plugin"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "plugins_remove");
   }
 
   /**
@@ -3500,5 +3546,215 @@ function plugins_remove ( $buffer, $parameters)
    * Return OK to user
    */
   return $buffer;
+}
+
+/**
+ * Modules registry hook and API
+ */
+framework_add_hook (
+  "modules_search",
+  "modules_search",
+  IN_HOOK_NULL,
+  array (
+    "response" => array (
+      200 => array (
+        "description" => __ ( "Returns the registered modules list."),
+        "schema" => array (
+          "type" => "array",
+          "xml" => array (
+            "name" => "Responses",
+            "wrapped" => true
+          ),
+          "items" => array (
+            "xml" => array (
+              "name" => "Module"
+            ),
+            "oneOf" => array (
+              array (
+                "type" => "object",
+                "description" => __ ( "A core module shipped with the system."),
+                "properties" => array (
+                  "Name" => array (
+                    "type" => "string",
+                    "description" => __ ( "The module directory name."),
+                    "example" => "blocks"
+                  ),
+                  "Type" => array (
+                    "type" => "string",
+                    "description" => __ ( "The module type."),
+                    "const" => "core"
+                  ),
+                  "Version" => array (
+                    "type" => "string",
+                    "description" => __ ( "The module version."),
+                    "example" => "1.0.0"
+                  ),
+                  "Author" => array (
+                    "type" => "string",
+                    "description" => __ ( "The module author name."),
+                    "example" => "VoIP Domain"
+                  ),
+                  "Loaded" => array (
+                    "type" => "boolean",
+                    "description" => __ ( "Whether the module is loaded into runtime."),
+                    "example" => true
+                  ),
+                  "Path" => array (
+                    "type" => "string",
+                    "description" => __ ( "The filesystem path of the module directory."),
+                    "example" => "/var/www/html/modules/blocks"
+                  ),
+                  "Files" => array (
+                    "type" => "object",
+                    "description" => __ ( "Map of standard module files and whether each exists."),
+                    "example" => array ( "api.php" => true, "config.php" => true, "filter.php" => false, "webui.php" => true)
+                  )
+                ),
+                "required" => array ( "Name", "Type", "Version", "Author", "Loaded", "Path", "Files")
+              ),
+              array (
+                "type" => "object",
+                "description" => __ ( "A plugin module installed from an external package."),
+                "properties" => array (
+                  "Name" => array (
+                    "type" => "string",
+                    "description" => __ ( "The module directory name."),
+                    "example" => "sampleitems"
+                  ),
+                  "Type" => array (
+                    "type" => "string",
+                    "description" => __ ( "The module type."),
+                    "const" => "plugin"
+                  ),
+                  "Version" => array (
+                    "type" => "string",
+                    "description" => __ ( "The module version."),
+                    "example" => "1.0.0"
+                  ),
+                  "Author" => array (
+                    "type" => "string",
+                    "description" => __ ( "The module author name."),
+                    "example" => "Ernani José Camargo Azevedo"
+                  ),
+                  "Loaded" => array (
+                    "type" => "boolean",
+                    "description" => __ ( "Whether the module is loaded into runtime."),
+                    "example" => true
+                  ),
+                  "Path" => array (
+                    "type" => "string",
+                    "description" => __ ( "The filesystem path of the module directory."),
+                    "example" => "/var/www/html/plugins/sampleitems"
+                  ),
+                  "Files" => array (
+                    "type" => "object",
+                    "description" => __ ( "Map of standard module files and whether each exists."),
+                    "example" => array ( "api.php" => true, "config.php" => true, "filter.php" => false, "webui.php" => true)
+                  ),
+                  "DisplayName" => array (
+                    "type" => "string",
+                    "description" => __ ( "The plugin display name."),
+                    "example" => "Sample Items"
+                  ),
+                  "Description" => array (
+                    "type" => "string",
+                    "description" => __ ( "The plugin description."),
+                    "example" => "Sample plugin demonstrating the plugin system"
+                  ),
+                  "License" => array (
+                    "type" => "string",
+                    "description" => __ ( "The plugin license."),
+                    "example" => "GPLv3"
+                  ),
+                  "Status" => array (
+                    "type" => "string",
+                    "description" => __ ( "The plugin status: Active, Inactive, Suspended or Failed."),
+                    "enum" => array ( "A", "I", "S", "F"),
+                    "example" => "A"
+                  )
+                ),
+                "required" => array ( "Name", "Type", "Version", "Author", "Loaded", "Path", "Files", "DisplayName", "Description", "License", "Status")
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+);
+framework_add_permission ( "modules_search", __ ( "View registered modules"));
+framework_add_api_call (
+  "/config/modules",
+  "Read",
+  "modules_search",
+  array (
+    "permissions" => array ( "Administrator", "modules_search"),
+    "title" => __ ( "List modules"),
+    "description" => __ ( "List all registered core modules and plugins with metadata.")
+  )
+);
+
+/**
+ * Function to list all registered modules.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return array Modules registry
+ */
+function modules_search ( $buffer, $parameters)
+{
+  global $_in;
+
+  /**
+   * Call start hook if exist
+   */
+  if ( framework_has_hook ( "modules_search_start"))
+  {
+    $parameters = framework_call ( "modules_search_start", $parameters);
+  }
+
+  /**
+   * Build result array
+   */
+  $data = array ();
+  foreach ( $_in["modules"] as $name => $info)
+  {
+    $entry = array (
+      "Name" => $name,
+      "Type" => $info["type"],
+      "Version" => $info["version"],
+      "Author" => $info["author"],
+      "Loaded" => $info["loaded"],
+      "Path" => $info["path"],
+      "Files" => $info["files"]
+    );
+    if ( $info["type"] == "plugin")
+    {
+      $entry["DisplayName"] = $info["display_name"] ?? "";
+      $entry["Description"] = $info["description"] ?? "";
+      $entry["License"] = $info["license"] ?? "";
+      $entry["Status"] = $info["status"] ?? "";
+    }
+    if ( ! empty ( $parameters["Filter"]))
+    {
+      if ( stripos ( $name, $parameters["Filter"]) === false && stripos ( $info["author"], $parameters["Filter"]) === false && ( $info["type"] != "plugin" || stripos ( $info["display_name"] ?? "", $parameters["Filter"]) === false))
+      {
+        continue;
+      }
+    }
+    $data[] = $entry;
+  }
+
+  /**
+   * Call post hook if exist
+   */
+  if ( framework_has_hook ( "modules_search_post"))
+  {
+    framework_call ( "modules_search_post", $parameters, false, $data);
+  }
+
+  return $data;
 }
 ?>

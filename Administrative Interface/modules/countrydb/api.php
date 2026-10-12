@@ -241,8 +241,7 @@ function countries_search ( $buffer, $parameters)
   $data = array ();
   if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Countries`" . ( ! empty ( $parameters["Filter"]) ? " WHERE `Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `ISO3166-2` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "'" : "") . " ORDER BY `Name`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "countries_search");
   }
 
   /**
@@ -459,8 +458,7 @@ function countries_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Countries` WHERE `Code` = " . (int) $parameters["Code"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "countries_view");
   }
   if ( ! $country = $result->fetch_assoc ())
   {

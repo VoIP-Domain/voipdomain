@@ -67,7 +67,6 @@ i18n_add ( "Are you sure you want to remove the gateway %s (%s)?");
 i18n_add ( "Gateway removal");
 i18n_add ( "Gateway removed successfully!");
 i18n_add ( "Error removing gateway!");
-i18n_add ( "Add gateways");
 i18n_add ( "Advanced");
 i18n_add ( "Timming");
 i18n_add ( "Routes");
@@ -122,7 +121,6 @@ i18n_add ( "Gateway added successfully!");
 i18n_add ( "View gateways");
 i18n_add ( "View gateway");
 i18n_add ( "Error viewing gateway!");
-i18n_add ( "Edit gateways");
 i18n_add ( "Edit gateway");
 i18n_add ( "Error changing gateway!");
 i18n_add ( "Gateway changed successfully!");
@@ -188,7 +186,6 @@ i18n_add ( "The type of the gateway.");
 i18n_add ( "The valid number routes and fares for the gateway.");
 i18n_add ( "Variables when gateway config type is MANUAL.");
 i18n_add ( "View gateway fares files");
-i18n_add ( "View gateways");
 i18n_add ( "The reference number for the gateway route. This is used to report any route/cost error.");
 i18n_add ( "The reference number for the gateway translation. This is used to report any translation pattern/remove/add error.");
 i18n_add ( "Remove route");
@@ -212,6 +209,9 @@ i18n_add ( "Cost (US$/m)");
 i18n_add ( "Select the gateway currency");
 i18n_add ( "Clone gateway");
 i18n_add ( "Error retrieving gateway data!");
+
+i18n_add ( "Source number");
+i18n_add ( "Call source number. Empty to pass through or value (accepts wildcard {extension}).");
 
 /**
  * Add Brazilian Portuguese support
@@ -246,7 +246,6 @@ i18n_add ( "Are you sure you want to remove the gateway %s (%s)?", "Você tem ce
 i18n_add ( "Gateway removal", "Remover gateway", "pt_BR");
 i18n_add ( "Gateway removed successfully!", "Gateway removido com sucesso!", "pt_BR");
 i18n_add ( "Error removing gateway!", "Erro ao remover gateway!", "pt_BR");
-i18n_add ( "Add gateways", "adicionar gateways", "pt_BR");
 i18n_add ( "Advanced", "Avançado", "pt_BR");
 i18n_add ( "Timming", "Tempos", "pt_BR");
 i18n_add ( "Routes", "Rotas", "pt_BR");
@@ -301,7 +300,6 @@ i18n_add ( "Gateway added successfully!", "Gateway adicionado com sucesso!", "pt
 i18n_add ( "View gateways", "visualizar gateways", "pt_BR");
 i18n_add ( "View gateway", "Visualizar gateway", "pt_BR");
 i18n_add ( "Error viewing gateway!", "Erro ao visualizar gateway!", "pt_BR");
-i18n_add ( "Edit gateways", "editar gateways", "pt_BR");
 i18n_add ( "Edit gateway", "Editar gateway", "pt_BR");
 i18n_add ( "Error changing gateway!", "Erro ao alterar gateway!", "pt_BR");
 i18n_add ( "Gateway changed successfully!", "Gateway alterado com sucesso!", "pt_BR");
@@ -367,7 +365,6 @@ i18n_add ( "The type of the gateway.", "O tipo do gateway.", "pt_BR");
 i18n_add ( "The valid number routes and fares for the gateway.", "Os números e tarifas válidas para o gateway.", "pt_BR");
 i18n_add ( "Variables when gateway config type is MANUAL.", "Variáveis quando o tipo de gateway for MANUAL.", "pt_BR");
 i18n_add ( "View gateway fares files", "Visualizar arquivos de tarifas dos gateways", "pt_BR");
-i18n_add ( "View gateways", "Visualizar gateways", "pt_BR");
 i18n_add ( "The reference number for the gateway route. This is used to report any route/cost error.", "O número de referência para a rota do gateway. Este será utilizado para reportar quaisquer eventual erro na rota/custo.", "pt_BR");
 i18n_add ( "The reference number for the gateway translation. This is used to report any translation pattern/remove/add error.", "O número de referência para a tradução do gateway. Este será utilizado para reportar quaisquer eventual erro de padrão/remoção/adição.", "pt_BR");
 i18n_add ( "Remove route", "Remover rota", "pt_BR");
@@ -391,4 +388,7 @@ i18n_add ( "Cost (US$/m)", "Custo (R$/m)", "pt_BR");
 i18n_add ( "Select the gateway currency", "Selecione a moeda do gateway", "pt_BR");
 i18n_add ( "Clone gateway", "Clonar gateway", "pt_BR");
 i18n_add ( "Error retrieving gateway data!", "Erro ao obter informações do gateway!", "pt_BR");
+
+i18n_add ( "Source number", "Número de origem", "pt_BR");
+i18n_add ( "Call source number. Empty to pass through or value (accepts wildcard {extension}).", "Número de origem da chamada. Vazio para repassar ou valor (aceita wildcard {extension}).", "pt_BR");
 ?>

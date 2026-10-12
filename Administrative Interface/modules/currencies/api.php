@@ -281,8 +281,7 @@ function currencies_search ( $buffer, $parameters)
   $data = array ();
   if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Currencies`" . ( ! empty ( $parameters["Filter"]) ? " WHERE `Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `ISO4217` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "' OR `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "'" : "") . " ORDER BY `Name`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "currencies_search");
   }
 
   /**
@@ -546,8 +545,7 @@ function currencies_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Currencies` WHERE `Code` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Code"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "currencies_view");
   }
   if ( ! $currency = $result->fetch_assoc ())
   {

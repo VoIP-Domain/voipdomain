@@ -160,7 +160,7 @@ function configs_language ( $buffer, $parameters)
 
 /**
  * Function to configure system default operator.
- * Required parameters are: (integer) Operator
+ * Required parameters are: (int) Operator
  * Possible results:
  *   - 200: OK, configuration created
  *   - 406: Invalid parameters
@@ -268,7 +268,7 @@ function configs_operator ( $buffer, $parameters)
 
 /**
  * Function to configure system default music on hold (MOH).
- * Required parameters are: (integer) MOH
+ * Required parameters are: (int) MOH
  * Possible results:
  *   - 200: OK, configuration created
  *   - 406: Invalid parameters

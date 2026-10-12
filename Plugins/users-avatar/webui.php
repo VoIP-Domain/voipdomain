@@ -402,8 +402,7 @@ function avatar_pageload_onfinish ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `UserAvatar`.`Avatar` FROM `UserAvatar` LEFT JOIN `Users` ON `UserAvatar`.`User` = `Users`.`ID` WHERE `Users`.`Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $_in["session"]["Data"]["Username"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "avatar_pageload_onfinish");
   }
 
   /**

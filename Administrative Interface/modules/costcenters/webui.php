@@ -186,6 +186,7 @@ function costcenters_add_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Cost centers"), "link" => "/costcenters"),
     2 => array ( "title" => __ ( "Add"))
   ));
+  sys_set_menu_highlight ( "/costcenters");
 
   /**
    * Add page JavaScript requirements
@@ -198,7 +199,7 @@ function costcenters_add_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"costcenter_add_form\">\n";
 
   // Add costcenter description field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"costcenter_add_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"costcenter_add_description\" placeholder=\"" . __ ( "Cost center description") . "\" />\n";
@@ -206,7 +207,7 @@ function costcenters_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add costcenter code field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"costcenter_add_code\" class=\"control-label col-xs-2\">" . __ ( "Code") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Code\" class=\"form-control\" id=\"costcenter_add_code\" placeholder=\"" . __ ( "Cost center code") . "\" maxlength=\"10\" />\n";
@@ -267,7 +268,7 @@ function costcenters_add_page ( $buffer, $parameters)
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
+ * @return void
  */
 function costcenters_clone_function ( $buffer, $parameters)
 {
@@ -313,6 +314,7 @@ function costcenters_view_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Cost centers"), "link" => "/costcenters"),
     2 => array ( "title" => __ ( "View"))
   ));
+  sys_set_menu_highlight ( "/costcenters");
 
   /**
    * Create page code
@@ -384,6 +386,7 @@ function costcenters_edit_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Cost centers"), "link" => "/costcenters"),
     2 => array ( "title" => __ ( "Edit"))
   ));
+  sys_set_menu_highlight ( "/costcenters");
 
   /**
    * Add page JavaScript requirements
@@ -396,7 +399,7 @@ function costcenters_edit_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"costcenter_edit_form\">\n";
 
   // Add costcenter description field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"costcenter_edit_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"costcenter_edit_description\" placeholder=\"" . __ ( "Cost center description") . "\" />\n";
@@ -404,7 +407,7 @@ function costcenters_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add costcenter code field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"costcenter_edit_code\" class=\"control-label col-xs-2\">" . __ ( "Code") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Code\" class=\"form-control\" id=\"costcenter_edit_code\" placeholder=\"" . __ ( "Cost center code") . "\" maxlength=\"10\" />\n";

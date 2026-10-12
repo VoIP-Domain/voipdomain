@@ -246,7 +246,7 @@ function ivr_operator_filter_start ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "AutoAnswer" => (boolean) (array_key_exists ( "AutoAnswer", $parameters["Properties"]) ? $parameters["Properties"]["AutoAnswer"] : false), "Delay" => (int) (array_key_exists ( "Delay", $parameters["Properties"]) ? $parameters["Properties"]["Delay"] : 0)), "Outputs" => array ( "output"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "AutoAnswer" => (bool) (array_key_exists ( "AutoAnswer", $parameters["Properties"]) ? $parameters["Properties"]["AutoAnswer"] : false), "Delay" => (int) (array_key_exists ( "Delay", $parameters["Properties"]) ? $parameters["Properties"]["Delay"] : 0)), "Outputs" => array ( "output"));
   if ( ! array_key_exists ( "AutoAnswer", $parameters["Properties"]))
   {
     $data["Errors"]["AutoAnswer"] = __ ( "AutoAnswer field is required.");
@@ -255,7 +255,7 @@ function ivr_operator_filter_start ( $buffer, $parameters)
   {
     $data["Errors"]["AutoAnswer"] = __ ( "AutoAnswer must be true or false.");
   }
-  if ( array_key_exists ( "AutoAnswer", $parameters["Properties"]) && (boolean) $parameters["Properties"]["AutoAnswer"] == true && ! array_key_exists ( "Delay", $parameters["Properties"]))
+  if ( array_key_exists ( "AutoAnswer", $parameters["Properties"]) && (bool) $parameters["Properties"]["AutoAnswer"] == true && ! array_key_exists ( "Delay", $parameters["Properties"]))
   {
     $data["Errors"]["Delay"] = __ ( "Delay is required when Auto Start is enabled.");
   }
@@ -1070,7 +1070,7 @@ function ivr_operator_filter_stop ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Discard" => (boolean) (array_key_exists ( "Discard", $parameters["Properties"]) ? $parameters["Properties"]["Discard"] : false)), "Outputs" => array ( "output"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Discard" => (bool) (array_key_exists ( "Discard", $parameters["Properties"]) ? $parameters["Properties"]["Discard"] : false)), "Outputs" => array ( "output"));
   if ( ! array_key_exists ( "Discard", $parameters["Properties"]))
   {
     $data["Errors"]["Discard"] = __ ( "Option Discard is required.");
@@ -1169,7 +1169,7 @@ function ivr_operator_filter_read ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Variable" => array_key_exists ( "Variable", $parameters["Properties"]) ? $parameters["Properties"]["Variable"] : "", "Digits" => (int) (array_key_exists ( "Digits", $parameters["Properties"]) ? $parameters["Properties"]["Digits"] : 0), "Timeout" => array_key_exists ( "Timeout", $parameters["Properties"]) ? $parameters["Properties"]["Timeout"] : 0, "Echo" => (boolean) (array_key_exists ( "Echo", $parameters["Properties"]) ? $parameters["Properties"]["Echo"] : false)), "Outputs" => array ( "ok", "timedout"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Variable" => array_key_exists ( "Variable", $parameters["Properties"]) ? $parameters["Properties"]["Variable"] : "", "Digits" => (int) (array_key_exists ( "Digits", $parameters["Properties"]) ? $parameters["Properties"]["Digits"] : 0), "Timeout" => array_key_exists ( "Timeout", $parameters["Properties"]) ? $parameters["Properties"]["Timeout"] : 0, "Echo" => (bool) (array_key_exists ( "Echo", $parameters["Properties"]) ? $parameters["Properties"]["Echo"] : false)), "Outputs" => array ( "ok", "timedout"));
   if ( ! array_key_exists ( "Variable", $parameters["Properties"]))
   {
     $data["Errors"]["Variable"] = __ ( "Variable is required.");
@@ -1394,7 +1394,7 @@ function ivr_operator_filter_menu ( $buffer, $parameters)
    * Check for required parameters
    */
   $props = (array_key_exists ( "Properties", $parameters) && is_array ( $parameters["Properties"])) ? $parameters["Properties"] : array ();
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $props) ? $props["Description"] : "", "Variable" => array_key_exists ( "Variable", $props) ? $props["Variable"] : "", "File" => (int) (array_key_exists ( "File", $props) ? $props["File"] : 0), "InvalidFile" => (int) (array_key_exists ( "InvalidFile", $props) ? $props["InvalidFile"] : 0), "Echo" => (boolean) (array_key_exists ( "Echo", $props) ? $props["Echo"] : false), "Timeout" => (int) (array_key_exists ( "Timeout", $props) ? $props["Timeout"] : 0), "Retries" => (int) (array_key_exists ( "Retries", $props) ? $props["Retries"] : 0), "Option0" => (boolean) (array_key_exists ( "Option0", $props) ? $props["Option0"] : false), "Option1" => (boolean) (array_key_exists ( "Option1", $props) ? $props["Option1"] : false), "Option2" => (boolean) (array_key_exists ( "Option2", $props) ? $props["Option2"] : false), "Option3" => (boolean) (array_key_exists ( "Option3", $props) ? $props["Option3"] : false), "Option4" => (boolean) (array_key_exists ( "Option4", $props) ? $props["Option4"] : false), "Option5" => (boolean) (array_key_exists ( "Option5", $props) ? $props["Option5"] : false), "Option6" => (boolean) (array_key_exists ( "Option6", $props) ? $props["Option6"] : false), "Option7" => (boolean) (array_key_exists ( "Option7", $props) ? $props["Option7"] : false), "Option8" => (boolean) (array_key_exists ( "Option8", $props) ? $props["Option8"] : false), "Option9" => (boolean) (array_key_exists ( "Option9", $props) ? $props["Option9"] : false), "OptionA" => (boolean) (array_key_exists ( "OptionA", $props) ? $props["OptionA"] : false), "OptionS" => (boolean) (array_key_exists ( "OptionS", $props) ? $props["OptionS"] : false)), "Outputs" => array ( "timedout"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $props) ? $props["Description"] : "", "Variable" => array_key_exists ( "Variable", $props) ? $props["Variable"] : "", "File" => (int) (array_key_exists ( "File", $props) ? $props["File"] : 0), "InvalidFile" => (int) (array_key_exists ( "InvalidFile", $props) ? $props["InvalidFile"] : 0), "Echo" => (bool) (array_key_exists ( "Echo", $props) ? $props["Echo"] : false), "Timeout" => (int) (array_key_exists ( "Timeout", $props) ? $props["Timeout"] : 0), "Retries" => (int) (array_key_exists ( "Retries", $props) ? $props["Retries"] : 0), "Option0" => (bool) (array_key_exists ( "Option0", $props) ? $props["Option0"] : false), "Option1" => (bool) (array_key_exists ( "Option1", $props) ? $props["Option1"] : false), "Option2" => (bool) (array_key_exists ( "Option2", $props) ? $props["Option2"] : false), "Option3" => (bool) (array_key_exists ( "Option3", $props) ? $props["Option3"] : false), "Option4" => (bool) (array_key_exists ( "Option4", $props) ? $props["Option4"] : false), "Option5" => (bool) (array_key_exists ( "Option5", $props) ? $props["Option5"] : false), "Option6" => (bool) (array_key_exists ( "Option6", $props) ? $props["Option6"] : false), "Option7" => (bool) (array_key_exists ( "Option7", $props) ? $props["Option7"] : false), "Option8" => (bool) (array_key_exists ( "Option8", $props) ? $props["Option8"] : false), "Option9" => (bool) (array_key_exists ( "Option9", $props) ? $props["Option9"] : false), "OptionA" => (bool) (array_key_exists ( "OptionA", $props) ? $props["OptionA"] : false), "OptionS" => (bool) (array_key_exists ( "OptionS", $props) ? $props["OptionS"] : false)), "Outputs" => array ( "timedout"));
   if ( ! array_key_exists ( "Variable", $parameters["Properties"]))
   {
     $data["Errors"]["Variable"] = __ ( "Variable is required.");
@@ -2386,8 +2386,7 @@ function ivrs_search ( $buffer, $parameters)
    */
   if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Name`, `Description` FROM `IVRs` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%')" : "") . " ORDER BY `Name`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ivrs_search");
   }
 
   /**
@@ -2570,8 +2569,7 @@ function ivrs_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `IVRs`.`ID`, `IVRs`.`Name`, `IVRs`.`Description`, `IVRWorkflows`.`Workflow` FROM `IVRs` LEFT JOIN `IVRWorkflows` ON `IVRs`.`ID` = `IVRWorkflows`.`IVR` WHERE `IVRs`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `IVRs`.`ID` = " . (int) $parameters["ID"] . " ORDER BY `IVRWorkflows`.`Revision` DESC LIMIT 0,1"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ivrs_view");
   }
   if ( ! $ivr = $result->fetch_assoc ())
   {
@@ -2770,8 +2768,7 @@ function ivrs_add ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `IVRs` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ivrs_add");
   }
   if ( $result->num_rows != 0)
   {
@@ -2816,8 +2813,7 @@ function ivrs_add ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `IVRs` (`Tenant`, `Name`, `Description`) VALUES (" . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ivrs_add");
   }
   $parameters["ID"] = $_in["mysql"]["id"]->insert_id;
 
@@ -2826,8 +2822,7 @@ function ivrs_add ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `IVRWorkflows` (`IVR`, `Revision`, `Workflow`) VALUES (" . (int) $parameters["ID"] . ", 1, '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Workflow"])) . "')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ivrs_add");
   }
 
   /**
@@ -3024,8 +3019,7 @@ function ivrs_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `IVRs` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "' AND `ID` != " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ivrs_edit");
   }
   if ( $result->num_rows != 0)
   {
@@ -3037,8 +3031,7 @@ function ivrs_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `IVRs`.*, `IVRWorkflows`.`Revision`, `IVRWorkflows`.`Workflow` FROM `IVRs` LEFT JOIN `IVRWorkflows` ON `IVRs`.`ID` = `IVRWorkflows`.`IVR` WHERE `IVRs`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `IVRs`.`ID` = " . (int) $parameters["ID"] . " ORDER BY `IVRWorkflows`.`Revision` DESC LIMIT 0, 1"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ivrs_edit");
   }
   if ( ! $ivr = $result->fetch_assoc ())
   {
@@ -3089,13 +3082,11 @@ function ivrs_edit ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `IVRs` Set `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "' WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ivrs_edit");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `IVRWorkflows` (`IVR`, `Revision`, `Workflow`) VALUES (" . (int) $parameters["ID"] . ", " . ( $ivr["Revision"] + 1) . ", '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Workflow"])) . "')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ivrs_edit");
   }
 
   /**
@@ -3235,8 +3226,7 @@ function ivrs_remove ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `IVRs`.*, `IVRWorkflows`.`Revision`, `IVRWorkflows`.`Workflow` FROM `IVRs` LEFT JOIN `IVRWorkflows` ON `IVRs`.`ID` = `IVRWorkflows`.`IVR` WHERE `IVRs`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `IVRs`.`ID` = " . (int) $parameters["ID"] . " ORDER BY `IVRWorkflows`.`Revision` DESC LIMIT 0, 1"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ivrs_remove");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -3267,13 +3257,11 @@ function ivrs_remove ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `IVRWorkflows` WHERE `IVR` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ivrs_remove");
   }
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `IVRs` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ivrs_remove");
   }
 
   /**
@@ -3332,15 +3320,13 @@ function ivrs_server_reconfig ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `IVRs` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "ivrs_server_reconfig");
   }
   while ( $ivr = $result->fetch_assoc ())
   {
     if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT * FROM `IVRWorkflows` WHERE `IVR` = " . (int) $ivr["ID"] . " ORDER BY `Revision`"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "ivrs_server_reconfig:fetch_workflows");
     }
     $lastname = $ivr["Name"];
     while ( $ivrworkflow = $result2->fetch_assoc ())

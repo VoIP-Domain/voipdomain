@@ -106,8 +106,7 @@ function authentication_view_post_github ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'Authentication_GitHub'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_view_post_github");
   }
   $buffer["Plugins"]["GitHub"] = array ();
   if ( $tmp = $result->fetch_assoc () && is_json ( $tmp["Data"]))
@@ -208,7 +207,7 @@ function authentication_edit_validate_github ( $buffer, $parameters)
   {
     $buffer["Plugin_GitHub_Status"] = __ ( "The provided status is not valid.");
   }
-  if ( (boolean) $parameters["Plugins"]["GitHub"]["Status"])
+  if ( (bool) $parameters["Plugins"]["GitHub"]["Status"])
   {
     if ( ! array_key_exists ( "ClientID", $parameters["Plugins"]["GitHub"]) || empty ( $parameters["Plugins"]["GitHub"]["ClientID"]))
     {
@@ -244,7 +243,7 @@ function authentication_edit_sanitize_github ( $buffer, $parameters)
   /**
    * Sanitize parameters
    */
-  $parameters["Plugins"]["GitHub"]["Status"] = (boolean) $parameters["Plugins"]["GitHub"]["Status"];
+  $parameters["Plugins"]["GitHub"]["Status"] = (bool) $parameters["Plugins"]["GitHub"]["Status"];
 
   return $parameters;
 }
@@ -268,8 +267,7 @@ function authentication_edit_post_github ( $buffer, $parameters)
   $tmp = json_encode ( array ( "Status" => $parameters["Plugins"]["GitHub"]["Status"], "ClientID" => $parameters["Plugins"]["GitHub"]["ClientID"], "ClientSecret" => $parameters["Plugins"]["GitHub"]["ClientSecret"], "RedirectURI" => $parameters["Plugins"]["GitHub"]["RedirectURI"]));
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Authentication_GitHub', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $tmp) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( $tmp) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_edit_post_github");
   }
 
   /**
@@ -302,7 +300,7 @@ framework_add_api_call (
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
+ * @return void
  */
 function authentication_github_redirect ( $buffer, $parameters)
 {
@@ -318,8 +316,7 @@ function authentication_github_redirect ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $tenantid . " AND `Key` LIKE 'Authentication_GitHub'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_github_redirect");
   }
   if ( ! $plugin = $result->fetch_assoc ())
   {
@@ -356,8 +353,7 @@ function authentication_github_redirect ( $buffer, $parameters)
     setcookie ( $_in["general"]["cookie"] . "_oauth2_" . $cookie, $state, $expire, "/api/auth/github");
     if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `AuthenticationCache` (`Tenant`, `Plugin`, `Cookie`, `State`, `Expire`, `Callback`) VALUES (" . (int) $tenantid . ", 'GitHub', '" . $_in["mysql"]["id"]->real_escape_string ( $cookie) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $state) . "', " . (int) $expire . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Callback"]) . "')"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "authentication_github_redirect");
     }
 
     /**
@@ -390,8 +386,7 @@ function authentication_github_redirect ( $buffer, $parameters)
   }
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `AuthenticationCache` WHERE `Plugin` = 'GitHub' AND `Cookie` = '" . $_in["mysql"]["id"]->real_escape_string ( $cookie) . "' AND `State` = '" . $_in["mysql"]["id"]->real_escape_string ( $state) . "' AND `Expire` >= " . time ()))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_github_redirect");
   }
   if ( ! $cache = $result->fetch_assoc ())
   {
@@ -405,8 +400,7 @@ function authentication_github_redirect ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `AuthenticationCache` WHERE `Plugin` = 'GitHub' AND `Cookie` = '" . $_in["mysql"]["id"]->real_escape_string ( $cookie) . "' AND `State` = '" . $_in["mysql"]["id"]->real_escape_string ( $state) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_github_redirect");
   }
 
   /**
@@ -468,8 +462,7 @@ function authentication_github_redirect ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `AuthenticationToken` (`Token`, `Tenant`, `Plugin`, `Email`, `IssueDate`, `LastSeen`, `Expires`, `TokenData`, `UserData`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $cookie) . "', " . (int) $tenantid . ", 'GitHub', '" . $_in["mysql"]["id"]->real_escape_string ( $userInfo["emailInfo"][0]["email"]) . "', NOW(), NOW(), '" . $_in["mysql"]["id"]->real_escape_string ( date ( "Y-m-d h:i:s", time () + $_in["general"]["timeout"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $tokenInfo)) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $userInfo)) . "')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_github_redirect");
   }
   setcookie ( $_in["general"]["cookie"] . "_authtoken", $cookie, time () + $_in["general"]["timeout"], "/");
 
@@ -504,8 +497,7 @@ function authentication_github_tenant_add_post ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Authentication_Plugin_GitHub', " . (int) $parameters["ID"] . ", '{\"Status\":false,\"ClientID\":\"\",\"ClientSecret\":\"\",\"RedirectURI\":\"\"}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_github_tenant_add_post");
   }
 
   /**

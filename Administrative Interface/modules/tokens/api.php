@@ -404,8 +404,7 @@ function tokens_search ( $buffer, $parameters)
    */
   if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Description`, `Expire` FROM `Tokens` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND `Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " ORDER BY `Description`, `Expire`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tokens_search");
   }
 
   /**
@@ -619,8 +618,7 @@ function tokens_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Tokens` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tokens_view");
   }
   if ( ! $token = $result->fetch_assoc ())
   {
@@ -845,8 +843,7 @@ function tokens_add ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Tokens` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Token` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Token"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tokens_add");
   }
   if ( $result->num_rows != 0)
   {
@@ -905,8 +902,7 @@ function tokens_add ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Tokens` (`Tenant`, `Description`, `Token`, `Access`, `Permissions`, `Expire`, `Language`) VALUES (" . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Token"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Access"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $parameters["Permissions"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Validity"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Language"]) . "')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tokens_add");
   }
   $parameters["ID"] = $_in["mysql"]["id"]->insert_id;
 
@@ -1131,8 +1127,7 @@ function tokens_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Tokens` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Token` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Token"]) . "' AND `ID` != " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tokens_edit");
   }
   if ( $result->num_rows != 0)
   {
@@ -1144,8 +1139,7 @@ function tokens_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Tokens` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tokens_edit");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -1197,8 +1191,7 @@ function tokens_edit ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Tokens` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Token` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Token"]) . "', `Access` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Access"]) . "', `Permissions` = '" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $parameters["Permissions"])) . "', `Expire` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Validity"]) . "', `Language` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Language"]) . "' WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tokens_edit");
   }
 
   /**
@@ -1328,8 +1321,7 @@ function tokens_remove ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Tokens` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tokens_remove");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -1350,8 +1342,7 @@ function tokens_remove ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Tokens` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "tokens_remove");
   }
 
   /**

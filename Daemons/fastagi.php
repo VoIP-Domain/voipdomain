@@ -144,9 +144,8 @@ function register_app ( $app, $hook, $options = array ())
 /**
  * Set error reporting level
  */
-error_reporting ( E_ERROR);
+error_reporting ( E_ALL);
 ini_set ( "display_errors", "false");
-// error_reporting ( E_ALL); ini_set ( "display_errors", "true");
 
 /**
  * Check if script is running from CLI
@@ -170,6 +169,17 @@ $_agi["clients"] = array ();
 require_once ( dirname ( __FILE__) . "/includes/functions.inc.php");
 require_once ( dirname ( __FILE__) . "/includes/plugins.inc.php");
 require_once ( dirname ( __FILE__) . "/includes/systemd.inc.php");
+require_once ( dirname ( __FILE__) . "/includes/error-handler.inc.php");
+
+/**
+ * Register error handlers for clear crash reporting
+ */
+daemon_register_error_handlers ();
+
+/**
+ * Ensure single instance
+ */
+daemon_lock ( "fastagi");
 
 /**
  * Parse configuration file. You should put your configuration file OUTSIDE
@@ -187,6 +197,33 @@ foreach ( glob ( dirname ( __FILE__) . "/fastagi-modules/*/fastagi.php") as $fil
 {
   require_once ( $filename);
 }
+
+/**
+ * Include all plugin files from fastagi-plugins/
+ */
+$_in["loaded_plugins"] = array ();
+$pluginsdir = dirname ( __FILE__) . "/fastagi-plugins";
+if ( is_dir ( $pluginsdir))
+{
+  foreach ( scandir ( $pluginsdir) as $entry)
+  {
+    if ( $entry == "." || $entry == "..")
+    {
+      continue;
+    }
+    $pluginpath = $pluginsdir . "/" . $entry;
+    if ( is_dir ( $pluginpath) && is_readable ( $pluginpath . "/fastagi.php"))
+    {
+      require_once ( $pluginpath . "/fastagi.php");
+      $_in["loaded_plugins"][] = $entry;
+    }
+  }
+}
+
+/**
+ * Resolve deferred hook registrations
+ */
+framework_resolve_deferred_hooks ();
 
 /**
  * Check for mandatory basic configurations (if didn't exist, set default)
@@ -363,7 +400,6 @@ foreach ( $_agi["applications"] as $app => $data)
 /**
  * Fork process to daemon mode (except if in debug mode)
  */
-error_reporting ( E_ERROR);
 set_time_limit ( 0);
 if ( ! $debug)
 {
@@ -382,6 +418,54 @@ if ( ! $debug)
  * Register systemd reload handler and continue as worker process
  */
 daemon_register_systemd_reload_handler ();
+
+/**
+ * Initialize non-blocking Gearman worker for plugin task processing
+ */
+$_in["gearman_worker"] = null;
+if ( array_key_exists ( "gearman", $_in) && is_array ( $_in["gearman"]) && extension_loaded ( "gearman"))
+{
+  $gm_host = ! empty ( $_in["gearman"]["hostname"]) ? $_in["gearman"]["hostname"] : "127.0.0.1";
+  $gm_port = ! empty ( $_in["gearman"]["port"]) ? $_in["gearman"]["port"] : 4730;
+  try
+  {
+    $_in["gearman_worker"] = new GearmanWorker ();
+    $_in["gearman_worker"]->addServer ( $gm_host, $gm_port);
+    $_in["gearman_worker"]->addOptions ( GEARMAN_WORKER_NON_BLOCKING);
+    $_in["gearman_worker"]->setTimeout ( 0);
+
+    $serverid = ! empty ( $_in["general"]["serverid"]) ? $_in["general"]["serverid"] : "0";
+    $_in["gearman_worker"]->addFunction ( "vd_fastagi_" . $serverid . "_task", "fastagi_gearman_task_handler");
+    writeLog ( "Gearman worker registered: vd_fastagi_" . $serverid . "_task");
+  } catch ( Exception $e) {
+    writeLog ( "Gearman worker init failed: " . $e->getMessage (), VoIP_LOG_WARNING);
+    $_in["gearman_worker"] = null;
+  }
+}
+
+/**
+ * Gearman task handler for FastAGI plugins
+ */
+function fastagi_gearman_task_handler ( $job)
+{
+  $payload = json_decode ( $job->workload (), true);
+  if ( ! is_array ( $payload) || ! array_key_exists ( "hook", $payload))
+  {
+    writeLog ( "Gearman task received with invalid payload.", VoIP_LOG_WARNING);
+    return json_encode ( array ( "result" => false, "error" => "Invalid payload"));
+  }
+  writeLog ( "Gearman task received: " . $payload["hook"]);
+  $taskdata = array_key_exists ( "data", $payload) ? $payload["data"] : array ();
+  try
+  {
+    $result = framework_call ( $payload["hook"], $taskdata, false, "");
+  } catch ( Throwable $e)
+  {
+    writeLog ( "Task \"" . $payload["hook"] . "\" threw " . get_class ( $e) . ": " . $e->getMessage () . " in " . $e->getFile () . ":" . $e->getLine (), VoIP_LOG_WARNING);
+    return json_encode ( array ( "result" => false, "error" => $e->getMessage ()));
+  }
+  return json_encode ( array ( "result" => true, "data" => $result));
+}
 
 /**
  * Instantiate client array
@@ -406,7 +490,21 @@ while ( true)
 
   $write = NULL;
   $except = NULL;
-  $ready = socket_select ( $read, $write, $except, NULL);
+  $tv_sec = $_in["gearman_worker"] !== null ? 0 : NULL;
+  $tv_usec = $_in["gearman_worker"] !== null ? 100000 : NULL;
+  $ready = socket_select ( $read, $write, $except, $tv_sec, $tv_usec);
+
+  /**
+   * Poll Gearman worker for pending tasks (non-blocking)
+   */
+  if ( $_in["gearman_worker"] !== null)
+  {
+    @$_in["gearman_worker"]->work ();
+    if ( $_in["gearman_worker"]->returnCode () != GEARMAN_SUCCESS && $_in["gearman_worker"]->returnCode () != GEARMAN_IO_WAIT && $_in["gearman_worker"]->returnCode () != GEARMAN_NO_JOBS)
+    {
+      writeLog ( "Gearman worker error: " . $_in["gearman_worker"]->error (), VoIP_LOG_WARNING);
+    }
+  }
 
   if ( in_array ( $socket, $read))
   {
@@ -478,8 +576,20 @@ while ( true)
           // Check for requested application:
           if ( array_key_exists ( $_agi["clients"][$i]["vars"]["network_script"], $_agi["applications"]))
           {
-            $_agi["clients"][$i]["buffer"] = array_merge_recursive ( $_agi["clients"][$i]["buffer"], framework_call ( $_agi["applications"][$_agi["clients"][$i]["vars"]["network_script"]]["hook"], array_merge_recursive ( $_agi["clients"][$i]["vars"], array ( "AGI_Client" => "Client " . $i . " (" . $_agi["clients"][$i]["ip"] . ":" . $_agi["clients"][$i]["port"] . ") "))));
-            $_agi["clients"][$i]["buffer"] = array_merge_recursive ( $_agi["clients"][$i]["buffer"], array ( "NOOP"));
+            try
+            {
+              $_agi["clients"][$i]["buffer"] = array_merge_recursive ( $_agi["clients"][$i]["buffer"], framework_call ( $_agi["applications"][$_agi["clients"][$i]["vars"]["network_script"]]["hook"], array_merge_recursive ( $_agi["clients"][$i]["vars"], array ( "AGI_Client" => "Client " . $i . " (" . $_agi["clients"][$i]["ip"] . ":" . $_agi["clients"][$i]["port"] . ") "))));
+              $_agi["clients"][$i]["buffer"] = array_merge_recursive ( $_agi["clients"][$i]["buffer"], array ( "NOOP"));
+            } catch ( Throwable $e)
+            {
+              writeLog ( "AGI application \"" . $_agi["clients"][$i]["vars"]["network_script"] . "\" threw " . get_class ( $e) . ": " . $e->getMessage () . " in " . $e->getFile () . ":" . $e->getLine (), VoIP_LOG_WARNING);
+              $trace_lines = explode ( "\n", $e->getTraceAsString ());
+              foreach ( array_slice ( $trace_lines, 0, 5) as $trace_line)
+              {
+                writeLog ( "  " . $trace_line, VoIP_LOG_WARNING);
+              }
+              $_agi["clients"][$i]["buffer"] = array ( "NOOP");
+            }
           } else {
             writeLog ( "Invalid application \"" . $_agi["clients"][$i]["vars"]["network_script"] . "\" requested from client " . $i . " (" . $_agi["clients"][$i]["ip"] . ":" . $_agi["clients"][$i]["port"] . "). Closing connection.", VoIP_LOG_WARNING);
             socket_close ( $_agi["clients"][$i]["socket"]);

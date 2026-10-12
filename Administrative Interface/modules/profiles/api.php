@@ -221,8 +221,7 @@ function profiles_search ( $buffer, $parameters)
    */
   if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `Profiles`.`ID`, `Profiles`.`Description`, `Profiles`.`Domain`, `Profiles`.`AreaCode`, `Countries`.`ISO3166-2` AS `Country` FROM `Profiles` LEFT JOIN `Countries` ON `Profiles`.`Country` = `Countries`.`Code` WHERE `Profiles`.`Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND `Profiles`.`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " ORDER BY `Profiles`.`Description`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "profiles_search");
   }
 
   /**
@@ -564,8 +563,7 @@ function profiles_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Profiles`.*, `Countries`.`Name` AS `CountryName`, `Countries`.`ISO3166-2` AS `CountryISO`, `Gateways`.`Description` AS `NGGWDescription`, `Gateways`.`Type` AS `NGGWType`, `Gateways`.`Active` AS `NGGWActive`, `Audios`.`Description` AS `MohDescription` FROM `Profiles` LEFT JOIN `Countries` ON `Profiles`.`Country` = `Countries`.`Code` LEFT JOIN `Gateways` ON `Profiles`.`NGGW` = `Gateways`.`ID` LEFT JOIN `Audios` ON `Profiles`.`MOH` = `Audios`.`ID` WHERE `Profiles`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Profiles`.`ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "profiles_view");
   }
   if ( ! $profile = $result->fetch_assoc ())
   {
@@ -576,7 +574,7 @@ function profiles_view ( $buffer, $parameters)
   /**
    * Format data
    */
-  $profile["Country"] = array ( "ID" => $profile["Country"], "NameEN" => $profile["CountryName"], "Name" => ( array_key_exists ( $profile["CountryISO"], $_in["countries"][$_in["general"]["language"]]) ? $_in["countries"][$_in["general"]["language"]][$profile["CountryISO"]] : $profile["CountryName"]), "ISO3166-2" => $profile["CountryISO"]);
+  $profile["Country"] = array ( "ID" => $profile["Country"], "NameEN" => $profile["CountryName"], "Name" => ( isset ( $_in["countries"][$_in["general"]["language"]][$profile["CountryISO"]]) ? $_in["countries"][$_in["general"]["language"]][$profile["CountryISO"]] : $profile["CountryName"]), "ISO3166-2" => $profile["CountryISO"]);
   $profile["NGGW"] = filters_call ( "get_gateways", array ( "ID" => $profile["NGGW"]))[0];
   $profile["Blockeds"] = filters_call ( "get_gateways", array ( "ID" => explode ( ",", $profile["BlockedGW"])));
   $profile["Gateways"] = filters_call ( "get_gateways", array ( "ID" => explode ( ",", $profile["DefaultGW"])));
@@ -587,7 +585,7 @@ function profiles_view ( $buffer, $parameters)
   } else {
     $profile["MOH"] = array ();
   }
-  $profile["Emergency"] = (boolean) $profile["EmergencyShortcut"];
+  $profile["Emergency"] = (bool) $profile["EmergencyShortcut"];
   $data = api_filter_entry ( array ( "Description", "Domain", "Country", "TimeZone", "Offset", "AreaCode", "Prefix", "NGGW", "Blockeds", "Gateways", "Language", "MOH", "Emergency"), $profile);
 
   /**
@@ -902,8 +900,7 @@ function profiles_add ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["MOH"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "profiles_add");
     }
     if ( $result->num_rows != 1)
     {
@@ -935,8 +932,7 @@ function profiles_add ( $buffer, $parameters)
     {
       if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $gateway))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "profiles_add");
       }
       if ( $result->num_rows == 1)
       {
@@ -958,8 +954,7 @@ function profiles_add ( $buffer, $parameters)
     {
       if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $gateway))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "profiles_add");
       }
       if ( $result->num_rows == 1)
       {
@@ -978,8 +973,7 @@ function profiles_add ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["NGGW"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "profiles_add");
     }
     if ( $result->num_rows != 1)
     {
@@ -1009,7 +1003,7 @@ function profiles_add ( $buffer, $parameters)
    */
   $parameters["AreaCode"] = (int) $parameters["AreaCode"];
   $parameters["MOH"] = (int) $parameters["MOH"];
-  $parameters["Emergency"] = (boolean) $parameters["Emergency"];
+  $parameters["Emergency"] = (bool) $parameters["Emergency"];
   $parameters["NGGW"] = (int) ( $parameters["NGGW"] < 0 ? $parameters["NGGW"] * -1 : $parameters["NGGW"]);
   foreach ( $parameters["Blockeds"] as $key => $value)
   {
@@ -1041,8 +1035,7 @@ function profiles_add ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Profiles` (`Tenant`, `Description`, `Domain`, `Country`, `TimeZone`, `Offset`, `AreaCode`, `Language`, `Prefix`, `MOH`, `EmergencyShortcut`, `NGGW`, `DefaultGW`, `BlockedGW`) VALUES (" . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Domain"]) . "', " . (int) $country["Code"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["TimeZone"]) . "', " . (float) $parameters["Offset"] . ", " . (int) $parameters["AreaCode"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Language"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Prefix"]) . "', " . (int) $parameters["MOH"] . ", '" . ( $parameters["Emergency"] ? 1 : 0) . "', " . (int) $parameters["NGGW"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $gateways)) . "', '" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $blockeds)) . "')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "profiles_add");
   }
   $parameters["ID"] = $_in["mysql"]["id"]->insert_id;
 
@@ -1370,8 +1363,7 @@ function profiles_edit ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["MOH"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "profiles_edit");
     }
     if ( $result->num_rows != 1)
     {
@@ -1384,8 +1376,7 @@ function profiles_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Profiles`.*, `Countries`.`ISO3166-2` AS `CountryISO` FROM `Profiles` LEFT JOIN `Countries` ON `Profiles`.`Country` = `Countries`.`Code` WHERE `Profiles`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Profiles`.`ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "profiles_edit");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -1414,8 +1405,7 @@ function profiles_edit ( $buffer, $parameters)
     {
       if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $gateway))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "profiles_edit");
       }
       if ( $result->num_rows == 1)
       {
@@ -1435,8 +1425,7 @@ function profiles_edit ( $buffer, $parameters)
     {
       if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $gateway))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "profiles_edit");
       }
       if ( $result->num_rows == 1)
       {
@@ -1453,8 +1442,7 @@ function profiles_edit ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["NGGW"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "profiles_edit");
     }
     if ( $result->num_rows != 1)
     {
@@ -1485,7 +1473,7 @@ function profiles_edit ( $buffer, $parameters)
   $parameters["ID"] = (int) $parameters["ID"];
   $parameters["AreaCode"] = (int) $parameters["AreaCode"];
   $parameters["MOH"] = (int) $parameters["MOH"];
-  $parameters["Emergency"] = (boolean) $parameters["Emergency"];
+  $parameters["Emergency"] = (bool) $parameters["Emergency"];
   $parameters["NGGW"] = (int) $parameters["NGGW"];
   foreach ( $parameters["Blockeds"] as $key => $value)
   {
@@ -1517,8 +1505,7 @@ function profiles_edit ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Profiles` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Domain` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Domain"]) . "', `Country` = " . (int) $country["Code"] . ", `TimeZone` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["TimeZone"]) . "', `Offset` = " . (float) $parameters["Offset"] . ", `AreaCode` = " . (int) $parameters["AreaCode"] . ", `Language` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Language"]) . "', `Prefix` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Prefix"]) . "', `MOH` = " . (int) $parameters["MOH"] . ", `EmergencyShortcut` = '" . ( $parameters["Emergency"] ? 1 : 0) . "', `NGGW` = " . (int) $parameters["NGGW"] . ", `DefaultGW` = '" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $parameters["Gateways"])) . "', `BlockedGW` = '" . $_in["mysql"]["id"]->real_escape_string ( implode ( ",", $parameters["Blockeds"])) . "' WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ORIGINAL"]["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "profiles_edit");
   }
 
   /**
@@ -1658,8 +1645,7 @@ function profiles_remove ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Profiles` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "profiles_remove");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -1690,8 +1676,7 @@ function profiles_remove ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Profiles` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "profiles_remove");
   }
 
   /**
@@ -1750,12 +1735,11 @@ function profiles_server_reconfig ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Profiles`.*, `Countries`.`ISO3166-2` AS `CountryISO` FROM `Profiles` LEFT JOIN `Countries` ON `Profiles`.`Country` = `Countries`.`Code` WHERE `Profiles`.`Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "profiles_server_reconfig:fetch_profiles");
   }
   while ( $profile = $result->fetch_assoc ())
   {
-    $notify = array ( "ID" => $profile["ID"], "Description" => $profile["Description"], "Domain" => $profile["Domain"], "Country" => $profile["CountryISO"], "TimeZone" => $profile["TimeZone"], "Offset" => (float) $profile["Offset"], "AreaCode" => $profile["AreaCode"], "Language" => $profile["Language"], "Prefix" => $profile["Prefix"], "MOH" => $profile["MOH"], "EmergencyShortcut" => (boolean) $profile["EmergencyShortcut"], "NGGW" => $profile["NGGW"], "Gateways" => array_filter ( explode ( ",", $profile["DefaultGW"]), "strlen"), "Blockeds" => array_filter ( explode ( ",", $profile["BlockedGW"]), "strlen"));
+    $notify = array ( "ID" => $profile["ID"], "Description" => $profile["Description"], "Domain" => $profile["Domain"], "Country" => $profile["CountryISO"], "TimeZone" => $profile["TimeZone"], "Offset" => (float) $profile["Offset"], "AreaCode" => $profile["AreaCode"], "Language" => $profile["Language"], "Prefix" => $profile["Prefix"], "MOH" => $profile["MOH"], "EmergencyShortcut" => (bool) $profile["EmergencyShortcut"], "NGGW" => $profile["NGGW"], "Gateways" => array_filter ( explode ( ",", $profile["DefaultGW"]), "strlen"), "Blockeds" => array_filter ( explode ( ",", $profile["BlockedGW"]), "strlen"));
     if ( framework_has_hook ( "profiles_add_notify"))
     {
       $notify = framework_call ( "profiles_add_notify", $parameters, false, $notify);

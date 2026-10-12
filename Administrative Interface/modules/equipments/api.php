@@ -263,8 +263,7 @@ function equipments_search ( $buffer, $parameters)
    */
   if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Equipments`" . ( ! empty ( $parameters["Filter"]) ? " WHERE `UID` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Vendor` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Model` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " ORDER BY `Vendor`, `Model`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_search");
   }
 
   /**
@@ -274,10 +273,10 @@ function equipments_search ( $buffer, $parameters)
   $fields = api_filter_fields ( $parameters["Fields"], $parameters["function"]["DefaultFields"], $parameters["function"]["PermittedFields"]);
   while ( $result = $results->fetch_assoc ())
   {
-    $result["Active"] = (boolean) $result["Active"];
-    $result["VideoSupport"] = (boolean) $result["VideoSupport"];
-    $result["AutoProvision"] = (boolean) $result["AutoProvision"];
-    $result["BLFSupport"] = (boolean) $result["BLFSupport"];
+    $result["Active"] = (bool) $result["Active"];
+    $result["VideoSupport"] = (bool) $result["VideoSupport"];
+    $result["AutoProvision"] = (bool) $result["AutoProvision"];
+    $result["BLFSupport"] = (bool) $result["BLFSupport"];
     $data[] = api_filter_entry ( $fields, $result);
   }
 
@@ -625,8 +624,7 @@ function equipments_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Equipments` WHERE `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_view");
   }
   if ( ! $equipment = $result->fetch_assoc ())
   {
@@ -641,8 +639,7 @@ function equipments_view ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Data` FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'Equipment_" . $_in["mysql"]["id"]->real_escape_string ( $equipment["UID"]) . "'"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "equipments_view");
     }
     if ( ! $tenantsettings = json_decode ( $result->fetch_assoc ()["Data"], true))
     {
@@ -660,10 +657,10 @@ function equipments_view ( $buffer, $parameters)
   /**
    * Format data
    */
-  $equipment["Active"] = (boolean) $equipment["Active"];
-  $equipment["VideoSupport"] = (boolean) $equipment["VideoSupport"];
-  $equipment["AutoProvision"] = (boolean) $equipment["AutoProvision"];
-  $equipment["BLFSupport"] = (boolean) $equipment["BLFSupport"];
+  $equipment["Active"] = (bool) $equipment["Active"];
+  $equipment["VideoSupport"] = (bool) $equipment["VideoSupport"];
+  $equipment["AutoProvision"] = (bool) $equipment["AutoProvision"];
+  $equipment["BLFSupport"] = (bool) $equipment["BLFSupport"];
   $equipment["SupportedAudioCodecs"] = json_decode ( $equipment["SupportedAudioCodecs"]);
   $equipment["AudioCodecs"] = $tenantsettings["AudioCodecs"];
   $equipment["SupportedVideoCodecs"] = json_decode ( $equipment["SupportedVideoCodecs"]);
@@ -804,8 +801,7 @@ function equipments_configure ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Equipments` WHERE `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_configure");
   }
   if ( $result->num_rows == 0)
   {
@@ -838,8 +834,7 @@ function equipments_configure ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Data` FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'Equipment_" . $_in["mysql"]["id"]->real_escape_string ( $parameters["UID"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_configure");
   }
   if ( ! $tenantsettings = json_decode ( $result->fetch_assoc ()["Data"], true))
   {
@@ -966,8 +961,7 @@ function equipments_configure ( $buffer, $parameters)
   $update = array ( "AudioCodecs" => $parameters["AudioCodecs"], "VideoCodecs" => $parameters["VideoCodecs"], "ExtraSettings" => $parameters["ExtraSettings"]);
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Config` SET `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $update)) . "' WHERE `Key` = 'Equipment_" . $_in["mysql"]["id"]->real_escape_string ( $parameters["UID"]) . "' AND `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_configure");
   }
 
   /**
@@ -1136,8 +1130,7 @@ function equipments_firmware_add ( $buffer, $parameters)
   } else {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Equipments` WHERE `ID` = " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "equipments_firmware_add");
     }
     if ( ! $equipment = $result->fetch_assoc ())
     {
@@ -1227,8 +1220,7 @@ function equipments_firmware_add ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Equipments` SET `SupportedFirmwares` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $equipment["SupportedFirmwares"])) . "', `Active` = " . ( $active ? 1 : 0) . " WHERE `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_firmware_add");
   }
 
   /**
@@ -1236,8 +1228,7 @@ function equipments_firmware_add ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Equipments` WHERE `Vendor` = '" . $_in["mysql"]["id"]->real_escape_string ( $equipment["Vendor"]) . "' AND `ID` != " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_firmware_add");
   }
   while ( $tmp = $result->fetch_assoc ())
   {
@@ -1277,8 +1268,7 @@ function equipments_firmware_add ( $buffer, $parameters)
         }
         if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Equipments` SET `SupportedFirmwares` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $tmp["SupportedFirmwares"])) . "', `Active` = " . ( $active ? 1 : 0) . " WHERE `ID` = " . (int) $tmp["ID"]))
         {
-          header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-          exit ();
+          database_query_error ( "equipments_firmware_add");
         }
       }
     }
@@ -1428,8 +1418,7 @@ function equipments_firmware_remove ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Equipments` WHERE `ID` = " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "equipments_firmware_remove");
     }
     if ( ! $equipment = $result->fetch_assoc ())
     {
@@ -1520,8 +1509,7 @@ function equipments_firmware_remove ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Equipments` SET `SupportedFirmwares` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $equipment["SupportedFirmwares"])) . "', `Active` = " . ( $active ? 1 : 0) . " WHERE `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_firmware_remove");
   }
 
   /**
@@ -1529,8 +1517,7 @@ function equipments_firmware_remove ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Equipments` WHERE `Vendor` = '" . $_in["mysql"]["id"]->real_escape_string ( $equipment["Vendor"]) . "' AND `ID` != " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_firmware_remove");
   }
   while ( $tmp = $result->fetch_assoc ())
   {
@@ -1569,8 +1556,7 @@ function equipments_firmware_remove ( $buffer, $parameters)
       }
       if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Equipments` SET `SupportedFirmwares` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $tmp["SupportedFirmwares"])) . "', `Active` = " . ( $active ? 1 : 0) . " WHERE `ID` = " . (int) $tmp["ID"]))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "equipments_firmware_remove");
       }
     }
   }
@@ -1637,8 +1623,7 @@ function equipments_server_reconfig ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Equipments`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_server_reconfig");
   }
   while ( $equipment = $result->fetch_assoc ())
   {
@@ -1647,8 +1632,7 @@ function equipments_server_reconfig ( $buffer, $parameters)
      */
     if ( ! $tenantresult = @$_in["mysql"]["id"]->query ( "SELECT `Data` FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'Equipment_" . $_in["mysql"]["id"]->real_escape_string ( $equipment["UID"]) . "'"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "equipments_server_reconfig:fetch_tenant_config");
     }
     $tenantsettings = json_decode ( $tenantresult->fetch_assoc ()["Data"], true);
     $notify = array (

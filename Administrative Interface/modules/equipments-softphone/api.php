@@ -58,8 +58,7 @@ function equipments_softphone_tenant_add_post ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_webphone', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"OPUS\",\"ALAW\",\"ULAW\"],\"VideoCodecs\":[\"VP8\",\"H264\"],\"ExtraSettings\":[]}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_softphone_tenant_add_post");
   }
 
   /**
@@ -67,8 +66,7 @@ function equipments_softphone_tenant_add_post ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_softphone', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"OPUS\",\"ALAW\",\"ULAW\",\"G722\",\"G729\",\"GSM\",\"ILBC\"],\"VideoCodecs\":[\"VP8\",\"H264\"],\"ExtraSettings\":[]}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "equipments_softphone_tenant_add_post");
   }
 
   return $buffer;

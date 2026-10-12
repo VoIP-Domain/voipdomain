@@ -121,8 +121,7 @@ function groups_profile ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID` FROM `Groups` WHERE `Tenant` = " . (int) get_tenant () . " AND `Profile` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "groups_profile");
   }
 
   /**

@@ -27,15 +27,7 @@
 	var datakey = '__pz__';
 	var slice = Array.prototype.slice;
 	var rIE11 = /trident\/7./i;
-	var supportsInputEvent = (function() {
-		// IE11 returns a false positive
-		if (rIE11.test(navigator.userAgent)) {
-			return false;
-		}
-		var input = document.createElement('input');
-		input.setAttribute('oninput', 'return');
-		return typeof input.oninput === 'function';
-	})();
+	var supportsInputEvent = !rIE11.test(navigator.userAgent);
 
 	// Regex
 	var rupper = /([A-Z])/g;

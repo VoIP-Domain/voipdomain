@@ -211,8 +211,7 @@ function audios_search ( $buffer, $parameters)
    */
   if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Filename` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%')" : "") . " ORDER BY `Description`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "audios_search");
   }
 
   /**
@@ -395,8 +394,7 @@ function audios_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "audios_view");
   }
   if ( ! $audio = $result->fetch_assoc ())
   {
@@ -624,8 +622,7 @@ function audios_download ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "audios_download");
   }
   if ( ! $audio = $result->fetch_assoc ())
   {
@@ -790,8 +787,7 @@ function audios_add ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Filename` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filename"]) . "'"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "audios_add");
     }
     if ( $result->num_rows != 0)
     {
@@ -837,8 +833,7 @@ function audios_add ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Audios` (`Tenant`, `Filename`, `Description`) VALUES (" . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filename"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "audios_add");
   }
   $parameters["ID"] = $_in["mysql"]["id"]->insert_id;
 
@@ -847,8 +842,7 @@ function audios_add ( $buffer, $parameters)
    */
   if ( ! @file_put_contents ( $_in["general"]["storagedir"] . "/sounds/" . $parameters["Filename"], base64_decode ( $parameters["Filecontent"])))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "audios_add");
   }
 
   /**
@@ -1007,8 +1001,7 @@ function audios_edit ( $buffer, $parameters)
     {
       if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Filename` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filename"]) . "' AND `ID` != " . (int) $parameters["ID"]))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "audios_edit");
       }
       if ( $result->num_rows != 0)
       {
@@ -1022,8 +1015,7 @@ function audios_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "audios_edit");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -1074,8 +1066,7 @@ function audios_edit ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Audios` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "'" . ( ! empty ( $parameters["Filename"]) ? ", `Filename` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filename"]) . "'" : "") . " WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "audios_edit");
   }
 
   /**
@@ -1228,8 +1219,7 @@ function audios_remove ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "audios_remove");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -1242,8 +1232,7 @@ function audios_remove ( $buffer, $parameters)
    */
   if ( sizeof ( filters_call ( "audio_inuse", array ( "ID" => $parameters["ID"]))) != 0)
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "audios_remove");
   }
 
   /**
@@ -1259,8 +1248,7 @@ function audios_remove ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "audios_remove");
   }
 
   /**
@@ -1324,8 +1312,7 @@ function audios_server_reconfig ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Audios` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "audios_server_reconfig");
   }
   while ( $audio = $result->fetch_assoc ())
   {

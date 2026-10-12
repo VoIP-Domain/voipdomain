@@ -105,7 +105,7 @@ function get_gateways ( $buffer, $parameters)
      */
     while ( $result = $results->fetch_assoc ())
     {
-      $result["Active"] = (boolean) $result["Active"];
+      $result["Active"] = (bool) $result["Active"];
       $result["TypeEN"] = $result["Type"];
       $result["Type"] = __ ( $result["Type"]);
       switch ( $result["Priority"])

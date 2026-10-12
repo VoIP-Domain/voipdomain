@@ -187,6 +187,7 @@ function agents_add_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Agents"), "link" => "/agents"),
     2 => array ( "title" => __ ( "Add"))
   ));
+  sys_set_menu_highlight ( "/agents");
 
   /**
    * Add page JavaScript requirements
@@ -199,7 +200,7 @@ function agents_add_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"agent_add_form\">\n";
 
   // Add agent name field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"agent_add_name\" class=\"control-label col-xs-2\">" . __ ( "Name") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Name\" class=\"form-control\" id=\"agent_add_name\" placeholder=\"" . __ ( "Agent name") . "\" />\n";
@@ -207,7 +208,7 @@ function agents_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add agent code field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"agent_add_code\" class=\"control-label col-xs-2\">" . __ ( "Code") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Code\" class=\"form-control\" id=\"agent_add_code\" placeholder=\"" . __ ( "Agent code") . "\" maxlength=\"4\" />\n";
@@ -215,7 +216,7 @@ function agents_add_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add agent password field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"agent_add_password\" class=\"control-label col-xs-2\">" . __ ( "Password") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <div class=\"input-group\">\n";
@@ -287,7 +288,7 @@ function agents_add_page ( $buffer, $parameters)
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
+ * @return void
  */
 function agents_clone_function ( $buffer, $parameters)
 {
@@ -334,6 +335,7 @@ function agents_view_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Agents"), "link" => "/agents"),
     2 => array ( "title" => __ ( "View"))
   ));
+  sys_set_menu_highlight ( "/agents");
 
   /**
    * Create page code
@@ -414,6 +416,7 @@ function agents_edit_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Agents"), "link" => "/agents"),
     2 => array ( "title" => __ ( "Edit"))
   ));
+  sys_set_menu_highlight ( "/agents");
 
   /**
    * Add page JavaScript requirements
@@ -426,7 +429,7 @@ function agents_edit_page ( $buffer, $parameters)
   $output = "<form class=\"form-horizontal\" id=\"agent_edit_form\">\n";
 
   // Add agent name field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"agent_edit_name\" class=\"control-label col-xs-2\">" . __ ( "Name") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Name\" class=\"form-control\" id=\"agent_edit_name\" placeholder=\"" . __ ( "Agent name") . "\" />\n";
@@ -434,7 +437,7 @@ function agents_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add agent code field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"agent_edit_code\" class=\"control-label col-xs-2\">" . __ ( "Code") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <input type=\"text\" name=\"Code\" class=\"form-control\" id=\"agent_edit_code\" placeholder=\"" . __ ( "Agent code") . "\" maxlength=\"4\" />\n";
@@ -442,7 +445,7 @@ function agents_edit_page ( $buffer, $parameters)
   $output .= "  </div>\n";
 
   // Add agent password field
-  $output .= "  <div class=\"form-group\">\n";
+  $output .= "  <div class=\"form-group required\">\n";
   $output .= "    <label for=\"agent_edit_password\" class=\"control-label col-xs-2\">" . __ ( "Password") . "</label>\n";
   $output .= "    <div class=\"col-xs-10\">\n";
   $output .= "      <div class=\"input-group\">\n";

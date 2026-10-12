@@ -217,8 +217,7 @@ function queues_search ( $buffer, $parameters)
    */
   if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `Name` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%')" : "") . " ORDER BY `Name`, `Description`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_search");
   }
 
   /**
@@ -411,8 +410,7 @@ function queues_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_view");
   }
   if ( ! $queue = $result->fetch_assoc ())
   {
@@ -579,8 +577,7 @@ function queues_add ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "'"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "queues_add");
     }
     if ( $result->num_rows != 0)
     {
@@ -626,8 +623,7 @@ function queues_add ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Queues` (`Tenant`, `Description`, `Name`, `Strategy`) VALUES (" . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Strategy"]) . "')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_add");
   }
   $parameters["ID"] = $_in["mysql"]["id"]->insert_id;
 
@@ -795,8 +791,7 @@ function queues_edit ( $buffer, $parameters)
   {
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "' AND `ID` != " . (int) $parameters["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "queues_edit");
     }
     if ( $result->num_rows != 0)
     {
@@ -809,8 +804,7 @@ function queues_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_edit");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -861,8 +855,7 @@ function queues_edit ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Queues` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', `Strategy` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Strategy"]) . "' WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_edit");
   }
 
   /**
@@ -1002,8 +995,7 @@ function queues_remove ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_remove");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -1016,13 +1008,11 @@ function queues_remove ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `ExtensionQueue` WHERE `Queue` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_remove");
   }
   if ( $result->num_rows != 0)
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_remove");
   }
 
   /**
@@ -1038,8 +1028,7 @@ function queues_remove ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_remove");
   }
 
   /**
@@ -1165,8 +1154,7 @@ function queues_join_member ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["Queue"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_join_member");
   }
   if ( ! $queue = $result->fetch_assoc ())
   {
@@ -1187,8 +1175,7 @@ function queues_join_member ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `QueueMembers` WHERE `Queue` = " . (int) $parameters["Queue"] . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . (int) $parameters["Agent"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_join_member");
   }
   if ( $result->num_rows != 0)
   {
@@ -1239,8 +1226,7 @@ function queues_join_member ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `QueueMembers` (`Queue`, `Member`) VALUES (" . (int) $parameters["Queue"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . $parameters["Agent"]) . "')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_join_member");
   }
 
   /**
@@ -1366,8 +1352,7 @@ function queues_leave_member ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["Queue"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_leave_member");
   }
   if ( ! $queue = $result->fetch_assoc ())
   {
@@ -1388,8 +1373,7 @@ function queues_leave_member ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `QueueMembers` WHERE `Queue` = " . (int) $parameters["Queue"] . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . (int) $parameters["Agent"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_leave_member");
   }
   if ( $result->num_rows != 0)
   {
@@ -1440,8 +1424,7 @@ function queues_leave_member ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `QueueMembers` WHERE `Queue` = " . (int) $parameters["Queue"] . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . $parameters["Agent"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_leave_member");
   }
 
   /**
@@ -1567,8 +1550,7 @@ function queues_pause_member ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["Queue"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_pause_member");
   }
   if ( ! $queue = $result->fetch_assoc ())
   {
@@ -1589,8 +1571,7 @@ function queues_pause_member ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `QueueMembers` WHERE `Queue` = " . (int) $parameters["Queue"]["ID"] . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . (int) $parameters["Agent"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_pause_member");
   }
   if ( $result->num_rows != 0)
   {
@@ -1759,8 +1740,7 @@ function queues_resume_member ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["Queue"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_resume_member");
   }
   if ( ! $queue = $result->fetch_assoc ())
   {
@@ -1781,8 +1761,7 @@ function queues_resume_member ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `QueueMembers` WHERE `Queue` = " . (int) $parameters["Queue"] . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . (int) $parameters["Agent"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_resume_member");
   }
   if ( $result->num_rows != 0)
   {
@@ -1884,8 +1863,7 @@ function queues_server_reconfig ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Queues` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_server_reconfig");
   }
   while ( $queue = $result->fetch_assoc ())
   {
@@ -1902,8 +1880,7 @@ function queues_server_reconfig ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Queues`.`Name`, `QueueMembers`.`Member` FROM `QueueMembers` LEFT JOIN `Queues` ON `QueueMembers`.`Queue` = `Queues`.`ID` WHERE `Queues`.`Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "queues_server_reconfig");
   }
   while ( $queuemember = $result->fetch_assoc ())
   {

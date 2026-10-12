@@ -622,6 +622,7 @@ function tenants_add_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Tenants"), "link" => "/tenants"),
     2 => array ( "title" => __ ( "Add"))
   ));
+  sys_set_menu_highlight ( "/tenants");
 
   /**
    * Add page CSS requirements
@@ -653,7 +654,7 @@ function tenants_add_page ( $buffer, $parameters)
   $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in active\" id=\"tenant_add_tab_basic\">\n";
 
   // Add name field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"tenant_add_name\" class=\"control-label col-xs-2\">" . __ ( "Name") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Name\" class=\"form-control\" id=\"tenant_add_name\" placeholder=\"" . __ ( "Tenant name") . "\" />\n";
@@ -661,7 +662,7 @@ function tenants_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add domain field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"tenant_add_domain\" class=\"control-label col-xs-2\">" . __ ( "Domain") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Domain\" class=\"form-control\" id=\"tenant_add_domain\" placeholder=\"" . __ ( "Tenant domain") . "\" maxlength=\"255\" />\n";
@@ -669,7 +670,7 @@ function tenants_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add email field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"tenant_add_email\" class=\"control-label col-xs-2\">" . __ ( "E-mail") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"email\" name=\"Email\" class=\"form-control\" id=\"tenant_add_email\" placeholder=\"" . __ ( "Tenant administrator e-mail") . "\" />\n";
@@ -694,7 +695,7 @@ function tenants_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add country selector
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"tenant_add_country\" class=\"control-label col-xs-2\">" . __ ( "Country") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"Country\" id=\"tenant_add_country\" class=\"form-control\" data-placeholder=\"" . __ ( "Tenant country") . "\"><option value=\"\"></option></select>\n";
@@ -702,7 +703,7 @@ function tenants_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add timezone selector
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"tenant_add_timezone\" class=\"control-label col-xs-2\">" . __ ( "Time zone") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"TimeZone\" id=\"tenant_add_timezone\" class=\"form-control\" data-placeholder=\"" . __ ( "Tenant time zone") . "\">\n";
@@ -713,7 +714,7 @@ function tenants_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add language field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"tenant_add_language\" class=\"control-label col-xs-2\">" . __ ( "Language") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"Language\" class=\"form-control\" id=\"tenant_add_language\" data-placeholder=\"" . __ ( "Tenant language") . "\"><option value=\"\"></option></select>\n";
@@ -721,7 +722,7 @@ function tenants_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add currency field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"tenant_add_currency\" class=\"control-label col-xs-2\">" . __ ( "Currency") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"Currency\" class=\"form-control\" id=\"tenant_add_currency\" data-placeholder=\"" . __ ( "Tenant currency") . "\"><option value=\"\"></option></select>\n";
@@ -733,7 +734,7 @@ function tenants_add_page ( $buffer, $parameters)
   $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in\" id=\"tenant_add_tab_account\">\n";
 
   // Add name field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"tenant_add_adminname\" class=\"control-label col-xs-2\">" . __ ( "Name") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"AdminName\" class=\"form-control\" id=\"tenant_add_adminname\" placeholder=\"" . __ ( "Tenant administrator name") . "\" />\n";
@@ -741,7 +742,7 @@ function tenants_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add login field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"tenant_add_username\" class=\"control-label col-xs-2\">" . __ ( "Username") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Username\" class=\"form-control\" id=\"tenant_add_username\" placeholder=\"" . __ ( "Tenant administrator login name") . "\" />\n";
@@ -749,7 +750,7 @@ function tenants_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add password field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"tenant_add_password\" class=\"control-label col-xs-2\">" . __ ( "Password") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"password\" name=\"Password\" class=\"form-control\" id=\"tenant_add_password\" placeholder=\"" . __ ( "Tenant administrator password") . "\" autocomplete=\"off\" />\n";
@@ -757,7 +758,7 @@ function tenants_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add password confirmation field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"tenant_add_confirmation\" class=\"control-label col-xs-2\">" . __ ( "Confirmation") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"password\" name=\"Confirmation\" class=\"form-control\" id=\"tenant_add_confirmation\" placeholder=\"" . __ ( "Tenant administrator password confirmation") . "\" autocomplete=\"off\" />\n";
@@ -890,7 +891,7 @@ function tenants_add_page ( $buffer, $parameters)
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
+ * @return void
  */
 function tenants_clone_function ( $buffer, $parameters)
 {
@@ -944,6 +945,7 @@ function tenants_view_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Tenants"), "link" => "/tenants"),
     2 => array ( "title" => __ ( "View"))
   ));
+  sys_set_menu_highlight ( "/tenants");
 
   /**
    * Add page CSS requirements
@@ -1254,6 +1256,7 @@ function tenants_edit_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Tenants"), "link" => "/tenants"),
     2 => array ( "title" => __ ( "Edit"))
   ));
+  sys_set_menu_highlight ( "/tenants");
 
   /**
    * Add page CSS requirements
@@ -1285,7 +1288,7 @@ function tenants_edit_page ( $buffer, $parameters)
   $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in active\" id=\"tenant_edit_tab_basic\">\n";
 
   // Add name field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"tenant_edit_name\" class=\"control-label col-xs-2\">" . __ ( "Name") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Name\" class=\"form-control\" id=\"tenant_edit_name\" placeholder=\"" . __ ( "Tenant name") . "\" />\n";
@@ -1293,7 +1296,7 @@ function tenants_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add domain field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"tenant_edit_domain\" class=\"control-label col-xs-2\">" . __ ( "Domain") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Domain\" class=\"form-control\" id=\"tenant_edit_domain\" placeholder=\"" . __ ( "Tenant domain") . "\" maxlength=\"255\" />\n";
@@ -1326,7 +1329,7 @@ function tenants_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add country selector
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"tenant_edit_country\" class=\"control-label col-xs-2\">" . __ ( "Country") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"Country\" id=\"tenant_edit_country\" class=\"form-control\" data-placeholder=\"" . __ ( "Tenant country") . "\"><option value=\"\"></option></select>\n";
@@ -1334,7 +1337,7 @@ function tenants_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add timezone selector
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"tenant_edit_timezone\" class=\"control-label col-xs-2\">" . __ ( "Time zone") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"TimeZone\" id=\"tenant_edit_timezone\" class=\"form-control\" data-placeholder=\"" . __ ( "Tenant time zone") . "\">\n";
@@ -1345,7 +1348,7 @@ function tenants_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add language field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"tenant_edit_language\" class=\"control-label col-xs-2\">" . __ ( "Language") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"Language\" class=\"form-control\" id=\"tenant_edit_language\" data-placeholder=\"" . __ ( "Tenant language") . "\"><option value=\"\"></option></select>\n";
@@ -1353,7 +1356,7 @@ function tenants_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add currency field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"tenant_edit_currency\" class=\"control-label col-xs-2\">" . __ ( "Currency") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"Currency\" class=\"form-control\" id=\"tenant_edit_currency\" data-placeholder=\"" . __ ( "Tenant currency") . "\"><option value=\"\"></option></select>\n";

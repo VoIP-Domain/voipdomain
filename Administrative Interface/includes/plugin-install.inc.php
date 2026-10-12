@@ -85,8 +85,10 @@ function plugin_install_db_init ()
   $_in["install"]["db"] = array (
     "procedures" => array (),
     "tables" => array (),
+    "alters" => array (),
     "triggers" => array (),
-    "data" => array ()
+    "data" => array (),
+    "raw" => array ()
   );
 }
 
@@ -183,6 +185,73 @@ function install_add_db_data ( $name, $data, $deps = array ())
 }
 
 /**
+ * Function to add an ALTER TABLE statement to the system database installation.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $name A unique identifier for this alteration (e.g., "MyTable_add_col")
+ * @param string $data The ALTER TABLE SQL statement
+ * @param array $deps[optional] Array with names of other alter entries that must run first
+ * @return boolean If the alter was added
+ */
+function install_add_db_alter ( $name, $data, $deps = array ())
+{
+  global $_in;
+
+  if ( array_key_exists ( $name, $_in["install"]["db"]["alters"]))
+  {
+    return false;
+  }
+  $_in["install"]["db"]["alters"][$name] = array ( "data" => $data, "deps" => $deps);
+  return true;
+}
+
+/**
+ * Function to add arbitrary SQL to the system database installation. This is an
+ * escape hatch for complex migrations that cannot be expressed via the structured
+ * functions. Raw SQL runs after alters and before triggers.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $name A unique identifier for this raw statement
+ * @param string $data The SQL statement(s) to execute
+ * @param array $deps[optional] Array with names of other raw entries that must run first
+ * @return boolean If the raw SQL was added
+ */
+function install_add_db_raw ( $name, $data, $deps = array ())
+{
+  global $_in;
+
+  if ( array_key_exists ( $name, $_in["install"]["db"]["raw"]))
+  {
+    return false;
+  }
+  $_in["install"]["db"]["raw"][$name] = array ( "data" => $data, "deps" => $deps);
+  return true;
+}
+
+/**
+ * Function to register a DROP statement for database cleanup during uninstall
+ * or schema migration.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $name The object name to drop
+ * @param string $type Object type: "table", "trigger", "procedure"
+ * @param array $deps[optional] Array with names of other raw entries that must run first
+ * @return boolean If the drop was added
+ */
+function install_add_db_drop ( $name, $type, $deps = array ())
+{
+  global $_in;
+
+  $types = array ( "table" => "DROP TABLE IF EXISTS", "trigger" => "DROP TRIGGER IF EXISTS", "procedure" => "DROP PROCEDURE IF EXISTS");
+  if ( ! array_key_exists ( $type, $types))
+  {
+    return false;
+  }
+  $sql = $types[$type] . " `" . $name . "`";
+  return install_add_db_raw ( "drop_" . $type . "_" . $name, $sql, $deps);
+}
+
+/**
  * Process pending database objects collected through install hooks.
  *
  * @global array $_in Framework global configuration variable
@@ -219,7 +288,10 @@ function plugin_process_db ( $return = array ())
           $depsok = true;
           foreach ( $data["deps"] as $dep)
           {
-            if ( $_in["install"]["db"]["procedures"][$dep]["installed"] != true)
+            if ( ! array_key_exists ( $dep, $_in["install"]["db"]["procedures"]))
+            {
+              continue;
+            } else if ( $_in["install"]["db"]["procedures"][$dep]["installed"] != true)
             {
               $depsok = false;
             }
@@ -271,7 +343,15 @@ function plugin_process_db ( $return = array ())
           $depsok = true;
           foreach ( $data["deps"] as $dep)
           {
-            if ( $_in["install"]["db"]["tables"][$dep]["installed"] != true)
+            if ( ! array_key_exists ( $dep, $_in["install"]["db"]["tables"]))
+            {
+              $check = @$_in["mysql"]["id"]->query ( "SHOW TABLES LIKE '" . $_in["mysql"]["id"]->real_escape_string ( $dep) . "'");
+              if ( $check && $check->num_rows > 0)
+              {
+                continue;
+              }
+              $depsok = false;
+            } else if ( $_in["install"]["db"]["tables"][$dep]["installed"] != true)
             {
               $depsok = false;
             }
@@ -305,6 +385,110 @@ function plugin_process_db ( $return = array ())
   /**
    * Create database triggers
    */
+  if ( sizeof ( $_in["install"]["db"]["alters"]))
+  {
+    foreach ( $_in["install"]["db"]["alters"] as $name => $data)
+    {
+      $_in["install"]["db"]["alters"][$name]["installed"] = false;
+    }
+    $toinstall = sizeof ( $_in["install"]["db"]["alters"]);
+    while ( $toinstall > 0)
+    {
+      $lastinst = $toinstall;
+      $pending = false;
+      foreach ( $_in["install"]["db"]["alters"] as $name => $data)
+      {
+        if ( $data["installed"] == false)
+        {
+          $depsok = true;
+          foreach ( $data["deps"] as $dep)
+          {
+            if ( array_key_exists ( $dep, $_in["install"]["db"]["alters"]) && $_in["install"]["db"]["alters"][$dep]["installed"] != true)
+            {
+              $depsok = false;
+            }
+          }
+          if ( $depsok)
+          {
+            $toinstall--;
+            if ( @$_in["mysql"]["id"]->query ( $data["data"]))
+            {
+              $_in["install"]["db"]["alters"][$name]["installed"] = true;
+            } else {
+              if ( ! array_key_exists ( "Alters", $return))
+              {
+                $return["Alters"] = array ();
+              }
+              $return["Alters"][] = sprintf ( __ ( "Error executing database alter \"%s\": %s", true, false), $name, $_in["mysql"]["id"]->error);
+            }
+          } else {
+            $pending = true;
+          }
+        }
+      }
+      if ( $lastinst == $toinstall && $pending == true)
+      {
+        $return["Alters"][] = __ ( "There are pending alters not executed due to dependency error.");
+        $toinstall = 0;
+      }
+    }
+  }
+
+  /**
+   * Execute raw SQL statements
+   */
+  if ( sizeof ( $_in["install"]["db"]["raw"]))
+  {
+    foreach ( $_in["install"]["db"]["raw"] as $name => $data)
+    {
+      $_in["install"]["db"]["raw"][$name]["installed"] = false;
+    }
+    $toinstall = sizeof ( $_in["install"]["db"]["raw"]);
+    while ( $toinstall > 0)
+    {
+      $lastinst = $toinstall;
+      $pending = false;
+      foreach ( $_in["install"]["db"]["raw"] as $name => $data)
+      {
+        if ( $data["installed"] == false)
+        {
+          $depsok = true;
+          foreach ( $data["deps"] as $dep)
+          {
+            if ( array_key_exists ( $dep, $_in["install"]["db"]["raw"]) && $_in["install"]["db"]["raw"][$dep]["installed"] != true)
+            {
+              $depsok = false;
+            }
+          }
+          if ( $depsok)
+          {
+            $toinstall--;
+            if ( @$_in["mysql"]["id"]->query ( $data["data"]))
+            {
+              $_in["install"]["db"]["raw"][$name]["installed"] = true;
+            } else {
+              if ( ! array_key_exists ( "Raw", $return))
+              {
+                $return["Raw"] = array ();
+              }
+              $return["Raw"][] = sprintf ( __ ( "Error executing raw SQL \"%s\": %s", true, false), $name, $_in["mysql"]["id"]->error);
+            }
+          } else {
+            $pending = true;
+          }
+        }
+      }
+      if ( $lastinst == $toinstall && $pending == true)
+      {
+        $return["Raw"][] = __ ( "There are pending raw SQL statements not executed due to dependency error.");
+        $toinstall = 0;
+      }
+    }
+  }
+
+  /**
+   * Create database triggers (after alters and raw SQL)
+   */
   if ( sizeof ( $_in["install"]["db"]["triggers"]))
   {
     foreach ( $_in["install"]["db"]["triggers"] as $name => $data)
@@ -323,7 +507,10 @@ function plugin_process_db ( $return = array ())
           $depsok = true;
           foreach ( $data["deps"] as $dep)
           {
-            if ( $_in["install"]["db"]["triggers"][$dep]["installed"] != true)
+            if ( ! array_key_exists ( $dep, $_in["install"]["db"]["triggers"]))
+            {
+              continue;
+            } else if ( $_in["install"]["db"]["triggers"][$dep]["installed"] != true)
             {
               $depsok = false;
             }
@@ -375,7 +562,10 @@ function plugin_process_db ( $return = array ())
           $depsok = true;
           foreach ( $data["deps"] as $dep)
           {
-            if ( $_in["install"]["db"]["data"][$dep]["installed"] != true)
+            if ( ! array_key_exists ( $dep, $_in["install"]["db"]["data"]))
+            {
+              continue;
+            } else if ( $_in["install"]["db"]["data"][$dep]["installed"] != true)
             {
               $depsok = false;
             }
@@ -484,7 +674,127 @@ function plugin_copy_recursive ( $source, $destination)
  */
 function plugin_get_daemon_module_types ()
 {
-  return array ( "client-modules", "fastagi-modules", "monitor-modules", "router-modules");
+  return array ( "client-plugins", "fastagi-plugins", "monitor-plugins", "router-plugins");
+}
+
+/**
+ * Validate and parse a plugin.json manifest file.
+ *
+ * @param string $filepath Full path to the plugin.json file
+ * @return array|false Parsed manifest array on success, false on validation failure
+ */
+function plugin_validate_manifest ( $filepath )
+{
+  if ( ! is_readable ( $filepath))
+  {
+    return false;
+  }
+  $json = file_get_contents ( $filepath);
+  $manifest = json_decode ( $json, true);
+  if ( ! is_array ( $manifest))
+  {
+    return false;
+  }
+
+  // Required fields
+  $required = array ( "name", "display_name", "version", "author", "description", "license");
+  foreach ( $required as $field)
+  {
+    if ( ! array_key_exists ( $field, $manifest) || empty ( $manifest[$field]))
+    {
+      return false;
+    }
+  }
+
+  // Author must have at least name
+  if ( ! is_array ( $manifest["author"]) || ! array_key_exists ( "name", $manifest["author"]) || empty ( $manifest["author"]["name"]))
+  {
+    return false;
+  }
+
+  // Version must be valid semver-like
+  if ( ! preg_match ( '/^\d+\.\d+\.\d+/', $manifest["version"]))
+  {
+    return false;
+  }
+
+  // Normalize optional fields
+  if ( ! array_key_exists ( "requires", $manifest) || ! is_array ( $manifest["requires"]))
+  {
+    $manifest["requires"] = array ();
+  }
+  if ( ! array_key_exists ( "conflicts", $manifest) || ! is_array ( $manifest["conflicts"]))
+  {
+    $manifest["conflicts"] = array ();
+  }
+  if ( ! array_key_exists ( "daemons", $manifest) || ! is_array ( $manifest["daemons"]))
+  {
+    $manifest["daemons"] = array ();
+  }
+  if ( ! array_key_exists ( "hooks", $manifest) || ! is_array ( $manifest["hooks"]))
+  {
+    $manifest["hooks"] = array ();
+  }
+  if ( ! array_key_exists ( "config", $manifest) || ! is_array ( $manifest["config"]))
+  {
+    $manifest["config"] = array ();
+  }
+  if ( ! array_key_exists ( "signature", $manifest) || ! is_array ( $manifest["signature"]))
+  {
+    $manifest["signature"] = array ();
+  }
+  if ( ! array_key_exists ( "published", $manifest))
+  {
+    $manifest["published"] = null;
+  }
+  if ( ! array_key_exists ( "support", $manifest) || ! is_array ( $manifest["support"]))
+  {
+    $manifest["support"] = array ();
+  }
+
+  return $manifest;
+}
+
+/**
+ * Parse a plugin manifest into the internal config format expected by the
+ * import pipeline. Bridges the gap between plugin.json structure and the
+ * legacy $parameters["config"] format.
+ *
+ * @param array $manifest Validated manifest from plugin_validate_manifest()
+ * @return array Config array compatible with plugin import pipeline
+ */
+function plugin_manifest_to_config ( $manifest )
+{
+  $config = array ();
+  $config["name"] = $manifest["display_name"];
+  $config["version"] = $manifest["version"];
+  $config["description"] = $manifest["description"];
+  $config["author"] = $manifest["author"]["name"];
+  $config["email"] = array_key_exists ( "email", $manifest["author"]) ? $manifest["author"]["email"] : "";
+  $config["license"] = $manifest["license"];
+  $config["daemons"] = $manifest["daemons"];
+  $config["published"] = $manifest["published"];
+  $config["support_url"] = array_key_exists ( "url", $manifest["support"]) ? $manifest["support"]["url"] : "";
+  $config["support_email"] = array_key_exists ( "email", $manifest["support"]) ? $manifest["support"]["email"] : "";
+  $config["signature"] = $manifest["signature"];
+  $config["conflicts"] = $manifest["conflicts"];
+
+  // Convert requires from {"core": ">=1.0.0"} to ["core >= 1.0.0"]
+  $config["require"] = array ();
+  if ( is_array ( $manifest["requires"]))
+  {
+    foreach ( $manifest["requires"] as $module => $constraint)
+    {
+      if ( preg_match ( '/^(>=|<=|>|<|=|!=)\s*(.+)$/', $constraint, $m))
+      {
+        $config["require"][] = $module . " " . $m[1] . " " . $m[2];
+      } else {
+        $config["require"][] = $module . " >= " . $constraint;
+      }
+    }
+  }
+
+  return $config;
 }
 
 /**
@@ -524,7 +834,7 @@ function plugin_db_manifest_has_content ( $manifest)
   {
     return false;
   }
-  foreach ( array ( "procedures", "tables", "triggers", "data") as $key)
+  foreach ( array ( "procedures", "tables", "alters", "triggers", "data", "raw") as $key)
   {
     if ( array_key_exists ( $key, $manifest) && is_array ( $manifest[$key]) && sizeof ( $manifest[$key]))
     {
@@ -543,9 +853,10 @@ function plugin_db_manifest_has_content ( $manifest)
  * @param string $pluginname Plugin directory name
  * @param string $script Script file name
  * @param string $hook Database hook name
+ * @param array $parameters Version context passed to hook functions
  * @return array|null
  */
-function plugin_collect_db_script ( $plugindir, $pluginname, $script, $hook)
+function plugin_collect_db_script ( $plugindir, $pluginname, $script, $hook, $parameters = array ())
 {
   global $_plugins, $_in;
 
@@ -560,7 +871,7 @@ function plugin_collect_db_script ( $plugindir, $pluginname, $script, $hook)
   {
     if ( function_exists ( $function))
     {
-      call_user_func ( $function, "", array ());
+      call_user_func ( $function, "", $parameters);
     }
   }
   if ( ! array_key_exists ( "install", $_in) || ! array_key_exists ( "db", $_in["install"]))
@@ -573,18 +884,19 @@ function plugin_collect_db_script ( $plugindir, $pluginname, $script, $hook)
 /**
  * Run plugin database hooks from install.php or update.php.
  *
- * @global array $_plugins Plugin system global variable
+ * @global array $_in Framework global configuration variable
  * @param string $plugindir Plugin directory path
  * @param string $pluginname Plugin directory name
  * @param string $script Script file name
  * @param string $hook Database hook name
+ * @param array $parameters Version context passed to hook functions
  * @return array
  */
-function plugin_run_db_script ( $plugindir, $pluginname, $script, $hook)
+function plugin_run_db_script ( $plugindir, $pluginname, $script, $hook, $parameters = array ())
 {
   global $_in;
 
-  $manifest = plugin_collect_db_script ( $plugindir, $pluginname, $script, $hook);
+  $manifest = plugin_collect_db_script ( $plugindir, $pluginname, $script, $hook, $parameters);
   if ( $manifest === null)
   {
     return array ();
@@ -663,6 +975,7 @@ function plugin_archive_directory ( $sourcedir, $archivepath)
 /**
  * Sync deployed daemon module directories to remote servers.
  *
+ * @global array $_in Framework global configuration variable
  * @param string $plugindir Plugin directory path
  * @param string $pluginname Plugin directory name
  * @param array $modules Deployed module entries (type/module)
@@ -682,14 +995,27 @@ function plugin_sync_daemon_modules_remote ( $plugindir, $pluginname, $modules, 
       continue;
     }
     list ( $type, $module) = explode ( "/", $entry, 2);
+
+    $daemon_type = str_replace ( "-plugins", "", $type);
+
     if ( $action == "remove")
     {
-      $notify = array ( "Plugin" => $pluginname, "ModuleType" => $type, "Module" => $module);
-      if ( ! notify_server ( $serverid, "plugin_daemon_module_remove", $notify))
+      $notify = array ( "Plugin" => $pluginname, "ModuleType" => $type, "Module" => $module, "DaemonType" => $daemon_type);
+      if ( $daemon_type == "client")
       {
-        $result["errors"][] = $entry;
+        if ( ! notify_server ( $serverid, "plugin_daemon_module_remove", $notify))
+        {
+          $result["errors"][] = $entry;
+        } else {
+          $result["synced"][] = $entry;
+        }
       } else {
-        $result["synced"][] = $entry;
+        if ( ! plugin_gearman_dispatch ( $serverid, $daemon_type, "plugin_daemon_module_remove", $notify))
+        {
+          $result["errors"][] = $entry;
+        } else {
+          $result["synced"][] = $entry;
+        }
       }
       continue;
     }
@@ -704,16 +1030,31 @@ function plugin_sync_daemon_modules_remote ( $plugindir, $pluginname, $modules, 
       $result["errors"][] = $entry;
       continue;
     }
-    $metadata = array ( "Plugin" => $pluginname, "ModuleType" => $type, "Module" => $module);
-    if ( ! file_transfer_send ( $serverid, $archive, array (
-      "TargetEvent" => "plugin_daemon_module_deploy",
-      "Context" => "plugin",
-      "Metadata" => $metadata
-    )))
+    $metadata = array ( "Plugin" => $pluginname, "ModuleType" => $type, "Module" => $module, "DaemonType" => $daemon_type);
+    if ( $daemon_type == "client")
     {
-      $result["errors"][] = $entry;
+      if ( ! file_transfer_send ( $serverid, $archive, array (
+        "TargetEvent" => "plugin_daemon_module_deploy",
+        "Context" => "plugin",
+        "Metadata" => $metadata
+      )))
+      {
+        $result["errors"][] = $entry;
+      } else {
+        $result["synced"][] = $entry;
+      }
     } else {
-      $result["synced"][] = $entry;
+      if ( ! file_transfer_send ( $serverid, $archive, array (
+        "TargetEvent" => "plugin_daemon_module_deploy",
+        "Context" => "plugin",
+        "Metadata" => $metadata,
+        "TargetDaemon" => $daemon_type
+      )))
+      {
+        $result["errors"][] = $entry;
+      } else {
+        $result["synced"][] = $entry;
+      }
     }
     @unlink ( $archive);
   }
@@ -721,15 +1062,78 @@ function plugin_sync_daemon_modules_remote ( $plugindir, $pluginname, $modules, 
 }
 
 /**
+ * Dispatch a Gearman task to a specific daemon type on a server.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param int $serverid Target server ID (0 = all servers)
+ * @param string $daemon_type Daemon type (fastagi, monitor, router)
+ * @param string $hook Hook/event name to call
+ * @param array $payload Data to pass
+ * @return boolean Success
+ */
+function plugin_gearman_dispatch ( $serverid, $daemon_type, $hook, $payload)
+{
+  global $_in;
+
+  $gearman_host = ! empty ( $_in["gearman"]["hostname"]) ? $_in["gearman"]["hostname"] : "127.0.0.1";
+  $gearman_port = ! empty ( $_in["gearman"]["port"]) ? $_in["gearman"]["port"] : 4730;
+  try
+  {
+    $gm = new GearmanClient ();
+    $gm->addServer ( $gearman_host, $gearman_port);
+  } catch ( Exception $e) {
+    return false;
+  }
+
+  $workload = json_encode ( array ( "hook" => $hook, "data" => $payload));
+
+  if ( $daemon_type == "router")
+  {
+    @$gm->doBackground ( "vd_router_task", $workload);
+    return $gm->returnCode () == GEARMAN_SUCCESS;
+  }
+
+  if ( $serverid == 0)
+  {
+    $servers = array ();
+    $result = @$_in["mysql"]["id"]->query ( "SELECT `ID` FROM `Servers`");
+    if ( $result)
+    {
+      while ( $row = $result->fetch_assoc ())
+      {
+        $servers[] = $row["ID"];
+      }
+    }
+    $success = true;
+    foreach ( $servers as $sid)
+    {
+      $function_name = "vd_" . $daemon_type . "_" . $sid . "_task";
+      $ret = @$gm->doBackground ( $function_name, $workload);
+      if ( $gm->returnCode () != GEARMAN_SUCCESS)
+      {
+        $success = false;
+      }
+    }
+    return $success;
+  }
+
+  $function_name = "vd_" . $daemon_type . "_" . $serverid . "_task";
+  @$gm->doBackground ( $function_name, $workload);
+  return $gm->returnCode () == GEARMAN_SUCCESS;
+}
+
+/**
  * Sync a plugin database manifest to remote servers.
  *
+ * @global array $_in Framework global configuration variable
  * @param array $manifest Database manifest collected from install/update/uninstall
  * @param string $pluginname Plugin directory name
  * @param string $hook Database hook name
  * @param int $serverid Server ID (0 = all servers)
+ * @param array $version_info Version context (version, version_from, version_to, type)
  * @return array
  */
-function plugin_sync_db_manifest_remote ( $manifest, $pluginname, $hook, $serverid = 0)
+function plugin_sync_db_manifest_remote ( $manifest, $pluginname, $hook, $serverid = 0, $version_info = array ())
 {
   global $_in;
 
@@ -742,15 +1146,20 @@ function plugin_sync_db_manifest_remote ( $manifest, $pluginname, $hook, $server
   {
     @mkdir ( $spooldir, 0755, true);
   }
+  $payload = array ( "manifest" => $manifest);
+  if ( sizeof ( $version_info) > 0)
+  {
+    $payload["version_info"] = $version_info;
+  }
   $jsonfile = $spooldir . "/db-" . $pluginname . "-" . $hook . "-" . md5 ( microtime ( true)) . ".json";
-  if ( ! @file_put_contents ( $jsonfile, json_encode ( $manifest)))
+  if ( ! @file_put_contents ( $jsonfile, json_encode ( $payload)))
   {
     return array ( "errors" => array ( "manifest"));
   }
   $synced = file_transfer_send ( $serverid, $jsonfile, array (
     "TargetEvent" => "plugin_db_apply",
     "Context" => "plugin",
-    "Metadata" => array ( "Plugin" => $pluginname, "Hook" => $hook)
+    "Metadata" => array ( "Plugin" => $pluginname, "Hook" => $hook, "VersionInfo" => $version_info)
   ));
   @unlink ( $jsonfile);
   return array ( "synced" => $synced ? true : false, "hook" => $hook);
@@ -874,6 +1283,9 @@ function plugin_apply_installation ( $plugindir, $pluginname, $parameters)
 {
   $result = array ();
   $upgrade = array_key_exists ( "upgrade", $parameters) && $parameters["upgrade"] == true;
+  $pluginversion = array_key_exists ( "config", $parameters) && array_key_exists ( "version", $parameters["config"]) ? $parameters["config"]["version"] : "1.0.0";
+  $currentversion = array_key_exists ( "ORIGINAL", $parameters) && array_key_exists ( "Version", $parameters["ORIGINAL"]) ? $parameters["ORIGINAL"]["Version"] : null;
+
   $lifecycle = array (
     "name" => $pluginname,
     "config" => $parameters["config"],
@@ -884,24 +1296,34 @@ function plugin_apply_installation ( $plugindir, $pluginname, $parameters)
     $lifecycle["original"] = $parameters["ORIGINAL"];
   }
 
+  $db_parameters = array (
+    "type" => $upgrade ? "upgrade" : "install",
+    "version" => $pluginversion
+  );
+  if ( $upgrade && $currentversion !== null)
+  {
+    $db_parameters["version_from"] = $currentversion;
+    $db_parameters["version_to"] = $pluginversion;
+  }
+
   if ( $upgrade && is_readable ( $plugindir . "/update.php"))
   {
-    $dbresult = plugin_run_db_script ( $plugindir, $pluginname, "update.php", "upgrade_db");
+    $dbresult = plugin_run_db_script ( $plugindir, $pluginname, "update.php", "upgrade_db", $db_parameters);
     $result = array_merge_recursive ( $result, $dbresult);
     if ( array_key_exists ( "db_manifest", $dbresult))
     {
-      $result["remote_db"] = plugin_sync_db_manifest_remote ( $dbresult["db_manifest"], $pluginname, "upgrade_db", 0);
+      $result["remote_db"] = plugin_sync_db_manifest_remote ( $dbresult["db_manifest"], $pluginname, "upgrade_db", 0, $db_parameters);
       unset ( $result["db_manifest"]);
     }
     plugin_call_lifecycle ( $pluginname, "upgrade", $lifecycle);
   } else {
     if ( is_readable ( $plugindir . "/install.php"))
     {
-      $dbresult = plugin_run_db_script ( $plugindir, $pluginname, "install.php", "install_db");
+      $dbresult = plugin_run_db_script ( $plugindir, $pluginname, "install.php", "install_db", $db_parameters);
       $result = array_merge_recursive ( $result, $dbresult);
       if ( array_key_exists ( "db_manifest", $dbresult))
       {
-        $result["remote_db"] = plugin_sync_db_manifest_remote ( $dbresult["db_manifest"], $pluginname, "install_db", 0);
+        $result["remote_db"] = plugin_sync_db_manifest_remote ( $dbresult["db_manifest"], $pluginname, "install_db", 0, $db_parameters);
         unset ( $result["db_manifest"]);
       }
     }
@@ -924,6 +1346,142 @@ function plugin_apply_installation ( $plugindir, $pluginname, $parameters)
     }
   }
 
+  /**
+   * Sync plugin configuration to target daemons via datadir
+   */
+  if ( array_key_exists ( "manifest", $parameters) && array_key_exists ( "config", $parameters["manifest"]) && sizeof ( $parameters["manifest"]["config"]) > 0)
+  {
+    $config_result = plugin_sync_config_to_daemons ( $pluginname, $parameters["manifest"]["config"], $parameters["manifest"]["daemons"]);
+    if ( sizeof ( $config_result["errors"]) > 0)
+    {
+      $result["config_sync_errors"] = $config_result["errors"];
+    }
+  }
+
+  return $result;
+}
+
+/**
+ * Sync plugin configuration data to all target daemons' datadir.
+ * Creates/updates /var/lib/voipdomain/data/plugin-{name}.json on each server.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $pluginname Plugin directory name
+ * @param array $config Plugin configuration data
+ * @param array $daemons List of target daemon types
+ * @return array Result with synced/errors arrays
+ */
+function plugin_sync_config_to_daemons ( $pluginname, $config, $daemons = array ())
+{
+  global $_in;
+
+  $result = array ( "synced" => array (), "errors" => array ());
+  $payload = json_encode ( $config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+  $filename = "plugin-" . $pluginname . ".json";
+
+  if ( sizeof ( $daemons) == 0)
+  {
+    $daemons = array ( "client");
+  }
+
+  $servers = array ();
+  $query = @$_in["mysql"]["id"]->query ( "SELECT `ID` FROM `Servers`");
+  if ( $query)
+  {
+    while ( $row = $query->fetch_assoc ())
+    {
+      $servers[] = $row["ID"];
+    }
+  }
+
+  foreach ( $servers as $serverid)
+  {
+    foreach ( $daemons as $daemon)
+    {
+      $notify_data = array (
+        "Plugin" => $pluginname,
+        "Filename" => $filename,
+        "Content" => base64_encode ( $payload),
+        "DaemonType" => $daemon
+      );
+      if ( $daemon == "client")
+      {
+        if ( ! notify_server ( $serverid, "plugin_config_sync", $notify_data))
+        {
+          $result["errors"][] = $daemon . "@server-" . $serverid;
+        } else {
+          $result["synced"][] = $daemon . "@server-" . $serverid;
+        }
+      } else {
+        if ( ! plugin_gearman_dispatch ( $serverid, $daemon, "plugin_config_sync", $notify_data))
+        {
+          $result["errors"][] = $daemon . "@server-" . $serverid;
+        } else {
+          $result["synced"][] = $daemon . "@server-" . $serverid;
+        }
+      }
+    }
+  }
+  return $result;
+}
+
+/**
+ * Remove plugin configuration from all target daemons' datadir.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $pluginname Plugin directory name
+ * @param array $daemons List of target daemon types
+ * @return array Result with synced/errors arrays
+ */
+function plugin_remove_config_from_daemons ( $pluginname, $daemons = array ())
+{
+  global $_in;
+
+  $result = array ( "synced" => array (), "errors" => array ());
+  $filename = "plugin-" . $pluginname . ".json";
+
+  if ( sizeof ( $daemons) == 0)
+  {
+    $daemons = array ( "client");
+  }
+
+  $servers = array ();
+  $query = @$_in["mysql"]["id"]->query ( "SELECT `ID` FROM `Servers`");
+  if ( $query)
+  {
+    while ( $row = $query->fetch_assoc ())
+    {
+      $servers[] = $row["ID"];
+    }
+  }
+
+  foreach ( $servers as $serverid)
+  {
+    foreach ( $daemons as $daemon)
+    {
+      $notify_data = array (
+        "Plugin" => $pluginname,
+        "Filename" => $filename,
+        "DaemonType" => $daemon
+      );
+      if ( $daemon == "client")
+      {
+        if ( ! notify_server ( $serverid, "plugin_config_remove", $notify_data))
+        {
+          $result["errors"][] = $daemon . "@server-" . $serverid;
+        } else {
+          $result["synced"][] = $daemon . "@server-" . $serverid;
+        }
+      } else {
+        if ( ! plugin_gearman_dispatch ( $serverid, $daemon, "plugin_config_remove", $notify_data))
+        {
+          $result["errors"][] = $daemon . "@server-" . $serverid;
+        } else {
+          $result["synced"][] = $daemon . "@server-" . $serverid;
+        }
+      }
+    }
+  }
   return $result;
 }
 
@@ -965,6 +1523,60 @@ function plugin_apply_removal ( $plugindir, $pluginname, $parameters)
       $result["reloaded"] = plugin_request_daemon_reload_all ( $reloadunits);
     }
   }
+
+  /**
+   * Remove plugin configuration from daemons' datadir
+   */
+  $daemons = array ();
+  if ( array_key_exists ( "ORIGINAL", $parameters) && ! empty ( $parameters["ORIGINAL"]["Daemons"]))
+  {
+    $daemons = explode ( ",", $parameters["ORIGINAL"]["Daemons"]);
+  }
+  if ( sizeof ( $daemons) == 0)
+  {
+    $daemons = array ( "client");
+  }
+  plugin_remove_config_from_daemons ( $pluginname, $daemons);
+
   return $result;
+}
+
+/**
+ * Check if any active plugins depend on the given plugin.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $pluginname Plugin directory name to check dependents for
+ * @return array List of plugin names that depend on this plugin
+ */
+function plugin_check_dependents ( $pluginname)
+{
+  global $_in;
+
+  $dependents = array ();
+  $result = @$_in["mysql"]["id"]->query ( "SELECT `Dirname`, `Name`, `Requires` FROM `Plugins` WHERE `Status` = 'A' AND `Dirname` != '" . $_in["mysql"]["id"]->real_escape_string ( $pluginname) . "'");
+  if ( ! $result)
+  {
+    return $dependents;
+  }
+  while ( $row = $result->fetch_assoc ())
+  {
+    $requires = json_decode ( $row["Requires"], true);
+    if ( ! is_array ( $requires))
+    {
+      continue;
+    }
+    foreach ( $requires as $reqstring)
+    {
+      if ( preg_match ( "/^(\w[\w-]*)/", trim ( $reqstring), $m))
+      {
+        if ( $m[1] === $pluginname)
+        {
+          $dependents[] = $row["Name"];
+          break;
+        }
+      }
+    }
+  }
+  return $dependents;
 }
 ?>

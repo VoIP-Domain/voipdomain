@@ -263,8 +263,7 @@ function servers_search ( $buffer, $parameters)
    */
   if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `Servers`.`ID`, `Servers`.`Description`, `Servers`.`Address`, `Servers`.`Port`, COUNT(`Extensions`.`Range`) AS `Extensions` FROM `Servers` LEFT JOIN `Ranges` ON `Ranges`.`Server` = `Servers`.`ID` LEFT JOIN `Extensions` ON `Extensions`.`Range` = `Ranges`.`ID` WHERE `Servers`.`Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND `Servers`.`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%'" : "") . " GROUP BY `Servers`.`ID` ORDER BY `Description`, `Address`, `Port`"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "servers_search");
   }
 
   /**
@@ -279,8 +278,7 @@ function servers_search ( $buffer, $parameters)
      */
     if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Description`, `Address`, `Port` FROM `ServerBackup` WHERE `Server` = " . (int) $result["ID"]))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "servers_search");
     }
     $result["Backups"] = array ();
     while ( $backup = $result2->fetch_assoc ())
@@ -524,8 +522,7 @@ function servers_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "servers_view");
   }
   if ( ! $server = $result->fetch_assoc ())
   {
@@ -538,8 +535,7 @@ function servers_view ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ID`, `Description`, `Address`, `Port` FROM `ServerBackup` WHERE `Server` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "servers_view");
   }
   $backups = array ();
   while ( $backup = $result->fetch_assoc ())
@@ -845,11 +841,11 @@ function servers_add ( $buffer, $parameters)
   /**
    * Check if transfer window enabled, and time window provided
    */
-  if ( array_key_exists ( "Window", $parameters) && (boolean) $parameters["Window"] && empty ( $parameters["Start"]))
+  if ( array_key_exists ( "Window", $parameters) && (bool) $parameters["Window"] && empty ( $parameters["Start"]))
   {
     $data["Start"] = __ ( "The start hour is required when the transfer window is enabled.");
   }
-  if ( array_key_exists ( "Window", $parameters) && (boolean) $parameters["Window"] && empty ( $parameters["Finish"]))
+  if ( array_key_exists ( "Window", $parameters) && (bool) $parameters["Window"] && empty ( $parameters["Finish"]))
   {
     $data["Finish"] = __ ( "The finish hour is required when the transfer window is enabled.");
   }
@@ -859,8 +855,7 @@ function servers_add ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "' AND `Port` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Port"]) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "servers_add");
   }
   if ( $result->num_rows != 0)
   {
@@ -888,7 +883,7 @@ function servers_add ( $buffer, $parameters)
    * Sanitize parameters
    */
   $parameters["Port"] = (int) $parameters["Port"];
-  $parameters["Window"] = array_key_exists ( "Window", $parameters) ? (boolean) $parameters["Window"] : false;
+  $parameters["Window"] = array_key_exists ( "Window", $parameters) ? (bool) $parameters["Window"] : false;
 
   /**
    * Call sanitize hook if exist
@@ -921,8 +916,7 @@ function servers_add ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Servers` (`Tenant`, `Description`, `Address`, `Port`, `Country`, `NTP`, `TransfStart`, `TransfEnd`, `PublicKey`, `PrivateKey`) VALUES (" . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Port"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Country"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["NTP"])) . "', " . ( $parameters["Window"] ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . ":00'" : "NULL") . ", " . ( $parameters["Window"] ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Finish"]) . ":59'" : "NULL") . ", '" . $_in["mysql"]["id"]->real_escape_string ( $pubKey) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $privKey) . "')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "servers_add");
   }
   $parameters["ID"] = $_in["mysql"]["id"]->insert_id;
 
@@ -945,8 +939,7 @@ function servers_add ( $buffer, $parameters)
 
       if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `ServerBackup` (`Server`, `Description`, `Address`, `Port`, `PublicKey`, `PrivateKey`) VALUES (" . (int) $parameters["ID"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $backupserver["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $backupserver["Address"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $backupserver["Port"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $pubKey) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $privKey) . "')"))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        database_query_error ( "servers_add");
       }
       $backups[$id]["ID"] = $_in["mysql"]["id"]->insert_id;
     }
@@ -1171,8 +1164,7 @@ function servers_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "servers_edit");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -1222,11 +1214,11 @@ function servers_edit ( $buffer, $parameters)
   /**
    * Check if transfer window enabled, and time window provided
    */
-  if ( array_key_exists ( "Window", $parameters) && (boolean) $parameters["Window"] && ! array_key_exists ( "Start", $parameters))
+  if ( array_key_exists ( "Window", $parameters) && (bool) $parameters["Window"] && ! array_key_exists ( "Start", $parameters))
   {
     $data["Start"] = __ ( "The start hour is required when the transfer window is enabled.");
   }
-  if ( array_key_exists ( "Window", $parameters) && (boolean) $parameters["Window"] && ! array_key_exists ( "Finish", $parameters))
+  if ( array_key_exists ( "Window", $parameters) && (bool) $parameters["Window"] && ! array_key_exists ( "Finish", $parameters))
   {
     $data["Finish"] = __ ( "The finish hour is required when the transfer window is enabled.");
   }
@@ -1236,8 +1228,7 @@ function servers_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "' AND `Port` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Port"]) . "' AND `ID` != " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "servers_edit");
   }
   if ( $result->num_rows != 0)
   {
@@ -1266,7 +1257,7 @@ function servers_edit ( $buffer, $parameters)
    */
   $parameters["ID"] = (int) $parameters["ID"];
   $parameters["Port"] = (int) $parameters["Port"];
-  $parameters["Window"] = array_key_exists ( "Window", $parameters) ? (boolean) $parameters["Window"] : false;
+  $parameters["Window"] = array_key_exists ( "Window", $parameters) ? (bool) $parameters["Window"] : false;
 
   /**
    * Call sanitize hook if exist
@@ -1289,8 +1280,7 @@ function servers_edit ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Servers` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "', `Port` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Port"]) . "', `Country` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Country"]) . "', `NTP` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["NTP"])) . "', `TransfStart` = " . ( $parameters["Window"] ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . ":00'" : "NULL") . ", `TransfEnd` = " . ( $parameters["Window"] ? "'" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Finish"]) . ":59'" : "NULL") . " WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ORIGINAL"]["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "servers_edit");
   }
 
   /**
@@ -1298,8 +1288,7 @@ function servers_edit ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `ServerBackup` WHERE `Server` = " . (int) $parameters["ORIGINAL"]["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "servers_edit");
   }
   $oldbackups = array ();
   while ( $backup = $result->fetch_assoc ())
@@ -1323,8 +1312,7 @@ function servers_edit ( $buffer, $parameters)
         {
           if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `ServerBackup` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Description"]) . "' WHERE `Server` = " . (int) $parameters["ORIGINAL"]["ID"] . " AND `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Address"]) . "' AND `Port` = '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Port"]) . "'"))
           {
-            header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-            exit ();
+            database_query_error ( "servers_edit");
           }
           break;
         }
@@ -1335,8 +1323,7 @@ function servers_edit ( $buffer, $parameters)
   {
     if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ServerBackup` WHERE `Server` = " . (int) $parameters["ORIGINAL"]["ID"] . " AND `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $oldbackup["Address"]) . "' AND `Port` = '" . $_in["mysql"]["id"]->real_escape_string ( $oldbackup["Port"]) . "'"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "servers_edit");
     }
   }
   foreach ( $backups as $bindex => $backup)
@@ -1353,8 +1340,7 @@ function servers_edit ( $buffer, $parameters)
 
     if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `ServerBackup` (`Server`, `Description`, `Address`, `Port`, `PublicKey`, `PrivateKey`) VALUES (" . (int) $parameters["ORIGINAL"]["ID"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Address"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $backup["Port"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $pubKey) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $privKey) . "')"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "servers_edit");
     }
   }
   $parameters["Backups"] = $backups;
@@ -1489,8 +1475,7 @@ function servers_remove ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "servers_remove");
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
   {
@@ -1503,8 +1488,7 @@ function servers_remove ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Server` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "servers_remove");
   }
   if ( $result->num_rows != 0)
   {
@@ -1525,8 +1509,7 @@ function servers_remove ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "servers_remove");
   }
 
   /**
@@ -1666,8 +1649,7 @@ function servers_rebuild ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "servers_rebuild:check_server");
   }
   if ( $result->num_rows != 1)
   {
@@ -1695,8 +1677,8 @@ function servers_rebuild ( $buffer, $parameters)
    * Sanitize parameters
    */
   $parameters["ID"] = (int) $parameters["ID"];
-  $parameters["Clean"] = (boolean) $parameters["Clean"];
-  $parameters["RebuildMain"] = ! array_key_exists ( "RebuildMain", $parameters) || (boolean) $parameters["RebuildMain"];
+  $parameters["Clean"] = (bool) $parameters["Clean"];
+  $parameters["RebuildMain"] = ! array_key_exists ( "RebuildMain", $parameters) || (bool) $parameters["RebuildMain"];
   $parameters["RebuildBackups"] = array_key_exists ( "RebuildBackups", $parameters) && is_array ( $parameters["RebuildBackups"]) ? array_map ( "intval", $parameters["RebuildBackups"]) : null;
 
   /**
@@ -1946,8 +1928,7 @@ function servers_report ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "servers_report");
   }
   if ( ! $server = $result->fetch_assoc ())
   {
@@ -1960,8 +1941,7 @@ function servers_report ( $buffer, $parameters)
    */
   if ( ! $records = @$_in["mysql"]["id"]->query ( "SELECT * FROM `cdr` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `server` = " . (int) $server["ID"] . " AND `calldate` >= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Start"]) . "' AND `calldate` <= '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["End"]) . "' ORDER BY `calldate` DESC"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "servers_report");
   }
 
   /**
@@ -2063,8 +2043,7 @@ function servers_install_script ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "servers_install_script");
   }
   if ( ! $server = $result->fetch_assoc ())
   {
@@ -2098,8 +2077,7 @@ function servers_install_script ( $buffer, $parameters)
   $tenantPublicKey = "";
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `PublicKey` FROM `Tenants` WHERE `ID` = " . (int) $_in["session"]["Tenant"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "servers_install_script");
   }
   if ( $tenant = $result->fetch_assoc ())
   {

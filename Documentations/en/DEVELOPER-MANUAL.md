@@ -102,7 +102,7 @@ VoIP Domain/
 | `functions-api.php` / `functions-webui.php` | Split helpers |
 | `config.php` | Module config pushed into `$_in` |
 
-Core modules include: `interface`, `authentication`, `tenants`, `users`, `tokens`, `servers`, `extensions`, `extensions-phones`, `extensions-queues`, `extensions-ivr`, `extensions-hunts`, `ivr`, `queues`, `agents`, `gateways`, `ranges`, `profiles`, `groups`, `blocks`, `exceptions`, `equipments`, `equipments-*` (vendors), `audios`, `notifications`, `config`, `debug`, `countrydb`, `currencies`, `costcenters`.
+Core modules include: `interface`, `authentication`, `tenants`, `users`, `tokens`, `servers`, `extensions`, `extensions-phones`, `extensions-queues`, `extensions-ivr`, `extensions-hunts`, `extensions-conferences`, `ivr`, `queues`, `conferences`, `agents`, `gateways`, `ranges`, `profiles`, `groups`, `blocks`, `exceptions`, `equipments`, `equipments-*` (vendors), `audios`, `notifications`, `config`, `debug`, `countrydb`, `currencies`, `costcenters`.
 
 ---
 
@@ -209,33 +209,96 @@ Plugins in `plugins/disabled_<name>/` are **skipped**.
 
 ## 6. Hooks
 
-### 6.1 Registration
+Hooks are the core extensibility mechanism — ordered chains of functions registered under a string name. When a hook fires, each registered function is called in sequence, passing the accumulated return value (`$buffer`) from one to the next.
+
+### 6.1 Global state (`$_plugins`)
+
+The hook system uses a global `$_plugins` array with these sub-arrays:
+
+| Key | Purpose |
+|-----|---------|
+| `hooks` | `[hook_name => [fn1, fn2, ...]]` — ordered function chains |
+| `map` | `[function_name => module_name]` — tracks which module registered each function |
+| `functions` | `[function_name => documentation_array]` — OpenAPI documentation per function |
+| `components` | `[component_name => schema_array]` — OAS component schemas |
+| `componentmap` | `[component_name => module_name]` — tracks which module registered each component |
+| `buffers` | `[hook_name => current_buffer]` — runtime buffers during hook execution |
+| `current` | `[hook_name => [fn1, fn2, ...]]` — loop detection (functions currently executing) |
+| `deferred_hooks` | Queue for `framework_add_hook_at()` calls whose reference function doesn't exist yet |
+
+### 6.2 Registration
 
 ```php
-framework_add_hook ( "ranges_add", "ranges_add", IN_HOOK_NULL, $documentation);
+framework_add_hook ( $hook, $function, $options = 0, $documentation = array () )
 ```
 
-| Constant | Effect |
-|----------|--------|
-| `IN_HOOK_NULL` (0) | Append handler to end of chain |
-| `IN_HOOK_INSERT_FIRST` (1) | Prepend handler |
-| `IN_HOOK_REMOVE_OTHERS` (2) | Clear existing handlers first |
-| `IN_HOOK_REPLACE` (4) | Used with `framework_add_hook_at` |
-| `IN_HOOK_INSERT_BEFORE` / `IN_HOOK_INSERT_AFTER` | Positional insert |
+| Parameter | Description |
+|-----------|-------------|
+| `$hook` | String hook name (e.g. `"ranges_add"`) |
+| `$function` | PHP function name to register |
+| `$options` | Bitmask of `IN_HOOK_*` constants |
+| `$documentation` | OpenAPI documentation array (merged into OAS export) |
 
-Optional 4th argument: OpenAPI documentation array (merged into Swagger export).
+**Option constants:**
 
-### 6.2 Invocation
+| Constant | Value | Effect |
+|----------|-------|--------|
+| `IN_HOOK_NULL` | 0 | Append handler to end of chain (default) |
+| `IN_HOOK_INSERT_FIRST` | 1 | Prepend handler to beginning of chain |
+| `IN_HOOK_REMOVE_OTHERS` | 2 | Clear all existing handlers before adding |
+| `IN_HOOK_REPLACE` | 4 | Replace a specific function (used with `framework_add_hook_at`) |
+| `IN_HOOK_INSERT_BEFORE` | 8 | Insert before a specific function (used with `framework_add_hook_at`) |
+| `IN_HOOK_INSERT_AFTER` | 16 | Insert after a specific function (used with `framework_add_hook_at`) |
+
+**Behavior notes:**
+
+- Registering the same function twice on the same hook triggers a framework error and is silently skipped.
+- `$_plugins["map"][$function]` is set to `$_in["module"]` — this tracks which module owns each function (used for lazy loading and i18n context).
+- Documentation arrays are merged via `array_merge_recursive_distinct_with_sequencial()` if the function already has documentation.
+
+### 6.3 Positional registration (`framework_add_hook_at`)
 
 ```php
-if ( framework_has_hook ( "ranges_add_pre"))
-{
-  $parameters = framework_call ( "ranges_add_pre", $parameters);
-}
-$result = framework_call ( "ranges_add", array (), false, $parameters);
+framework_add_hook_at ( $hook, $function, $reference, $options = IN_HOOK_INSERT_AFTER )
 ```
 
-Signature for every hook handler:
+Inserts `$function` relative to an existing `$reference` function in the hook chain.
+
+| `$options` | Effect |
+|------------|--------|
+| `IN_HOOK_INSERT_AFTER` | Insert `$function` immediately after `$reference` (default) |
+| `IN_HOOK_INSERT_BEFORE` | Insert `$function` immediately before `$reference` |
+| `IN_HOOK_REPLACE` | Replace `$reference` with `$function` |
+
+**Deferred resolution:** if the hook or reference function doesn't exist yet (because the module hasn't loaded), the registration is queued in `$_plugins["deferred_hooks"]`. After all modules load, `framework_resolve_deferred_hooks()` processes the queue in up to 10 passes until all references are resolved. Unresolvable entries trigger a framework error.
+
+### 6.4 Invocation
+
+```php
+framework_call ( $hook, $parameters = array (), $output = false, $buffer = "" )
+```
+
+| Parameter | Description |
+|-----------|-------------|
+| `$hook` | Hook name to execute |
+| `$parameters` | Array passed as 2nd argument to every handler |
+| `$output` | If `true`, echoes the final buffer (used for page rendering) |
+| `$buffer` | Initial buffer value (passed as 1st argument to the first handler) |
+
+**Execution flow:**
+
+1. Check hook exists → framework error if not.
+2. Check for re-entrant call on the same hook → framework error if detected (loop prevention).
+3. Initialize buffer (uses `$buffer` parameter if no existing buffer).
+4. For each function in the chain:
+   a. **Lazy load** — if the function doesn't exist in memory, attempt to `require_once` the module's `filter.php` and `webui.php`.
+   b. **Set module context** — `$_in["module"]` is set to the function's owning module (from `$_plugins["map"]`).
+   c. **Call** — `call_user_func($function, $buffer, $parameters)`. The return value becomes the new buffer.
+5. Clear loop detection entry. Reset `$_in["module"]` to empty.
+6. If `$output` is true, echo the buffer.
+7. Return the final buffer.
+
+**Handler signature:**
 
 ```php
 function my_handler ( $buffer, $parameters)
@@ -246,11 +309,52 @@ function my_handler ( $buffer, $parameters)
 }
 ```
 
-`framework_call` returns the final buffer after all handlers run. Loop detection prevents re-entrant calls on the same hook.
+**Important:** always return `$buffer` (modified or not). Failing to return breaks the chain for downstream handlers.
 
-### 6.3 Dynamic hooks
+**Common invocation patterns:**
 
-Some hooks are built at runtime:
+```php
+// Simple call — fire hook, get result:
+$result = framework_call ( "ranges_view", $parameters);
+
+// With initial buffer (common for API hooks where $parameters is the 4th arg):
+$result = framework_call ( "ranges_add", array (), false, $parameters);
+
+// Guard for optional hooks (dynamic or may not exist):
+if ( framework_has_hook ( "ranges_add_pre"))
+{
+  $parameters = framework_call ( "ranges_add_pre", $parameters);
+}
+
+// Page rendering — echo the accumulated HTML:
+framework_call ( "extensions_search_page", $parameters, true);
+```
+
+### 6.5 Hook inspection and removal
+
+```php
+// Check if a hook exists:
+framework_has_hook ( $hook )                    // returns boolean
+
+// Check if a specific function is registered on a hook:
+framework_has_hook ( $hook, $function )         // returns array (function, hook chain)
+
+// Remove a single function from a hook:
+framework_remove_hook_function ( $hook, $function )  // returns boolean
+
+// Remove an entire hook (all functions):
+framework_remove_hook ( $hook )                 // returns boolean
+
+// Read the current buffer mid-execution:
+framework_get_buffer ( $hook )                  // returns mixed
+
+// Clear a hook's buffer:
+framework_clear_buffer ( $hook )                // void
+```
+
+### 6.6 Dynamic hooks
+
+Some hooks are built at runtime from data:
 
 ```php
 framework_call ( "ivr_operator_" . $operator["Operator"], $params);
@@ -260,7 +364,7 @@ framework_call ( "equipment_model_" . $model . "_configure", ...);
 
 Always guard with `framework_has_hook()` when the target may not exist.
 
-### 6.4 Daemon hook return format
+### 6.7 Daemon hook return format
 
 Client event handlers invoked from `task_manager` should return:
 
@@ -278,17 +382,33 @@ Non-2xx codes are logged; `task_finished` still updates `Commands` based on code
 
 ## 7. Filters
 
-Filters differ from hooks: **at most one handler per module** per filter name.
+Filters differ from hooks: **at most one handler per module** per filter name. They are indexed by module name, not ordered sequentially.
+
+### 7.1 Registration
 
 ```php
-framework_add_filter ( "page_menu_registers", "myplugin_menu");
+framework_add_filter ( $filter, $function )
 ```
+
+Stores `$_filters[$filter][$_in["module"]] = $function`. Returns `false` if the module already has a handler for this filter.
+
+### 7.2 Invocation
 
 ```php
-$menu = filters_call ( "page_menu_registers", $parameters, $existingMenu);
+$result = filters_call ( $filter, $parameters = array (), $buffer = array () )
 ```
 
-Filter handlers signature:
+Returns `false` if no handlers are registered. Otherwise:
+
+1. Adds `$parameters["called_filter"] = $filter` to parameters.
+2. Saves `$_in["module"]`, then iterates each registered handler.
+3. **Lazy loads** `filter.php` from the module if the function doesn't exist.
+4. Sets `$_in["module"]` to the handler's module before each call.
+5. Calls each handler: `$buffer = call_user_func($function, $buffer, $parameters)`.
+6. Restores `$_in["module"]` to the original value.
+7. Returns the final `$buffer`.
+
+### 7.3 Handler signature
 
 ```php
 function myplugin_menu ( $buffer, $parameters)
@@ -298,7 +418,9 @@ function myplugin_menu ( $buffer, $parameters)
 }
 ```
 
-Common filters:
+Same as hooks: always return `$buffer`.
+
+### 7.4 Common filters
 
 | Filter | Purpose |
 |--------|---------|
@@ -308,6 +430,7 @@ Common filters:
 | `authentication_plugins` | OAuth provider list |
 | `extensions_add_subpages` | Extra tabs on extension forms |
 | `e164_identify` / `e164_identify_country_XXX` | Number normalization |
+| `audio_inuse` | Check if an audio file is referenced by a module |
 
 Optional filter slots (may have zero registrants): `page_menu_others`, `page_menu_reports_*`, `authentication_failure`.
 
@@ -731,6 +854,7 @@ Core module `extensions` provides shared CRUD; type-specific behavior in submodu
 | `extensions-queues` | `extension_queue` | `extension_queue_*` |
 | `extensions-ivr` | `extension_ivr` | `extension_ivr_*` |
 | `extensions-hunts` | `extension_hunt` | `extension_hunt_*` |
+| `extensions-conferences` | `extension_conference` | `extension_conference_*` |
 
 Cross-module hooks example: `extensions_number_changed`, `extensions_remove_pre` (hunt cleanup).
 
@@ -770,7 +894,7 @@ Event `equipment_configure` pushes generated config to phone via HTTP/TFTP/FTP d
 
 ### 21.1 Admin
 
-- Visual workflow editor (`modules/ivr/config.php` defines operators: time, menu, dial, …).
+- Visual workflow editor (`modules/ivr/config.php` defines operators).
 - Saved as JSON on IVR + extension records.
 - Validation filters: `ivr_operator_filter_{operator}`.
 
@@ -791,6 +915,59 @@ framework_call ( "ivr_operator_" . $operator["Operator"], array (
 Built-in operators in `operator-builtin.php` return Asterisk dialplan lines (`Answer()`, `Read()`, `GoTo()`, …).
 
 Variables in expressions: `{date}`, `{time}`, `{callerid}`, `{var_NAME}` via `operator_apply_variables()`.
+
+### 21.3 Built-in operators
+
+#### Flow control
+
+| Operator | Outputs | Asterisk app | Description |
+|----------|---------|--------------|-------------|
+| `start` | 1 | — | Entry point |
+| `answer` | 1 | `Answer()` | Answer the channel |
+| `wait` | 1 | `Wait()` | Pause for N seconds |
+| `hangup` | 0 | `Hangup()` | Hang up the channel |
+| `redirect` | 0 | `GoTo()` | Redirect to extension/context |
+| `gotoivr` | 0 | `GoTo()` | Jump to another IVR workflow |
+
+#### Conditions and routing
+
+| Operator | Outputs | Asterisk app | Description |
+|----------|---------|--------------|-------------|
+| `time` | 2+ | `GotoIfTime()` | Branch by time-of-day ranges |
+| `date` | 2+ | `GotoIf()` + `${STRFTIME}` | Branch by date ranges (with "other" fallback) |
+| `weekday` | 2+ | `GotoIf()` + `${STRFTIME}` | Branch by day of week |
+| `router` | 2+ | `GotoIf()` | Branch by variable conditions (equals, contains, starts, ends, greater, less, regex); supports AND/OR logic |
+| `calleridcheck` | match/nomatch | `GotoIf()` | Branch by CallerID number pattern match |
+| `menu` | digits + timeout + maxretries | `Read()` | DTMF digit collection with retry limit |
+| `read` | 1 | `Read()` | Collect digits into a variable |
+
+#### Media
+
+| Operator | Outputs | Asterisk app | Description |
+|----------|---------|--------------|-------------|
+| `play` | 1 | `PlayBack()` or `Background()` | Play audio (interruptible option uses `Background()`) |
+| `record` | 1 | `MixMonitor()` | Start/stop call recording |
+| `stop` | 1 | `StopMixMonitor()` | Stop recording |
+| `say` | 1 | `SayDigits()` / `SayNumber()` / `SayAlpha()` / `SayUnixTime()` | Speak digits, numbers, letters, or date/time |
+
+#### Telephony
+
+| Operator | Outputs | Asterisk app | Description |
+|----------|---------|--------------|-------------|
+| `dial` | answered/noanswer/busy/congestion | `Dial()` | Call extension or number; supports CallerID override and MOH class |
+| `queue` | answered/timeout/full/joinempty | `Queue()` | Route call to a queue with position announcement and max callers |
+| `voicemail` | 1 | `VoiceMail()` | Send caller to voicemail (busy/unavailable greeting) |
+| `conference` | 1 | `ConfBridge()` | Send caller to a conference room |
+| `callback` | ok/error | `Dial(Local/...)` | Schedule callback via local channel |
+
+#### Actions
+
+| Operator | Outputs | Asterisk app | Description |
+|----------|---------|--------------|-------------|
+| `setvar` | 1 | `Set()` | Set a channel variable |
+| `script` | ok/error | `System()` | Execute shell script (branches on exit code) |
+| `email` | 1 | `System(curl)` | Send email (supports variable substitution in To/Subject/Body) |
+| `http` | ok/error | `Set(result=${CURL()})` | HTTP GET/POST request; response stored in variable |
 
 ---
 
@@ -836,13 +1013,217 @@ See samples; router uses `vd`, monitor uses `vdclient` + `[ami]` credentials.
 
 ## 24. Internationalization
 
+VoIP Domain uses a custom gettext-inspired i18n system based on an in-memory dictionary (`$_in["i18n"]`). All user-visible strings are written in English and wrapped with translation functions. Translations are loaded from `language.php` files at module load time.
+
+### 24.1 Language file structure (`language.php`)
+
+Every module has a `language.php` that registers translatable strings. The file has two sections:
+
 ```php
-// language.php
-i18n_add ( "My string");
-echo __ ( "My string"); // resolved at runtime from $_in["i18n"]
+/**
+ * Add basic language structure (english)
+ */
+i18n_add ( "Search gateways");
+i18n_add ( "The gateway description is required.");
+i18n_add ( "An object containing information about the system gateway.");
+
+/**
+ * Add Brazilian Portuguese support
+ */
+i18n_add ( "Search gateways", "Pesquisar gateways", "pt_BR");
+i18n_add ( "The gateway description is required.", "A descrição do gateway é obrigatória.", "pt_BR");
+i18n_add ( "An object containing information about the system gateway.", "Um objeto contendo informações sobre o gateway do sistema.", "pt_BR");
 ```
 
-Locale from `[general] language` (e.g. `en_US`, `pt_BR`). JS strings exported via `$_in["page"]["i18n"]`.
+English-only calls (`i18n_add("text")`) register the key in `$_in["i18n"]` so the system knows the string exists. Translation calls (`i18n_add("text", "translation", "lang")`) store the translation indexed by language and module context.
+
+### 24.2 PHP translation functions
+
+| Function | Signature | Purpose |
+|----------|-----------|---------|
+| `__()` | `__ ( $text, $strip = true, $slashes = true, $context = "" )` | Returns translated string |
+| `_e()` | `_e ( $text, $strip = true, $slashes = true, $context = "" )` | Echoes translated string |
+| `_n()` | `_n ( $singular, $plural, $count, $strip = true, $slashes = true, $context = "" )` | Returns singular/plural form |
+| `_ne()` | `_ne ( $singular, $plural, $count, $strip = true, $slashes = true, $context = "" )` | Echoes singular/plural form |
+| `i18n_add()` | `i18n_add ( $text, $translation = "", $language = "", $context = "" )` | Registers a string or translation |
+
+**Parameters:**
+
+- `$strip` — strip HTML tags from result (default `true`). Set to `false` when the string contains intentional HTML.
+- `$slashes` — add backslashes before `"` and `'` (default `true`). Set to `false` when the result will not be embedded in a JavaScript string literal.
+- `$context` — module name for scoped lookup. When empty (the default), uses `$_in["module"]`.
+
+### 24.3 Translation lookup chain
+
+When `__("Some text")` is called, the system resolves the translation in this order:
+
+1. **`{language}-{context}`** — e.g. `pt_BR-gateways`. Exact module match.
+2. **`{language}`** — e.g. `pt_BR`. Context-free fallback (strings from the `interface` module are stored this way because `$_in["module"]` is empty when `interface/language.php` loads).
+3. **Original text** — if no translation is found, the English string is returned as-is.
+
+Example with module `gateways` and language `pt_BR`:
+
+```
+__("Search gateways")
+  → lookup "pt_BR-gateways" in $_in["i18n"]["Search gateways"] → FOUND → "Pesquisar gateways"
+
+__("Search gateways", true, true, "blocks")
+  → lookup "pt_BR-blocks" → NOT FOUND
+  → lookup "pt_BR"        → NOT FOUND (it was registered under gateways context)
+  → fallback              → "Search gateways"
+```
+
+### 24.4 Module context (`$_in["module"]`)
+
+Context is central to how translations are scoped:
+
+- When `language.php` loads, `$_in["module"]` is set to the module directory name (e.g. `"gateways"`, `"servers"`, `"ivr"`).
+- `i18n_add()` uses `$_in["module"]` as the default context, so translations are stored as `{language}-{module}`.
+- `__()` also defaults to `$_in["module"]` for lookup.
+- **The `interface` module is special:** `$_in["module"]` is set to `""` (empty string) when `modules/interface/language.php` loads. This means its translations are stored under the context-free key `{language}` (e.g. `pt_BR`), making them globally accessible as fallback for all modules.
+
+### 24.5 Storage format
+
+Internally, `$_in["i18n"]` is a nested associative array:
+
+```php
+$_in["i18n"] = array (
+  "Search gateways" => array (
+    "pt_BR-gateways" => "Pesquisar gateways"
+  ),
+  "Add" => array (
+    "pt_BR" => "Adicionar"   // interface module (global)
+  ),
+  "Error" => array (
+    "pt_BR" => "Erro",              // interface module (global)
+    "pt_BR-debug" => "Erro debug"   // debug module override (hypothetical)
+  )
+);
+```
+
+### 24.6 Caching
+
+In production mode (`general.debug = false`), `$_in["i18n"]` is cached in `modules/cache.json` alongside hooks, filters, and paths. The cache includes all translations from all `language.php` files, with pre-evaluated `__()` results for hook registration strings (menus, API titles, etc.).
+
+In debug mode, all `language.php` files are reloaded on every request.
+
+**Cache invalidation:** delete `modules/cache.json` to force a full reload. This happens automatically when a plugin is enabled/disabled.
+
+### 24.7 Language selection
+
+The user's language is determined from:
+
+1. **Web UI session:** `$_in["general"]["language"]` is set from the user's profile during authentication.
+2. **API token/session:** same mechanism, set during API authentication.
+3. **Default:** `$_in["general"]["language"]` defaults to `en_US` from `webinterface.conf` (`[general] language`).
+
+**Important constraint:** in `api.php`, module files (including `language.php` and `api.php`) load **before** authentication. This means `__()` calls in `framework_add_hook()` and `framework_add_api_call()` documentation arrays evaluate with the default language (`en_US`). The OAS documentation export (`debug_api_export()`) compensates by re-translating strings at export time using the authenticated user's language with explicit `$context` parameters.
+
+### 24.8 JavaScript i18n
+
+#### 24.8.1 Global strings (loaded at page boot)
+
+When the SPA shell loads, `index.php` sends the full `$_in["i18n"]` dictionary for the current language as part of the page initialization. The JavaScript framework (`voipdomain.js`) stores these in an internal `i18ndata` object.
+
+#### 24.8.2 Page-level strings (`sys_addtext`)
+
+For strings needed only on a specific page (e.g. DataTables labels, inline JavaScript), use `sys_addtext()` in the page hook:
+
+```php
+function myfeature_page ( $buffer, $parameters)
+{
+  sys_addtext ( "No records found", __ ( "No records found"));
+  sys_addtext ( "Loading...", __ ( "Loading..."));
+  // ...
+}
+```
+
+This populates `$_in["page"]["i18n"]`, which is included in the AJAX page response JSON. The frontend processes it before executing inline JavaScript:
+
+```javascript
+// voipdomain.js — automatic processing on page load
+if ( 'i18n' in modules[module])
+{
+  for ( var key in modules[module].i18n)
+  {
+    if ( modules[module].i18n.hasOwnProperty ( key))
+    {
+      VoIP.i18n.add ( key, modules[module].i18n[key]);
+    }
+  }
+}
+```
+
+#### 24.8.3 JavaScript translation API
+
+```javascript
+// Register a string:
+VoIP.i18n.add ( "original", "translation");
+
+// Translate a string:
+var text = VoIP.i18n.__ ( "original");
+// Returns "translation" if registered, "original" otherwise
+```
+
+The JavaScript i18n system is a simple key-value lookup (no context, no fallback chain). All context resolution happens server-side in `sys_addtext()`.
+
+### 24.9 OAS documentation i18n
+
+API documentation strings (endpoint titles, descriptions, parameter descriptions, response descriptions, schema field descriptions and examples) are defined in `api.php` module files using `__()`. Since these files load before authentication, the strings are initially stored in English.
+
+The `debug_api_export()` function (in `modules/debug/api.php`) re-translates these strings at export time:
+
+- **Endpoint summary/description:** re-translated using the primary module context (`$primarymodule`) determined from `$_plugins["map"]`.
+- **Request/response schemas:** re-translated via `format_schema($parameters, $context)` with the module context passed through all recursive calls.
+- **Component schemas:** module context resolved from `$_plugins["componentmap"]`, which is populated by `framework_add_component_documentation()`.
+
+### 24.10 Adding a new language
+
+1. Open each `language.php` file in `modules/*/`.
+2. Add a new block below existing translations:
+
+```php
+/**
+ * Add Spanish support
+ */
+i18n_add ( "Search gateways", "Buscar gateways", "es_ES");
+i18n_add ( "The gateway description is required.", "La descripción del gateway es obligatoria.", "es_ES");
+// ... all strings
+```
+
+3. Set the language in `webinterface.conf`: `language = es_ES`.
+4. Delete `modules/cache.json` to rebuild.
+
+### 24.11 Validation tool (`checklanguage`)
+
+A CLI tool at `modules/checklanguage` validates i18n consistency per module:
+
+```bash
+cd modules
+./checklanguage gateways
+```
+
+It scans PHP files for `__()`, `_e()`, `_n()`, `_ne()` calls and cross-references with `language.php` registrations. Reports:
+
+- **Missing translations:** strings used in code but not registered in `language.php`.
+- **Unused entries:** strings registered but not found in any PHP file (may be global strings from the `interface` module — verify before removing).
+- **Duplicate entries:** same string registered multiple times.
+
+Run on all modules:
+
+```bash
+for m in */; do [ -f "$m/language.php" ] && echo "=== $m ===" && ./checklanguage "${m%/}"; done
+```
+
+### 24.12 Best practices
+
+1. **Always register English keys** — even if the current deployment is English-only. `i18n_add("My string")` ensures the key exists in `$_in["i18n"]`.
+2. **Use `$strip = false, $slashes = false`** when the translated string contains HTML or will not be embedded in JS: `__("Link: <a href='...'", false, false)`.
+3. **Use `$context` explicitly** when translating strings outside their originating module (e.g. in `debug_api_export()`).
+4. **Do not duplicate interface strings** — if a string is registered in `modules/interface/language.php`, it is globally accessible. Do not re-register it in other modules.
+5. **Keep keys stable** — the English string IS the key. Changing it breaks the link to all translations.
+6. **Use `sys_addtext()` for page-specific JS strings** — do not put all strings in the global boot dictionary.
+7. **Run `checklanguage` after changes** — catch missing translations before deployment.
 
 ---
 
@@ -904,4 +1285,4 @@ Not all phases are implemented for every entity — register only what you need;
 
 ---
 
-*Document version: 2026-06 — aligned with VoIP Domain 0.3 RC1.*
+*Document version: 2026-07 — aligned with VoIP Domain 1.1.*

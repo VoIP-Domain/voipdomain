@@ -71,7 +71,7 @@ function operator_apply_variables ( $string, $allowed = array ( "{date}", "{time
   $result = "";
   if ( in_array ( "{var_VARIABLE}", $allowed))
   {
-    while ( strpos ( $string, "{var_") !== false)
+    while ( $string !== null && strpos ( $string, "{var_") !== false)
     {
       $pos = strpos ( $string, "{var_");
       $result .= substr ( $string, 0, $pos);
@@ -146,7 +146,7 @@ function create_ivr_workflow ( $name, $description, $revision, $workflow)
     $output .= " same => n(" . $id . "),Set(CDR(vd_ivr)=\${CDR(vd_ivr)},\${EPOCH}-" . $id . "_" . $operator["Operator"] . ")\n";
     if ( framework_has_hook ( "ivr_operator_" . $operator["Operator"]))
     {
-      $output .= framework_call ( "ivr_operator_" . $operator["Operator"], array ( "Operator" => $operator["Operator"], "Properties" => $operator["Properties"], "Links" => $workflow["Links"][$id], "ID" => $id), false, "");
+      $output .= framework_call ( "ivr_operator_" . $operator["Operator"], array ( "Operator" => $operator["Operator"], "Properties" => $operator["Properties"], "Links" => ( array_key_exists ( $id, $workflow["Links"]) ? $workflow["Links"][$id] : array ()), "ID" => $id), false, "");
     } else {
       writeLog ( "IVR \"" . $operator["Operator"] . "\" module operator not found!", VoIP_LOG_WARNING);
     }

@@ -380,11 +380,12 @@ if ( ! defined ( "VD_WEBROOT"))
  * functions.inc.php: miscelaneous function library
  * plugins.inc.php: modular plugin library
  * plugin-install.inc.php: plugin installation helper library
+ * plugin-signing.inc.php: plugin Ed25519 signing and verification library
  * file-transfer.inc.php: remote file transfer helper library
  * systemd.inc.php: systemd integration helper library
  * timezonepicker_ui.inc.php: timezone picker UI helper library
  */
-foreach ( array ( "functions", "plugins", "plugin-install", "file-transfer", "systemd", "timezonepicker_ui", "config") as $include)
+foreach ( array ( "functions", "plugins", "plugin-install", "plugin-signing", "file-transfer", "systemd", "module-versions", "timezonepicker_ui", "config") as $include)
 {
   if ( ! is_file ( VD_WEBROOT . "/includes/" . $include . ".inc.php"))
   {

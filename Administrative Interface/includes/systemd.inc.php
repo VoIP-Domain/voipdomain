@@ -53,12 +53,16 @@ function systemd_daemon_unit_from_module_type ( $moduletype)
   switch ( $moduletype)
   {
     case "client-modules":
+    case "client-plugins":
       return "client";
     case "fastagi-modules":
+    case "fastagi-plugins":
       return "fastagi";
     case "monitor-modules":
+    case "monitor-plugins":
       return "monitor";
     case "router-modules":
+    case "router-plugins":
       return "router";
     default:
       return false;

@@ -1040,7 +1040,7 @@ function format_form_datetime ( $date)
  * section 5.6) to timestamp.
  *
  * @param string $date Date and time in current format
- * @return int Result date and time at UNIX timestamp
+ * @return int|string Result date and time at UNIX timestamp
  */
 function format_form_timestamp ( $date)
 {
@@ -1180,7 +1180,7 @@ function format_db_iso8601 ( $datetime)
  * Function to translate a MySQL date to UNIX timestamp.
  *
  * @param string $datetime MySQL format date and time.
- * @return int Date in UNIX timestamp.
+ * @return int|string Date in UNIX timestamp.
  */
 function format_db_timestamp ( $datetime)
 {
@@ -1242,8 +1242,8 @@ function format_secs_to_string ( $time)
 /**
  * Function to return a secure random string.
  *
- * @param $size int[optional] Size of the string (default 64 bytes)
- * @param $raw_output boolean[optional] Return raw data (default false)
+ * @param int[optional] $size Size of the string (default 64 bytes)
+ * @param boolean[optional] $raw_output Return raw data (default false)
  * @return string
  */
 function secure_rand ( $size = 64, $raw_output = false)
@@ -1285,9 +1285,9 @@ function secure_rand ( $size = 64, $raw_output = false)
  * later grouped in one event handler or discarded.
  *
  * @global array $_in Framework global configuration variable
- * @param $serverid int ID of server to notify. If 0, notify all servers.
- * @param $event string[optional] Name of start event to fire at server.
- * @param $data array[optional] Start event parameters to send.
+ * @param int $serverid ID of server to notify. If 0, notify all servers.
+ * @param string[optional] $event Name of start event to fire at server.
+ * @param array[optional] $data Start event parameters to send.
  * @return boolean
  */
 function notify_capture ( $serverid, $event = "", $data = array ())
@@ -1320,7 +1320,7 @@ function notify_capture ( $serverid, $event = "", $data = array ())
  * Function to discard capturing events.
  *
  * @global array $_in Framework global configuration variable
- * @param $serverid int ID of server to notify. If 0, notify all servers.
+ * @param int $serverid ID of server to notify. If 0, notify all servers.
  * @return boolean
  */
 function notify_capture_discard ( $serverid)
@@ -1350,9 +1350,9 @@ function notify_capture_discard ( $serverid)
  * Function to finish capturing events and send to the server.
  *
  * @global array $_in Framework global configuration variable
- * @param $serverid int ID of server to notify. If 0, notify all servers.
- * @param $event string[optional] Name of finish event to fire at server.
- * @param $data array[optional] Finish event parameters to send.
+ * @param int $serverid ID of server to notify. If 0, notify all servers.
+ * @param string[optional] $event Name of finish event to fire at server.
+ * @param array[optional] $data Finish event parameters to send.
  * @return boolean
  */
 function notify_capture_send ( $serverid, $event = "", $data = array ())
@@ -1443,10 +1443,10 @@ function router_request_cache_reload ( $parameters = array ())
  * Function to send notifications to servers (using gearman).
  *
  * @global array $_in Framework global configuration variable
- * @param $serverid int ID of server to notify. If 0, notify all servers.
- * @param $event string Name of event to fire at server.
- * @param $data array[optional] Event parameters to send.
- * @param $handler int[optional] ID of the grouped event handler.
+ * @param int $serverid ID of server to notify. If 0, notify all servers.
+ * @param string $event Name of event to fire at server.
+ * @param array[optional] $data Event parameters to send.
+ * @param int[optional] $handler ID of the grouped event handler.
  * @return boolean
  */
 function notify_server ( $serverid, $event, $data = array (), $handler = null)
@@ -1605,11 +1605,11 @@ function notify_server ( $serverid, $event, $data = array (), $handler = null)
 /**
  * Function to calculate the distance between two geographic points (longitude/latitude).
  *
- * @param $lat1 float Latitude of origin point.
- * @param $lon1 float Longitude of origin point.
- * @param $lat2 float Latitude of destination point.
- * @param $lon2 float Longitude of destination point.
- * @param $unit[optional] string Return unity (default "miles"), as "M" for miles, "K" for kilometers and "N" for nautic miles.
+ * @param float $lat1 Latitude of origin point.
+ * @param float $lon1 Longitude of origin point.
+ * @param float $lat2 Latitude of destination point.
+ * @param float $lon2 Longitude of destination point.
+ * @param string[optional] $unit Return unity (default "miles"), as "M" for miles, "K" for kilometers and "N" for nautic miles.
  * @return float
  */
 function distance ( $lat1, $lon1, $lat2, $lon2, $unit = "m")
@@ -1634,9 +1634,9 @@ function distance ( $lat1, $lon1, $lat2, $lon2, $unit = "m")
 /**
  * Function to convert degree's geographic points to decimal format.
  *
- * @param $deg int Degrees.
- * @param $min int Minutes.
- * @param $sec int Seconds.
+ * @param int $deg Degrees.
+ * @param int $min Minutes.
+ * @param int $sec Seconds.
  * @return float
  */
 function DMStoDEC ( $deg, $min, $sec)
@@ -1647,7 +1647,7 @@ function DMStoDEC ( $deg, $min, $sec)
 /**
  * Function to convert geographic coordenates from decimal format to degree's.
  *
- * @param $dec float Longitude/Latitude.
+ * @param float $dec Longitude/Latitude.
  * @return array ( $deg, $min, $sec)
  */
 function DECtoDMS ( $dec)
@@ -1667,9 +1667,9 @@ function DECtoDMS ( $dec)
  * Function to compare two arrays. If equals, return true,
  * otherwise return false.
  *
- * @param $array1 array First array.
- * @param $array2 array Second array.
- * @param $strict[optional] boolean Use strict compare (compare variable type
+ * @param array $array1 First array.
+ * @param array $array2 Second array.
+ * @param boolean[optional] $strict Use strict compare (compare variable type
  *                                  too).
  * @return boolean
  */
@@ -1695,9 +1695,9 @@ function array_compare ( $array1, $array2, $strict = false)
  * Function to compare two arrays, including keys. If equals, return true,
  * otherwise return false.
  *
- * @param $array1 array First array.
- * @param $array2 array Second array.
- * @param $strict[optional] boolean Use strict compare (compare variable type
+ * @param array $array1 First array.
+ * @param array $array2 Second array.
+ * @param boolean[optional] $strict Use strict compare (compare variable type
  *                                  too).
  * @return boolean
  */
@@ -1723,7 +1723,7 @@ function array_compare_with_keys ( $array1, $array2, $strict = false)
  * Function to explode a string into an array, respecting key and value of each
  * field. Useful with Asterisk QOS fields.
  *
- * @param $string string String to be processed.
+ * @param string $string String to be processed.
  * @return array
  */
 function explode_QOS ( $string)
@@ -1763,7 +1763,7 @@ function explode_QOS ( $string)
  * For a full description of Asterisk channel RTP variables, please refer to
  * https://wiki.asterisk.org/wiki/display/AST/Asterisk+13+Function_CHANNEL
  *
- * @param $qos array Input raw QOS information.
+ * @param array $qos Input raw QOS information.
  * @return array Filtered QOS.
  */
 function filter_QOS ( $qos)
@@ -1792,8 +1792,8 @@ function filter_QOS ( $qos)
 /**
  * Function to calculate the MOS of a call.
  *
- * @param $qosa string Asterisk RTCP QOS call information (side a).
- * @param $qosb[optional] string Asterisk RTCP QOS call information (side b, optional).
+ * @param string $qosa Asterisk RTCP QOS call information (side a).
+ * @param string[optional] $qosb Asterisk RTCP QOS call information (side b, optional).
  * @return float Call MOS
  */
 function calculate_MOS ( $qosa, $qosb = "")
@@ -1855,8 +1855,8 @@ function is_XML ( $xml)
  * Function to convert an array into a XML document.
  * Originally from https://stackoverflow.com/questions/9152176/convert-an-array-to-xml-or-json
  *
- * @param $array array The content to be converted.
- * @param $node_name[optional] string The root node name. Default "root".
+ * @param array $array The content to be converted.
+ * @param string[optional] $node_name The root node name. Default "root".
  * @return string XML document
  */
 function array2xml ( $array, $node_name = "root")
@@ -1896,8 +1896,8 @@ function array2xml ( $array, $node_name = "root")
 /**
  * Function to check if an IP address is on a CIDR.
  *
- * $param $ip string IP address
- * $param $cidr string The network CID
+ * @param string $ip IP address
+ * @param string $cidr The network CID
  * @return boolean
  */
 function cidr_match ( $ip, $cidr)
@@ -1913,7 +1913,7 @@ function cidr_match ( $ip, $cidr)
 /**
  * Function to dump hex string to text (using . as non-printable characters).
  *
- * $param $hex string Hex representation string
+ * @param string $hex Hex representation string
  * @return string Text view of Hex string
  */
 function hex2str ( $hex)
@@ -1941,6 +1941,12 @@ function hex2str ( $hex)
  */
 if ( ! function_exists ( "array_key_last"))
 {
+  /**
+   * Polyfill for array_key_last() (PHP < 7.3).
+   *
+   * @param array $array The input array
+   * @return int|string|null The last key of the array, or null if empty
+   */
   function array_key_last ( $array)
   {
     if ( ! is_array ( $array) || empty ( $array))
@@ -1960,12 +1966,12 @@ if ( ! function_exists ( "hash_pbkdf2"))
   /**
    * Function to generate PBKDF2 hash.
    *
-   * @param $algo String Cryptografic hash algorith to be used
-   * @param $password String The password to be hashed
-   * @param $salt String Salt to be used
-   * @param $count int Number of iterations
-   * @param $length int Length of the desired hash (in bytes)
-   * @param $raw_output boolean[optional] Raw output option (default false)
+   * @param String $algo Cryptografic hash algorith to be used
+   * @param String $password The password to be hashed
+   * @param String $salt Salt to be used
+   * @param int $count Number of iterations
+   * @param int $length Length of the desired hash (in bytes)
+   * @param boolean[optional] $raw_output Raw output option (default false)
    * @return string Resulting hash
    */
   function hash_pbkdf2 ( $algo, $password, $salt, $count, $length = 0, $raw_output = false)
@@ -2017,6 +2023,7 @@ if ( ! function_exists ( "hash_pbkdf2"))
  * Paths starting with http:// or https:// are returned unchanged. Relative paths
  * are prefixed with the request scheme and configured host (general.baseurl).
  *
+ * @global array $_in Framework global configuration variable
  * @param string $path Application path (e.g. "/api/users/1") or absolute URL
  * @return string
  */
@@ -2335,7 +2342,7 @@ function voipdomain_mysqli_connect ( $hostname, $username, $password, $database)
  * @param string $text Text to be translated
  * @param boolean $strip[optional] Strip HTML tags (default true)
  * @param boolean $slashes[optional] Add slashes before " or ' (default true)
- * @param boolean $context[optional] Set alternative system module.
+ * @param string $context[optional] Set alternative system module.
  * @return string Translated text (if not found, the text itself)
  */
 function __ ( $text, $strip = true, $slashes = true, $context = "")
@@ -2393,7 +2400,7 @@ function __ ( $text, $strip = true, $slashes = true, $context = "")
  * @param string $text Text to be translated
  * @param boolean $strip[optional] Strip HTML tags (default true)
  * @param boolean $slashes[optional] Add slashes before " or ' (default true)
- * @param boolean $context[optional] Set alternative system module.
+ * @param string $context[optional] Set alternative system module.
  * @return void
  */
 function _e ( $text, $strip = true, $slashes = true, $context = "")
@@ -2411,7 +2418,7 @@ function _e ( $text, $strip = true, $slashes = true, $context = "")
  * @param int $count Count value
  * @param boolean $strip[optional] Strip HTML tags (default true)
  * @param boolean $slashes[optional] Add slashes before " or ' (default true)
- * @param boolean $context[optional] Set alternative system module.
+ * @param string $context[optional] Set alternative system module.
  * @return string Translated text (if not found, the text itself)
  */
 function _n ( $singular, $plural, $count, $strip = true, $slashes = true, $context = "")
@@ -2468,7 +2475,7 @@ function _n ( $singular, $plural, $count, $strip = true, $slashes = true, $conte
  * @param int $count Count value
  * @param boolean $strip[optional] Strip HTML tags (default true)
  * @param boolean $slashes[optional] Add slashes before " or ' (default true)
- * @param boolean $context[optional] Set alternative system module.
+ * @param string $context[optional] Set alternative system module.
  * @return void
  */
 function _ne ( $singular, $plural, $count, $strip = true, $slashes = true, $context = "")
@@ -2485,7 +2492,6 @@ function _ne ( $singular, $plural, $count, $strip = true, $slashes = true, $cont
  * @param string[optional] $translation The translation text for $language
  * @param string[optional] $language The language of translated text
  * @param string[optional] $context The context of translated text
- * @param boolean $context[optional] Set alternative system module.
  * @return void
  */
 function i18n_add ( $text, $translation = "", $language = "", $context = "")
@@ -2514,8 +2520,8 @@ function i18n_add ( $text, $translation = "", $language = "", $context = "")
  * Function to dump all translations.
  *
  * @global array $_in Framework global configuration variable
- * @param string[optional] $context The context of translated text
  * @param string[optional] $language The language of translated text
+ * @param string[optional] $context The context of translated text
  * @return array The list of translation strings
  */
 function i18n_dump ( $language = "", $context = "")
@@ -2548,8 +2554,8 @@ function i18n_dump ( $language = "", $context = "")
 /**
  * Function to sort NAPTR DNS query result.
  *
- * @array $a First element.
- * @array $b Second element.
+ * @param array $a First element.
+ * @param array $b Second element.
  * @return int -1 ($a > $b), 0 ($a == $b) or 1 ($a < $b)
  */
 function sort_naptr ( $a, $b)
@@ -2568,8 +2574,8 @@ function sort_naptr ( $a, $b)
 /**
  * Function to sort SRV DNS query result.
  *
- * @array $a First element.
- * @array $b Second element.
+ * @param array $a First element.
+ * @param array $b Second element.
  * @return int -1 ($a > $b), 0 ($a == $b) or 1 ($a < $b)
  */
 function sort_srv ( $a, $b)
@@ -2623,7 +2629,7 @@ function array_diff_recursive ( $array1, $array2)
  * Function to remove file or directory recursively if needed.
  *
  * @param string $filename Full path to file or directory to be excluded
- * @return null
+ * @return void
  */
 function unlink_recursive ( $filename)
 {
@@ -2735,10 +2741,10 @@ function fix_rules ( $rules)
             {
               foreach ( $rule["value"] as $valid => $valcontent)
               {
-                $rules[$key][$id]["value"][$valid] = (boolean) $rule["value"][$valid];
+                $rules[$key][$id]["value"][$valid] = (bool) $rule["value"][$valid];
               }
             } else {
-              $rules[$key][$id]["value"] = (boolean) $rule["value"];
+              $rules[$key][$id]["value"] = (bool) $rule["value"];
             }
             break;
         }
@@ -2752,7 +2758,7 @@ function fix_rules ( $rules)
 /**
  * Generate an UUID v4 unique identifier.
  *
- * @param $data[optional] A random 16 bytes string.
+ * @param string[optional] $data A random 16 bytes string.
  * @return string A valid UUID v4 unique identifier.
  */
 function guidv4 ( $data = null)
@@ -2814,9 +2820,9 @@ function array_merge_recursive_distinct ( array &$array1, array &$array2)
  * Function to convert a size number to a human readable space string (KB, MB,
  * GB, etc.).
  *
- * @param $size integer Size to be converted
- * @param $base[optional] integer Use base 2 or base 10 (1024 or 1000 per Kilo)
- * @param $limit[optional] integer Limit to some size (0 = K, 1 = M, 2 = G,
+ * @param integer $size Size to be converted
+ * @param integer[optional] $base Use base 2 or base 10 (1024 or 1000 per Kilo)
+ * @param integer[optional] $limit Limit to some size (0 = K, 1 = M, 2 = G,
  *                                 3 = T, 4 = P, 5 = E, 6 = Z and 7 = Y)
  * @return string
  */
@@ -2849,7 +2855,7 @@ function human_size ( $size, $base = 2, $limit = 255)
 /**
  * Function to detect if an array is an associative indexed array.
  *
- * @param $array array The array to be checked
+ * @param array $array The array to be checked
  * @return boolean
  */
 function is_assoc ( array $array)
@@ -2928,9 +2934,9 @@ function array_merge_recursive_distinct_with_sequencial ( array &$array1, array 
  *   str_format ( "+5551992425885", "({3,2}) {5,5}-{10,}")
  *   will output "(51) 99242-5885"
  *
- * @param $content string Content to be cutted.
- * @param $pattern string Pattern to be used.
- * @result string Result of the pattern and content.
+ * @param string $content Content to be cutted.
+ * @param string $pattern Pattern to be used.
+ * @return string Result of the pattern and content.
  */
 function str_format ( $content, $pattern)
 {
@@ -2962,7 +2968,7 @@ function str_format ( $content, $pattern)
 /**
  * Function to get the first key of an array.
  *
- * @param $array array The array to be analyzed.
+ * @param array $array The array to be analyzed.
  * @return int|string|null The first array key. If not exist, return null.
  */
 if ( ! function_exists ( "array_key_first"))
@@ -2980,8 +2986,8 @@ if ( ! function_exists ( "array_key_first"))
 /**
  * Function that implements base32 encoding (RFC4648).
  *
- * @param $string string The data to be encoded.
- * @param $pad[optional] boolean Pad output.
+ * @param string $string The data to be encoded.
+ * @param boolean[optional] $pad Pad output.
  * @return string The RFC4648 encoded data.
  */
 function base32_encode ( $string, $pad = false)
@@ -3023,7 +3029,7 @@ function base32_encode ( $string, $pad = false)
 /**
  * Function that implements base32 decoding (RFC4648).
  *
- * @param $string string The RFC4648 encoded data.
+ * @param string $string The RFC4648 encoded data.
  * @return string The decoded data.
  */
 function base32_decode ( $string)
@@ -3065,9 +3071,9 @@ function base32_decode ( $string)
 /**
  * Function to generate a RFC6238 (TOTP) codes.
  *
- * @param $secret string The base32-encoded authentication secret.
- * @param $ranges[optional] integer The range of codes to accept.
- * @param $size[optional] integer The size of code, 6 or 8 digits.
+ * @param string $secret The base32-encoded authentication secret.
+ * @param integer[optional] $ranges The range of codes to accept.
+ * @param integer[optional] $size The size of code, 6 or 8 digits.
  * @return array An array with result codes.
  */
 function rfc6238_generate ( $secret, $ranges = 3, $size = 6)
@@ -3116,10 +3122,10 @@ function rfc6238_generate ( $secret, $ranges = 3, $size = 6)
 /**
  * Function to validate a RFC6238 (TOTP) user code.
  *
- * @param $secret string The base32-encoded authentication secret.
- * @param $code string The user current code.
- * @param $ranges[optional] integer The range of codes to accept.
- * @param $size[optional] integer The size of code, 6 or 8 digits.
+ * @param string $secret The base32-encoded authentication secret.
+ * @param string $code The user current code.
+ * @param integer[optional] $ranges The range of codes to accept.
+ * @param integer[optional] $size The size of code, 6 or 8 digits.
  * @return boolean True if code is valid.
  */
 function rfc6238_validate ( $secret, $code, $ranges = 3, $size = 6)
@@ -3170,10 +3176,10 @@ function rfc6238_validate ( $secret, $code, $ranges = 3, $size = 6)
 /**
  * Function to generate a RFC6238 (TOTP) authentication URI.
  *
- * @param $username string The user name.
- * @param $domain string The user domain.
- * @param $secret string The user secret.
- * @param $issuer string The authentication issuer.
+ * @param string $username The user name.
+ * @param string $domain The user domain.
+ * @param string $secret The user secret.
+ * @param string $issuer The authentication issuer.
  * @return string An TOTP authentication URI.
  */
 function rfc6238_uri ( $username, $domain, $secret, $issuer)
@@ -3264,10 +3270,10 @@ function rfc4226_validate ( $secret, $code, $counter, $window = 5, $size = 6)
 /**
  * Function to generate a RFC4226 (HOTP) authentication URI.
  *
- * @param $username string The user name.
- * @param $domain string The user domain.
- * @param $secret string The user secret.
- * @param $issuer string The authentication issuer.
+ * @param string $username The user name.
+ * @param string $domain The user domain.
+ * @param string $secret The user secret.
+ * @param string $issuer The authentication issuer.
  * @return string An HOTP authentication URI.
  */
 function rfc4226_uri ( $username, $domain, $secret, $issuer)
@@ -3278,8 +3284,8 @@ function rfc4226_uri ( $username, $domain, $secret, $issuer)
 /**
  * Function to search for a substring inside an array.
  *
- * @param $needle string The string to search for.
- * @param $haystack array The array to search in.
+ * @param string $needle The string to search for.
+ * @param array $haystack The array to search in.
  * @return boolean True if substring was found in any array value, otherwise false.
  */
 function array_search_substring ( $needle, $haystack)
@@ -3292,5 +3298,108 @@ function array_search_substring ( $needle, $haystack)
     }
   }
   return false;
+}
+
+/**
+ * Function to handle database query failures. Sends a 503 response with the
+ * MySQL error details when debug mode is active.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $context Optional context identifier for the failing query
+ * @param string $query The failing SQL query
+ * @return void (exits)
+ */
+function database_query_error ( $context = "", $query = "")
+{
+  global $_in;
+
+  if ( ob_get_level ())
+  {
+    ob_end_clean ();
+  }
+
+  header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+  header ( "Content-Type: application/json");
+
+  $response = array ( "result" => false, "error" => "Service temporarily unavailable");
+
+  if ( array_key_exists ( "general", $_in) && ! empty ( $_in["general"]["debug"]))
+  {
+    $response["error"] = "Database query failed";
+    $response["context"] = $context;
+    $response["mysql_error"] = $_in["mysql"]["id"]->error;
+    $response["mysql_errno"] = $_in["mysql"]["id"]->errno;
+    if ( ! empty ( $query))
+    {
+      $response["query"] = $query;
+    }
+    $trace = debug_backtrace ( DEBUG_BACKTRACE_IGNORE_ARGS, 10);
+    $response["_debug"] = array (
+      "backtrace" => array_map ( function ( $frame) {
+        return array (
+          "file" => isset ( $frame["file"]) ? basename ( $frame["file"]) : "[internal]",
+          "line" => $frame["line"] ?? 0,
+          "function" => $frame["function"] ?? ""
+        );
+      }, $trace),
+      "php_errors" => isset ( $_in["php_errors"]) ? $_in["php_errors"] : array ()
+    );
+  }
+
+  echo json_encode ( $response);
+  exit ();
+}
+
+/**
+ * Function to emit a structured API error response for non-database failures.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param int $code HTTP status code (4xx or 5xx)
+ * @param string $error Short error identifier
+ * @param string $message Human-readable description
+ * @return void (exits)
+ */
+function api_error_response ( $code, $error, $message = "")
+{
+  global $_in;
+
+  if ( ob_get_level ())
+  {
+    ob_end_clean ();
+  }
+
+  $statusTexts = array (
+    400 => "Bad Request", 401 => "Unauthorized", 403 => "Forbidden",
+    404 => "Not Found", 405 => "Method Not Allowed", 406 => "Not Acceptable",
+    409 => "Conflict", 415 => "Unsupported Media Type", 422 => "Unprocessable Entity",
+    500 => "Internal Server Error", 502 => "Bad Gateway", 503 => "Service Unavailable"
+  );
+  $statusText = array_key_exists ( $code, $statusTexts) ? $statusTexts[$code] : "Error";
+  header ( $_SERVER["SERVER_PROTOCOL"] . " " . $code . " " . $statusText);
+  header ( "Content-Type: application/json");
+
+  $response = array ( "result" => false, "error" => $error);
+  if ( ! empty ( $message))
+  {
+    $response["message"] = $message;
+  }
+
+  if ( array_key_exists ( "general", $_in) && ! empty ( $_in["general"]["debug"]))
+  {
+    $trace = debug_backtrace ( DEBUG_BACKTRACE_IGNORE_ARGS, 10);
+    $response["_debug"] = array (
+      "backtrace" => array_map ( function ( $frame) {
+        return array (
+          "file" => isset ( $frame["file"]) ? basename ( $frame["file"]) : "[internal]",
+          "line" => $frame["line"] ?? 0,
+          "function" => $frame["function"] ?? ""
+        );
+      }, $trace),
+      "php_errors" => isset ( $_in["php_errors"]) ? $_in["php_errors"] : array ()
+    );
+  }
+
+  echo json_encode ( $response);
+  exit ();
 }
 ?>

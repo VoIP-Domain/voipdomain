@@ -581,13 +581,13 @@ function framework_page_generate ( $content)
   {
     $body .= "\n";
     $body .= "<div id=\"vd_debug\" class=\"modal fade\" role=\"dialog\" aria-labelledby=\"vd_debug\" aria-hidden=\"true\">\n";
-    $body .= "  <div class=\"modal-dialog modal-lg\">\n";
+    $body .= "  <div class=\"modal-dialog modal-lg\" style=\"max-width:900px\">\n";
     $body .= "    <div class=\"modal-content\">\n";
     $body .= "      <div class=\"modal-header\">\n";
     $body .= "        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n";
     $body .= "        <h3 class=\"modal-title\">" . __ ( "VoIP Domain debugging") . "</h3>\n";
     $body .= "      </div>\n";
-    $body .= "      <div class=\"modal-body\"></div>\n";
+    $body .= "      <div class=\"modal-body\" style=\"max-height:70vh;overflow-y:auto;font-size:13px\"></div>\n";
     $body .= "      <div class=\"modal-footer\">\n";
     $body .= "        <button class=\"btn\" data-dismiss=\"modal\">" . __ ( "Close") . "</button>\n";
     $body .= "      </div>\n";
@@ -615,50 +615,65 @@ function framework_page_generate ( $content)
   {
     $footer .= "    document.dump_vd_debug = function ( request)\n";
     $footer .= "    {\n";
-    $footer .= "      console.log ( request);\n";
-    $footer .= "      display = '<strong>Endpoint</strong>: ' + request.endpoint + '<br />';\n";
+    $footer .= "      console.log ( 'VoIP Domain Debug:', request);\n";
+    $footer .= "      var display = '<strong>Endpoint</strong>: ' + request.endpoint + '<br />';\n";
     $footer .= "      display += '<strong>Route</strong>: ' + request.route + '<br />';\n";
     $footer .= "      display += '<strong>Data</strong>: <span id=\"vd_debug_data\"></span><br />';\n";
     $footer .= "      display += '<strong>Sent headers</strong>: <span id=\"vd_debug_sentheaders\"></span><br />';\n";
     $footer .= "      display += '<strong>Received headers</strong>: <span id=\"vd_debug_receivedheaders\"></span><br />';\n";
     $footer .= "      display += '<strong>Response</strong>: ' + request.result.API.statusText + ' (' + request.result.API.statusCode + ')<br />';\n";
-    $footer .= "      if ( request.result.API.content.search ( /__X_VD_DEBUG__/))\n";
+    $footer .= "      var jsonBody = null;\n";
+    $footer .= "      try { jsonBody = JSON.parse ( request.result.API.content); } catch ( e) { jsonBody = null; }\n";
+    $footer .= "      if ( jsonBody && jsonBody.error)\n";
     $footer .= "      {\n";
-    $footer .= "        display += '<strong>Backtrace</strong>:<br />';\n";
-    $footer .= "        content = request.result.API.content.replace ( /.*__X_VD_DEBUG__/gm, '');\n";
-    $footer .= "        backtrace = JSON.parse ( content.substring ( content.search ( /:/) + 1));\n";
-    $footer .= "        counter = 1;\n";
-    $footer .= "        for ( const property in backtrace)\n";
+    $footer .= "        display += '<strong>Error</strong>: <code>' + jsonBody.error + '</code><br />';\n";
+    $footer .= "        if ( jsonBody.context) display += '<strong>Context</strong>: <code>' + jsonBody.context + '</code><br />';\n";
+    $footer .= "        if ( jsonBody.message) display += '<strong>Message</strong>: <code>' + jsonBody.message + '</code><br />';\n";
+    $footer .= "        if ( jsonBody.mysql_error) display += '<strong>MySQL Error</strong>: <code>' + jsonBody.mysql_error + '</code> (errno: ' + jsonBody.mysql_errno + ')<br />';\n";
+    $footer .= "        if ( jsonBody.query) display += '<strong>Query</strong>: <pre style=\"max-height:120px;overflow:auto\">' + jsonBody.query + '</pre>';\n";
+    $footer .= "      }\n";
+    $footer .= "      if ( jsonBody && jsonBody._debug)\n";
+    $footer .= "      {\n";
+    $footer .= "        if ( jsonBody._debug.backtrace && jsonBody._debug.backtrace.length)\n";
     $footer .= "        {\n";
-    $footer .= "          display += '&nbsp;<strong>' + counter++ + '</strong>) ' + ( backtrace[property].hasOwnProperty ( 'file') ? backtrace[property].file + ' (line ' + backtrace[property].line + ')' : '[internal function]') + ': ' + backtrace[property].function + ' (<span id=\"vd_debug_' + property + '\"></span>)<br />';\n";
+    $footer .= "          display += '<strong>Backtrace</strong>:<br /><ol style=\"font-family:monospace;font-size:12px\">';\n";
+    $footer .= "          for ( var i = 0; i < jsonBody._debug.backtrace.length; i++)\n";
+    $footer .= "          {\n";
+    $footer .= "            var f = jsonBody._debug.backtrace[i];\n";
+    $footer .= "            display += '<li>' + f.file + ':' + f.line + ' &rarr; <strong>' + f.function + '</strong>()</li>';\n";
+    $footer .= "          }\n";
+    $footer .= "          display += '</ol>';\n";
+    $footer .= "        }\n";
+    $footer .= "        if ( jsonBody._debug.php_errors && jsonBody._debug.php_errors.length)\n";
+    $footer .= "        {\n";
+    $footer .= "          display += '<strong>PHP Errors (' + jsonBody._debug.php_errors.length + ')</strong>:<br /><ol style=\"font-family:monospace;font-size:12px\">';\n";
+    $footer .= "          for ( var i = 0; i < jsonBody._debug.php_errors.length; i++)\n";
+    $footer .= "          {\n";
+    $footer .= "            var e = jsonBody._debug.php_errors[i];\n";
+    $footer .= "            display += '<li><span style=\"color:#c00\">[' + e.type + ']</span> ' + e.message + ' in <strong>' + e.file + '</strong>:' + e.line + '</li>';\n";
+    $footer .= "          }\n";
+    $footer .= "          display += '</ol>';\n";
     $footer .= "        }\n";
     $footer .= "      }\n";
-    $footer .= "      if ( request.result.API.content.search ( /__X_VD_DEBUG__/) != 1)\n";
+    $footer .= "      if ( ! jsonBody)\n";
     $footer .= "      {\n";
-    $footer .= "        display += '<strong>Content</strong>: <textarea readonly=\"readonly\">' + request.result.API.content.substring ( 0, request.result.API.content.search ( /__X_VD_DEBUG__/)) + '</textarea>';\n";
+    $footer .= "        display += '<strong>Raw Content</strong>:<br /><textarea readonly=\"readonly\" style=\"width:100%;height:150px\">' + request.result.API.content + '</textarea>';\n";
     $footer .= "      }\n";
     $footer .= "      $('#vd_debug').find ( '.modal-body').html ( display);\n";
     $footer .= "      $('#vd_debug').modal ( 'show');\n";
     $footer .= "      $('#vd_debug_data').jsonViewer ( request.data, { collapsed: true, withQuotes: true});\n";
     $footer .= "      $('#vd_debug_sentheaders').jsonViewer ( request.sentHeaders, { collapsed: true, withQuotes: true});\n";
-    $footer .= "      headers = request.result.API.headers.replace ( /(\\r\\n|\\n|\\r)/gm, '\\n').split ( '\\n');\n";
+    $footer .= "      var headers = request.result.API.headers.replace ( /(\\r\\n|\\n|\\r)/gm, '\\n').split ( '\\n');\n";
     $footer .= "      var obj = {};\n";
-    $footer .= "      for ( const property in headers)\n";
+    $footer .= "      for ( var i = 0; i < headers.length; i++)\n";
     $footer .= "      {\n";
-    $footer .= "        if ( headers[property] != '')\n";
+    $footer .= "        if ( headers[i] != '' && headers[i].indexOf ( ':') !== -1)\n";
     $footer .= "        {\n";
-    $footer .= "          split = headers[property].split ( ':');\n";
-    $footer .= "          obj[split[0].trim ()] = split[1].trim ();\n";
+    $footer .= "          var split = headers[i].split ( ':');\n";
+    $footer .= "          obj[split[0].trim ()] = split.slice ( 1).join ( ':').trim ();\n";
     $footer .= "        }\n";
     $footer .= "      }\n";
     $footer .= "      $('#vd_debug_receivedheaders').jsonViewer ( obj, { collapsed: true, withQuotes: true});\n";
-    $footer .= "      if ( request.result.API.content.search ( /__X_VD_DEBUG__/))\n";
-    $footer .= "      {\n";
-    $footer .= "        for ( const property in backtrace)\n";
-    $footer .= "        {\n";
-    $footer .= "          $('#vd_debug_' + property).jsonViewer ( backtrace[property].args, { collapsed: true, withQuotes: true});\n";
-    $footer .= "        }\n";
-    $footer .= "      }\n";
     $footer .= "    };\n";
     $footer .= "\n";
     $footer .= "    if ( 'SecurityPolicyViolationEvent' in window)\n";
@@ -1008,7 +1023,7 @@ function call_report_page_generate ( $buffer, $parameters)
   /**
    * Create page code
    */
-  if ( array_key_exists ( "Filter", $parameters))
+  if ( array_key_exists ( "Filters", $parameters))
   {
     $buffer .= "<div class=\"container\">\n";
     if ( array_key_exists ( "FiltersOverwrite", $parameters) && ! empty ( $parameters["FiltersOverwrite"]))
@@ -2525,6 +2540,7 @@ framework_add_path ( "/dashboard", "dashboard_page", array ( "permissions" => ar
 
 /**
  * Function to draw a dashboard to user.
+ * Dispatches to master portal view when session is Super-Administrator (Tenant == 0).
  *
  * @global array $_in Framework global configuration variable
  * @param string $page Buffer from plugin system if processed by other function
@@ -2537,6 +2553,14 @@ function dashboard_page ( $page, $parameters)
   global $_in;
 
   /**
+   * If master portal (Super-Administrator), render system-wide dashboard
+   */
+  if ( $_in["session"]["Tenant"] == 0 && in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
+  {
+    return dashboard_master_page ( $page, $parameters);
+  }
+
+  /**
    * Set page title
    */
   sys_set_title ( __ ( "Dashboard"));
@@ -2547,6 +2571,7 @@ function dashboard_page ( $page, $parameters)
    */
   sys_addcss ( array ( "name" => "tempus-dominus", "src" => "/vendors/tempus-dominus/build/css/bootstrap-datetimepicker.css", "dep" => array ()));
   sys_addcss ( array ( "name" => "daterangepicker", "src" => "/vendors/daterangepicker/daterangepicker.css", "dep" => array ()));
+  sys_addcss ( array ( "name" => "tui.chart", "src" => "/vendors/tui.chart/dist/tui-chart.css", "dep" => array ()));
 
   /**
    * Add page JavaScript requirements
@@ -2554,84 +2579,176 @@ function dashboard_page ( $page, $parameters)
   sys_addjs ( array ( "name" => "tempus-dominus", "src" => "/vendors/tempus-dominus/build/js/bootstrap-datetimepicker.js", "dep" => array ( "moment", "bootstrap")));
   sys_addjs ( array ( "name" => "jquery-knob", "src" => "/vendors/jquery-knob/dist/jquery.knob.js", "dep" => array ()));
   sys_addjs ( array ( "name" => "daterangepicker", "src" => "/vendors/daterangepicker/daterangepicker.js", "dep" => array ( "moment")));
+  sys_addjs ( array ( "name" => "raphael", "src" => "/vendors/raphael/raphael.js", "dep" => array ()));
+  sys_addjs ( array ( "name" => "tui.code-snippet", "src" => "/vendors/tui.code-snippet/dist/tui-code-snippet.js", "dep" => array ()));
+  sys_addjs ( array ( "name" => "tui.chart", "src" => "/vendors/tui.chart/dist/tui-chart.js", "dep" => array ( "raphael", "tui.code-snippet")));
 
   /**
-   * Dashboard
+   * Date range picker
    */
   $output = "<div class=\"pull-right\">\n";
   $output .= "  <div id=\"range\" class=\"daterangepicker-input\"><i class=\"fa fa-calendar\"></i> <span> - </span> <b class=\"caret\"></b></div>\n";
   $output .= "</div>\n";
   $output .= "<div class=\"clearfix\"></div>\n";
 
-  // Draw information knob dials
+  /**
+   * Summary info-box cards
+   */
+  $output .= "<div id=\"summary-cards\" class=\"row\" style=\"margin-top: 15px;\">\n";
+
+  $output .= "  <div class=\"col-md-2 col-sm-4 col-xs-6\">\n";
+  $output .= "    <div style=\"background: #fff; border-left: 4px solid #3c8dbc; border-radius: 4px; padding: 12px 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,.08);\">\n";
+  $output .= "      <div style=\"font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600;\">" . __ ( "Total Calls") . "</div>\n";
+  $output .= "      <div style=\"font-size: 22px; font-weight: 700; color: #3c8dbc;\" id=\"card_total\">0</div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
+  $output .= "  <div class=\"col-md-2 col-sm-4 col-xs-6\">\n";
+  $output .= "    <div style=\"background: #fff; border-left: 4px solid #00a65a; border-radius: 4px; padding: 12px 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,.08);\">\n";
+  $output .= "      <div style=\"font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600;\">" . __ ( "Answered") . "</div>\n";
+  $output .= "      <div style=\"font-size: 22px; font-weight: 700; color: #00a65a;\" id=\"card_answered\">0</div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
+  $output .= "  <div class=\"col-md-2 col-sm-4 col-xs-6\">\n";
+  $output .= "    <div style=\"background: #fff; border-left: 4px solid #dd4b39; border-radius: 4px; padding: 12px 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,.08);\">\n";
+  $output .= "      <div style=\"font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600;\">" . __ ( "Missed") . "</div>\n";
+  $output .= "      <div style=\"font-size: 22px; font-weight: 700; color: #dd4b39;\" id=\"card_missed\">0</div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
+  $output .= "  <div class=\"col-md-2 col-sm-4 col-xs-6\">\n";
+  $output .= "    <div style=\"background: #fff; border-left: 4px solid #605ca8; border-radius: 4px; padding: 12px 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,.08);\">\n";
+  $output .= "      <div style=\"font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600;\">" . __ ( "Extensions") . "</div>\n";
+  $output .= "      <div style=\"font-size: 22px; font-weight: 700; color: #605ca8;\" id=\"card_extensions\">0</div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
+  $output .= "  <div class=\"col-md-2 col-sm-4 col-xs-6\">\n";
+  $output .= "    <div style=\"background: #fff; border-left: 4px solid #f39c12; border-radius: 4px; padding: 12px 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,.08);\">\n";
+  $output .= "      <div style=\"font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600;\">" . __ ( "Servers") . "</div>\n";
+  $output .= "      <div style=\"font-size: 22px; font-weight: 700; color: #f39c12;\" id=\"card_servers\">0</div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
+  $output .= "  <div class=\"col-md-2 col-sm-4 col-xs-6\">\n";
+  $output .= "    <div style=\"background: #fff; border-left: 4px solid #00c0ef; border-radius: 4px; padding: 12px 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,.08);\">\n";
+  $output .= "      <div style=\"font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600;\">" . __ ( "Gateways") . "</div>\n";
+  $output .= "      <div style=\"font-size: 22px; font-weight: 700; color: #00c0ef;\" id=\"card_gateways\">0</div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
+  $output .= "</div>\n";
+
+  /**
+   * KPI knob dials
+   */
   $output .= "<div id=\"stats\" class=\"row circleStats\">\n";
 
-  // Answer-Seizure Ratio (ASR)
   $output .= "  <div class=\"col-md-2 col-sm-4 col-xs-6\">\n";
   $output .= "    <div class=\"circleStatsItem blue\">\n";
-  $output .= "      <i class=\"fa fa-bullhorn\"></i>\n";
+  $output .= "      <i class=\"fa fa-phone-alt\"></i>\n";
   $output .= "      <span class=\"plus\">+</span>\n";
   $output .= "      <span class=\"percent\">%</span>\n";
   $output .= "      <input type=\"text\" id=\"dashboard_asr\" value=\"0\" class=\"blueCircle\" />\n";
   $output .= "    </div>\n";
-  $output .= "    <div class=\"box-small-title\"><span class=\"legend\" data-original-title=\"" . __ ( "Answered calls") . " * 100 / " . __ ( "Calls total") . "\" data-toggle=\"tooltip\">" . __ ( "Answer-Seizure Ratio") . "</span><br /><span id=\"dashboard_asr_value\"></span> " . __ ( "of") . " <span id=\"dashboard_asr_total\"></span></div>\n";
+  $output .= "    <div class=\"box-small-title\"><span class=\"legend\" data-original-title=\"" . __ ( "Answered calls") . " * 100 / " . __ ( "Calls total") . "\" data-toggle=\"tooltip\">" . __ ( "Answer-Seizure Ratio") . "</span><br /><span id=\"dashboard_asr_value\"></span> / <span id=\"dashboard_asr_total\"></span></div>\n";
   $output .= "  </div>\n";
 
-  // Network Efficiency Ratio (NER)
   $output .= "  <div class=\"col-md-2 col-sm-4 col-xs-6\">\n";
   $output .= "    <div class=\"circleStatsItem red\">\n";
-  $output .= "      <i class=\"fa fa-thumbs-up\"></i>\n";
+  $output .= "      <i class=\"fa fa-check-circle\"></i>\n";
   $output .= "      <span class=\"plus\">+</span>\n";
   $output .= "      <span class=\"percent\">%</span>\n";
   $output .= "      <input type=\"text\" id=\"dashboard_ner\" value=\"0\" class=\"orangeCircle\" />\n";
   $output .= "    </div>\n";
-  $output .= "    <div class=\"box-small-title\"><span class=\"legend\" data-original-title=\"" . __ ( "Answered or not answered or busy calls") . " * 100 / " . __ ( "Calls total") . "\" data-toggle=\"tooltip\">" . __ ( "Network Efficiency Ratio") . "</span><br /><span id=\"dashboard_ner_value\"></span> " . __ ( "of") . " <span id=\"dashboard_ner_total\"></span></div>\n";
+  $output .= "    <div class=\"box-small-title\"><span class=\"legend\" data-original-title=\"" . __ ( "Answered or not answered or busy calls") . " * 100 / " . __ ( "Calls total") . "\" data-toggle=\"tooltip\">" . __ ( "Network Efficiency Ratio") . "</span><br /><span id=\"dashboard_ner_value\"></span> / <span id=\"dashboard_ner_total\"></span></div>\n";
   $output .= "  </div>\n";
 
-  // Subscriber Busy Ratio
   $output .= "  <div class=\"col-md-2 col-sm-4 col-xs-6\">\n";
   $output .= "    <div class=\"circleStatsItem yellow\">\n";
-  $output .= "      <i class=\"fa fa-user\"></i>\n";
+  $output .= "      <i class=\"fa fa-user-clock\"></i>\n";
   $output .= "      <span class=\"plus\">+</span>\n";
   $output .= "      <span class=\"percent\">%</span>\n";
   $output .= "      <input type=\"text\" id=\"dashboard_sbr\" value=\"0\" class=\"yellowCircle\" />\n";
   $output .= "    </div>\n";
-  $output .= "    <div class=\"box-small-title\"><span class=\"legend\" data-original-title=\"" . __ ( "Busy calls") . " * 100 / " . __ ( "Answered or busy calls") . "\" data-toggle=\"tooltip\">" . __ ( "Subscriber Busy Ratio") . "</span><br /><span id=\"dashboard_sbr_value\"></span> " . __ ( "of") . " <span id=\"dashboard_sbr_total\"></span></div>\n";
+  $output .= "    <div class=\"box-small-title\"><span class=\"legend\" data-original-title=\"" . __ ( "Busy calls") . " * 100 / " . __ ( "Answered or busy calls") . "\" data-toggle=\"tooltip\">" . __ ( "Subscriber Busy Ratio") . "</span><br /><span id=\"dashboard_sbr_value\"></span> / <span id=\"dashboard_sbr_total\"></span></div>\n";
   $output .= "  </div>\n";
 
-  // Short Calls Ratio
   $output .= "  <div class=\"col-md-2 col-sm-4 col-xs-6\">\n";
   $output .= "    <div class=\"circleStatsItem green\">\n";
-  $output .= "      <i class=\"fa fa-chart-bar\"></i>\n";
+  $output .= "      <i class=\"fa fa-hourglass-half\"></i>\n";
   $output .= "      <span class=\"plus\">+</span>\n";
   $output .= "      <span class=\"percent\">%</span>\n";
   $output .= "      <input type=\"text\" id=\"dashboard_scr\" value=\"0\" class=\"greenCircle\" />\n";
   $output .= "    </div>\n";
-  $output .= "    <div class=\"box-small-title\"><span class=\"legend\" data-original-title=\"" . __ ( "Answered calls") . " <= 60 " . __ ( "seconds") . " * 100 / " . __ ( "Answered calls") . "\" data-toggle=\"tooltip\">" . __ ( "Short Calls Ratio") . "</span><br /><span id=\"dashboard_scr_value\"></span> " . __ ( "of") . " <span id=\"dashboard_scr_total\"></span></div>\n";
+  $output .= "    <div class=\"box-small-title\"><span class=\"legend\" data-original-title=\"" . __ ( "Answered calls") . " <= 60 " . __ ( "seconds") . " * 100 / " . __ ( "Answered calls") . "\" data-toggle=\"tooltip\">" . __ ( "Short Calls Ratio") . "</span><br /><span id=\"dashboard_scr_value\"></span> / <span id=\"dashboard_scr_total\"></span></div>\n";
   $output .= "  </div>\n";
 
-  // Long Calls Ratio
   $output .= "  <div class=\"col-md-2 col-sm-4 col-xs-6\">\n";
   $output .= "    <div class=\"circleStatsItem lightorange\">\n";
-  $output .= "      <i class=\"fa fa-shopping-cart\"></i>\n";
+  $output .= "      <i class=\"fa fa-clock\"></i>\n";
   $output .= "      <span class=\"plus\">+</span>\n";
   $output .= "      <span class=\"percent\">%</span>\n";
   $output .= "      <input type=\"text\" id=\"dashboard_lcr\" value=\"0\" class=\"lightOrangeCircle\" />\n";
   $output .= "    </div>\n";
-  $output .= "    <div class=\"box-small-title\"><span class=\"legend\" data-original-title=\"" . __ ( "Answered calls") . " >= 5 " . __ ( "minutes") . " * 100 / " . __ ( "Answered calls") . "\" data-toggle=\"tooltip\">" . __ ( "Long Calls Ratio") . "</span><br /><span id=\"dashboard_lcr_value\"></span> " . __ ( "of") . " <span id=\"dashboard_lcr_total\"></span></div>\n";
+  $output .= "    <div class=\"box-small-title\"><span class=\"legend\" data-original-title=\"" . __ ( "Answered calls") . " >= 5 " . __ ( "minutes") . " * 100 / " . __ ( "Answered calls") . "\" data-toggle=\"tooltip\">" . __ ( "Long Calls Ratio") . "</span><br /><span id=\"dashboard_lcr_value\"></span> / <span id=\"dashboard_lcr_total\"></span></div>\n";
   $output .= "  </div>\n";
 
-  // Allocation percent
   $output .= "  <div class=\"col-md-2 col-sm-4 col-xs-6\">\n";
   $output .= "    <div class=\"circleStatsItem pink\">\n";
-  $output .= "      <i class=\"fa fa-globe\"></i>\n";
+  $output .= "      <i class=\"fa fa-sitemap\"></i>\n";
   $output .= "      <span class=\"plus\">+</span>\n";
   $output .= "      <span class=\"percent\">%</span>\n";
   $output .= "      <input type=\"text\" id=\"dashboard_allocation\" value=\"0\" class=\"pinkCircle\" />\n";
   $output .= "    </div>\n";
-  $output .= "    <div class=\"box-small-title\"><span class=\"legend\" data-original-title=\"" . __ ( "Registered extensions") . " * 100 / " . __ ( "Extensions total") . "\" data-toggle=\"tooltip\">" . __ ( "Allocation Ratio") . "</span><br /><span id=\"dashboard_allocation_value\"></span> " . __ ( "of") . " <span id=\"dashboard_allocation_total\"></span></div>\n";
+  $output .= "    <div class=\"box-small-title\"><span class=\"legend\" data-original-title=\"" . __ ( "Registered extensions") . " * 100 / " . __ ( "Extensions total") . "\" data-toggle=\"tooltip\">" . __ ( "Allocation Ratio") . "</span><br /><span id=\"dashboard_allocation_value\"></span> / <span id=\"dashboard_allocation_total\"></span></div>\n";
   $output .= "  </div>\n";
-  $output .= "</div>";
+  $output .= "</div>\n";
+
+  /**
+   * Chart and server status row
+   */
+  $output .= "<div class=\"row\" style=\"margin-top: 10px;\">\n";
+
+  $output .= "  <div class=\"col-md-8\">\n";
+  $output .= "    <div style=\"background: #fff; border: 1px solid #e8e8e8; border-radius: 4px; padding: 15px; margin-bottom: 15px;\">\n";
+  $output .= "      <h4 style=\"margin: 0 0 10px; font-size: 15px; font-weight: 600; color: #333;\"><i class=\"fa fa-chart-area\" style=\"color: #3c8dbc; margin-right: 8px;\"></i>" . __ ( "Call Volume") . "</h4>\n";
+  $output .= "      <div id=\"dashboard_chart\" style=\"width: 100%; height: 280px;\"></div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
+  $output .= "  <div class=\"col-md-4\">\n";
+  $output .= "    <div style=\"background: #fff; border: 1px solid #e8e8e8; border-radius: 4px; padding: 15px; margin-bottom: 15px; min-height: 338px;\">\n";
+  $output .= "      <h4 style=\"margin: 0 0 10px; font-size: 15px; font-weight: 600; color: #333;\"><i class=\"fa fa-server\" style=\"color: #f39c12; margin-right: 8px;\"></i>" . __ ( "Server Status") . "</h4>\n";
+  $output .= "      <div id=\"server_status\"><p style=\"color: #999; font-size: 13px;\">" . __ ( "Loading...") . "</p></div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
+  $output .= "</div>\n";
+
+  /**
+   * Recent calls table
+   */
+  $output .= "<div class=\"row\">\n";
+  $output .= "  <div class=\"col-md-12\">\n";
+  $output .= "    <div style=\"background: #fff; border: 1px solid #e8e8e8; border-radius: 4px; padding: 15px;\">\n";
+  $output .= "      <h4 style=\"margin: 0 0 10px; font-size: 15px; font-weight: 600; color: #333;\"><i class=\"fa fa-history\" style=\"color: #605ca8; margin-right: 8px;\"></i>" . __ ( "Recent Calls") . "</h4>\n";
+  $output .= "      <div class=\"table-responsive\">\n";
+  $output .= "        <table class=\"table table-striped table-condensed\" style=\"font-size: 13px; margin: 0;\">\n";
+  $output .= "          <thead><tr>\n";
+  $output .= "            <th>" . __ ( "Source") . "</th>\n";
+  $output .= "            <th>" . __ ( "Destination") . "</th>\n";
+  $output .= "            <th>" . __ ( "Date") . "</th>\n";
+  $output .= "            <th>" . __ ( "Duration") . "</th>\n";
+  $output .= "            <th>" . __ ( "Status") . "</th>\n";
+  $output .= "          </tr></thead>\n";
+  $output .= "          <tbody id=\"recent_calls\"><tr><td colspan=\"5\" style=\"color: #999;\">" . __ ( "Loading...") . "</td></tr></tbody>\n";
+  $output .= "        </table>\n";
+  $output .= "      </div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+  $output .= "</div>\n";
 
   /**
    * Add dashboard JavaScript code
@@ -2724,6 +2841,95 @@ function dashboard_page ( $page, $parameters)
               "{\n" .
               "  delay: { 'show': 100, 'hide': 100 }\n" .
               "});\n" .
+              "var dashboardChart = null;\n" .
+              "tui.chart.registerTheme ( 'dashboardTheme', { series: { colors: [ '#00a65a', '#f39c12', '#dd4b39', '#605ca8']}});\n" .
+              "function renderChart ( volume)\n" .
+              "{\n" .
+              "  if ( ! volume || volume.length === 0)\n" .
+              "  {\n" .
+              "    $('#dashboard_chart').html ( '<p style=\"color: #999; font-size: 13px; text-align: center; padding-top: 100px;\">" . __ ( "No data for the selected period.") . "</p>');\n" .
+              "    return;\n" .
+              "  }\n" .
+              "  var categories = [];\n" .
+              "  var answered = [];\n" .
+              "  var noAnswer = [];\n" .
+              "  var busy = [];\n" .
+              "  var failed = [];\n" .
+              "  for ( var i = 0; i < volume.length; i++)\n" .
+              "  {\n" .
+              "    categories.push ( volume[i].Date.substr ( 5));\n" .
+              "    answered.push ( volume[i].Answered);\n" .
+              "    noAnswer.push ( volume[i].NoAnswer);\n" .
+              "    busy.push ( volume[i].Busy);\n" .
+              "    failed.push ( volume[i].Failed);\n" .
+              "  }\n" .
+              "  var container = document.getElementById ( 'dashboard_chart');\n" .
+              "  var chartData = {\n" .
+              "    categories: categories,\n" .
+              "    series: [\n" .
+              "      { name: '" . __ ( "Answered") . "', data: answered },\n" .
+              "      { name: '" . __ ( "No Answer") . "', data: noAnswer },\n" .
+              "      { name: '" . __ ( "Busy") . "', data: busy },\n" .
+              "      { name: '" . __ ( "Failed") . "', data: failed }\n" .
+              "    ]\n" .
+              "  };\n" .
+              "  var options = {\n" .
+              "    chart: { width: container.offsetWidth, height: 280 },\n" .
+              "    yAxis: { title: '" . __ ( "Calls") . "' },\n" .
+              "    xAxis: { title: '" . __ ( "Date") . "', tickInterval: 'auto' },\n" .
+              "    series: { showDot: false, zoomable: false },\n" .
+              "    legend: { align: 'bottom' },\n" .
+              "    chartExportMenu: { visible: false },\n" .
+              "    theme: 'dashboardTheme'\n" .
+              "  };\n" .
+              "  $('#dashboard_chart').empty ();\n" .
+              "  dashboardChart = tui.chart.lineChart ( container, chartData, options);\n" .
+              "}\n" .
+              "function renderServerStatus ( servers)\n" .
+              "{\n" .
+              "  if ( ! servers || servers.length === 0)\n" .
+              "  {\n" .
+              "    $('#server_status').html ( '<p style=\"color: #999; font-size: 13px;\">" . __ ( "No servers configured.") . "</p>');\n" .
+              "    return;\n" .
+              "  }\n" .
+              "  var html = '<table class=\"table table-condensed\" style=\"font-size: 13px; margin: 0;\">';\n" .
+              "  html += '<thead><tr><th>" . __ ( "Server") . "</th><th style=\"width: 80px; text-align: center;\">" . __ ( "Pending") . "</th></tr></thead><tbody>';\n" .
+              "  for ( var i = 0; i < servers.length; i++)\n" .
+              "  {\n" .
+              "    var badge = 'success';\n" .
+              "    if ( servers[i].Pending > 10) badge = 'danger';\n" .
+              "    else if ( servers[i].Pending > 0) badge = 'warning';\n" .
+              "    html += '<tr><td>' + servers[i].Description + '</td><td style=\"text-align: center;\"><span class=\"label label-' + badge + '\">' + servers[i].Pending + '</span></td></tr>';\n" .
+              "  }\n" .
+              "  html += '</tbody></table>';\n" .
+              "  $('#server_status').html ( html);\n" .
+              "}\n" .
+              "function renderRecentCalls ( calls)\n" .
+              "{\n" .
+              "  if ( ! calls || calls.length === 0)\n" .
+              "  {\n" .
+              "    $('#recent_calls').html ( '<tr><td colspan=\"5\" style=\"color: #999;\">" . __ ( "No calls found.") . "</td></tr>');\n" .
+              "    return;\n" .
+              "  }\n" .
+              "  var html = '';\n" .
+              "  var labels = { 'ANSWERED': 'success', 'NO ANSWER': 'warning', 'BUSY': 'info', 'FAILED': 'danger' };\n" .
+              "  var dispositions = { 'ANSWERED': '" . __ ( "Answered") . "', 'NO ANSWER': '" . __ ( "No answer") . "', 'BUSY': '" . __ ( "Busy") . "', 'FAILED': '" . __ ( "Failed") . "' };\n" .
+              "  for ( var i = 0; i < calls.length; i++)\n" .
+              "  {\n" .
+              "    var dur = calls[i].BillSec > 0 ? calls[i].BillSec : calls[i].Duration;\n" .
+              "    var m = Math.floor ( dur / 60);\n" .
+              "    var s = dur % 60;\n" .
+              "    var badge = labels[calls[i].Disposition] || 'default';\n" .
+              "    html += '<tr>';\n" .
+              "    html += '<td>' + calls[i].Source + '</td>';\n" .
+              "    html += '<td>' + calls[i].Destination + '</td>';\n" .
+              "    html += '<td>' + calls[i].Date + '</td>';\n" .
+              "    html += '<td>' + ( m > 0 ? m + '" . __ ( "m ") . "' : '') + ( s < 10 ? '0' : '') + s + '" . __ ( "s") . "</td>';\n" .
+              "    html += '<td><span class=\"label label-' + badge + '\">' + ( dispositions[calls[i].Disposition] || calls[i].Disposition) + '</span></td>';\n" .
+              "    html += '</tr>';\n" .
+              "  }\n" .
+              "  $('#recent_calls').html ( html);\n" .
+              "}\n" .
               "$('#range span').html ( moment ().subtract ( 29, 'days').format ( '" . __ ( "MM/DD/YYYY") . "') + ' - ' + moment ().format ( '" . __ ( "MM/DD/YYYY") . "'));\n" .
               "$('#range').css ( 'display', 'block').daterangepicker (\n" .
               "{\n" .
@@ -2802,6 +3008,421 @@ function dashboard_page ( $page, $parameters)
               "    $('#dashboard_allocation').val ( data.Allocation.Percent).trigger ( 'change');\n" .
               "    $('#dashboard_allocation_value').html ( data.Allocation.Value);\n" .
               "    $('#dashboard_allocation_total').html ( data.Allocation.Total);\n" .
+              "    if ( data.Counts)\n" .
+              "    {\n" .
+              "      $('#card_total').html ( data.Counts.TotalCalls);\n" .
+              "      $('#card_answered').html ( data.Counts.Answered);\n" .
+              "      $('#card_missed').html ( data.Counts.NoAnswer);\n" .
+              "      $('#card_extensions').html ( data.Counts.Extensions);\n" .
+              "      $('#card_servers').html ( data.Counts.Servers);\n" .
+              "      $('#card_gateways').html ( data.Counts.ActiveGateways);\n" .
+              "    }\n" .
+              "    try { if ( data.DailyVolume) renderChart ( data.DailyVolume); } catch ( e) { console.error ( 'Chart error:', e); }\n" .
+              "    try { if ( data.ServerStatus) renderServerStatus ( data.ServerStatus); } catch ( e) { console.error ( 'ServerStatus error:', e); }\n" .
+              "    try { if ( data.RecentCalls) renderRecentCalls ( data.RecentCalls); } catch ( e) { console.error ( 'RecentCalls error:', e); }\n" .
+              "  }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
+              "  {\n" .
+              "    new PNotify ( { title: '" . __ ( "Dashboard") . "', text: '" . __ ( "Error retrieving statistics!") . "', type: 'error'});\n" .
+              "  });\n" .
+              "}).trigger ( 'update');\n");
+
+  /**
+   * Return generated HTML
+   */
+  return $output;
+}
+
+/**
+ * Function to draw the master portal dashboard (system-wide).
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $page Buffer from plugin system if processed by other function
+ *                     before
+ * @param array $parameters Framework page structure
+ * @return array Framework page structure with generated content
+ */
+function dashboard_master_page ( $page, $parameters)
+{
+  global $_in;
+
+  /**
+   * Set page title
+   */
+  sys_set_title ( __ ( "Dashboard"));
+  sys_set_subtitle ( __ ( "system-wide dashboard"));
+
+  /**
+   * Add page CSS requirements
+   */
+  sys_addcss ( array ( "name" => "tempus-dominus", "src" => "/vendors/tempus-dominus/build/css/bootstrap-datetimepicker.css", "dep" => array ()));
+  sys_addcss ( array ( "name" => "daterangepicker", "src" => "/vendors/daterangepicker/daterangepicker.css", "dep" => array ()));
+  sys_addcss ( array ( "name" => "tui.chart", "src" => "/vendors/tui.chart/dist/tui-chart.css", "dep" => array ()));
+
+  /**
+   * Add page JavaScript requirements
+   */
+  sys_addjs ( array ( "name" => "tempus-dominus", "src" => "/vendors/tempus-dominus/build/js/bootstrap-datetimepicker.js", "dep" => array ( "moment", "bootstrap")));
+  sys_addjs ( array ( "name" => "jquery-knob", "src" => "/vendors/jquery-knob/dist/jquery.knob.js", "dep" => array ()));
+  sys_addjs ( array ( "name" => "daterangepicker", "src" => "/vendors/daterangepicker/daterangepicker.js", "dep" => array ( "moment")));
+  sys_addjs ( array ( "name" => "raphael", "src" => "/vendors/raphael/raphael.js", "dep" => array ()));
+  sys_addjs ( array ( "name" => "tui.code-snippet", "src" => "/vendors/tui.code-snippet/dist/tui-code-snippet.js", "dep" => array ()));
+  sys_addjs ( array ( "name" => "tui.chart", "src" => "/vendors/tui.chart/dist/tui-chart.js", "dep" => array ( "raphael", "tui.code-snippet")));
+
+  /**
+   * Date range picker
+   */
+  $output = "<div class=\"pull-right\">\n";
+  $output .= "  <div id=\"range\" class=\"daterangepicker-input\"><i class=\"fa fa-calendar\"></i> <span> - </span> <b class=\"caret\"></b></div>\n";
+  $output .= "</div>\n";
+  $output .= "<div class=\"clearfix\"></div>\n";
+
+  /**
+   * Summary info-box cards (system-wide)
+   */
+  $output .= "<div id=\"summary-cards\" class=\"row\" style=\"margin-top: 15px;\">\n";
+
+  $output .= "  <div class=\"col-md-2 col-sm-4 col-xs-6\">\n";
+  $output .= "    <div style=\"background: #fff; border-left: 4px solid #605ca8; border-radius: 4px; padding: 12px 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,.08);\">\n";
+  $output .= "      <div style=\"font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600;\">" . __ ( "Tenants") . "</div>\n";
+  $output .= "      <div style=\"font-size: 22px; font-weight: 700; color: #605ca8;\" id=\"card_tenants\">0</div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
+  $output .= "  <div class=\"col-md-2 col-sm-4 col-xs-6\">\n";
+  $output .= "    <div style=\"background: #fff; border-left: 4px solid #3c8dbc; border-radius: 4px; padding: 12px 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,.08);\">\n";
+  $output .= "      <div style=\"font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600;\">" . __ ( "Total Calls") . "</div>\n";
+  $output .= "      <div style=\"font-size: 22px; font-weight: 700; color: #3c8dbc;\" id=\"card_total\">0</div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
+  $output .= "  <div class=\"col-md-2 col-sm-4 col-xs-6\">\n";
+  $output .= "    <div style=\"background: #fff; border-left: 4px solid #00a65a; border-radius: 4px; padding: 12px 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,.08);\">\n";
+  $output .= "      <div style=\"font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600;\">" . __ ( "Answered") . "</div>\n";
+  $output .= "      <div style=\"font-size: 22px; font-weight: 700; color: #00a65a;\" id=\"card_answered\">0</div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
+  $output .= "  <div class=\"col-md-2 col-sm-4 col-xs-6\">\n";
+  $output .= "    <div style=\"background: #fff; border-left: 4px solid #dd4b39; border-radius: 4px; padding: 12px 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,.08);\">\n";
+  $output .= "      <div style=\"font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600;\">" . __ ( "Missed") . "</div>\n";
+  $output .= "      <div style=\"font-size: 22px; font-weight: 700; color: #dd4b39;\" id=\"card_missed\">0</div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
+  $output .= "  <div class=\"col-md-2 col-sm-4 col-xs-6\">\n";
+  $output .= "    <div style=\"background: #fff; border-left: 4px solid #f39c12; border-radius: 4px; padding: 12px 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,.08);\">\n";
+  $output .= "      <div style=\"font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600;\">" . __ ( "Servers") . "</div>\n";
+  $output .= "      <div style=\"font-size: 22px; font-weight: 700; color: #f39c12;\" id=\"card_servers\">0</div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
+  $output .= "  <div class=\"col-md-2 col-sm-4 col-xs-6\">\n";
+  $output .= "    <div style=\"background: #fff; border-left: 4px solid #00c0ef; border-radius: 4px; padding: 12px 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,.08);\">\n";
+  $output .= "      <div style=\"font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600;\">" . __ ( "Gateways") . "</div>\n";
+  $output .= "      <div style=\"font-size: 22px; font-weight: 700; color: #00c0ef;\" id=\"card_gateways\">0</div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
+  $output .= "</div>\n";
+
+  /**
+   * KPI dials (same structure as tenant, system-wide values)
+   */
+  $output .= "<div id=\"stats\" class=\"row\" style=\"margin-top: 10px;\">\n";
+
+  $knobs = array (
+    array ( "id" => "asr", "label" => "ASR", "icon" => "fa-phone", "color" => "#00a65a", "desc" => __ ( "Answer-Seizure Ratio")),
+    array ( "id" => "ner", "label" => "NER", "icon" => "fa-check-circle", "color" => "#00c0ef", "desc" => __ ( "Network Efficiency Ratio")),
+    array ( "id" => "sbr", "label" => "SBR", "icon" => "fa-user-slash", "color" => "#f39c12", "desc" => __ ( "Subscriber Busy Ratio")),
+    array ( "id" => "scr", "label" => "SCR", "icon" => "fa-bolt", "color" => "#dd4b39", "desc" => __ ( "Short Calls Ratio")),
+    array ( "id" => "lcr", "label" => "LCR", "icon" => "fa-clock", "color" => "#605ca8", "desc" => __ ( "Long Calls Ratio")),
+    array ( "id" => "allocation", "label" => __ ( "Allocation"), "icon" => "fa-sitemap", "color" => "#e42b75", "desc" => __ ( "Extension Allocation Ratio"))
+  );
+
+  foreach ( $knobs as $knob)
+  {
+    $output .= "  <div class=\"col-xs-6 col-sm-4 col-md-2 text-center\" style=\"margin-bottom: 15px;\">\n";
+    $output .= "    <input type=\"text\" class=\"dial\" value=\"0\" id=\"dashboard_" . $knob["id"] . "\" data-width=\"120\" data-height=\"120\" />\n";
+    $output .= "    <div style=\"margin-top: 8px;\">\n";
+    $output .= "      <span class=\"legend\" style=\"font-size: 13px; font-weight: 600; cursor: help;\" title=\"" . $knob["desc"] . "\"><i class=\"fa " . $knob["icon"] . "\" style=\"color: " . $knob["color"] . "; margin-right: 4px;\"></i>" . $knob["label"] . "</span>\n";
+    $output .= "      <div style=\"font-size: 11px; color: #777;\"><span id=\"dashboard_" . $knob["id"] . "_value\">0</span> / <span id=\"dashboard_" . $knob["id"] . "_total\">0</span></div>\n";
+    $output .= "    </div>\n";
+    $output .= "  </div>\n";
+  }
+
+  $output .= "</div>\n";
+
+  /**
+   * Chart and Top Tenants row
+   */
+  $output .= "<div class=\"row\" style=\"margin-top: 10px;\">\n";
+
+  $output .= "  <div class=\"col-md-8\">\n";
+  $output .= "    <div style=\"background: #fff; border: 1px solid #e8e8e8; border-radius: 6px; padding: 15px; margin-bottom: 15px;\">\n";
+  $output .= "      <h4 style=\"margin: 0 0 10px; font-size: 15px; font-weight: 600; color: #333;\"><i class=\"fa fa-chart-area\" style=\"color: #3c8dbc; margin-right: 8px;\"></i>" . __ ( "Call Volume") . "</h4>\n";
+  $output .= "      <div id=\"dashboard_chart\" style=\"width: 100%; height: 280px;\"></div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
+  $output .= "  <div class=\"col-md-4\">\n";
+  $output .= "    <div style=\"background: #fff; border: 1px solid #e8e8e8; border-radius: 6px; padding: 15px; margin-bottom: 15px; max-height: 336px; overflow-y: auto;\">\n";
+  $output .= "      <h4 style=\"margin: 0 0 10px; font-size: 15px; font-weight: 600; color: #333;\"><i class=\"fa fa-building\" style=\"color: #605ca8; margin-right: 8px;\"></i>" . __ ( "Top Tenants") . "</h4>\n";
+  $output .= "      <div id=\"tenant_breakdown\"><p style=\"color: #999; font-size: 13px;\">" . __ ( "Loading...") . "</p></div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
+  $output .= "</div>\n";
+
+  /**
+   * Server status and Recent calls row
+   */
+  $output .= "<div class=\"row\">\n";
+
+  $output .= "  <div class=\"col-md-4\">\n";
+  $output .= "    <div style=\"background: #fff; border: 1px solid #e8e8e8; border-radius: 6px; padding: 15px; margin-bottom: 15px; max-height: 300px; overflow-y: auto;\">\n";
+  $output .= "      <h4 style=\"margin: 0 0 10px; font-size: 15px; font-weight: 600; color: #333;\"><i class=\"fa fa-server\" style=\"color: #f39c12; margin-right: 8px;\"></i>" . __ ( "Server Status") . "</h4>\n";
+  $output .= "      <div id=\"server_status\"><p style=\"color: #999; font-size: 13px;\">" . __ ( "Loading...") . "</p></div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
+  $output .= "  <div class=\"col-md-8\">\n";
+  $output .= "    <div style=\"background: #fff; border: 1px solid #e8e8e8; border-radius: 6px; padding: 15px; margin-bottom: 15px;\">\n";
+  $output .= "      <h4 style=\"margin: 0 0 10px; font-size: 15px; font-weight: 600; color: #333;\"><i class=\"fa fa-history\" style=\"color: #605ca8; margin-right: 8px;\"></i>" . __ ( "Recent Calls") . "</h4>\n";
+  $output .= "      <div class=\"table-responsive\">\n";
+  $output .= "        <table class=\"table table-condensed table-striped\" style=\"font-size: 13px; margin: 0;\">\n";
+  $output .= "          <thead><tr>\n";
+  $output .= "            <th>" . __ ( "Tenant") . "</th>\n";
+  $output .= "            <th>" . __ ( "Source") . "</th>\n";
+  $output .= "            <th>" . __ ( "Destination") . "</th>\n";
+  $output .= "            <th>" . __ ( "Date") . "</th>\n";
+  $output .= "            <th>" . __ ( "Duration") . "</th>\n";
+  $output .= "            <th>" . __ ( "Status") . "</th>\n";
+  $output .= "          </tr></thead>\n";
+  $output .= "          <tbody id=\"recent_calls\"><tr><td colspan=\"6\" style=\"color: #999;\">" . __ ( "Loading...") . "</td></tr></tbody>\n";
+  $output .= "        </table>\n";
+  $output .= "      </div>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+
+  $output .= "</div>\n";
+
+  /**
+   * JavaScript
+   */
+  sys_addjs ( "$('.dial').knob ({\n" .
+              "  'min': 0,\n" .
+              "  'max': 100,\n" .
+              "  'readOnly': true,\n" .
+              "  'width': 120,\n" .
+              "  'height': 120,\n" .
+              "  'fgColor': '#e42b75',\n" .
+              "  'dynamicDraw': true,\n" .
+              "  'thickness': 0.2,\n" .
+              "  'tickColorizeValues': true,\n" .
+              "  'skin': 'tron',\n" .
+              "  'animated': 2000\n" .
+              "});\n" .
+              "$('span.legend').tooltip (\n" .
+              "{\n" .
+              "  delay: { 'show': 100, 'hide': 100 }\n" .
+              "});\n" .
+              "var dashboardChart = null;\n" .
+              "tui.chart.registerTheme ( 'dashboardTheme', { series: { colors: [ '#00a65a', '#f39c12', '#dd4b39', '#605ca8']}});\n" .
+              "function renderChart ( volume)\n" .
+              "{\n" .
+              "  if ( ! volume || volume.length === 0)\n" .
+              "  {\n" .
+              "    $('#dashboard_chart').html ( '<p style=\"color: #999; font-size: 13px; text-align: center; padding-top: 100px;\">" . __ ( "No data for the selected period.") . "</p>');\n" .
+              "    return;\n" .
+              "  }\n" .
+              "  var categories = [];\n" .
+              "  var answered = [];\n" .
+              "  var noAnswer = [];\n" .
+              "  var busy = [];\n" .
+              "  var failed = [];\n" .
+              "  for ( var i = 0; i < volume.length; i++)\n" .
+              "  {\n" .
+              "    categories.push ( volume[i].Date.substr ( 5));\n" .
+              "    answered.push ( volume[i].Answered);\n" .
+              "    noAnswer.push ( volume[i].NoAnswer);\n" .
+              "    busy.push ( volume[i].Busy);\n" .
+              "    failed.push ( volume[i].Failed);\n" .
+              "  }\n" .
+              "  var container = document.getElementById ( 'dashboard_chart');\n" .
+              "  var chartData = {\n" .
+              "    categories: categories,\n" .
+              "    series: [\n" .
+              "      { name: '" . __ ( "Answered") . "', data: answered },\n" .
+              "      { name: '" . __ ( "No Answer") . "', data: noAnswer },\n" .
+              "      { name: '" . __ ( "Busy") . "', data: busy },\n" .
+              "      { name: '" . __ ( "Failed") . "', data: failed }\n" .
+              "    ]\n" .
+              "  };\n" .
+              "  var options = {\n" .
+              "    chart: { width: container.offsetWidth, height: 280 },\n" .
+              "    yAxis: { title: '" . __ ( "Calls") . "' },\n" .
+              "    xAxis: { title: '" . __ ( "Date") . "', tickInterval: 'auto' },\n" .
+              "    series: { showDot: false, zoomable: false },\n" .
+              "    legend: { align: 'bottom' },\n" .
+              "    chartExportMenu: { visible: false },\n" .
+              "    theme: 'dashboardTheme'\n" .
+              "  };\n" .
+              "  $('#dashboard_chart').empty ();\n" .
+              "  dashboardChart = tui.chart.lineChart ( container, chartData, options);\n" .
+              "}\n" .
+              "function renderTenantBreakdown ( tenants)\n" .
+              "{\n" .
+              "  if ( ! tenants || tenants.length === 0)\n" .
+              "  {\n" .
+              "    $('#tenant_breakdown').html ( '<p style=\"color: #999; font-size: 13px;\">" . __ ( "No tenants found.") . "</p>');\n" .
+              "    return;\n" .
+              "  }\n" .
+              "  var html = '<table class=\"table table-condensed\" style=\"font-size: 13px; margin: 0;\">';\n" .
+              "  html += '<thead><tr><th>" . __ ( "Tenant") . "</th><th style=\"text-align: right;\">" . __ ( "Calls") . "</th><th style=\"text-align: right;\">" . __ ( "Answered") . "</th><th style=\"text-align: right;\">" . __ ( "Missed") . "</th></tr></thead><tbody>';\n" .
+              "  for ( var i = 0; i < tenants.length; i++)\n" .
+              "  {\n" .
+              "    html += '<tr><td>' + tenants[i].Name + '</td><td style=\"text-align: right;\">' + tenants[i].TotalCalls + '</td><td style=\"text-align: right; color: #00a65a;\">' + tenants[i].Answered + '</td><td style=\"text-align: right; color: #dd4b39;\">' + tenants[i].NoAnswer + '</td></tr>';\n" .
+              "  }\n" .
+              "  html += '</tbody></table>';\n" .
+              "  $('#tenant_breakdown').html ( html);\n" .
+              "}\n" .
+              "function renderServerStatus ( servers)\n" .
+              "{\n" .
+              "  if ( ! servers || servers.length === 0)\n" .
+              "  {\n" .
+              "    $('#server_status').html ( '<p style=\"color: #999; font-size: 13px;\">" . __ ( "No servers configured.") . "</p>');\n" .
+              "    return;\n" .
+              "  }\n" .
+              "  var html = '<table class=\"table table-condensed\" style=\"font-size: 13px; margin: 0;\">';\n" .
+              "  html += '<thead><tr><th>" . __ ( "Server") . "</th><th style=\"width: 80px; text-align: center;\">" . __ ( "Pending") . "</th></tr></thead><tbody>';\n" .
+              "  for ( var i = 0; i < servers.length; i++)\n" .
+              "  {\n" .
+              "    var badge = 'success';\n" .
+              "    if ( servers[i].Pending > 10) badge = 'danger';\n" .
+              "    else if ( servers[i].Pending > 0) badge = 'warning';\n" .
+              "    html += '<tr><td>' + servers[i].Description + '</td><td style=\"text-align: center;\"><span class=\"label label-' + badge + '\">' + servers[i].Pending + '</span></td></tr>';\n" .
+              "  }\n" .
+              "  html += '</tbody></table>';\n" .
+              "  $('#server_status').html ( html);\n" .
+              "}\n" .
+              "function renderRecentCalls ( calls)\n" .
+              "{\n" .
+              "  if ( ! calls || calls.length === 0)\n" .
+              "  {\n" .
+              "    $('#recent_calls').html ( '<tr><td colspan=\"6\" style=\"color: #999;\">" . __ ( "No calls found.") . "</td></tr>');\n" .
+              "    return;\n" .
+              "  }\n" .
+              "  var html = '';\n" .
+              "  var labels = { 'ANSWERED': 'success', 'NO ANSWER': 'warning', 'BUSY': 'info', 'FAILED': 'danger' };\n" .
+              "  var dispositions = { 'ANSWERED': '" . __ ( "Answered") . "', 'NO ANSWER': '" . __ ( "No answer") . "', 'BUSY': '" . __ ( "Busy") . "', 'FAILED': '" . __ ( "Failed") . "' };\n" .
+              "  for ( var i = 0; i < calls.length; i++)\n" .
+              "  {\n" .
+              "    var dur = calls[i].BillSec > 0 ? calls[i].BillSec : calls[i].Duration;\n" .
+              "    var m = Math.floor ( dur / 60);\n" .
+              "    var s = dur % 60;\n" .
+              "    var badge = labels[calls[i].Disposition] || 'default';\n" .
+              "    html += '<tr>';\n" .
+              "    html += '<td>' + calls[i].Tenant + '</td>';\n" .
+              "    html += '<td>' + calls[i].Source + '</td>';\n" .
+              "    html += '<td>' + calls[i].Destination + '</td>';\n" .
+              "    html += '<td>' + calls[i].Date + '</td>';\n" .
+              "    html += '<td>' + ( m > 0 ? m + '" . __ ( "m ") . "' : '') + ( s < 10 ? '0' : '') + s + '" . __ ( "s") . "</td>';\n" .
+              "    html += '<td><span class=\"label label-' + badge + '\">' + ( dispositions[calls[i].Disposition] || calls[i].Disposition) + '</span></td>';\n" .
+              "    html += '</tr>';\n" .
+              "  }\n" .
+              "  $('#recent_calls').html ( html);\n" .
+              "}\n" .
+              "$('#range span').html ( moment ().subtract ( 29, 'days').format ( '" . __ ( "MM/DD/YYYY") . "') + ' - ' + moment ().format ( '" . __ ( "MM/DD/YYYY") . "'));\n" .
+              "$('#range').css ( 'display', 'block').daterangepicker (\n" .
+              "{\n" .
+              "  startDate: moment ().subtract ( 29, 'days').format ( '" . __ ( "MM/DD/YYYY") . "'),\n" .
+              "  endDate: moment ().format ( '" . __ ( "MM/DD/YYYY") . "'),\n" .
+              "  minDate: '" . $_in["general"]["installdate"] . "',\n" .
+              "  maxDate: moment ().format ( '" . __ ( "MM/DD/YYYY") . "'),\n" .
+              "  dateLimit: {\n" .
+              "    days: 365\n" .
+              "  },\n" .
+              "  showDropdowns: true,\n" .
+              "  showWeekNumbers: true,\n" .
+              "  timePicker: false,\n" .
+              "  timePickerIncrement: 1,\n" .
+              "  timePicker12Hour: true,\n" .
+              "  ranges: {\n" .
+              "    '" . __ ( "Today") . "': [ moment (), moment ()],\n" .
+              "    '" . __ ( "Yesterday") . "': [ moment ().subtract ( 1, 'days'), moment ().subtract ( 1, 'days')],\n" .
+              "    '" . __ ( "Last 7 days") . "': [ moment ().subtract ( 6, 'days'), moment ()],\n" .
+              "    '" . __ ( "Last 30 days") . "': [ moment ().subtract ( 29, 'days'), moment ()],\n" .
+              "    '" . __ ( "This month") . "': [ moment ().startOf ( 'month'), moment ().endOf ( 'month')],\n" .
+              "    '" . __ ( "Previous month") . "': [ moment ().subtract ( 1, 'month').startOf ( 'month'), moment ().subtract ( 1, 'month').endOf ( 'month')]\n" .
+              "  },\n" .
+              "  opens: 'left',\n" .
+              "  buttonClasses: [ 'btn btn-default'],\n" .
+              "  applyClass: 'btn-small btn-primary',\n" .
+              "  cancelClass: 'btn-small',\n" .
+              "  separator: ' " . __ ( "through") . " ',\n" .
+              "  locale: {\n" .
+              "    applyLabel: '" . __ ( "Apply") . "',\n" .
+              "    cancelLabel: '" . __ ( "Cancel") . "',\n" .
+              "    format: '" . __ ( "MM/DD/YYYY") . "',\n" .
+              "    fromLabel: '" . __ ( "From") . "',\n" .
+              "    toLabel: '" . __ ( "To") . "',\n" .
+              "    customRangeLabel: '" . __ ( "Customize") . "',\n" .
+              "    daysOfWeek: [ '" . __ ( "Su") . "', '" . __ ( "Mo") . "', '" . __ ( "Tu") . "', '" . __ ( "We") . "', '" . __ ( "Th") . "', '" . __ ( "Fr") . "', '" . __ ( "Sa") . "'],\n" .
+              "    monthNames: [ '" . __ ( "January") . "', '" . __ ( "February") . "', '" . __ ( "March") . "', '" . __ ( "April") . "', '" . __ ( "May") . "', '" . __ ( "June") . "', '" . __ ( "July") . "', '" . __ ( "August") . "', '" . __ ( "September") . "', '" . __ ( "October") . "', '" . __ ( "November") . "', '" . __ ( "December") . "'],\n" .
+              "    firstDay: 1\n" .
+              "  }\n" .
+              "}, function ( start, end, label)\n" .
+              "{\n" .
+              "  $('#range span').html ( start.format ( '" . __ ( "MM/DD/YYYY") . "') + ' - ' + end.format ( '" . __ ( "MM/DD/YYYY") . "'));\n" .
+              "  $('#stats').trigger ( 'update', { Start: moment ( start).format ( 'YYYY-MM-DD'), End: moment ( end).format ( 'YYYY-MM-DD')});\n" .
+              "});\n" .
+              "$('#stats').on ( 'update', function ( event, data)\n" .
+              "{\n" .
+              "  if ( typeof ( data) != 'object')\n" .
+              "  {\n" .
+              "    data = {};\n" .
+              "  }\n" .
+              "  if ( ! data.hasOwnProperty ( 'Start') || data.Start == '')\n" .
+              "  {\n" .
+              "    data.Start = moment ().subtract ( 29, 'days').format ( 'YYYY-MM-DD');\n" .
+              "  }\n" .
+              "  if ( ! data.hasOwnProperty ( 'End') || data.End == '')\n" .
+              "  {\n" .
+              "    data.End = moment ().format ( 'YYYY-MM-DD');\n" .
+              "  }\n" .
+              "  VoIP.rest ( '/dashboard/master', 'GET', { Start: data.Start, End: data.End}).done ( function ( data, textStatus, jqXHR)\n" .
+              "  {\n" .
+              "    $('#dashboard_asr').val ( data.ASR.Percent).trigger ( 'change');\n" .
+              "    $('#dashboard_asr_value').html ( data.ASR.Value);\n" .
+              "    $('#dashboard_asr_total').html ( data.ASR.Total);\n" .
+              "    $('#dashboard_ner').val ( data.NER.Percent).trigger ( 'change');\n" .
+              "    $('#dashboard_ner_value').html ( data.NER.Value);\n" .
+              "    $('#dashboard_ner_total').html ( data.NER.Total);\n" .
+              "    $('#dashboard_sbr').val ( data.SBR.Percent).trigger ( 'change');\n" .
+              "    $('#dashboard_sbr_value').html ( data.SBR.Value);\n" .
+              "    $('#dashboard_sbr_total').html ( data.SBR.Total);\n" .
+              "    $('#dashboard_scr').val ( data.SCR.Percent).trigger ( 'change');\n" .
+              "    $('#dashboard_scr_value').html ( data.SCR.Value);\n" .
+              "    $('#dashboard_scr_total').html ( data.SCR.Total);\n" .
+              "    $('#dashboard_lcr').val ( data.LCR.Percent).trigger ( 'change');\n" .
+              "    $('#dashboard_lcr_value').html ( data.LCR.Value);\n" .
+              "    $('#dashboard_lcr_total').html ( data.LCR.Total);\n" .
+              "    $('#dashboard_allocation').val ( data.Allocation.Percent).trigger ( 'change');\n" .
+              "    $('#dashboard_allocation_value').html ( data.Allocation.Value);\n" .
+              "    $('#dashboard_allocation_total').html ( data.Allocation.Total);\n" .
+              "    if ( data.Counts)\n" .
+              "    {\n" .
+              "      $('#card_tenants').html ( data.Counts.Tenants);\n" .
+              "      $('#card_total').html ( data.Counts.TotalCalls);\n" .
+              "      $('#card_answered').html ( data.Counts.Answered);\n" .
+              "      $('#card_missed').html ( data.Counts.NoAnswer);\n" .
+              "      $('#card_servers').html ( data.Counts.Servers);\n" .
+              "      $('#card_gateways').html ( data.Counts.ActiveGateways);\n" .
+              "    }\n" .
+              "    try { if ( data.DailyVolume) renderChart ( data.DailyVolume); } catch ( e) { console.error ( 'Chart error:', e); }\n" .
+              "    try { if ( data.TenantBreakdown) renderTenantBreakdown ( data.TenantBreakdown); } catch ( e) { console.error ( 'TenantBreakdown error:', e); }\n" .
+              "    try { if ( data.ServerStatus) renderServerStatus ( data.ServerStatus); } catch ( e) { console.error ( 'ServerStatus error:', e); }\n" .
+              "    try { if ( data.RecentCalls) renderRecentCalls ( data.RecentCalls); } catch ( e) { console.error ( 'RecentCalls error:', e); }\n" .
               "  }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "  {\n" .
               "    new PNotify ( { title: '" . __ ( "Dashboard") . "', text: '" . __ ( "Error retrieving statistics!") . "', type: 'error'});\n" .
@@ -2909,7 +3530,7 @@ framework_add_hook ( "about_page", "about_page");
 framework_add_path ( "/about", "about_page");
 
 /**
- * Function to displau system information (about page).
+ * Function to display system information (about page).
  *
  * @global array $_in Framework global configuration variable
  * @param string $page Buffer from plugin system if processed by other function
@@ -2928,24 +3549,102 @@ function about_page ( $page, $parameters)
   sys_set_subtitle ( __ ( "system information"));
 
   /**
-   * Add page CSS requirements
+   * Header section with logo and version
    */
-  sys_addcss ( array ( "name" => "tempus-dominus", "src" => "/vendors/tempus-dominus/build/css/bootstrap-datetimepicker.css", "dep" => array ()));
-  sys_addcss ( array ( "name" => "daterangepicker", "src" => "/vendors/daterangepicker/daterangepicker.css", "dep" => array ()));
+  $output = "<div class=\"row\">\n";
+  $output .= "  <div class=\"col-md-12\">\n";
+  $output .= "    <div style=\"text-align: center; padding: 30px 0 20px;\">\n";
+  $output .= "      <h1 style=\"font-family: 'Source Sans Pro', sans-serif; font-size: 36px; font-weight: 700; margin: 0;\"><i class=\"fa fa-phone-alt\" style=\"margin-right: 10px; color: #3c8dbc;\"></i>VoIP Domain</h1>\n";
+  $output .= "      <p style=\"font-size: 16px; color: #777; margin-top: 8px;\">" . __ ( "The new era of VoIP management") . "</p>\n";
+  $output .= "      <span class=\"label label-primary\" style=\"font-size: 14px; padding: 5px 15px;\">" . __ ( "Version") . " " . $_in["version"] . "</span>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+  $output .= "</div>\n";
 
   /**
-   * Add page JavaScript requirements
+   * Description section
    */
-  sys_addjs ( array ( "name" => "tempus-dominus", "src" => "/vendors/tempus-dominus/build/js/bootstrap-datetimepicker.js", "dep" => array ( "moment", "bootstrap")));
-  sys_addjs ( array ( "name" => "jquery-knob", "src" => "/vendors/jquery-knob/dist/jquery.knob.js", "dep" => array ()));
-  sys_addjs ( array ( "name" => "daterangepicker", "src" => "/vendors/daterangepicker/daterangepicker.js", "dep" => array ( "moment")));
+  $output .= "<div class=\"row\">\n";
+  $output .= "  <div class=\"col-md-10 col-md-offset-1\">\n";
+  $output .= "    <div style=\"background: #f9f9f9; border-left: 4px solid #3c8dbc; padding: 20px 25px; margin-bottom: 25px; border-radius: 0 4px 4px 0;\">\n";
+  $output .= "      <p style=\"text-align: justify; font-size: 14px; line-height: 1.7; margin: 0 0 12px;\">" . __ ( "VoIP Domain was created in 2016 by Ernani Azevedo with the intention of providing a simpler way to deploy medium-to-large VoIP telephony systems. The system tries to keep complex tasks as simple as possible, using minimal technical jargon and automating everything it can, so managers with basic VoIP knowledge can deploy a large, stable, feature-rich PBX.") . "</p>\n";
+  $output .= "      <p style=\"text-align: justify; font-size: 14px; line-height: 1.7; margin: 0;\">" . __ ( "This project was published as Open Source under GPL version 3 license. Feel free to contribute and make this a great tool for every company.") . "</p>\n";
+  $output .= "    </div>\n";
+  $output .= "  </div>\n";
+  $output .= "</div>\n";
 
   /**
-   * Dashboard
+   * Features grid
    */
-  $output = "<div class=\"center\"><span style=\"font-family: 'Source Sans Pro', sans-serif; font-size: 24px; font-weight: 500; line-height: 26.4px;\">VoIP Domain</span><br /><strong>" . __ ( "Version") . " " . $_in["version"] . "</strong></div><br />\n";
-  $output .= "<div style=\"text-align: justified; text-indent: 3em\">" . __ ( "VoIP Domain was created in 2016 by Ernani Azevedo, with the aim of creating a simpler way to deploy a medium to large VoIP telephone system. The system tries to keep complex tasks as simple as possible, with as few computational terms and automating everything as possible, so that any manager with a little VoIP knowledge can deploy a large, stable and feature-rich PBX.") . "</div><br />\n";
-  $output .= "<div style=\"text-align: justified; text-indent: 3em\">" . __ ( "This project is published as Open Source under GPL version 3 license. Fell free to contribute and make this a great tool for everyone.") . "</div>\n";
+  $output .= "<div class=\"row\">\n";
+  $output .= "  <div class=\"col-md-10 col-md-offset-1\">\n";
+  $output .= "    <h3 style=\"font-size: 20px; font-weight: 600; margin-bottom: 20px; color: #333;\"><i class=\"fa fa-star\" style=\"color: #f39c12; margin-right: 8px;\"></i>" . __ ( "Key Features") . "</h3>\n";
+  $output .= "  </div>\n";
+  $output .= "</div>\n";
+
+  $output .= "<div class=\"row\">\n";
+
+  $features = array (
+    array ( "icon" => "building", "color" => "#3c8dbc", "title" => __ ( "Multi-Tenant"), "desc" => __ ( "Serve multiple companies from a single installation with full data isolation.")),
+    array ( "icon" => "magic", "color" => "#00a65a", "title" => __ ( "Smart Auto-Provisioning"), "desc" => __ ( "Automatically configure devices from any manufacturer with a unified standard.")),
+    array ( "icon" => "server", "color" => "#f39c12", "title" => __ ( "Multiple Servers"), "desc" => __ ( "Manage a network of Asterisk servers from one interface, even offline.")),
+    array ( "icon" => "route", "color" => "#dd4b39", "title" => __ ( "Least-Cost Routing"), "desc" => __ ( "Intelligent call routing with automatic dial plans and cost optimization.")),
+    array ( "icon" => "code", "color" => "#605ca8", "title" => __ ( "RESTful API"), "desc" => __ ( "Complete API documented in Swagger OAS 3.0, generated directly from code.")),
+    array ( "icon" => "puzzle-piece", "color" => "#00c0ef", "title" => __ ( "100% Modular"), "desc" => __ ( "Plugins, translations, and custom integrations — extend everything."))
+  );
+
+  foreach ( $features as $feature)
+  {
+    $output .= "  <div class=\"col-md-4 col-sm-6\" style=\"margin-bottom: 20px;\">\n";
+    $output .= "    <div style=\"background: #fff; border: 1px solid #e8e8e8; border-radius: 6px; padding: 20px; height: 100%; min-height: 140px;\">\n";
+    $output .= "      <div style=\"margin-bottom: 12px;\"><i class=\"fa fa-" . $feature["icon"] . "\" style=\"font-size: 24px; color: " . $feature["color"] . ";\"></i></div>\n";
+    $output .= "      <h4 style=\"font-size: 15px; font-weight: 600; margin: 0 0 8px; color: #333;\">" . $feature["title"] . "</h4>\n";
+    $output .= "      <p style=\"font-size: 13px; color: #666; margin: 0; line-height: 1.5;\">" . $feature["desc"] . "</p>\n";
+    $output .= "    </div>\n";
+    $output .= "  </div>\n";
+  }
+
+  $output .= "</div>\n";
+
+  /**
+   * Technical info and links
+   */
+  $output .= "<div class=\"row\" style=\"margin-top: 10px;\">\n";
+
+  $output .= "  <div class=\"col-md-5 col-md-offset-1\">\n";
+  $output .= "    <h3 style=\"font-size: 20px; font-weight: 600; margin-bottom: 15px; color: #333;\"><i class=\"fa fa-info-circle\" style=\"color: #3c8dbc; margin-right: 8px;\"></i>" . __ ( "Technical Information") . "</h3>\n";
+  $output .= "    <table class=\"table table-striped\" style=\"font-size: 13px;\">\n";
+  $output .= "      <tr><td style=\"font-weight: 600; width: 40%;\">" . __ ( "Version") . "</td><td>" . $_in["version"] . "</td></tr>\n";
+  $output .= "      <tr><td style=\"font-weight: 600;\">" . __ ( "License") . "</td><td>GPL v3.0</td></tr>\n";
+  $output .= "      <tr><td style=\"font-weight: 600;\">" . __ ( "Language") . "</td><td>PHP / JavaScript</td></tr>\n";
+  $output .= "      <tr><td style=\"font-weight: 600;\">" . __ ( "PBX Engine") . "</td><td>Asterisk</td></tr>\n";
+  $output .= "      <tr><td style=\"font-weight: 600;\">" . __ ( "Database") . "</td><td>MySQL / MariaDB</td></tr>\n";
+  $output .= "      <tr><td style=\"font-weight: 600;\">" . __ ( "Author") . "</td><td>Ernani Jos&eacute; Camargo Azevedo</td></tr>\n";
+  $output .= "    </table>\n";
+  $output .= "  </div>\n";
+
+  $output .= "  <div class=\"col-md-5\">\n";
+  $output .= "    <h3 style=\"font-size: 20px; font-weight: 600; margin-bottom: 15px; color: #333;\"><i class=\"fa fa-link\" style=\"color: #3c8dbc; margin-right: 8px;\"></i>" . __ ( "Links") . "</h3>\n";
+  $output .= "    <ul style=\"list-style: none; padding: 0; font-size: 13px; line-height: 2.2;\">\n";
+  $output .= "      <li><i class=\"fa fa-globe\" style=\"width: 20px; color: #3c8dbc;\"></i> <a href=\"https://voipdomain.io/\" target=\"_blank\">" . __ ( "Project Homepage") . "</a></li>\n";
+  $output .= "      <li><i class=\"fab fa-github\" style=\"width: 20px; color: #333;\"></i> <a href=\"https://github.com/VoIP-Domain/voipdomain\" target=\"_blank\">" . __ ( "Source Code") . " (GitHub)</a></li>\n";
+  $output .= "      <li><i class=\"fa fa-book\" style=\"width: 20px; color: #00a65a;\"></i> <a href=\"https://voipdomain.io/docs\" target=\"_blank\">" . __ ( "Documentation") . "</a></li>\n";
+  $output .= "      <li><i class=\"fa fa-bug\" style=\"width: 20px; color: #dd4b39;\"></i> <a href=\"https://github.com/VoIP-Domain/voipdomain/issues\" target=\"_blank\">" . __ ( "Report a Bug") . "</a></li>\n";
+  $output .= "      <li><i class=\"fa fa-box\" style=\"width: 20px; color: #f39c12;\"></i> <a href=\"https://rhel.voipdomain.io/\" target=\"_blank\">" . __ ( "RPM Repository") . " (RHEL)</a></li>\n";
+  $output .= "    </ul>\n";
+  $output .= "  </div>\n";
+
+  $output .= "</div>\n";
+
+  /**
+   * Footer with copyright
+   */
+  $output .= "<div class=\"row\">\n";
+  $output .= "  <div class=\"col-md-10 col-md-offset-1\">\n";
+  $output .= "    <hr style=\"border-color: #e8e8e8; margin: 25px 0 15px;\" />\n";
+  $output .= "    <p style=\"text-align: center; font-size: 12px; color: #999;\">&copy; 2016&ndash;" . date ( "Y") . " Ernani Jos&eacute; Camargo Azevedo. " . __ ( "All rights reserved.") . "</p>\n";
+  $output .= "  </div>\n";
+  $output .= "</div>\n";
 
   return $output;
 }

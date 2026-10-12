@@ -71,6 +71,8 @@ framework_add_hook ( "dialplan_generate", "range_dialplan_generate");
  */
 function range_add ( $buffer, $parameters)
 {
+  $overwritten = false;
+
   /**
    * Call start hook if exist
    */

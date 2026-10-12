@@ -106,8 +106,7 @@ function authentication_view_post_facebook ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Key` = 'Authentication_Facebook'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_view_post_facebook");
   }
   $buffer["Plugins"]["Facebook"] = array ();
   if ( $tmp = $result->fetch_assoc () && is_json ( $tmp["Data"]))
@@ -208,7 +207,7 @@ function authentication_edit_validate_facebook ( $buffer, $parameters)
   {
     $buffer["Plugin_Facebook_Status"] = __ ( "The provided status is not valid.");
   }
-  if ( (boolean) $parameters["Plugins"]["Facebook"]["Status"])
+  if ( (bool) $parameters["Plugins"]["Facebook"]["Status"])
   {
     if ( ! array_key_exists ( "ClientID", $parameters["Plugins"]["Facebook"]) || empty ( $parameters["Plugins"]["Facebook"]["ClientID"]))
     {
@@ -244,7 +243,7 @@ function authentication_edit_sanitize_facebook ( $buffer, $parameters)
   /**
    * Sanitize parameters
    */
-  $parameters["Plugins"]["Facebook"]["Status"] = (boolean) $parameters["Plugins"]["Facebook"]["Status"];
+  $parameters["Plugins"]["Facebook"]["Status"] = (bool) $parameters["Plugins"]["Facebook"]["Status"];
 
   return $parameters;
 }
@@ -268,8 +267,7 @@ function authentication_edit_post_facebook ( $buffer, $parameters)
   $tmp = json_encode ( array ( "Status" => $parameters["Plugins"]["Facebook"]["Status"], "ClientID" => $parameters["Plugins"]["Facebook"]["ClientID"], "ClientSecret" => $parameters["Plugins"]["Facebook"]["ClientSecret"], "RedirectURI" => $parameters["Plugins"]["Facebook"]["RedirectURI"]));
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Authentication_Facebook', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $tmp) . "') ON DUPLICATE KEY UPDATE `Data` = '" . $_in["mysql"]["id"]->real_escape_string ( $tmp) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_edit_post_facebook");
   }
 
   /**
@@ -302,7 +300,7 @@ framework_add_api_call (
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
+ * @return void
  */
 function authentication_facebook_redirect ( $buffer, $parameters)
 {
@@ -318,8 +316,7 @@ function authentication_facebook_redirect ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Config` WHERE `Tenant` = " . (int) $tenantid . " AND `Key` LIKE 'Authentication_Facebook'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_facebook_redirect");
   }
   if ( ! $plugin = $result->fetch_assoc ())
   {
@@ -356,8 +353,7 @@ function authentication_facebook_redirect ( $buffer, $parameters)
     setcookie ( $_in["general"]["cookie"] . "_oauth2_" . $cookie, $state, $expire, "/api/auth/facebook");
     if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `AuthenticationCache` (`Tenant`, `Plugin`, `Cookie`, `State`, `Expire`, `Callback`) VALUES (" . (int) $tenantid . ", 'Facebook', '" . $_in["mysql"]["id"]->real_escape_string ( $cookie) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $state) . "', " . (int) $expire . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Callback"]) . "')"))
     {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
+      database_query_error ( "authentication_facebook_redirect");
     }
 
     /**
@@ -389,8 +385,7 @@ function authentication_facebook_redirect ( $buffer, $parameters)
   }
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `AuthenticationCache` WHERE `Plugin` = 'Facebook' AND `Cookie` = '" . $_in["mysql"]["id"]->real_escape_string ( $cookie) . "' AND `State` = '" . $_in["mysql"]["id"]->real_escape_string ( $state) . "' AND `Expire` >= " . time ()))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_facebook_redirect");
   }
   if ( ! $cache = $result->fetch_assoc ())
   {
@@ -404,8 +399,7 @@ function authentication_facebook_redirect ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `AuthenticationCache` WHERE `Plugin` = 'Facebook' AND `Cookie` = '" . $_in["mysql"]["id"]->real_escape_string ( $cookie) . "' AND `State` = '" . $_in["mysql"]["id"]->real_escape_string ( $state) . "'"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_facebook_redirect");
   }
 
   /**
@@ -458,8 +452,7 @@ function authentication_facebook_redirect ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `AuthenticationToken` (`Token`, `Tenant`, `Plugin`, `Email`, `IssueDate`, `LastSeen`, `Expires`, `TokenData`, `UserData`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $cookie) . "', " . (int) $tenantid . ", 'Facebook', '" . $_in["mysql"]["id"]->real_escape_string ( $userInfo["email"]) . "', NOW(), NOW(), '" . $_in["mysql"]["id"]->real_escape_string ( date ( "Y-m-d h:i:s", time () + $tokenInfo["expires_in"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $tokenInfo)) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $userInfo)) . "')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_facebook_redirect");
   }
   setcookie ( $_in["general"]["cookie"] . "_authtoken", $cookie, time () + $tokenInfo["expires_in"], "/");
 
@@ -494,8 +487,7 @@ function authentication_facebook_tenant_add_post ( $buffer, $parameters)
    */
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Authentication_Plugin_Facebook', " . (int) $parameters["ID"] . ", '{\"Status\":false,\"ClientID\":\"\",\"ClientSecret\":\"\",\"RedirectURI\":\"\"}}')"))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "authentication_facebook_tenant_add_post");
   }
 
   /**

@@ -36,7 +36,7 @@
 
 framework_add_hook ( "plugin_daemon_module_deploy", "plugin_daemon_module_deploy");
 framework_add_hook ( "plugin_daemon_module_remove", "plugin_daemon_module_remove");
-framework_add_hook ( "plugin_db_apply", "plugin_db_apply");
+framework_add_hook ( "plugin_db_apply", "plugin_db_apply_reject");
 
 /**
  * Return the local daemons root directory path.
@@ -159,47 +159,25 @@ function plugin_daemon_module_remove ( $buffer, $parameters)
 }
 
 /**
- * Apply a plugin database manifest on the local client database.
+ * Reject plugin database manifest requests on client daemons. Client daemons
+ * use file-based storage; MySQL operations are restricted to the admin interface.
+ * Plugins requiring local storage should use SQLite3 or JSON files in datadir.
  *
  * @param string $buffer Buffer from plugin system if processed by other function before
  * @param array $parameters Optional parameters to the function
  * @return array
  */
-function plugin_db_apply ( $buffer, $parameters)
+function plugin_db_apply_reject ( $buffer, $parameters)
 {
-  $data = array ();
-  foreach ( array ( "Plugin", "Hook") as $key)
-  {
-    if ( ! array_key_exists ( $key, $parameters) || $parameters[$key] == "")
-    {
-      $data[$key] = "Missing parameter";
-    }
-  }
-  if ( sizeof ( $data))
-  {
-    return array ( "code" => 406, "message" => "Invalid parameters.", "content" => $data);
-  }
+  $plugin = array_key_exists ( "Plugin", $parameters) ? $parameters["Plugin"] : "unknown";
 
-  $manifest = null;
   if ( array_key_exists ( "FilePath", $parameters) && is_readable ( $parameters["FilePath"]))
   {
-    $manifest = json_decode ( file_get_contents ( $parameters["FilePath"]), true);
     @unlink ( $parameters["FilePath"]);
-  } elseif ( array_key_exists ( "Data", $parameters))
-  {
-    $manifest = json_decode ( base64_decode ( $parameters["Data"]), true);
-  }
-  if ( ! is_array ( $manifest))
-  {
-    return array ( "code" => 406, "message" => "Invalid database manifest.");
   }
 
-  $result = plugin_apply_db_manifest ( $manifest);
-  if ( sizeof ( $result))
-  {
-    return array ( "code" => 500, "message" => "Error applying plugin database manifest.", "content" => $result);
-  }
+  writeLog ( "plugin_db_apply: Rejected MySQL manifest from plugin '" . $plugin . "'. Client daemons do not support MySQL; use file-based storage or SQLite3.", VoIP_LOG_WARNING);
 
-  return array ( "code" => 200, "message" => "Plugin database manifest applied.");
+  return array ( "code" => 200, "message" => "Database manifest ignored (client daemons use file-based storage).");
 }
 ?>

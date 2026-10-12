@@ -43,10 +43,61 @@ framework_add_hook ( "agent_change", "agent_change");
 framework_add_hook ( "agent_remove", "agent_remove");
 
 /**
+ * Bootstrap hook: agent login dialplan injected into [VoIPDomain-Internal]
+ */
+framework_add_hook ( "asterisk_dialplan_internal", "agent_dialplan_internal");
+
+/**
  * Cleanup functions
  */
 framework_add_hook ( "agent_wipe", "agent_wipe");
 cleanup_register ( "Agents", "agent_wipe");
+
+/**
+ * Inject agent login dialplan into [VoIPDomain-Internal] context.
+ *
+ * @param string $buffer Buffer from plugin system
+ * @param array $parameters Optional parameters
+ * @return string
+ */
+function agent_dialplan_internal ( $buffer, $parameters)
+{
+  $buffer .= "exten => *20,1,Verbose(1,\${STRFTIME(\${EPOCH},GMT+3,%c)}: Called agent login application from \${CALLERID(num)})\n";
+  $buffer .= " same => n,Ringing()\n";
+  $buffer .= " same => n,Wait(2)\n";
+  $buffer .= " same => n,Answer()\n";
+  $buffer .= " same => n(getagent),GoSub(VoIPDomain-Tools,get_digits,1(agent,agent-user,4,10,1))\n";
+  $buffer .= " same => n,GoToIf(\$[\"\${AGENT(\${agent})}\" = \"\"]?notfound)\n";
+  $buffer .= " same => n,GoToIf(\$[\"\${AGENT(\${agent})}\" = \"LOGGEDIN\"]?logged)\n";
+  $buffer .= " same => n,GoTo(getpass)\n";
+  $buffer .= " same => n(notfound),PlayBack(agent-incorrect)\n";
+  $buffer .= " same => n,GoTo(getagent)\n";
+  $buffer .= " same => n(logged),PlayBack(agent-alreadyon)\n";
+  $buffer .= " same => n,HangUp()\n";
+  $buffer .= " same => n(getpass),GoSub(VoIPDomain-Tools,get_digits,1(password,agent-pass,6,10,1,0))\n";
+  $buffer .= " same => n,AGI(agi://127.0.0.1:4573/agents_password,\${agent},\${password})\n";
+  $buffer .= " same => n,GoToIf(\$[\"\${AGENTCHECK}\" != \"1\"]?invalid)\n";
+  $buffer .= " same => n,AgentLogin(\${agent},s)\n";
+  $buffer .= " same => n,PlayBack(agent-loginok)\n";
+  $buffer .= " same => n,HangUp()\n";
+  $buffer .= " same => n(invalid),PlayBack(vm-invalidpassword)\n";
+  $buffer .= " same => n,GoTo(getpass)\n";
+  $buffer .= "\n";
+  $buffer .= "exten => _*20XXXX,1,Verbose(1,\${STRFTIME(\${EPOCH},GMT+3,%c)}: Called agent login application from \${CALLERID(num)} to agent \${EXTEN:3})\n";
+  $buffer .= " same => n,Ringing()\n";
+  $buffer .= " same => n,Wait(2)\n";
+  $buffer .= " same => n,Answer()\n";
+  $buffer .= " same => n,GoToIf(\$[\"\${AGENT(\${EXTEN:3})}\" = \"\"]?notfound)\n";
+  $buffer .= " same => n,GoToIf(\$[\"\${AGENT(\${EXTEN:3})}\" = \"LOGGEDIN\"]?logged)\n";
+  $buffer .= " same => n,Set(agent=\${EXTEN:3})\n";
+  $buffer .= " same => n,GoTo(*20,getpass)\n";
+  $buffer .= " same => n(notfound),PlayBack(agent-incorrect)\n";
+  $buffer .= " same => n,HangUp()\n";
+  $buffer .= " same => n(logged),PlayBack(agent-alreadyon)\n";
+  $buffer .= " same => n,HangUp()\n";
+  $buffer .= "\n";
+  return $buffer;
+}
 
 /**
  * Function to create a new agent.

@@ -72,9 +72,17 @@ if ( ! array_key_exists ( "components", $_plugins))
 {
   $_plugins["components"] = array ();
 }
+if ( ! array_key_exists ( "componentmap", $_plugins))
+{
+  $_plugins["componentmap"] = array ();
+}
 if ( ! array_key_exists ( "functions", $_plugins))
 {
   $_plugins["functions"] = array ();
+}
+if ( ! array_key_exists ( "deferred_hooks", $_plugins) || ! is_array ( $_plugins["deferred_hooks"]))
+{
+  $_plugins["deferred_hooks"] = array ();
 }
 
 /**
@@ -169,13 +177,14 @@ function framework_add_function_documentation ( $function, $documentation)
  * documentation schema.
  *
  * @global array $_plugins The main plugin system variable
+ * @global array $_in Framework global configuration variable
  * @param string $component The name of the component
  * @param array $documentation The object documentation array
  * @return void
  */
 function framework_add_component_documentation ( $component, $documentation)
 {
-  global $_plugins;
+  global $_plugins, $_in;
 
   if ( array_key_exists ( $component, $_plugins["components"]))
   {
@@ -184,6 +193,10 @@ function framework_add_component_documentation ( $component, $documentation)
     $_plugins["components"][$component] = array_merge_recursive_distinct_with_sequencial ( $var1, $var2);
   } else {
     $_plugins["components"][$component] = is_array ( $documentation) ? $documentation : array ();
+  }
+  if ( ! array_key_exists ( $component, $_plugins["componentmap"]))
+  {
+    $_plugins["componentmap"][$component] = array_key_exists ( "module", $_in) ? $_in["module"] : "";
   }
 }
 
@@ -201,7 +214,7 @@ function framework_add_component_documentation ( $component, $documentation)
  * @param string $function The name of the function to be called
  * @param string $reference The name of the function to use as reference
  * @param int[optional] $options Options. Please refer to defined constants
- * @return boolean
+ * @return void
  */
 function framework_add_hook_at ( $hook, $function, $reference, $options = IN_HOOK_INSERT_AFTER)
 {
@@ -212,9 +225,9 @@ function framework_add_hook_at ( $hook, $function, $reference, $options = IN_HOO
     framework_error ( "VoIP Domain Framework: Function \"" . $function . "\" already exist at hook \"" . $hook . "\"");
     return;
   }
-  if ( ! in_array ( $reference, $_plugins["hooks"][$hook]))
+  if ( ! array_key_exists ( $hook, $_plugins["hooks"]) || ! is_array ( $_plugins["hooks"][$hook]) || ! in_array ( $reference, $_plugins["hooks"][$hook]))
   {
-    framework_error ( "VoIP Domain Framework: Reference function \"" . $reference . "\" doesn't exist at hook \"" . $hook . "\"");
+    $_plugins["deferred_hooks"][] = array ( "hook" => $hook, "function" => $function, "reference" => $reference, "options" => $options, "module" => $_in["module"]);
     return;
   }
   $_plugins["map"][$function] = $_in["module"];
@@ -229,6 +242,58 @@ function framework_add_hook_at ( $hook, $function, $reference, $options = IN_HOO
   } else {
     array_splice ( $_plugins["hooks"][$hook], array_search ( $reference, $_plugins["hooks"][$hook], true) + 1, 0, $function);
   }
+}
+
+/**
+ * Function to resolve deferred hook registrations. This must be called after
+ * all modules have been loaded. It processes the deferred queue in multiple
+ * passes until all references are resolved or no further progress can be made.
+ *
+ * @global array $_plugins The main plugin system variable
+ * @return void
+ */
+function framework_resolve_deferred_hooks ()
+{
+  global $_plugins;
+
+  $max_passes = 10;
+  $pass = 0;
+  while ( sizeof ( $_plugins["deferred_hooks"]) > 0 && $pass < $max_passes)
+  {
+    $pass++;
+    $remaining = array ();
+    foreach ( $_plugins["deferred_hooks"] as $entry)
+    {
+      if ( ! array_key_exists ( $entry["hook"], $_plugins["hooks"]) || ! is_array ( $_plugins["hooks"][$entry["hook"]]) || ! in_array ( $entry["reference"], $_plugins["hooks"][$entry["hook"]]))
+      {
+        $remaining[] = $entry;
+        continue;
+      }
+      if ( in_array ( $entry["function"], $_plugins["hooks"][$entry["hook"]]))
+      {
+        continue;
+      }
+      $_plugins["map"][$entry["function"]] = $entry["module"];
+      if ( $entry["options"] & IN_HOOK_REPLACE)
+      {
+        $_plugins["hooks"][$entry["hook"]][array_search ( $entry["reference"], $_plugins["hooks"][$entry["hook"]], true)] = $entry["function"];
+      } else if ( $entry["options"] & IN_HOOK_INSERT_BEFORE) {
+        array_splice ( $_plugins["hooks"][$entry["hook"]], array_search ( $entry["reference"], $_plugins["hooks"][$entry["hook"]], true), 0, $entry["function"]);
+      } else {
+        array_splice ( $_plugins["hooks"][$entry["hook"]], array_search ( $entry["reference"], $_plugins["hooks"][$entry["hook"]], true) + 1, 0, $entry["function"]);
+      }
+    }
+    if ( sizeof ( $remaining) == sizeof ( $_plugins["deferred_hooks"]))
+    {
+      break;
+    }
+    $_plugins["deferred_hooks"] = $remaining;
+  }
+  foreach ( $_plugins["deferred_hooks"] as $entry)
+  {
+    framework_error ( "VoIP Domain Framework: Deferred hook resolution failed - reference function \"" . $entry["reference"] . "\" doesn't exist at hook \"" . $entry["hook"] . "\" for function \"" . $entry["function"] . "\"");
+  }
+  $_plugins["deferred_hooks"] = array ();
 }
 
 /**
@@ -247,7 +312,7 @@ function framework_remove_hook_function ( $hook, $function)
   if ( ! is_array ( $_plugins["hooks"][$hook]))
   {
     framework_error ( "VoIP Domain Framework: Hook \"" . $hook . "\" not found to remove function \"" . $function . "\".");
-    return;
+    return false;
   }
   if ( ! in_array ( $function, $_plugins["hooks"][$hook]))
   {
@@ -264,7 +329,7 @@ function framework_remove_hook_function ( $hook, $function)
  * @global array $_plugins The main plugin system variable
  * @param string $hook The name of the hook to be checked
  * @param string $function[optional] The name of the function to be checked
- * @return boolean
+ * @return boolean|array
  */
 function framework_has_hook ( $hook, $function = "")
 {
@@ -289,7 +354,7 @@ function framework_remove_hook ( $hook)
 {
   global $_plugins;
 
-  if ( ! in_array ( $function, $_plugins["hooks"][$hook]))
+  if ( ! array_key_exists ( $hook, $_plugins["hooks"]) || ! is_array ( $_plugins["hooks"][$hook]))
   {
     return false;
   }
@@ -344,10 +409,9 @@ function framework_clear_buffer ( $hook)
  * @global array $_plugins The main plugin system variable
  * @global array $_in Framework global configuration variable
  * @param string $hook The name of the hook to be called
- * @param array[optional] Array containing the parameters to be passed to the
- *                        called functions of the hook
- * @param boolean[optional] Set true to print the buffer output at last function
- *                          call
+ * @param array $parameters Array containing the parameters to be passed to the called functions of the hook
+ * @param boolean $output Set true to print the buffer output at last function call
+ * @param mixed $buffer Initial buffer value passed to the first handler
  * @return mixed
  */
 function framework_call ( $hook, $parameters = array (), $output = false, $buffer = "")
@@ -385,14 +449,18 @@ function framework_call ( $hook, $parameters = array (), $output = false, $buffe
     {
       if ( ! is_loaded ( $_plugins["map"][$function], "module"))
       {
-        if ( is_readable ( dirname ( __FILE__) . "/../modules/" . $_plugins["map"][$function] . "/filter.php"))
+        foreach ( array ( "modules", "plugins") as $_search_dir)
         {
-          require_once ( dirname ( __FILE__) . "/../modules/" . $_plugins["map"][$function] . "/filter.php");
+          if ( is_readable ( dirname ( __FILE__) . "/../" . $_search_dir . "/" . $_plugins["map"][$function] . "/filter.php"))
+          {
+            require_once ( dirname ( __FILE__) . "/../" . $_search_dir . "/" . $_plugins["map"][$function] . "/filter.php");
+          }
+          if ( is_readable ( dirname ( __FILE__) . "/../" . $_search_dir . "/" . $_plugins["map"][$function] . "/webui.php"))
+          {
+            require_once ( dirname ( __FILE__) . "/../" . $_search_dir . "/" . $_plugins["map"][$function] . "/webui.php");
+          }
         }
-        if ( is_readable ( dirname ( __FILE__) . "/../modules/" . $_plugins["map"][$function] . "/webui.php"))
-        {
-          require_once ( dirname ( __FILE__) . "/../modules/" . $_plugins["map"][$function] . "/webui.php");
-        }
+        unset ( $_search_dir);
       }
       if ( ! function_exists ( $function))
       {
@@ -426,8 +494,8 @@ function framework_call ( $hook, $parameters = array (), $output = false, $buffe
 /**
  * Internal function to print error messages using the PHP error processor.
  *
- * @param string Message to be printed
- * @param int[optional] PHP error trigger level
+ * @param string $message Message to be printed
+ * @param int $level PHP error trigger level
  * @return void
  */
 function framework_error ( $message, $level = E_USER_NOTICE)
@@ -439,15 +507,15 @@ function framework_error ( $message, $level = E_USER_NOTICE)
 /**
  * Internal function to check if a module was loaded.
  *
- * @param string Module name
- * @param string Module type
+ * @param string $module Module name
+ * @param string $type Module type
  * @return boolean
  */
 function is_loaded ( $module, $type)
 {
   foreach ( get_included_files () as $included)
   {
-    if ( strpos ( $included, "/modules/" . $module . "/" . $type . ".php") !== false)
+    if ( strpos ( $included, "/modules/" . $module . "/" . $type . ".php") !== false || strpos ( $included, "/plugins/" . $module . "/" . $type . ".php") !== false)
     {
       return true;
     }

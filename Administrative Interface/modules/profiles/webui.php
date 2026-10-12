@@ -187,6 +187,7 @@ function profiles_add_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Profiles"), "link" => "/profiles"),
     2 => array ( "title" => __ ( "Add"))
   ));
+  sys_set_menu_highlight ( "/profiles");
 
   /**
    * Add page CSS requirements
@@ -220,7 +221,7 @@ function profiles_add_page ( $buffer, $parameters)
   $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in active\" id=\"profile_add_tab_basic\">\n";
 
   // Add profile description field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"profile_add_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"profile_add_description\" placeholder=\"" . __ ( "Profile description") . "\" />\n";
@@ -228,7 +229,7 @@ function profiles_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add profile domain field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"profile_add_domain\" class=\"control-label col-xs-2\">" . __ ( "Domain") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Domain\" class=\"form-control\" id=\"profile_add_domain\" placeholder=\"" . __ ( "Profile domain") . "\" />\n";
@@ -236,7 +237,7 @@ function profiles_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add profile external prefix field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"profile_add_prefix\" class=\"control-label col-xs-2\">" . __ ( "External prefix") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Prefix\" class=\"form-control\" id=\"profile_add_prefix\" placeholder=\"" . __ ( "Prefix to access PSTN calls") . "\" />\n";
@@ -252,7 +253,7 @@ function profiles_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add profile emergency numbers shortcut option
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"profile_add_emergency\" class=\"control-label col-xs-2\">" . __ ( "Emergency shortcut") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"checkbox\" name=\"Emergency\" id=\"profile_add_emergency\" value=\"true\" class=\"form-control\" />\n";
@@ -277,7 +278,7 @@ function profiles_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add profile country selector
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"profile_add_country\" class=\"control-label col-xs-2\">" . __ ( "Country") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"Country\" id=\"profile_add_country\" class=\"form-control\" data-placeholder=\"" . __ ( "Profile country") . "\"><option value=\"\"></option></select>\n";
@@ -285,7 +286,7 @@ function profiles_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add profile timezone selector
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"profile_add_timezone\" class=\"control-label col-xs-2\">" . __ ( "Time zone") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"TimeZone\" id=\"profile_add_timezone\" class=\"form-control\" data-placeholder=\"" . __ ( "Profile time zone") . "\">\n";
@@ -296,7 +297,7 @@ function profiles_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add profile area code field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"profile_add_areacode\" class=\"control-label col-xs-2\">" . __ ( "Area code") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"AreaCode\" class=\"form-control\" id=\"profile_add_areacode\" placeholder=\"" . __ ( "Profile area code") . "\" />\n";
@@ -304,7 +305,7 @@ function profiles_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add profile language selector
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"profile_add_language\" class=\"control-label col-xs-2\">" . __ ( "Language") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"Language\" id=\"profile_add_language\" class=\"form-control\" data-placeholder=\"" . __ ( "Profile language") . "\"><option value=\"\"></option></select>\n";
@@ -316,7 +317,7 @@ function profiles_add_page ( $buffer, $parameters)
   $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in\" id=\"profile_add_tab_gateways\">\n";
 
   // Add profile non geographic gateway selector
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"profile_add_nggw\" class=\"control-label col-xs-2\">" . __ ( "Non geographic gateway") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"NGGW\" id=\"profile_add_nggw\" class=\"form-control\" data-placeholder=\"" . __ ( "Gateway to non-geographic calls") . "\"><option value=\"\"></option></select>\n";
@@ -343,7 +344,7 @@ function profiles_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add profile allowed gateways selector
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"profile_add_gateways\" class=\"control-label col-xs-2\">" . __ ( "Allowed gateways") . "</label>\n";
   $output .= "        <div class=\"col-xs-10 multiselect\">\n";
   $output .= "          <div class=\"col-sm-5\">\n";
@@ -587,7 +588,7 @@ function profiles_add_page ( $buffer, $parameters)
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
+ * @return void
  */
 function profiles_clone_function ( $buffer, $parameters)
 {
@@ -659,6 +660,7 @@ function profiles_view_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Profiles"), "link" => "/profiles"),
     2 => array ( "title" => __ ( "View"))
   ));
+  sys_set_menu_highlight ( "/profiles");
 
   /**
    * Add page CSS requirements
@@ -759,7 +761,21 @@ function profiles_view_page ( $buffer, $parameters)
   $output .= "        <label for=\"profile_view_timezone\" class=\"control-label col-xs-2\">" . __ ( "Time zone") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"TimeZone\" id=\"profile_view_timezone\" class=\"form-control\" data-placeholder=\"" . __ ( "Profile time zone") . "\" disabled=\"disabled\"></select>\n";
-  $output .= voipdomain_timezonepicker_select_markup ();
+  $output .= "        </div>\n";
+  $output .= "      </div>\n";
+ 
+  // Add profile area code field
+  $output .= "      <div class=\"form-group\">\n";
+  $output .= "        <label for=\"profile_view_areacode\" class=\"control-label col-xs-2\">" . __ ( "Area code") . "</label>\n";
+  $output .= "        <div class=\"col-xs-10\">\n";
+  $output .= "          <input type=\"text\" name=\"AreaCode\" class=\"form-control\" id=\"profile_view_areacode\" placeholder=\"" . __ ( "Profile area code") . "\" disabled=\"disabled\" />\n";
+  $output .= "        </div>\n";
+  $output .= "      </div>\n";
+ 
+  // Add profile language selector
+  $output .= "      <div class=\"form-group\">\n";
+  $output .= "        <label for=\"profile_view_language\" class=\"control-label col-xs-2\">" . __ ( "Language") . "</label>\n";
+  $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"Language\" id=\"profile_view_language\" class=\"form-control\" data-placeholder=\"" . __ ( "Profile language") . "\" disabled=\"disabled\"></select>\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";
@@ -914,6 +930,7 @@ function profiles_edit_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Profiles"), "link" => "/profiles"),
     2 => array ( "title" => __ ( "Edit"))
   ));
+  sys_set_menu_highlight ( "/profiles");
 
   /**
    * Add page CSS requirements
@@ -947,7 +964,7 @@ function profiles_edit_page ( $buffer, $parameters)
   $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in active\" id=\"profile_edit_tab_basic\">\n";
 
   // Add profile description field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"profile_edit_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"profile_edit_description\" placeholder=\"" . __ ( "Profile description") . "\" />\n";
@@ -955,7 +972,7 @@ function profiles_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add profile domain field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"profile_edit_domain\" class=\"control-label col-xs-2\">" . __ ( "Domain") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Domain\" class=\"form-control\" id=\"profile_edit_domain\" placeholder=\"" . __ ( "Profile domain") . "\" />\n";
@@ -963,7 +980,7 @@ function profiles_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add profile external prefix field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"profile_edit_prefix\" class=\"control-label col-xs-2\">" . __ ( "External prefix") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Prefix\" class=\"form-control\" id=\"profile_edit_prefix\" placeholder=\"" . __ ( "Prefix to access PSTN calls") . "\" />\n";
@@ -979,7 +996,7 @@ function profiles_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add profile emergency numbers shortcut option
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"profile_edit_emergency\" class=\"control-label col-xs-2\">" . __ ( "Emergency shortcut") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"checkbox\" name=\"Emergency\" id=\"profile_edit_emergency\" value=\"true\" class=\"form-control\" />\n";
@@ -1004,7 +1021,7 @@ function profiles_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add profile country selector
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"profile_edit_country\" class=\"control-label col-xs-2\">" . __ ( "Country") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"Country\" id=\"profile_edit_country\" class=\"form-control\" data-placeholder=\"" . __ ( "Profile country") . "\"><option value=\"\"></option></select>\n";
@@ -1012,7 +1029,7 @@ function profiles_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add profile timezone selector
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"profile_edit_timezone\" class=\"control-label col-xs-2\">" . __ ( "Time zone") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"TimeZone\" id=\"profile_edit_timezone\" class=\"form-control\" data-placeholder=\"" . __ ( "Profile time zone") . "\">\n";
@@ -1023,7 +1040,7 @@ function profiles_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add profile area code field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"profile_edit_areacode\" class=\"control-label col-xs-2\">" . __ ( "Area code") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"AreaCode\" class=\"form-control\" id=\"profile_edit_areacode\" placeholder=\"" . __ ( "Profile area code") . "\" />\n";
@@ -1031,7 +1048,7 @@ function profiles_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add profile language selector
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"profile_edit_language\" class=\"control-label col-xs-2\">" . __ ( "Language") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"Language\" id=\"profile_edit_language\" class=\"form-control\" data-placeholder=\"" . __ ( "Profile language") . "\"><option value=\"\"></option></select>\n";
@@ -1043,7 +1060,7 @@ function profiles_edit_page ( $buffer, $parameters)
   $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in\" id=\"profile_edit_tab_gateways\">\n";
 
   // Add profile non geographic gateway selector
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"profile_edit_nggw\" class=\"control-label col-xs-2\">" . __ ( "Non geographic gateway") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"NGGW\" id=\"profile_edit_nggw\" class=\"form-control\" data-placeholder=\"" . __ ( "Gateway to non-geographic calls") . "\"><option value=\"\"></option></select>\n";
@@ -1070,7 +1087,7 @@ function profiles_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add profile allowed gateways selector
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"profile_edit_gateways\" class=\"control-label col-xs-2\">" . __ ( "Allowed gateways") . "</label>\n";
   $output .= "        <div class=\"col-xs-10 multiselect\">\n";
   $output .= "          <div class=\"col-sm-5\">\n";

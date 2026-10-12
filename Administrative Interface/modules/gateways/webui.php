@@ -192,6 +192,7 @@ function gateways_add_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Gateways"), "link" => "/gateways"),
     2 => array ( "title" => __ ( "Add"))
   ));
+  sys_set_menu_highlight ( "/gateways");
 
   /**
    * Add page CSS requirements
@@ -227,7 +228,7 @@ function gateways_add_page ( $buffer, $parameters)
   $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in active\" id=\"gateway_add_tab_basic\">\n";
 
   // Add gateway description field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"gateway_add_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"gateway_add_description\" placeholder=\"" . __ ( "Gateway description") . "\" />\n";
@@ -243,7 +244,7 @@ function gateways_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add gateway type
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"gateway_add_type\" class=\"control-label col-xs-2\">" . __ ( "Type") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"Type\" class=\"form-control\" id=\"gateway_add_type\">\n";
@@ -257,7 +258,7 @@ function gateways_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add gateway priority
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"gateway_add_priority\" class=\"control-label col-xs-2\">" . __ ( "Priority") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"Priority\" class=\"form-control\" id=\"gateway_add_priority\">\n";
@@ -288,7 +289,7 @@ function gateways_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add gateway IP address field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"gateway_add_address\" class=\"control-label col-xs-2\">" . __ ( "Address") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Address\" class=\"form-control\" id=\"gateway_add_address\" placeholder=\"" . __ ( "Gateway address") . "\" />\n";
@@ -296,7 +297,7 @@ function gateways_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add gateway port field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"gateway_add_port\" class=\"control-label col-xs-2\">" . __ ( "Port") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Port\" class=\"form-control\" id=\"gateway_add_port\" placeholder=\"" . __ ( "Gateway port") . "\" />\n";
@@ -320,7 +321,7 @@ function gateways_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add gateway currency
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"gateway_add_currency\" class=\"control-label col-xs-2\">" . __ ( "Currency") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"Currency\" class=\"form-control\" id=\"gateway_add_currency\">\n";
@@ -362,6 +363,14 @@ function gateways_add_page ( $buffer, $parameters)
   $output .= "        <label for=\"gateway_add_inbound\" class=\"control-label col-xs-2\">" . __ ( "Inbound") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"checkbox\" name=\"Inbound\" id=\"gateway_add_inbound\" value=\"true\" class=\"form-control\" checked=\"checked\" />\n";
+  $output .= "        </div>\n";
+  $output .= "      </div>\n";
+
+  // Add source number field
+  $output .= "      <div class=\"form-group\">\n";
+  $output .= "        <label for=\"gateway_add_calleridnumber\" class=\"control-label col-xs-2\">" . __ ( "Source number") . "</label>\n";
+  $output .= "        <div class=\"col-xs-10\">\n";
+  $output .= "          <input type=\"text\" name=\"CallerIDNumber\" class=\"form-control\" id=\"gateway_add_calleridnumber\" placeholder=\"" . __ ( "Call source number. Empty to pass through or value (accepts wildcard {extension}).") . "\" />\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";
   $output .= "    </div>\n";
@@ -688,6 +697,7 @@ function gateways_add_page ( $buffer, $parameters)
               "  formData.RPID = $('#gateway_add_rpid').prop ( 'checked');\n" .
               "  formData.Qualify = $('#gateway_add_qualify').prop ( 'checked');\n" .
               "  formData.Inbound = $('#gateway_add_inbound').prop ( 'checked');\n" .
+              "  formData.CallerIDNumber = $('#gateway_add_calleridnumber').val ();\n" .
               "  $('#gateway_add_form').data ( 'formData', formData);\n" .
               "});");
 
@@ -701,7 +711,7 @@ function gateways_add_page ( $buffer, $parameters)
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
+ * @return void
  */
 function gateways_clone_function ( $buffer, $parameters)
 {
@@ -734,6 +744,7 @@ function gateways_clone_function ( $buffer, $parameters)
               "    $('#gateway_add_rpid').bootstrapToggle ( ( data.RPID ? 'on' : 'off'));\n" .
               "    $('#gateway_add_qualify').bootstrapToggle ( ( data.Qualify ? 'on' : 'off'));\n" .
               "    $('#gateway_add_inbound').bootstrapToggle ( ( data.Inbound ? 'on' : 'off'));\n" .
+              "    $('#gateway_add_calleridnumber').val ( data.CallerIDNumber || '');\n" .
               "    $('#gateway_add_discard').val ( data.Discard);\n" .
               "    $('#gateway_add_minimum').val ( data.Minimum);\n" .
               "    $('#gateway_add_fraction').val ( data.Fraction);\n" .
@@ -793,6 +804,7 @@ function gateways_view_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Gateways"), "link" => "/gateways"),
     2 => array ( "title" => __ ( "View"))
   ));
+  sys_set_menu_highlight ( "/gateways");
 
   /**
    * Add page CSS requirements
@@ -962,6 +974,14 @@ function gateways_view_page ( $buffer, $parameters)
   $output .= "          <input type=\"checkbox\" name=\"Inbound\" value=\"true\" id=\"gateway_view_inbound\" class=\"form-control\" disabled=\"disabled\" />\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";
+
+  // Add source number field
+  $output .= "      <div class=\"form-group\">\n";
+  $output .= "        <label for=\"gateway_view_calleridnumber\" class=\"control-label col-xs-2\">" . __ ( "Source number") . "</label>\n";
+  $output .= "        <div class=\"col-xs-10\">\n";
+  $output .= "          <input type=\"text\" name=\"CallerIDNumber\" class=\"form-control\" id=\"gateway_view_calleridnumber\" placeholder=\"" . __ ( "Call source number. Empty to pass through or value (accepts wildcard {extension}).") . "\" disabled=\"disabled\" />\n";
+  $output .= "        </div>\n";
+  $output .= "      </div>\n";
   $output .= "    </div>\n";
 
   // Timing options panel
@@ -1081,6 +1101,7 @@ function gateways_view_page ( $buffer, $parameters)
               "  $('#gateway_view_rpid').bootstrapToggle ( 'enable').bootstrapToggle ( ( data.RPID ? 'on' : 'off')).bootstrapToggle ( 'disable');\n" .
               "  $('#gateway_view_qualify').bootstrapToggle ( 'enable').bootstrapToggle ( ( data.Qualify ? 'on' : 'off')).bootstrapToggle ( 'disable');\n" .
               "  $('#gateway_view_inbound').bootstrapToggle ( 'enable').bootstrapToggle ( ( data.Inbound ? 'on' : 'off')).bootstrapToggle ( 'disable');\n" .
+              "  $('#gateway_view_calleridnumber').val ( data.CallerIDNumber || '');\n" .
               "  $('#gateway_view_discard').val ( data.Discard);\n" .
               "  $('#gateway_view_minimum').val ( data.Minimum);\n" .
               "  $('#gateway_view_fraction').val ( data.Fraction);\n" .
@@ -1142,6 +1163,7 @@ function gateways_edit_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Gateways"), "link" => "/gateways"),
     2 => array ( "title" => __ ( "Edit"))
   ));
+  sys_set_menu_highlight ( "/gateways");
 
   /**
    * Add page CSS requirements
@@ -1177,7 +1199,7 @@ function gateways_edit_page ( $buffer, $parameters)
   $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in active\" id=\"gateway_edit_tab_basic\">\n";
 
   // Add gateway description field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"gateway_edit_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"gateway_edit_description\" placeholder=\"" . __ ( "Gateway description") . "\" />\n";
@@ -1193,7 +1215,7 @@ function gateways_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add gateway type
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"gateway_edit_type\" class=\"control-label col-xs-2\">" . __ ( "Type") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"Type\" class=\"form-control\" id=\"gateway_edit_type\">\n";
@@ -1207,7 +1229,7 @@ function gateways_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add gateway priority
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"gateway_edit_priority\" class=\"control-label col-xs-2\">" . __ ( "Priority") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"Priority\" class=\"form-control\" id=\"gateway_edit_priority\">\n";
@@ -1238,7 +1260,7 @@ function gateways_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add gateway IP address field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"gateway_edit_address\" class=\"control-label col-xs-2\">" . __ ( "Address") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Address\" class=\"form-control\" id=\"gateway_edit_address\" placeholder=\"" . __ ( "Gateway address") . "\" />\n";
@@ -1246,7 +1268,7 @@ function gateways_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add gateway port field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"gateway_edit_port\" class=\"control-label col-xs-2\">" . __ ( "Port") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Port\" class=\"form-control\" id=\"gateway_edit_port\" placeholder=\"" . __ ( "Gateway port") . "\" />\n";
@@ -1270,7 +1292,7 @@ function gateways_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add gateway currency
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"gateway_edit_currency\" class=\"control-label col-xs-2\">" . __ ( "Currency") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"Currency\" class=\"form-control\" id=\"gateway_edit_currency\">\n";
@@ -1312,6 +1334,14 @@ function gateways_edit_page ( $buffer, $parameters)
   $output .= "        <label for=\"gateway_edit_inbound\" class=\"control-label col-xs-2\">" . __ ( "Inbound") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"checkbox\" name=\"Inbound\" id=\"gateway_edit_inbound\" value=\"true\" class=\"form-control\" />\n";
+  $output .= "        </div>\n";
+  $output .= "      </div>\n";
+
+  // Add source number field
+  $output .= "      <div class=\"form-group\">\n";
+  $output .= "        <label for=\"gateway_edit_calleridnumber\" class=\"control-label col-xs-2\">" . __ ( "Source number") . "</label>\n";
+  $output .= "        <div class=\"col-xs-10\">\n";
+  $output .= "          <input type=\"text\" name=\"CallerIDNumber\" class=\"form-control\" id=\"gateway_edit_calleridnumber\" placeholder=\"" . __ ( "Call source number. Empty to pass through or value (accepts wildcard {extension}).") . "\" />\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";
   $output .= "    </div>\n";
@@ -1579,6 +1609,7 @@ function gateways_edit_page ( $buffer, $parameters)
               "  $('#gateway_edit_rpid').bootstrapToggle ( ( data.RPID ? 'on' : 'off'));\n" .
               "  $('#gateway_edit_qualify').bootstrapToggle ( ( data.Qualify ? 'on' : 'off'));\n" .
               "  $('#gateway_edit_inbound').bootstrapToggle ( ( data.Inbound ? 'on' : 'off'));\n" .
+              "  $('#gateway_edit_calleridnumber').val ( data.CallerIDNumber || '');\n" .
               "  $('#gateway_edit_discard').val ( data.Discard);\n" .
               "  $('#gateway_edit_minimum').val ( data.Minimum);\n" .
               "  $('#gateway_edit_fraction').val ( data.Fraction);\n" .
@@ -1681,6 +1712,7 @@ function gateways_edit_page ( $buffer, $parameters)
               "  formData.RPID = $('#gateway_edit_rpid').prop ( 'checked');\n" .
               "  formData.Qualify = $('#gateway_edit_qualify').prop ( 'checked');\n" .
               "  formData.Inbound = $('#gateway_edit_inbound').prop ( 'checked');\n" .
+              "  formData.CallerIDNumber = $('#gateway_edit_calleridnumber').val ();\n" .
               "  $('#gateway_edit_form').data ( 'formData', formData);\n" .
               "});");
 
@@ -1706,6 +1738,7 @@ function gateways_report_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Gateways"), "link" => "/gateways"),
     2 => array ( "title" => __ ( "Report"))
   ));
+  sys_set_menu_highlight ( "/gateways");
 
   // Generate call report page through hook call:
   return framework_call ( "call_report_page_generate", array (

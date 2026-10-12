@@ -92,8 +92,7 @@ function process_call ( $buffer, $parameters)
   // Server that processed the call:
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `Tenant` = " . (int) get_tenant () . " AND `ID` = " . (int) $parameters["server"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "process_call");
   }
   if ( $data = $result->fetch_assoc ())
   {
@@ -188,8 +187,7 @@ function process_call ( $buffer, $parameters)
   // Which gateway used (if any):
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways` WHERE `Tenant` = " . (int) get_tenant () . " AND `ID` = " . (int) $parameters["gateway"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "process_call");
   }
   if ( $data = $result->fetch_assoc ())
   {
@@ -207,8 +205,7 @@ function process_call ( $buffer, $parameters)
   // Which cost center (if any):
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `CostCenters` WHERE `Tenant` = " . (int) get_tenant () . " AND `ID` = " . (int) $parameters["ccid"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "process_call");
   }
   if ( $data = $result->fetch_assoc ())
   {

@@ -1,0 +1,29 @@
+{
+  "$schema": "voipdomain-plugin-1.0",
+  "name": "tellows-score",
+  "display_name": "Tellows Score",
+  "version": "1.0.0",
+  "author": {
+    "name": "Ernani José Camargo Azevedo",
+    "email": "azevedo@voipdomain.io",
+    "url": "https://voipdomain.io"
+  },
+  "published": "2026-07-22",
+  "description": "Integrates Tellows spam score service to identify and block spam callers",
+  "license": "GPLv3",
+  "support": {
+    "url": "https://voipdomain.io/support",
+    "email": "support@voipdomain.io"
+  },
+  "requires": {
+    "core": ">=1.0.0",
+    "php": ">=8.1"
+  },
+  "conflicts": [],
+  "daemons": ["client", "fastagi"],
+  "hooks": {},
+  "config": {
+    "targets": ["client", "fastagi"]
+  },
+  "signature": {}
+}

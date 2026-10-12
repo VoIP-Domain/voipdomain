@@ -207,11 +207,14 @@ function servers_search_page ( $buffer, $parameters)
               "    l.stop ();\n" .
               "  });\n" .
               "});\n" .
+              "if ( ! window.VoIP_rebuildInProgress) { window.VoIP_rebuildInProgress = {}; }\n" .
               "$('#datatables').on ( 'click', 'button.btn-default', function ( e)\n" .
               "{\n" .
               "  e && e.preventDefault ();\n" .
-              "  $('#server_rebuild button.rebuild').prop ( 'disabled', false);\n" .
-              "  $('#server_rebuild_id').val ( $(this).data ( 'id'));\n" .
+              "  var serverId = $(this).data ( 'id');\n" .
+              "  var btn = $('#server_rebuild button.rebuild')[0];\n" .
+              "  var l = Ladda.create ( btn);\n" .
+              "  $('#server_rebuild_id').val ( serverId);\n" .
               "  $('#server_rebuild_clean').prop ( 'checked', false);\n" .
               "  $('#server_rebuild_description').html ( $(this).data ( 'description'));\n" .
               "  var backups = JSON.parse ( atob ( $(this).data ( 'backups')));\n" .
@@ -221,6 +224,14 @@ function servers_search_page ( $buffer, $parameters)
               "    content += '<input type=\"checkbox\" id=\"server_rebuild_backup_' + backups[x].ID + '\" checked=\"checked\" /> <label for=\"server_rebuild_backup_' + backups[x].ID + '\">' + backups[x].Address + ' (" . __ ( "Backup server") . ")</label><br />';\n" .
               "  }\n" .
               "  $('#server_rebuild_serverlist').html ( content);\n" .
+              "  if ( window.VoIP_rebuildInProgress[serverId])\n" .
+              "  {\n" .
+              "    l.start ();\n" .
+              "    $(btn).prop ( 'disabled', true);\n" .
+              "  } else {\n" .
+              "    l.stop ();\n" .
+              "    $(btn).prop ( 'disabled', false);\n" .
+              "  }\n" .
               "  $('#server_rebuild').modal ( 'show');\n" .
               "});\n" .
               "$('#server_rebuild button.rebuild').on ( 'click', function ( event)\n" .
@@ -231,24 +242,31 @@ function servers_search_page ( $buffer, $parameters)
               "    new PNotify ( { title: '" . __ ( "Server rebuild") . "', text: '" . __ ( "At least one server must be selected!") . "', type: 'error'});\n" .
               "    return;\n" .
               "  }\n" .
-              "  var l = Ladda.create ( this);\n" .
+              "  var btn = this;\n" .
+              "  var l = Ladda.create ( btn);\n" .
               "  l.start ();\n" .
+              "  $(btn).prop ( 'disabled', true);\n" .
+              "  var serverId = $('#server_rebuild_id').val ();\n" .
+              "  window.VoIP_rebuildInProgress[serverId] = true;\n" .
               "  var rebuildMain = $('#server_rebuild_server_main').prop ( 'checked');\n" .
               "  var rebuildBackups = [];\n" .
               "  $('#server_rebuild_serverlist').find ( 'input[id^=\"server_rebuild_backup_\"]:checked').each ( function ()\n" .
               "  {\n" .
               "    rebuildBackups.push ( parseInt ( $(this).attr ( 'id').replace ( 'server_rebuild_backup_', '')));\n" .
               "  });\n" .
-              "  VoIP.rest ( '/servers/' + encodeURIComponent ( $('#server_rebuild_id').val ()) + '/rebuild', 'POST', { Clean: $('#server_rebuild_clean').prop ( 'checked'), RebuildMain: rebuildMain, RebuildBackups: rebuildBackups}).done ( function ( data, textStatus, jqXHR)\n" .
+              "  $('#server_rebuild').modal ( 'hide');\n" .
+              "  new PNotify ( { title: '" . __ ( "Server rebuild") . "', text: '" . __ ( "You will receive a notification when the rebuild is complete.") . "', type: 'info'});\n" .
+              "  VoIP.rest ( '/servers/' + encodeURIComponent ( serverId) + '/rebuild', 'POST', { Clean: $('#server_rebuild_clean').prop ( 'checked'), RebuildMain: rebuildMain, RebuildBackups: rebuildBackups}).done ( function ( data, textStatus, jqXHR)\n" .
               "  {\n" .
-              "    $('#server_rebuild').modal ( 'hide');\n" .
               "    new PNotify ( { title: '" . __ ( "Server rebuild") . "', text: '" . __ ( "Server rebuilt successfully!") . "', type: 'success'});\n" .
               "  }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "  {\n" .
               "    new PNotify ( { title: '" . __ ( "Server rebuild") . "', text: '" . __ ( "Error rebuilding server!") . "', type: 'error'});\n" .
               "  }).always ( function ()\n" .
               "  {\n" .
+              "    delete window.VoIP_rebuildInProgress[serverId];\n" .
               "    l.stop ();\n" .
+              "    $(btn).prop ( 'disabled', false);\n" .
               "  });\n" .
               "});\n");
 
@@ -274,6 +292,7 @@ function servers_add_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Servers"), "link" => "/servers"),
     2 => array ( "title" => __ ( "Add"))
   ));
+  sys_set_menu_highlight ( "/servers");
 
   /**
    * Add page CSS requirements
@@ -307,7 +326,7 @@ function servers_add_page ( $buffer, $parameters)
   $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in active\" id=\"server_add_tab_basic\">\n";
 
   // Add server description field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"server_add_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"server_add_description\" placeholder=\"" . __ ( "Server description") . "\" />\n";
@@ -315,7 +334,7 @@ function servers_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add server address field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"server_add_address\" class=\"control-label col-xs-2\">" . __ ( "Address") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Address\" class=\"form-control\" id=\"server_add_address\" placeholder=\"" . __ ( "Server address") . "\" />\n";
@@ -323,7 +342,7 @@ function servers_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add server port field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"server_add_port\" class=\"control-label col-xs-2\">" . __ ( "Port") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Port\" class=\"form-control\" id=\"server_add_port\" placeholder=\"" . __ ( "Server port") . "\" />\n";
@@ -331,7 +350,7 @@ function servers_add_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add server country selector
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"server_add_country\" class=\"control-label col-xs-2\">" . __ ( "Country") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"Country\" id=\"server_add_country\" class=\"form-control\" data-placeholder=\"" . __ ( "Server country") . "\"><option value=\"\"></option></select>\n";
@@ -604,7 +623,7 @@ function servers_add_page ( $buffer, $parameters)
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
  * @param array $parameters Optional parameters to the function
- * @return string Output of the generated page
+ * @return void
  */
 function servers_clone_function ( $buffer, $parameters)
 {
@@ -673,6 +692,7 @@ function servers_view_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Servers"), "link" => "/servers"),
     2 => array ( "title" => __ ( "View"))
   ));
+  sys_set_menu_highlight ( "/servers");
 
   /**
    * Add page CSS requirements
@@ -893,6 +913,7 @@ function servers_edit_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Servers"), "link" => "/servers"),
     2 => array ( "title" => __ ( "Edit"))
   ));
+  sys_set_menu_highlight ( "/servers");
 
   /**
    * Add page CSS requirements
@@ -926,7 +947,7 @@ function servers_edit_page ( $buffer, $parameters)
   $output .= "    <div role=\"tabpanel\" class=\"tab-pane fade in active\" id=\"server_edit_tab_basic\">\n";
 
   // Add server description field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"server_edit_description\" class=\"control-label col-xs-2\">" . __ ( "Description") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Description\" class=\"form-control\" id=\"server_edit_description\" placeholder=\"" . __ ( "Server description") . "\" />\n";
@@ -934,7 +955,7 @@ function servers_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add server address field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"server_edit_address\" class=\"control-label col-xs-2\">" . __ ( "Address") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Address\" class=\"form-control\" id=\"server_edit_address\" placeholder=\"" . __ ( "Server address") . "\" />\n";
@@ -942,7 +963,7 @@ function servers_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add server port field
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"server_edit_port\" class=\"control-label col-xs-2\">" . __ ( "Port") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Port\" class=\"form-control\" id=\"server_edit_port\" placeholder=\"" . __ ( "Server port") . "\" />\n";
@@ -950,7 +971,7 @@ function servers_edit_page ( $buffer, $parameters)
   $output .= "      </div>\n";
 
   // Add server country selector
-  $output .= "      <div class=\"form-group\">\n";
+  $output .= "      <div class=\"form-group required\">\n";
   $output .= "        <label for=\"server_edit_country\" class=\"control-label col-xs-2\">" . __ ( "Country") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <select name=\"Country\" id=\"server_edit_country\" class=\"form-control\" data-placeholder=\"" . __ ( "Server country") . "\"><option value=\"\"></option></select>\n";
@@ -1269,6 +1290,7 @@ function servers_report_page ( $buffer, $parameters)
     1 => array ( "title" => __ ( "Servers"), "link" => "/servers"),
     2 => array ( "title" => __ ( "Report"))
   ));
+  sys_set_menu_highlight ( "/servers");
 
   // Generate call report page through hook call:
   return framework_call ( "call_report_page_generate", array (

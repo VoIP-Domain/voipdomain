@@ -69,8 +69,7 @@ function avatar_authentication_success ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Avatar` FROM `UserAvatar` WHERE `User` = " . (int) $_in["session"]["Data"]["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "avatar_authentication_success");
   }
   if ( ! $_in["session"]["Data"]["Avatar"] = $result->fetch_assoc ()["Avatar"])
   {
@@ -117,8 +116,7 @@ function avatar_session_extend ( $buffer, $parameters)
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Avatar` FROM `UserAvatar` WHERE `User` = " . (int) $_in["session"]["Data"]["ID"]))
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    database_query_error ( "avatar_session_extend");
   }
   if ( ! $_in["session"]["Data"]["Avatar"] = $result->fetch_assoc ()["Avatar"])
   {

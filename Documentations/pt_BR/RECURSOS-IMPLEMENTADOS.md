@@ -231,7 +231,115 @@ sync BD de plugins via `plugin_db_apply`.
 
 ---
 
-## 13. Referência rápida
+## 13. Melhorias no motor de workflow IVR (v1.1)
+
+Oito novos operadores e cinco modificações em operadores existentes expandem o
+motor de workflow IVR.
+
+### Correções
+
+| Operador | Correção |
+|----------|----------|
+| `date` | Adicionado link de fallback "other" quando nenhuma condição de data corresponde (espelha comportamento do `time`) |
+| `email` | `operator_apply_variables()` agora aplicado nos campos To, Subject e Body |
+
+### Operadores modificados
+
+| Operador | Alteração |
+|----------|-----------|
+| `play` | Novo toggle `Interruptible` — usa `Background()` em vez de `PlayBack()` quando habilitado |
+| `menu` | Nova saída `maxretries` — dispara quando limite de tentativas é excedido (distinto de `timedout`) |
+| `router` | Novo tipo de condição `regex`; nova propriedade `Logic` para avaliação AND/OR de múltiplas condições |
+| `dial` | Novas propriedades `CallerIDName`, `CallerIDNum` para sobrescrever CallerID; propriedade `MOHClass` para música em espera |
+| `script` | Agora retorna duas saídas (`ok`/`error`) baseado em `SHELL_EXIT_CODE` em vez de saída única |
+
+### Novos operadores
+
+| Operador | Saídas | App Asterisk | Descrição |
+|----------|--------|--------------|-----------|
+| `queue` | answered, timeout, full, joinempty | `Queue()` | Encaminhar para fila com anúncio de posição e limite de chamadores |
+| `voicemail` | 1 | `VoiceMail()` | Enviar para correio de voz (saudação ocupado/indisponível) |
+| `say` | 1 | `SayDigits()` / `SayNumber()` / `SayAlpha()` / `SayUnixTime()` | Falar dígitos, números, letras ou data/hora |
+| `gotoivr` | 0 | `GoTo()` | Saltar para outro workflow IVR |
+| `calleridcheck` | match, nomatch | `GotoIf()` | Desvio por padrão de CallerID |
+| `http` | ok, error | `Set(${CURL()})` | Requisição HTTP GET/POST; resposta armazenada em variável |
+| `conference` | 1 | `ConfBridge()` | Enviar chamador para sala de conferência |
+| `callback` | ok, error | `Dial(Local/...)` | Agendar retorno de chamada via canal local |
+
+### Arquivos
+
+- `Daemons/client-modules/ivr/operator-builtin.php` — geração de dialplan
+- `Administrative Interface/modules/ivr/config.php` — definições de UI (modais, operadores do flowchart)
+- `Administrative Interface/modules/ivr/language.php` — i18n (EN + pt_BR, 139 novas entradas cada)
+
+---
+
+## 14. Salas de conferência (ConfBridge)
+
+Gerenciamento de salas de conferência pela interface administrativa, utilizando
+Asterisk ConfBridge.
+
+### Módulo admin: `conferences`
+
+CRUD completo para salas de conferência com as seguintes propriedades:
+
+| Propriedade | Descrição |
+|-------------|-----------|
+| `Name` | Nome de exibição da sala |
+| `PIN` | PIN de acesso para participantes (opcional) |
+| `AdminPIN` | PIN de acesso para administradores (opcional) |
+| `MaxMembers` | Máximo de participantes (0 = ilimitado) |
+| `MOHClass` | Classe de música em espera |
+| `RecordConference` | Habilitar gravação automática |
+| `AnnounceJoinLeave` | Anunciar entrada/saída de participantes |
+| `WaitForAdmin` | Aguardar administrador antes de iniciar |
+
+API REST: `GET|POST /api/conferences`, `GET|PUT|DELETE /api/conferences/:id`.
+
+Interface: pesquisa (DataTables), adicionar, visualizar, editar, clonar.
+
+Arquivos:
+- `Administrative Interface/modules/conferences/{install,filter,api,webui,language}.php`
+
+### Módulo cliente: `conferences`
+
+Gera arquivos `confbridge-{nome}.conf` para o Asterisk com três seções por sala:
+
+- **Perfil de bridge** — `max_members`, `record_conference`
+- **Perfil de usuário** — `music_on_hold_class`, `announce_join_leave`, `wait_marked`, `pin`
+- **Perfil de admin** — `marked`, `admin`, `pin`
+
+Após gravar a configuração, executa `asterisk -rx "module reload app_confbridge.so"`.
+
+Arquivos:
+- `Daemons/client-modules/conferences/client.php`
+
+### Tipo de extensão: `conference`
+
+O módulo `extensions-conferences` registra o tipo de extensão "Conferência" via
+filtro `objects_types`. Uma extensão do tipo `conference` mapeia um número/DID
+a uma sala de conferência.
+
+O daemon cliente gera `dialplan-extension-{numero}.conf` com:
+
+- `ConfBridge(nome-sala, bridge-profile, user-profile|admin-profile)` conforme
+  o flag `Admin` definido na extensão.
+- Hint: `Custom:conference-{nome}` para monitoração BLF.
+
+Arquivos:
+- `Administrative Interface/modules/extensions-conferences/{install,filter,api,language}.php`
+- `Daemons/client-modules/extensions-conference/client.php`
+
+### Bootstrap Asterisk
+
+`confbridge.conf` inclui `voipdomain/configs/confbridge-*.conf` — paralelo a
+`queues.conf`, `voicemail.conf`, etc.
+
+Placeholder: `confbridge-000000.conf`.
+
+---
+
+## 15. Referência rápida
 
 | Nome | Tipo | Local |
 |------|------|-------|
@@ -241,5 +349,19 @@ sync BD de plugins via `plugin_db_apply`.
 | `extension_number_migrate` | Hook | `Daemons/client-modules/extensions-phones/client.php` |
 | `plugins_toggle` | Hook API | `Administrative Interface/modules/config/api.php` |
 | `equipment_model_cisco_deploy_firmware_archive()` | Helper | `equipments-cisco/client.php` |
+| `conference_add` | Hook | `Daemons/client-modules/conferences/client.php` |
+| `conference_change` | Hook | idem |
+| `conference_remove` | Hook | idem |
+| `extension_conference_add` | Hook | `Daemons/client-modules/extensions-conference/client.php` |
+| `extension_conference_change` | Hook | idem |
+| `extension_conference_remove` | Hook | idem |
+| `ivr_operator_queue` | Hook | `Daemons/client-modules/ivr/operator-builtin.php` |
+| `ivr_operator_voicemail` | Hook | idem |
+| `ivr_operator_say` | Hook | idem |
+| `ivr_operator_gotoivr` | Hook | idem |
+| `ivr_operator_calleridcheck` | Hook | idem |
+| `ivr_operator_http` | Hook | idem |
+| `ivr_operator_conference` | Hook | idem |
+| `ivr_operator_callback` | Hook | idem |
 
 Documentação completa em inglês: [../en/IMPLEMENTED-FEATURES.md](../en/IMPLEMENTED-FEATURES.md).

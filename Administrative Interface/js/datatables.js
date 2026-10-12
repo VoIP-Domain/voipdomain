@@ -168,7 +168,7 @@ $(document).ready ( function ()
         sEmptyTable: VoIP.i18n.__ ( 'No records found'),
         sInfo: VoIP.i18n.__ ( 'Showing _START_ to _END_ of _TOTAL_ records'),
         sInfoEmpty: VoIP.i18n.__ ( 'Showing 0 to 0 of 0 records'),
-        sInfoFiltered: '(filtered out of _MAX_ total records)',
+        sInfoFiltered: VoIP.i18n.__ ( '(filtered out of _MAX_ total records)'),
         sInfoPostFix: '',
         sInfoThousands: VoIP.i18n.__ ( '.'),
         sLengthMenu: '_MENU_<span class="hidden-xs"> ' + VoIP.i18n.__ ( 'per page') + '</span>',
