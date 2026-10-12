@@ -1,0 +1,92 @@
+{
+  "info": {
+    "name": "VoIP Domain — Lab Smoke",
+    "description": "Minimal smoke collection for lab/staging. Import into Postman or Insomnia.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://lab.example" },
+    { "key": "username", "value": "admin" },
+    { "key": "password", "value": "admin" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Session — Login",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"Username\": \"{{username}}\",\n  \"Password\": \"{{password}}\"\n}"
+        },
+        "url": "{{baseUrl}}/api/session"
+      }
+    },
+    {
+      "name": "Debug — Ping",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "disabled": true
+          }
+        ],
+        "url": "{{baseUrl}}/api/debug/ping"
+      }
+    },
+    {
+      "name": "Debug — API Map",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/debug/api/map"
+      }
+    },
+    {
+      "name": "Debug — Call Hook (debug_ping)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{}" },
+        "url": "{{baseUrl}}/api/debug/callhook/debug_ping"
+      }
+    },
+    {
+      "name": "Debug — Call Hook (ranges_add_validate)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{}" },
+        "url": "{{baseUrl}}/api/debug/callhook/ranges_add_validate"
+      }
+    },
+    {
+      "name": "Debug — Explain Number",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/debug/explain/%2B5511999999999"
+      }
+    },
+    {
+      "name": "Infrastructure — router_reload_cache",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"ServerID\": \"1\"\n}"
+        },
+        "url": "{{baseUrl}}/api/debug/callhook/router_reload_cache"
+      }
+    },
+    {
+      "name": "Servers — List",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/servers"
+      }
+    }
+  ]
+}

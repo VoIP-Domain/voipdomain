@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Core
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -44,9 +44,9 @@ ini_set ( "display_errors", 0);
 // error_reporting ( E_ALL); ini_set ( "display_errors", 1);
 
 /**
- * Include main configuration parser and functions
+ * Bootstrap webroot and load configuration (does not depend on PHP-FPM chdir).
  */
-require_once ( "includes/config.inc.php");
+require_once ( __DIR__ . "/includes/bootstrap.inc.php");
 
 /**
  * Include interface module
@@ -68,14 +68,9 @@ if ( $_in["mode"] == "install")
 /**
  * Include modules cache (or create it if not found)
  */
-if ( ! $_in["general"]["debug"] && $cache = json_decode ( @file_get_contents ( "modules/cache.json"), true))
+if ( ! $_in["general"]["debug"] && is_array ( $cache = json_decode ( @file_get_contents ( "modules/cache.json"), true)))
 {
-  $_plugins["map"] = $cache["map"];
-  $_plugins["hooks"] = $cache["hooks"];
-  $_plugins["functions"] = $cache["functions"];
-  $_paths = $cache["paths"];
-  $_in["i18n"] = $cache["i18n"];
-  $_filters = $cache["filters"];
+  voipdomain_apply_modules_cache ( $cache);
   unset ( $cache);
 
   /**
@@ -201,7 +196,7 @@ if ( array_key_exists ( "HTTP_X_INFRAMEWORK", $_SERVER) && $_SERVER["HTTP_X_INFR
 } else {
   // Set HTTP headers (CSP) when providing HTML code:
   $_in["general"]["nonce"] = hash ( "sha256", uniqid ( "", true));
-  header ( "Content-Security-Policy: default-src 'self' 'nonce-" . $_in["general"]["nonce"] . "';img-src 'self' blob: data:;style-src 'self' 'unsafe-inline';media-src 'self' blob: data:");                // Permit request of contents only from our self server
+  header ( "Content-Security-Policy: default-src 'self' 'nonce-" . $_in["general"]["nonce"] . "';script-src 'self' 'nonce-" . $_in["general"]["nonce"] . "';img-src 'self' blob: data:;style-src 'self' 'unsafe-inline';media-src 'self' blob: data:");
 
   // Set X-Frame-Options to deny processing of frames, iframes and objects:
   header ( "X-Frame-Options: DENY");
@@ -221,7 +216,7 @@ if ( array_key_exists ( "HTTP_X_INFRAMEWORK", $_SERVER) && $_SERVER["HTTP_X_INFR
  */
 if ( $_SERVER["REQUEST_URI"] == "/auth" || substr ( $_SERVER["REQUEST_URI"], 0, 6) == "/auth?")
 {
-  echo framework_call ( "authentication_page_generate");
+  echo framework_call ( "authentication_login_page_generate");
   exit ();
 }
 
@@ -234,7 +229,7 @@ if ( $_SERVER["HTTP_HOST"] == $_in["general"]["masterhostname"])
 }
 if ( array_key_exists ( "authhostname", $_in["general"]) && $_SERVER["HTTP_HOST"] == $_in["general"]["authhostname"])
 {
-  $loginpage = "authentication_page_generate";
+  $loginpage = "authentication_login_page_generate";
 }
 if ( ! isset ( $loginpage))
 {

@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments Htek
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -45,7 +45,7 @@ framework_add_hook (
 );
 
 /**
- * Function to extend equipments configuration sanitize of Htek models.
+ * Function to extend Configure equipment sanitize of Htek models.
  *
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
@@ -76,7 +76,7 @@ function equipments_configure_htek_userpass_sanitize ( $buffer, $parameters)
 }
 
 /**
- * Function to extend equipments addition/edition validate of Htek models.
+ * Function to extend equipments addition/edit validate of Htek models.
  *
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
@@ -142,7 +142,7 @@ function equipments_htek_tenant_add_post ( $buffer, $parameters)
   /**
    * Add authentication settings
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_uc902sp', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G722\",\"ILBC\",\"OPUS\",\"G726\],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"vduser\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"vdadmin\",\"Password\":\"vdadmin\"}}}')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_uc902sp', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ULAW\",\"ALAW\",\"G722\",\"ILBC\",\"OPUS\",\"G726\"],\"VideoCodecs\":[],\"ExtraSettings\":{\"User\":{\"Name\":\"vduser\",\"Password\":\"vduser\"},\"Admin\":{\"Name\":\"vdadmin\",\"Password\":\"vdadmin\"}}}')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

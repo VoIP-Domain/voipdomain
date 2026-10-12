@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,13 +25,13 @@
 
 /**
  * VoIP Domain queues module WebUI. This module add the feature of queueing
- * incoming calls. Usefull to manage call centers.
+ * incoming calls. Useful to manage call centers.
  *
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Queues
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -186,7 +186,7 @@ function queues_add_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Queues"));
-  sys_set_subtitle ( __ ( "queues addition"));
+  sys_set_subtitle ( __ ( "Add queues"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Queues"), "link" => "/queues"),
     2 => array ( "title" => __ ( "Add"))
@@ -267,7 +267,7 @@ function queues_add_page ( $buffer, $parameters)
               "    URL: '/queues',\n" .
               "    method: 'POST',\n" .
               "    button: $('button.add'),\n" .
-              "    title: '" . __ ( "Queue addition") . "',\n" .
+              "    title: '" . __ ( "Add queue") . "',\n" .
               "    fail: '" . __ ( "Error adding queue!") . "',\n" .
               "    success: '" . __ ( "Queue added successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
@@ -311,7 +311,7 @@ function queues_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Queue cloning") . "', text: '" . __ ( "Error retrieving queue data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Clone queue") . "', text: '" . __ ( "Error retrieving queue data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -332,7 +332,7 @@ function queues_view_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Queues"));
-  sys_set_subtitle ( __ ( "queues visualization"));
+  sys_set_subtitle ( __ ( "View queues"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Queues"), "link" => "/queues"),
     2 => array ( "title" => __ ( "View"))
@@ -422,7 +422,7 @@ function queues_edit_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Queues"));
-  sys_set_subtitle ( __ ( "queues editing"));
+  sys_set_subtitle ( __ ( "Edit queues"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Queues"), "link" => "/queues"),
     2 => array ( "title" => __ ( "Edit"))
@@ -497,7 +497,7 @@ function queues_edit_page ( $buffer, $parameters)
               "  $('#queue_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Queue edition") . "', text: '" . __ ( "Error retrieving queue data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Edit queue") . "', text: '" . __ ( "Error retrieving queue data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#queue_edit_form').alerts ( 'form',\n" .
               "{\n" .
@@ -506,7 +506,7 @@ function queues_edit_page ( $buffer, $parameters)
               "    URL: '/queues/' + VoIP.parameters.id,\n" .
               "    method: 'PATCH',\n" .
               "    button: $('button.edit'),\n" .
-              "    title: '" . __ ( "Queue edition") . "',\n" .
+              "    title: '" . __ ( "Edit queue") . "',\n" .
               "    fail: '" . __ ( "Error changing queue!") . "',\n" .
               "    success: '" . __ ( "Queue changed successfully!") . "',\n" .
               "    onsuccess: function ()\n" .

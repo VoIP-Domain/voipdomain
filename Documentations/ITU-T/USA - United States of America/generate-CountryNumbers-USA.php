@@ -8,7 +8,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 
 /**
  * United States of America telephony system standard has many data that can be
- * processed from many places. This script fetch the main database that contains
+ * processed from many places. This script fetches the main database that contains
  * the NDC and NSN as thousand number with location and network operator name,
  * process it and generate the final filter to the United States of America.
  * The main database was fetched from
@@ -37,7 +37,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Core
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -52,7 +52,7 @@ ini_set ( "display_errors", "false");
  */
 if ( ! defined ( "STDIN"))
 {
-  echo "This script must be executed into CLI!\n";
+  echo "This script must be run from the CLI!\n";
   exit ( 1);
 }
 
@@ -93,7 +93,7 @@ if ( $status != 200)
   exit ( 1);
 }
 echo "Done!\n";
-echo "Writting database to disk... ";
+echo "Writing database to disk... ";
 if ( ! file_put_contents ( "AllBlocksAugmentedReport.zip", $result))
 {
   echo "Error writing file!\n";
@@ -123,7 +123,7 @@ echo "Done!\n";
 /**
  * Open database file
  */
-echo "Openning extracted database file... ";
+echo "Opening extracted database file... ";
 if ( ! $fp = fopen ( "AllBlocksAugmentedReport.txt", "r"))
 {
   echo "Cannot open file!\n";
@@ -224,7 +224,7 @@ $output .= "--   |:  1   |     |:  |:  |       |:  1    /\n";
 $output .= "--    \:.. ./      |::.|::.|       |::.. . /\n";
 $output .= "--     `---'       `---`---'       `------'\n";
 $output .= "--\n";
-$output .= "-- Copyright (C) 2016-2025 Ernani José Camargo Azevedo\n";
+$output .= "-- Copyright (C) 2016-2026 Ernani José Camargo Azevedo\n";
 $output .= "--\n";
 $output .= "-- This program is free software: you can redistribute it and/or modify\n";
 $output .= "-- it under the terms of the GNU General Public License as published by\n";
@@ -241,8 +241,8 @@ $output .= "-- along with this program.  If not, see <https://www.gnu.org/licens
 $output .= "--\n";
 $output .= "\n";
 $output .= "--\n";
-$output .= "-- VoIP Domain country database filters. This module add the filter calls\n";
-$output .= "-- related to country database of United States of America..\n";
+$output .= "-- VoIP Domain country database filters. This module adds the filter calls\n";
+$output .= "-- related to country database of United States of America.\n";
 $output .= "--\n";
 $output .= "-- Reference: https://www.itu.int/oth/T02020000DE/en (2006-11-22)\n";
 $output .= "--            https://www.nationalpooling.com/reports/region/AllBlocksAugmentedReport.zip (2020-06-09)\n";
@@ -251,7 +251,7 @@ $output .= "-- @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>\
 $output .= "-- @version    1.0\n";
 $output .= "-- @package    VoIP Domain\n";
 $output .= "-- @subpackage CountryDB\n";
-$output .= "-- @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.\n";
+$output .= "-- @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.\n";
 $output .= "-- @license    https://www.gnu.org/licenses/gpl-3.0.en.html\n";
 $output .= "--\n";
 $output .= "\n";
@@ -285,7 +285,7 @@ echo "Done\n";
 /**
  * Write prefixes
  */
-echo "Writting prefixes... ";
+echo "Writing prefixes... ";
 $output = "INSERT INTO `CountryCodes` (`Country`, `Code`, `Prefix`) VALUES ";
 $records = 0;
 $prefixes = array_unique ( $prefixes);

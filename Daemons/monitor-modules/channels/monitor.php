@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Channels
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "FullyBooted", "channels_bootup");
 framework_add_hook ( "Load", "channels_load");
@@ -216,6 +216,59 @@ function channels_show ( $buffer, $parameters)
 }
 
 /**
+ * Emit channel delta events after an AMI reload resync.
+ *
+ * @global object $gm Gearman client object
+ * @param array $backup Channel state before reload
+ * @param array $current Channel state after reload
+ * @param int $serverid Server identifier
+ * @return void
+ */
+function channels_sync_reload ( $backup, $current, $serverid)
+{
+  global $gm;
+
+  if ( ! is_array ( $backup))
+  {
+    $backup = array ();
+  }
+  if ( ! is_array ( $current))
+  {
+    $current = array ();
+  }
+
+  foreach ( $backup as $channel => $data)
+  {
+    if ( ! array_key_exists ( $channel, $current))
+    {
+      $gm->doBackground ( "channels_destroy", json_encode ( array ( "ServerID" => $serverid, "Channel" => $channel, "Cause" => 0)));
+    }
+  }
+
+  foreach ( $current as $channel => $data)
+  {
+    if ( ! array_key_exists ( $channel, $backup))
+    {
+      $gm->doBackground ( "channels_create", json_encode ( array ( "ServerID" => $serverid, "Channel" => $channel, "Data" => $data)));
+      continue;
+    }
+    $previous = $backup[$channel];
+    if ( $previous["State"] != $data["State"])
+    {
+      $gm->doBackground ( "channels_state", json_encode ( array ( "ServerID" => $serverid, "Channel" => $channel, "State" => $data["State"])));
+    }
+    if ( $previous["CallerID"] != $data["CallerID"] || $previous["ConnectedLine"] != $data["ConnectedLine"])
+    {
+      $gm->doBackground ( "channels_callerid", json_encode ( array ( "ServerID" => $serverid, "Channel" => $channel, "CallerID" => $data["CallerID"], "ConnectedLine" => $data["ConnectedLine"])));
+    }
+    if ( $previous["Language"] != $data["Language"] || $previous["AccountCode"] != $data["AccountCode"] || $previous["UniqueID"] != $data["UniqueID"] || $previous["LinkedID"] != $data["LinkedID"])
+    {
+      $gm->doBackground ( "channels_create", json_encode ( array ( "ServerID" => $serverid, "Channel" => $channel, "Data" => $data)));
+    }
+  }
+}
+
+/**
  * Function to process channel status complete response to action "CoreShowChannels".
  *
  * @global array $_in Framework global configuration variable
@@ -229,16 +282,22 @@ function channels_status_complete ( $buffer, $parameters)
 {
   global $_in, $gm;
 
+  $bootup = false;
   if ( $_in["Status"]["Channels"]["BootUp"] == true)
   {
     $_in["Status"]["Channels"]["BootUp"] = false;
+    $bootup = true;
     $gm->doBackground ( "channels_bootup", json_encode ( array ( "ServerID" => $_in["daemon"]["serverid"], "Channels" => $_in["Channels"])));
   }
   if ( $_in["Status"]["Channels"]["Reload"] == true)
   {
+    $backup = $_in["Status"]["Channels"]["Backup"];
     $_in["Status"]["Channels"]["Reload"] = false;
     unset ( $_in["Status"]["Channels"]["Backup"]);
-// TODO: Tem que comparar o backup com o resultado atual e enviar "diferenças"...
+    if ( ! $bootup)
+    {
+      channels_sync_reload ( $backup, $_in["Channels"], $_in["daemon"]["serverid"]);
+    }
   }
 
   // End event:

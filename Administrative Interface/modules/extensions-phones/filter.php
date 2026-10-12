@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Extensions Phones
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -188,11 +188,11 @@ function extensions_phones_add_subpage ( $buffer, $parameters)
   $output .= "        </div>\n";
   $output .= "      </div>\n";
 
-  // Add extension transhipments selectors
+  // Add extension transfers selectors
   $output .= "      <div class=\"form-group\">\n";
-  $output .= "        <label for=\"extension_add_transhipments\" class=\"control-label col-xs-2\">" . __ ( "Transhipment") . "</label>\n";
+  $output .= "        <label for=\"extension_add_transfers\" class=\"control-label col-xs-2\">" . __ ( "Transhipment") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
-  $output .= "          <select name=\"Transhipments\" id=\"extension_add_transhipments\" class=\"form-control\" data-placeholder=\"" . __ ( "Transhipment extensions") . "\" multiple=\"multiple\"></select>\n";
+  $output .= "          <select name=\"Transhipments\" id=\"extension_add_transfers\" class=\"form-control\" data-placeholder=\"" . __ ( "Transhipment extensions") . "\" multiple=\"multiple\"></select>\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";
   $buffer["tabs"]["phone-basic"] = array ( "type" => "phone", "label" => __ ( "Phone"), "html" => $output);
@@ -384,7 +384,7 @@ function extensions_phones_add_subpage ( $buffer, $parameters)
 
   // Add extension voicemail option
   $output .= "      <div class=\"form-group\">\n";
-  $output .= "        <label for=\"extension_add_voicemail\" class=\"control-label col-xs-2\">" . __ ( "Voice mail") . "</label>\n";
+  $output .= "        <label for=\"extension_add_voicemail\" class=\"control-label col-xs-2\">" . __ ( "Voicemail") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"checkbox\" name=\"VoiceMail\" id=\"extension_add_voicemail\" value=\"true\" class=\"form-control\" />\n";
   $output .= "        </div>\n";
@@ -434,7 +434,7 @@ function extensions_phones_add_subpage ( $buffer, $parameters)
                             "});\n" .
                             "$('#extension_add_form input[type=checkbox]').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});\n" .
                             "$('#extension_add_password').mask ( '000000');\n" .
-                            "$('#extension_add_transhipments,#extension_add_hints').select2 (\n" .
+                            "$('#extension_add_transfers,#extension_add_hints').select2 (\n" .
                             "{\n" .
                             "  allowClear: true,\n" .
                             "  width: '100%',\n" .
@@ -466,7 +466,7 @@ function extensions_phones_add_subpage ( $buffer, $parameters)
                             "  }\n" .
                             "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
                             "{\n" .
-                            "  new PNotify ( { title: '" . __ ( "Extension addition") . "', text: '" . __ ( "Error retrieving permissions!") . "', type: 'error'});\n" .
+                            "  new PNotify ( { title: '" . __ ( "Add extension") . "', text: '" . __ ( "Error retrieving permissions!") . "', type: 'error'});\n" .
                             "});\n" .
                             "$('#extension_add_costcenter').select2 (\n" .
                             "{\n" .
@@ -537,7 +537,7 @@ function extensions_phones_add_subpage ( $buffer, $parameters)
                             "  $('#extension_add_accounts ul.nav-tabs li i').remove ();\n" .
                             "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
                             "{\n" .
-                            "  new PNotify ( { title: '" . __ ( "Extension addition") . "', text: '" . __ ( "Error retrieving equipment types!") . "', type: 'error'});\n" .
+                            "  new PNotify ( { title: '" . __ ( "Add extension") . "', text: '" . __ ( "Error retrieving equipment types!") . "', type: 'error'});\n" .
                             "});\n" .
                             "$('#extension_add_accounts').on ( 'click', 'i.tab-del', function ( event)\n" .
                             "{\n" .
@@ -713,7 +713,7 @@ function extensions_phones_clone_subpage ( $buffer, $parameters)
                                      "          }\n" .
                                      "          ids.push ( data.Transhipments[id].ID);\n" .
                                      "        }\n" .
-                                     "        $('#extension_add_transhipments').val ( ids).trigger ( 'change');\n" .
+                                     "        $('#extension_add_transfers').val ( ids).trigger ( 'change');\n" .
                                      "        $('#extension_add_accounts').data ( 'accounts', data.Accounts);\n" .
                                      "        $('#extension_add_accounts ul.nav-tabs').tabdrop ( 'layout');\n" .
                                      "        $('#extension_add_costcenter').val ( data.CostCenter.ID).trigger ( 'change');\n" .
@@ -811,11 +811,11 @@ function extensions_phones_view_subpage ( $buffer, $parameters)
   $output .= "        </div>\n";
   $output .= "      </div>\n";
 
-  // Add extension transhipments selectors
+  // Add extension transfers selectors
   $output .= "      <div class=\"form-group\">\n";
-  $output .= "        <label for=\"extension_view_transhipments\" class=\"control-label col-xs-2\">" . __ ( "Transhipment") . "</label>\n";
+  $output .= "        <label for=\"extension_view_transfers\" class=\"control-label col-xs-2\">" . __ ( "Transhipment") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
-  $output .= "          <select name=\"Transhipments\" id=\"extension_view_transhipments\" class=\"form-control\" data-placeholder=\"" . __ ( "Transhipment extensions") . "\" multiple=\"multiple\" disabled=\"disabled\"></select>\n";
+  $output .= "          <select name=\"Transhipments\" id=\"extension_view_transfers\" class=\"form-control\" data-placeholder=\"" . __ ( "Transhipment extensions") . "\" multiple=\"multiple\" disabled=\"disabled\"></select>\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";
   $buffer["tabs"]["phone-basic"] = array ( "type" => "phone", "label" => __ ( "Phone"), "html" => $output);
@@ -1007,7 +1007,7 @@ function extensions_phones_view_subpage ( $buffer, $parameters)
 
   // Add extension voicemail option
   $output .= "      <div class=\"form-group\">\n";
-  $output .= "        <label for=\"extension_view_voicemail\" class=\"control-label col-xs-2\">" . __ ( "Voice mail") . "</label>\n";
+  $output .= "        <label for=\"extension_view_voicemail\" class=\"control-label col-xs-2\">" . __ ( "Voicemail") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"checkbox\" name=\"VoiceMail\" value=\"true\" id=\"extension_view_voicemail\" class=\"form-control\" disabled=\"disabled\" />\n";
   $output .= "        </div>\n";
@@ -1105,9 +1105,9 @@ function extensions_phones_view_subpage ( $buffer, $parameters)
                                      "          continue;\n" .
                                      "        }\n" .
                                      "        ids.push ( data.Transhipments[id].ID);\n" .
-                                     "        $('#extension_view_transhipments').append ( $('<option>', { value: data.Transhipments[id].ID, text: data.Transhipments[id].Description}));\n" .
+                                     "        $('#extension_view_transfers').append ( $('<option>', { value: data.Transhipments[id].ID, text: data.Transhipments[id].Description}));\n" .
                                      "      }\n" .
-                                     "      $('#extension_view_transhipments').val ( ids).trigger ( 'change');\n" .
+                                     "      $('#extension_view_transfers').val ( ids).trigger ( 'change');\n" .
                                      "      var count = 0;\n" .
                                      "      for ( var id in data.Accounts)\n" .
                                      "      {\n" .
@@ -1148,7 +1148,7 @@ function extensions_phones_view_subpage ( $buffer, $parameters)
                                      "        $('#extension_view_hints').append ( $('<option>', { value: data.Hints[id].ID, text: data.Hints[id].Description}));\n" .
                                      "      }\n" .
                                      "      $('#extension_view_hints').val ( ids).trigger ( 'change');\n";
-  $buffer["js"]["init"][] = "$('#extension_view_group,#extension_view_captures,#extension_view_transhipments,#extension_view_hints,#extension_view_costcenter,#extension_export_type').select2 ();\n" .
+  $buffer["js"]["init"][] = "$('#extension_view_group,#extension_view_captures,#extension_view_transfers,#extension_view_hints,#extension_view_costcenter,#extension_export_type').select2 ();\n" .
                             "$('#extension_view_form input[type=checkbox]').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});\n" .
                             "$('#extension_view_accounts ul.nav-tabs').tabdrop ();\n" .
                             "$('#extension_view_tab_phone-permissions input[type=radio]').labelauty ();\n" .
@@ -1234,7 +1234,7 @@ function extensions_phones_view_subpage ( $buffer, $parameters)
                             "  document.execCommand ( 'copy');\n" .
                             "  $(this).focus ();\n" .
                             "  $(target).removeAttr ( 'readonly').attr ( 'disabled', 'disabled').attr ( 'type', 'password');\n" .
-                            "  new PNotify ( { title: '" . __ ( "Extension view") . "', text: '" . __ ( "Password copied to clipboard!") . "', type: 'success'});\n" .
+                            "  new PNotify ( { title: '" . __ ( "View extension") . "', text: '" . __ ( "Password copied to clipboard!") . "', type: 'success'});\n" .
                             "});\n" .
                             "$('#extension_view_accounts').on ( 'click', '.btn-export', function ( event)\n" .
                             "{\n" .
@@ -1328,11 +1328,11 @@ function extensions_phones_edit_subpage ( $buffer, $parameters)
   $output .= "        </div>\n";
   $output .= "      </div>\n";
 
-  // Add extension transhipments selectors
+  // Add extension transfers selectors
   $output .= "      <div class=\"form-group\">\n";
-  $output .= "        <label for=\"extension_edit_transhipments\" class=\"control-label col-xs-2\">" . __ ( "Transhipment") . "</label>\n";
+  $output .= "        <label for=\"extension_edit_transfers\" class=\"control-label col-xs-2\">" . __ ( "Transhipment") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
-  $output .= "          <select name=\"Transhipments\" id=\"extension_edit_transhipments\" class=\"form-control\" data-placeholder=\"" . __ ( "Transhipment extensions") . "\" multiple=\"multiple\"></select>\n";
+  $output .= "          <select name=\"Transhipments\" id=\"extension_edit_transfers\" class=\"form-control\" data-placeholder=\"" . __ ( "Transhipment extensions") . "\" multiple=\"multiple\"></select>\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";
   $buffer["tabs"]["phone-basic"] = array ( "type" => "phone", "label" => __ ( "Phone"), "html" => $output);
@@ -1524,7 +1524,7 @@ function extensions_phones_edit_subpage ( $buffer, $parameters)
 
   // Add extension voicemail option
   $output .= "      <div class=\"form-group\">\n";
-  $output .= "        <label for=\"extension_edit_voicemail\" class=\"control-label col-xs-2\">" . __ ( "Voice mail") . "</label>\n";
+  $output .= "        <label for=\"extension_edit_voicemail\" class=\"control-label col-xs-2\">" . __ ( "Voicemail") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"checkbox\" name=\"VoiceMail\" id=\"extension_edit_voicemail\" value=\"true\" class=\"form-control\" />\n";
   $output .= "        </div>\n";
@@ -1591,7 +1591,7 @@ function extensions_phones_edit_subpage ( $buffer, $parameters)
                                      "        }\n" .
                                      "        ids.push ( data.Transhipments[id].ID);\n" .
                                      "      }\n" .
-                                     "      $('#extension_edit_transhipments').val ( ids).trigger ( 'change');\n" .
+                                     "      $('#extension_edit_transfers').val ( ids).trigger ( 'change');\n" .
                                      "      $('#extension_edit_accounts').data ( 'accounts', data.Accounts);\n" .
                                      "      $('#extension_edit_accounts ul.nav-tabs').tabdrop ( 'layout');\n" .
                                      "      $('#extension_edit_costcenter').val ( data.CostCenter.ID).trigger ( 'change');\n" .
@@ -1622,7 +1622,7 @@ function extensions_phones_edit_subpage ( $buffer, $parameters)
                             "});\n" .
                             "$('#extension_edit_form input[type=checkbox]').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});\n" .
                             "$('#extension_edit_password').mask ( '000000');\n" .
-                            "$('#extension_edit_transhipments,#extension_edit_hints').select2 (\n" .
+                            "$('#extension_edit_transfers,#extension_edit_hints').select2 (\n" .
                             "{\n" .
                             "  allowClear: true,\n" .
                             "  data: VoIP.APIsearch ( { path: '/extensions', Fields: 'ID,Description,Number', formatText: '%Description% (%Number%)', data: { Except: VoIP.parameters.id}})\n" .
@@ -1653,7 +1653,7 @@ function extensions_phones_edit_subpage ( $buffer, $parameters)
                             "  }\n" .
                             "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
                             "{\n" .
-                            "  new PNotify ( { title: '" . __ ( "Extension edition") . "', text: '" . __ ( "Error retrieving permissions!") . "', type: 'error'});\n" .
+                            "  new PNotify ( { title: '" . __ ( "Edit extension") . "', text: '" . __ ( "Error retrieving permissions!") . "', type: 'error'});\n" .
                             "});\n" .
                             "$('#extension_edit_volrx,#extension_edit_voltx').bootstrapSlider (\n" .
                             "{\n" .
@@ -1730,7 +1730,7 @@ function extensions_phones_edit_subpage ( $buffer, $parameters)
                             "  $('#extension_edit_accounts ul.nav-tabs li i').remove ();\n" .
                             "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
                             "{\n" . 
-                            "  new PNotify ( { title: '" . __ ( "Extension addition") . "', text: '" . __ ( "Error retrieving equipment types!") . "', type: 'error'});\n" .
+                            "  new PNotify ( { title: '" . __ ( "Add extension") . "', text: '" . __ ( "Error retrieving equipment types!") . "', type: 'error'});\n" .
                             "});\n" .
                             "$('#extension_edit_accounts').on ( 'click', 'i.tab-del', function ( event)\n" .
                             "{\n" .

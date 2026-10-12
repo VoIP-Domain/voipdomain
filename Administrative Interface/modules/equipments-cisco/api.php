@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments Cisco
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -39,9 +39,21 @@ framework_add_hook (
   "equipments_configure_3905_validate",
   "equipments_configure_cisco_validate"
 );
+framework_add_hook (
+  "equipments_configure_7811_validate",
+  "equipments_configure_cisco_validate"
+);
+framework_add_hook (
+  "equipments_configure_7942_validate",
+  "equipments_configure_cisco_validate"
+);
+framework_add_hook (
+  "equipments_configure_8961_validate",
+  "equipments_configure_cisco_validate"
+);
 
 /**
- * Function to extend equipments addition/edition validate of Cisco models.
+ * Function to extend equipments addition/edit validate of Cisco models.
  *
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
@@ -55,7 +67,7 @@ function equipments_configure_cisco_validate ( $buffer, $parameters)
    */
   if ( ! in_array ( "G729", $parameters["AudioCodecs"]) || ! in_array ( "ULAW", $parameters["AudioCodecs"]) || ! in_array ( "ALAW", $parameters["AudioCodecs"]))
   {
-    $buffer["AudioCodecs"] = __ ( "Cisco doesn't allow disabling \"G.729\", \"G.711 a-law\" or \"G.711 µ-law\" codec's.");
+    $buffer["AudioCodecs"] = __ ( "Cisco doesn't allow disabling \"G.729\", \"G.711 a-law\" or \"G.711 µ-law\" codecs.");
   }
 
   /**
@@ -91,6 +103,11 @@ function equipments_cisco_tenant_add_post ( $buffer, $parameters)
     exit ();
   }
   if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_7811', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ALAW\",\"ULAW\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":[]}')"))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Config` (`Key`, `Tenant`, `Data`) VALUES ('Equipment_7942', " . (int) $parameters["ID"] . ", '{\"AudioCodecs\":[\"ALAW\",\"ULAW\",\"G729\",\"G722\"],\"VideoCodecs\":[],\"ExtraSettings\":[]}')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

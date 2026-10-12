@@ -3,7 +3,8 @@ Description=VoIP Domain AMI Event Listener Service
 After=rc-local.service
 
 [Service]
-ExecStart=/usr/libexec/voipdomain/daemons/monitor.php -d
+ExecStart=/var/lib/voipdomain/daemons/monitor.php -d
+ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 Restart=always
 RestartSec=5

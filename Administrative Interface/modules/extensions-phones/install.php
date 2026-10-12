@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Extensions
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -89,7 +89,7 @@ function extensionsphones_install_db ( $buffer, $parameters)
                                               "  KEY `PhoneTranshipment_ibfk_2` (`Transhipment`),\n" .
                                               "  CONSTRAINT `PhoneTranshipment_ibfk_1` FOREIGN KEY (`Extension`) REFERENCES `Extensions` (`ID`) ON UPDATE CASCADE,\n" .
                                               "  CONSTRAINT `PhoneTranshipment_ibfk_2` FOREIGN KEY (`Transhipment`) REFERENCES `Extensions` (`ID`) ON UPDATE CASCADE\n" .
-                                              ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extension transhipment link';\n", array ( "Extensions"));
+                                              ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Extension transfer link';\n", array ( "Extensions"));
   install_add_db_table ( "ExtensionPhone", "CREATE TABLE `ExtensionPhone` (\n" .
                                            "  `Extension` bigint(20) unsigned NOT NULL,\n" .
                                            "  `Email` varchar(255) DEFAULT NULL,\n" .

@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments Grandstream
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -44,7 +44,7 @@ i18n_add ( "Show password");
 i18n_add ( "Copy password");
 i18n_add ( "Admin password");
 i18n_add ( "Password of privileged administrator");
-i18n_add ( "Equipment view");
+i18n_add ( "View equipment");
 i18n_add ( "Password copied to clipboard!");
 i18n_add ( "The password is required.");
 i18n_add ( "Extras");
@@ -60,7 +60,7 @@ i18n_add ( "Show password", "Exibir senha", "pt_BR");
 i18n_add ( "Copy password", "Copiar senha", "pt_BR");
 i18n_add ( "Admin password", "Senha de administrador", "pt_BR");
 i18n_add ( "Password of privileged administrator", "Senha de administrador privilegiado", "pt_BR");
-i18n_add ( "Equipment view", "Visualizar equipamento", "pt_BR");
+i18n_add ( "View equipment", "Visualizar equipamento", "pt_BR");
 i18n_add ( "Password copied to clipboard!", "Senha copiada para a área de transferência!", "pt_BR");
 i18n_add ( "The password is required.", "A senha é obrigatória.", "pt_BR");
 i18n_add ( "Extras", "Extras", "pt_BR");

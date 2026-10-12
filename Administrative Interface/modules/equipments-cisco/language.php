@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,21 +30,21 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Extensions Phones
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
  * Add basic language structure (english)
  */
-i18n_add ( "Cisco doesn't allow disabling \"G.729\", \"G.711 a-law\" or \"G.711 µ-law\" codec's.");
+i18n_add ( "Cisco doesn't allow disabling \"G.729\", \"G.711 a-law\" or \"G.711 µ-law\" codecs.");
 i18n_add ( "This equipment does not allow disabling this codec!");
 i18n_add ( "Equipment configuration");
 
 /**
  * Add Brazilian Portuguese support
  */
-i18n_add ( "Cisco doesn't allow disabling \"G.729\", \"G.711 a-law\" or \"G.711 µ-law\" codec's.", "Cisco não permite desabilitar os codec's \"G.729\", \"G.711 a-law\" ou \"G.711 µ-law\".", "pt_BR");
+i18n_add ( "Cisco doesn't allow disabling \"G.729\", \"G.711 a-law\" or \"G.711 µ-law\" codecs.", "Cisco não permite desabilitar os codecs \"G.729\", \"G.711 a-law\" ou \"G.711 µ-law\".", "pt_BR");
 i18n_add ( "This equipment does not allow disabling this codec!", "Este equipamento não permite desabilitar este codec!", "pt_BR");
 i18n_add ( "Equipment configuration", "Configuração de equipamento", "pt_BR");
 ?>

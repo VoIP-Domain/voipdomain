@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,37 +31,37 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments Snom
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 framework_add_hook (
-  "equipments_configure_710_sanitize",
+  "equipments_configure_snom710_sanitize",
   "equipments_configure_snom_adminuserpass_sanitize"
 );
 framework_add_hook (
-  "equipments_configure_710_validate",
+  "equipments_configure_snom710_validate",
   "equipments_configure_snom_adminuserpass_validate"
 );
 framework_add_hook (
-  "equipments_configure_720_sanitize",
+  "equipments_configure_snom720_sanitize",
   "equipments_configure_snom_adminuserpass_sanitize"
 );
 framework_add_hook (
-  "equipments_configure_720_validate",
+  "equipments_configure_snom720_validate",
   "equipments_configure_snom_adminuserpass_validate"
 );
 framework_add_hook (
-  "equipments_configure_870_sanitize",
+  "equipments_configure_snom870_sanitize",
   "equipments_configure_snom_adminuserpass_sanitize"
 );
 framework_add_hook (
-  "equipments_configure_870_validate",
+  "equipments_configure_snom870_validate",
   "equipments_configure_snom_adminuserpass_validate"
 );
 
 /**
- * Function to extend equipments configuration sanitize of Snom models.
+ * Function to extend Configure equipment sanitize of Snom models.
  *
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
@@ -87,7 +87,7 @@ function equipments_configure_snom_adminuserpass_sanitize ( $buffer, $parameters
 }
 
 /**
- * Function to extend equipments addition/edition validate of Snom models.
+ * Function to extend equipments addition/edit validate of Snom models.
  *
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before

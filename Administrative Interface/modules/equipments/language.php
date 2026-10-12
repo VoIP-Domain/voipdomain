@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -41,9 +41,9 @@ i18n_add ( "Search equipments");
 i18n_add ( "View equipment information");
 i18n_add ( "Configure equipments");
 i18n_add ( "Equipments");
-i18n_add ( "equipments search");
-i18n_add ( "equipments visualization");
-i18n_add ( "Equipment view");
+i18n_add ( "Search equipment");
+i18n_add ( "View equipment");
+i18n_add ( "View equipment");
 i18n_add ( "Error viewing equipment!");
 i18n_add ( "Error retrieving equipment data!");
 i18n_add ( "Error changing equipment!");
@@ -76,12 +76,12 @@ i18n_add ( "Supported video codec.");
 i18n_add ( "An array with allowed video codecs.");
 i18n_add ( "Allowed video codec.");
 i18n_add ( "An array with any extra settings that equipment support.");
-i18n_add ( "Get a equipment information.");
+i18n_add ( "Get equipment information.");
 i18n_add ( "The system unique identifier of the equipment.");
 i18n_add ( "The system equipment was successfully updated.");
 i18n_add ( "At least one audio codec must be selected.");
 i18n_add ( "At least one video codec must be selected.");
-i18n_add ( "Change a equipment information.");
+i18n_add ( "Change equipment information.");
 i18n_add ( "Invalid codec found.");
 i18n_add ( "Vendor");
 i18n_add ( "Model");
@@ -104,7 +104,7 @@ i18n_add ( "Enable all codecs");
 i18n_add ( "Enable selected codec(s)");
 i18n_add ( "Disable selected codec(s)");
 i18n_add ( "Disable all codecs");
-i18n_add ( "equipments configuration");
+i18n_add ( "Configure equipment");
 i18n_add ( "Equipment configuration");
 i18n_add ( "Equipment configured successfully!");
 i18n_add ( "The list of allowed audio codecs to this equipment.");
@@ -149,7 +149,7 @@ i18n_add ( "The filename of the firmware file.");
 i18n_add ( "The SHA256 hash of the firmware file.");
 i18n_add ( "The size of the firmware file.");
 i18n_add ( "The base64 encoded file content.");
-i18n_add ( "New equipment firmware file added successfully.");
+i18n_add ( "A new equipment firmware file was added successfully.");
 i18n_add ( "The new status of Active equipment field (automatically actived if all firmware file for an available version are provided).");
 i18n_add ( "Equipment not found.");
 i18n_add ( "Add equipments firmware file");
@@ -171,11 +171,11 @@ i18n_add ( "File content SHA256 hash");
 i18n_add ( "File size");
 i18n_add ( "Available");
 i18n_add ( "Unavailable");
-i18n_add ( "Firmware remove");
+i18n_add ( "Firmware removal");
 i18n_add ( "Are you sure you want to remove the firmware file %s?");
 i18n_add ( "Remove firmware");
 i18n_add ( "Upload firmware");
-i18n_add ( "Firmware removed successfully!");
+i18n_add ( "Firmware removald successfully!");
 i18n_add ( "Equipment automatically deactivated!");
 i18n_add ( "Error removing firmware!");
 i18n_add ( "File didn't match required firmware content!");
@@ -191,13 +191,13 @@ i18n_add ( "Search equipments", "Pesquisar equipamentos", "pt_BR");
 i18n_add ( "View equipment information", "Visualizar informações de equipamento", "pt_BR");
 i18n_add ( "Configure equipments", "Configurar equipamentos", "pt_BR");
 i18n_add ( "Equipments", "Equipamentos", "pt_BR");
-i18n_add ( "equipments search", "pesquisa de equipamentos", "pt_BR");
-i18n_add ( "equipments visualization", "visualização de equipamentos", "pt_BR");
-i18n_add ( "Equipment view", "Visualização de equipamento", "pt_BR");
+i18n_add ( "Search equipment", "Pesquisar equipamentos", "pt_BR");
+i18n_add ( "View equipment", "visualizar equipamentos", "pt_BR");
+i18n_add ( "View equipment", "Visualizar equipamento", "pt_BR");
 i18n_add ( "Error viewing equipment!", "Erro ao visualizar equipamento!", "pt_BR");
-i18n_add ( "Error retrieving equipment data!", "Erro ao requisitar dados do equipamento!", "pt_BR");
+i18n_add ( "Error retrieving equipment data!", "Erro ao obter dados do equipamento!", "pt_BR");
 i18n_add ( "Error changing equipment!", "Erro ao alterar equipamento!", "pt_BR");
-i18n_add ( "Filter search with this string. If not provided, return all equipments.", "Filtrar a pesquisa com esta string. Se não informado, retorna todos os equipamentos.", "pt_BR");
+i18n_add ( "Filter search with this string. If not provided, return all equipments.", "Filtrar a pesquisa com esta string. Se omitido, retorna todos os equipamentos.", "pt_BR");
 i18n_add ( "View equipments", "Visualizar equipamentos", "pt_BR");
 i18n_add ( "An array containing the system equipments.", "Um array contendo os equipamentos do sistema.", "pt_BR");
 i18n_add ( "The equipment internal system unique identifier.", "O identificador único interno do sistema para o equipamento.", "pt_BR");
@@ -226,12 +226,12 @@ i18n_add ( "Supported video codec.", "Codecs de vídeo suportados.", "pt_BR");
 i18n_add ( "An array with allowed video codecs.", "Um array contendo os codecs de vídeo permitidos.", "pt_BR");
 i18n_add ( "Allowed video codec.", "Codecs de vídeo permitidos.", "pt_BR");
 i18n_add ( "An array with any extra settings that equipment support.", "Um array contendo as configurações extras que o equipamento suporta.", "pt_BR");
-i18n_add ( "Get a equipment information.", "Requisitar informações de equipamento.", "pt_BR");
+i18n_add ( "Get equipment information.", "Obter informações do equipamento.", "pt_BR");
 i18n_add ( "The system unique identifier of the equipment.", "O identificador único do sistema para o equipamento.", "pt_BR");
 i18n_add ( "The system equipment was successfully updated.", "O equipamento do sistema foi atualizado com sucesso.", "pt_BR");
 i18n_add ( "At least one audio codec must be selected.", "No mínimo um codec de áudio deve ser selecionado.", "pt_BR");
 i18n_add ( "At least one video codec must be selected.", "No mínimo um codec de vídeo deve ser selecionado.", "pt_BR");
-i18n_add ( "Change a equipment information.", "Alterar as informações do equipamento.", "pt_BR");
+i18n_add ( "Change equipment information.", "Alterar as informações do equipamento.", "pt_BR");
 i18n_add ( "Invalid codec found.", "Codec inválido encontrado.", "pt_BR");
 i18n_add ( "Vendor", "Fabricante", "pt_BR");
 i18n_add ( "Model", "Modelo", "pt_BR");
@@ -254,7 +254,7 @@ i18n_add ( "Enable all codecs", "Habilitar todos codecs", "pt_BR");
 i18n_add ( "Enable selected codec(s)", "Habilitar o(s) codec(s) selecionado(s)", "pt_BR");
 i18n_add ( "Disable selected codec(s)", "Desabilitar o(s) codec(s) selecionado(s)", "pt_BR");
 i18n_add ( "Disable all codecs", "Desabilitar todos codecs", "pt_BR");
-i18n_add ( "equipments configuration", "configuração de equipamentos", "pt_BR");
+i18n_add ( "Configure equipment", "configuração de equipamentos", "pt_BR");
 i18n_add ( "Equipment configuration", "Configuração de equipamento", "pt_BR");
 i18n_add ( "Equipment configured successfully!", "Equipamento configurado com sucesso!", "pt_BR");
 i18n_add ( "The list of allowed audio codecs to this equipment.", "Uma lista de codecs de áudio permitidos para este equipamento.", "pt_BR");
@@ -298,8 +298,8 @@ i18n_add ( "Invalid equipment ID.", "ID de equipamento inválido.", "pt_BR");
 i18n_add ( "The filename of the firmware file.", "O nome do arquivo da firmware.", "pt_BR");
 i18n_add ( "The SHA256 hash of the firmware file.", "O hash SHA256 do arquivo da firmware.", "pt_BR");
 i18n_add ( "The size of the firmware file.", "O tamanho do arquivo da firmware.", "pt_BR");
-i18n_add ( "The base64 encoded file content.", "O conteúdo do arquivo encodeado em base64.", "pt_BR");
-i18n_add ( "New equipment firmware file added successfully.", "Novo firmware de equipamento adicionado com sucesso.", "pt_BR");
+i18n_add ( "The base64 encoded file content.", "O conteúdo do arquivo codificado em base64.", "pt_BR");
+i18n_add ( "A new equipment firmware file was added successfully.", "Um novo firmware de equipamento foi adicionado com sucesso.", "pt_BR");
 i18n_add ( "The new status of Active equipment field (automatically actived if all firmware file for an available version are provided).", "O novo valor Ativo para o campo de estado do equipamento (automaticamente ativado se todos os arquivos de firmware para uma versão disponível forem instalados).", "pt_BR");
 i18n_add ( "Equipment not found.", "Equipamento não encontrado.", "pt_BR");
 i18n_add ( "Add equipments firmware file", "Adicionar arquivo de firmware de equipamentos", "pt_BR");
@@ -321,14 +321,14 @@ i18n_add ( "File content SHA256 hash", "Hash SHA256 do conteúdo do arquivo", "p
 i18n_add ( "File size", "Tamanho do arquivo", "pt_BR");
 i18n_add ( "Available", "Disponível", "pt_BR");
 i18n_add ( "Unavailable", "Indisponível", "pt_BR");
-i18n_add ( "Firmware remove", "Remover firmware", "pt_BR");
-i18n_add ( "Are you sure you want to remove the firmware file %s?", "Você tem certeza que deseja remover o arquivo de firmware %s?", "pt_BR");
+i18n_add ( "Firmware removal", "Remover firmware", "pt_BR");
+i18n_add ( "Are you sure you want to remove the firmware file %s?", "Você tem certeza de que deseja remover o arquivo de firmware %s?", "pt_BR");
 i18n_add ( "Remove firmware", "Remover firmware", "pt_BR");
 i18n_add ( "Upload firmware", "Adicionar firmware", "pt_BR");
-i18n_add ( "Firmware removed successfully!", "Firmware removida com sucesso!", "pt_BR");
+i18n_add ( "Firmware removald successfully!", "Firmware removida com sucesso!", "pt_BR");
 i18n_add ( "Equipment automatically deactivated!", "Equipamento inativado automaticamente!", "pt_BR");
 i18n_add ( "Error removing firmware!", "Erro ao remover firmware!", "pt_BR");
-i18n_add ( "File didn't match required firmware content!", "Arquivo não contém o conteúdo requerido para o arquivo de firmware!", "pt_BR");
+i18n_add ( "File didn't match required firmware content!", "Arquivo não contém o conteúdo exigido para o arquivo de firmware!", "pt_BR");
 i18n_add ( "Firmware successfully uploaded!", "Firmware adicionada com sucesso!", "pt_BR");
 i18n_add ( "Equipment automatically activated!", "Equipamento ativado automaticamente!", "pt_BR");
 i18n_add ( "Cannot upload firmware file!", "Não foi possível enviar arquivo de firmware!", "pt_BR");

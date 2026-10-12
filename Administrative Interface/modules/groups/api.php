@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Groups
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -126,14 +126,14 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Fields" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -197,7 +197,7 @@ function groups_search ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
 
   /**
@@ -236,7 +236,7 @@ function groups_search ( $buffer, $parameters)
   /**
    * Search groups
    */
-  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `Groups`.`ID`, `Groups`.`Description`, `Groups`.`CostCenter` AS `CostCenterID`, `CostCenters`.`Description` AS `CostCenterDescription`, `Groups`.`Profile` AS `ProfileID`, `Profiles`.`Description` AS `ProfileDescription` FROM `Groups` LEFT JOIN `CostCenters` ON `Groups`.`CostCenter` = `CostCenters`.`ID` LEFT JOIN `Profiles` ON `Groups`.`Profile` = `Profiles`.`ID` WHERE `Groups`.`Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Groups`.`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `CostCenter`.`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%')" : "") . " GROUP BY `Groups`.`ID`"))
+  if ( ! $results = @$_in["mysql"]["id"]->query ( "SELECT `Groups`.`ID`, `Groups`.`Description`, `Groups`.`CostCenter` AS `CostCenterID`, `CostCenters`.`Description` AS `CostCenterDescription`, `Groups`.`Profile` AS `ProfileID`, `Profiles`.`Description` AS `ProfileDescription` FROM `Groups` LEFT JOIN `CostCenters` ON `Groups`.`CostCenter` = `CostCenters`.`ID` LEFT JOIN `Profiles` ON `Groups`.`Profile` = `Profiles`.`ID` WHERE `Groups`.`Tenant` = " . (int) $_in["session"]["Tenant"] . ( ! empty ( $parameters["Filter"]) ? " AND (`Groups`.`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%' OR `CostCenters`.`Description` LIKE '%" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Filter"]) . "%')" : "") . " GROUP BY `Groups`.`ID`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -342,7 +342,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -365,7 +365,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "groups_view"),
     "title" => __ ( "View groups"),
-    "description" => __ ( "Get a system group information."),
+    "description" => __ ( "Get system group information."),
     "parameters" => array (
       array (
         "name" => "ID",
@@ -527,10 +527,10 @@ framework_add_hook (
     ),
     "response" => array (
       201 => array (
-        "description" => __ ( "New system group was added successfully.")
+        "description" => __ ( "A new system group was added successfully.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -717,7 +717,7 @@ function groups_add ( $buffer, $parameters)
    * Return OK to user
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . $_in["api"]["baseurl"] . "/groups/" . $parameters["ID"]);
+  header ( "Location: " . voipdomain_location_url ( "/api/groups/" . $parameters["ID"]));
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 
@@ -758,7 +758,7 @@ framework_add_hook (
         "description" => __ ( "The system group was successfully updated.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -791,7 +791,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "groups_edit"),
     "title" => __ ( "Edit groups"),
-    "description" => __ ( "Change a system group information.")
+    "description" => __ ( "Change system group information.")
   )
 );
 
@@ -974,7 +974,7 @@ framework_add_hook (
         "description" => __ ( "The system group was removed.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1140,7 +1140,7 @@ function groups_remove ( $buffer, $parameters)
 }
 
 /**
- * API call to generate group call's report
+ * API call to generate group calls report
  */
 framework_add_hook (
   "groups_report",
@@ -1179,7 +1179,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1199,7 +1199,7 @@ framework_add_hook (
     )
   )
 );
-framework_add_permission ( "groups_report", __ ( "Groups use report"));
+framework_add_permission ( "groups_report", __ ( "Group usage report"));
 framework_add_api_call (
   "/groups/:ID/report",
   "Read",
@@ -1207,7 +1207,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "groups_report"),
     "title" => __ ( "Group report"),
-    "description" => __ ( "Generate a group call's usage report.", true, false),
+    "description" => __ ( "Generate a group call usage report.", true, false),
     "parameters" => array (
       array (
         "name" => "ID",
@@ -1357,7 +1357,7 @@ function groups_report ( $buffer, $parameters)
  * API call to intercept new server and server rebuild
  */
 framework_add_hook ( "servers_add_post", "groups_server_reconfig");
-framework_add_hook ( "servers_rebuild_config", "groups_server_reconfig");
+framework_add_hook ( "servers_rebuild_config", "groups_server_reconfig", IN_HOOK_INSERT_FIRST);
 
 /**
  * Function to notify server to include all groups.

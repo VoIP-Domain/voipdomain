@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,13 +24,13 @@
  */
 
 /**
- * VoIP Domain equipments configuration module.
+ * VoIP Domain Configure equipment module.
  *
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments Audiocodes
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -49,9 +49,9 @@ function equipment_model_exists ( $model, $vendor = "")
 
   if ( $vendor == "")
   {
-    foreach ( $_in["equipments"]["vendors"] as $vendor)
+    foreach ( $_in["equipments"]["vendors"] as $vendorName => $models)
     {
-      foreach ( $_in["equipments"]["vendors"][$vendor] as $temp)
+      foreach ( $models as $temp)
       {
         if ( $model == $temp)
         {
@@ -60,6 +60,10 @@ function equipment_model_exists ( $model, $vendor = "")
       }
     }
   } else {
+    if ( ! array_key_exists ( $vendor, $_in["equipments"]["vendors"]))
+    {
+      return false;
+    }
     foreach ( $_in["equipments"]["vendors"][$vendor] as $temp)
     {
       if ( $model == $temp)
@@ -84,9 +88,9 @@ function equipment_vendor_exists ( $vendor)
 {
   global $_in;
 
-  foreach ( $_in["equipments"]["vendors"] as $temp)
+  foreach ( $_in["equipments"]["vendors"] as $vendorName => $models)
   {
-    if ( $vendor == $temp)
+    if ( $vendor == $vendorName)
     {
       return true;
     }

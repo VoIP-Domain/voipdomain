@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="pt_BR" class="no-js">
+<html lang="en" class="no-js">
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <meta name="description" content="Sistema de administração de centrais VoIP.">
+  <meta name="description" content="VoIP PBX administration system.">
   <meta name="author" content="Ernani José Camargo Azevedo">
   <link rel="icon" type="" href="phone-api.png">
   <title>VoIP Domain - REST API Test</title>
@@ -85,7 +85,7 @@
                  $('#receivedheaders').html ( '<strong><font color="' + ( jqXHR.statusCode ().status == '200' ? 'green' : 'red') + '">' + jqXHR.statusCode ().status + ' ' + jqXHR.statusCode ().statusText + '</font></strong>' + jqXHR.getAllResponseHeaders ().replace ( /^.*: /gm, function ( text) { return '<br /><strong>' + text.substring ( 0, text.length - 2) + '</strong>: '; }));
                  if ( textStatus == 'parsererror')
                  {
-                   $('#receivedvars').html ( '<strong><font color="red">JSON parser error. Clear text follows:</font></strong><br />' + jqXHR.responseText);
+                   $('#receivedvars').html ( '<strong><font color="red">JSON parser error. Plain text follows:</font></strong><br />' + jqXHR.responseText);
                  } else {
                    if ( typeof jqXHR.responseJSON === 'object')
                    {

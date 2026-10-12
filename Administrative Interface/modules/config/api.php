@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Configuration
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -340,10 +340,10 @@ framework_add_hook (
     ),
     "response" => array (
       200 => array (
-        "description" => __ ( "The system permissions was successfully updated.")
+        "description" => __ ( "The system permissions were successfully updated.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -818,7 +818,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1097,7 +1097,7 @@ framework_add_hook (
             ),
             "ImmutableLength" => array (
               "type" => "boolean",
-              "description" => __ ( "If the system extension number length are immutable."),
+              "description" => __ ( "If the system extension number length is immutable."),
               "example" => false
             ),
             "Country" => array (
@@ -1111,7 +1111,7 @@ framework_add_hook (
                 ),
                 "NameEN" => array (
                   "type" => "string",
-                  "description" => __ ( "The english name of the country."),
+                  "description" => __ ( "The English name of the country."),
                   "example" => "United States of America"
                 ),
                 "Name" => array (
@@ -1409,7 +1409,7 @@ framework_add_hook (
         "description" => __ ( "System configurations updated successfully.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1491,6 +1491,10 @@ function configs_edit ( $buffer, $parameters)
   {
     $data["TimeZone"] = __ ( "The time zone is invalid.");
   }
+  if ( ! array_key_exists ( "TimeZone", $data))
+  {
+    voipdomain_timezonepicker_apply_parameters ( $parameters);
+  }
   if ( empty ( $parameters["Language"]))
   {
     $data["Language"] = __ ( "The language is required.");
@@ -1541,7 +1545,7 @@ function configs_edit ( $buffer, $parameters)
   {
     if ( ! array_key_exists ( "Currency", $data))
     {
-      $data["Currency"] = __ ( "The informed currency is invalid.");
+      $data["Currency"] = __ ( "The provided currency is invalid.");
     }
   }
 
@@ -1557,7 +1561,7 @@ function configs_edit ( $buffer, $parameters)
   {
     if ( ! array_key_exists ( "Country", $data))
     {
-      $data["Country"] = __ ( "The informed country is invalid.");
+      $data["Country"] = __ ( "The provided country is invalid.");
     }
   }
 
@@ -1734,6 +1738,10 @@ function configs_edit ( $buffer, $parameters)
   /**
    * Update tenant configuration
    */
+  if ( ! empty ( $parameters["TimeZone"]))
+  {
+    voipdomain_timezonepicker_apply_parameters ( $parameters);
+  }
   if ( $country["Code"] != $parameters["ORIGINAL"]["Country"] || $parameters["TimeZone"] != $parameters["ORIGINAL"]["TimeZone"] || $parameters["Offset"] != $parameters["ORIGINAL"]["Offset"] || $currency["ISO4217"] != $parameters["ORIGINAL"]["Currency"] || $parameters["Language"] != $parameters["ORIGINAL"]["Language"])
   {
     $updates = "";
@@ -1851,7 +1859,7 @@ framework_add_hook (
         "description" => __ ( "New system plugin installed successfully.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -2062,31 +2070,31 @@ function plugins_import ( $buffer, $parameters)
     $config = parse_ini_file ( $parameters["tmpdir"] . "/" . $parameters["name"] . "/" . $parameters["name"] . ".cfg", true);
     if ( ! array_key_exists ( $parameters["name"], $config))
     {
-      $data["message"] = __ ( "Plugin configuration file misses own plugin section.");
+      $data["message"] = __ ( "Plugin configuration file is missing its own plugin section.");
     }
     if ( ! array_key_exists ( "message", $data) && ! array_key_exists ( "version", $config[$parameters["name"]]))
     {
-      $data["message"] = __ ( "Plugin configuration file misses own plugin section.");
+      $data["message"] = __ ( "Plugin configuration file is missing its own plugin section.");
     }
     if ( ! array_key_exists ( "message", $data) && ! array_key_exists ( "name", $config[$parameters["name"]]))
     {
-      $data["message"] = __ ( "Plugin configuration file misses own plugin name.");
+      $data["message"] = __ ( "Plugin configuration file is missing its own plugin name.");
     }
     if ( ! array_key_exists ( "message", $data) && ! array_key_exists ( "description", $config[$parameters["name"]]))
     {
-      $data["message"] = __ ( "Plugin configuration file misses own plugin section.");
+      $data["message"] = __ ( "Plugin configuration file is missing its own plugin section.");
     }
     if ( ! array_key_exists ( "message", $data) && ! array_key_exists ( "author", $config[$parameters["name"]]))
     {
-      $data["message"] = __ ( "Plugin configuration file misses own plugin section.");
+      $data["message"] = __ ( "Plugin configuration file is missing its own plugin section.");
     }
     if ( ! array_key_exists ( "message", $data) && ! array_key_exists ( "license", $config[$parameters["name"]]))
     {
-      $data["message"] = __ ( "Plugin configuration file misses own plugin section.");
+      $data["message"] = __ ( "Plugin configuration file is missing its own plugin section.");
     }
     if ( ! array_key_exists ( "message", $data) && ! array_key_exists ( "require", $config[$parameters["name"]]))
     {
-      $data["message"] = __ ( "Plugin configuration file misses own plugin section.");
+      $data["message"] = __ ( "Plugin configuration file is missing its own plugin section.");
     }
     if ( ! array_key_exists ( "message", $data))
     {
@@ -2183,7 +2191,7 @@ function plugins_import ( $buffer, $parameters)
   }
 
   /**
-   * Process all plugin files, calling our internal /api/config/plugin/file API
+   * Process all plugin files, calling our internal /api/config/testfile API
    * call.
    * We need to do this way calling our own API because we check for PHP syntax
    * errors, and if you just include or try to parse the plugin file with an
@@ -2220,18 +2228,36 @@ function plugins_import ( $buffer, $parameters)
   /**
    * Check if plugin already exists
    */
+  $parameters["upgrade"] = false;
   if ( ! array_key_exists ( "message", $data))
   {
-    if ( file_exists ( dirname ( __FILE__) . "../../plugins/" . $parameters["name"]))
+    $pluginspath = plugin_get_plugins_path ();
+    $existingdir = "";
+    if ( file_exists ( $pluginspath . $parameters["name"]))
     {
-      $data["message"] = __ ( "Plugin already installed.");
+      $existingdir = $pluginspath . $parameters["name"];
     } else {
-      if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Plugins` WHERE `Dirname` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "'"))
+      if ( file_exists ( $pluginspath . "disabled_" . $parameters["name"]))
       {
-        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-        exit ();
+        $existingdir = $pluginspath . "disabled_" . $parameters["name"];
       }
-      if ( $result->num_rows != 0)
+    }
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Plugins` WHERE `Dirname` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "'"))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    if ( $result->num_rows != 0)
+    {
+      $parameters["ORIGINAL"] = $result->fetch_assoc ();
+      if ( (float) $parameters["config"]["version"] <= (float) $parameters["ORIGINAL"]["Version"])
+      {
+        $data["message"] = __ ( "Plugin already installed.");
+      } else {
+        $parameters["upgrade"] = true;
+      }
+    } else {
+      if ( $existingdir != "")
       {
         $data["message"] = __ ( "Plugin already installed.");
       }
@@ -2250,21 +2276,48 @@ function plugins_import ( $buffer, $parameters)
   }
 
   /**
-   * Add plugin to database
+   * Add or update plugin in database
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Plugins` (`Dirname`, `Name`, `Version`, `Author`, `Description`, `License`, `Status`, `Requires`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["name"]) . "', '" . (float) $parameters["config"]["version"] . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["author"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["license"]) . "', 'A', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["config"]["require"])) . "')"))
+  if ( $parameters["upgrade"])
   {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
+    if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Plugins` SET `Name` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["name"]) . "', `Version` = '" . (float) $parameters["config"]["version"] . "', `Author` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["author"]) . "', `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["description"]) . "', `License` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["license"]) . "', `Requires` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["config"]["require"])) . "' WHERE `Dirname` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "'"))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    $data["message"] = sprintf ( __ ( "Plugin %s (version %s) successfully upgraded."), $parameters["config"]["name"], $parameters["config"]["version"]);
+  } else {
+    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Plugins` (`Dirname`, `Name`, `Version`, `Author`, `Description`, `License`, `Status`, `Requires`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["name"]) . "', '" . (float) $parameters["config"]["version"] . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["author"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["description"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["config"]["license"]) . "', 'A', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["config"]["require"])) . "')"))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    $data["message"] = sprintf ( __ ( "Plugin %s (version %s) successfully installed."), $parameters["config"]["name"], $parameters["config"]["version"]);
   }
-  $data["message"] = sprintf ( __ ( "Plugin %s (version %s) successfully installed."), $parameters["config"]["name"], $parameters["config"]["version"]);
 
   /**
    * Move plugin to system plugins directory
    */
-  rename ( $parameters["tmpdir"] . "/" . $parameters["name"], dirname ( __FILE__) . "/../../plugins/" . $parameters["name"]);
+  $pluginspath = plugin_get_plugins_path ();
+  $plugindir = $pluginspath . $parameters["name"];
+  if ( $parameters["upgrade"] && file_exists ( $plugindir))
+  {
+    unlink_recursive ( $plugindir);
+  }
+  if ( file_exists ( $pluginspath . "disabled_" . $parameters["name"]))
+  {
+    unlink_recursive ( $pluginspath . "disabled_" . $parameters["name"]);
+  }
+  rename ( $parameters["tmpdir"] . "/" . $parameters["name"], $plugindir);
 
-  // **TODO**: Need to implement "install.php" call to deploy database, "update.php" if updating plugin, and need to export PHP files to Asterisk Server, FastAGI server, etc...
+  /**
+   * Run plugin install/update scripts, lifecycle hooks and deploy daemon modules
+   */
+  $installresult = plugin_apply_installation ( $plugindir, $parameters["name"], $parameters);
+  if ( sizeof ( $installresult))
+  {
+    $data = array_merge_recursive ( $data, $installresult);
+  }
 
   /**
    * Remove temporary directory
@@ -2368,7 +2421,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -2409,8 +2462,8 @@ framework_add_api_call (
  * created to internal system call, to validate a plugin file when checking it,
  * because PHP will trigger a fatal error if any syntax or other error happens
  * when include file, making it impossible to return a detailed check to system,
- * so, we include here and watch for response error message if happens,
- * otherwise, return a complete list of included files, included system hook's,
+ * so we include it here and watch for a response error message if one occurs,
+ * otherwise, return a complete list of included files, included system hooks,
  * filters, etc.
  *
  * @global array $_in Framework global configuration variable
@@ -2643,14 +2696,14 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Fields" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -2714,7 +2767,7 @@ function plugins_search ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
 
   /**
@@ -2810,7 +2863,7 @@ framework_add_hook (
         "description" => __ ( "Plugin toggled enabled/disabled successfully.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -2994,6 +3047,44 @@ function plugins_toggle ( $buffer, $parameters)
   }
 
   /**
+   * Sync daemon modules and lifecycle hooks for enable/disable
+   */
+  $plugindir = plugin_get_plugins_path () . $parameters["Plugin"];
+  $togglelifecycle = array (
+    "name" => $parameters["Plugin"],
+    "status" => $newstatus,
+    "original" => $plugin
+  );
+  if ( $newstatus == "A")
+  {
+    plugin_call_lifecycle ( $parameters["Plugin"], "enable", $togglelifecycle);
+    $deploy = plugin_deploy_daemons ( $plugindir, $parameters["Plugin"]);
+    if ( sizeof ( $deploy["deployed"]))
+    {
+      $data["deployed"] = $deploy["deployed"];
+      $data["remote"] = plugin_sync_daemon_modules_remote ( $plugindir, $parameters["Plugin"], $deploy["deployed"], "deploy", 0);
+      $reloadunits = systemd_units_from_deployed_modules ( $deploy["deployed"]);
+      if ( sizeof ( $reloadunits))
+      {
+        $data["reloaded"] = plugin_request_daemon_reload_all ( $reloadunits);
+      }
+    }
+  } else {
+    plugin_call_lifecycle ( $parameters["Plugin"], "disable", $togglelifecycle);
+    $undeploy = plugin_undeploy_daemons ( $plugindir, $parameters["Plugin"]);
+    if ( sizeof ( $undeploy["removed"]))
+    {
+      $data["removed"] = $undeploy["removed"];
+      $data["remote"] = plugin_sync_daemon_modules_remote ( $plugindir, $parameters["Plugin"], $undeploy["removed"], "remove", 0);
+      $reloadunits = systemd_units_from_deployed_modules ( $undeploy["removed"]);
+      if ( sizeof ( $reloadunits))
+      {
+        $data["reloaded"] = plugin_request_daemon_reload_all ( $reloadunits);
+      }
+    }
+  }
+
+  /**
    * Call post hook if exist
    */
   if ( framework_has_hook ( "plugins_toggle_post"))
@@ -3083,7 +3174,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -3253,7 +3344,7 @@ framework_add_hook (
         "description" => __ ( "The system plugin was removed.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -3363,6 +3454,16 @@ function plugins_remove ( $buffer, $parameters)
   }
 
   /**
+   * Run plugin uninstall scripts, lifecycle hooks and remove daemon modules
+   */
+  $pluginspath = plugin_get_plugins_path ();
+  $plugindir = $pluginspath . ( $parameters["ORIGINAL"]["Status"] == "I" ? "disabled_" : "") . $parameters["ORIGINAL"]["Dirname"];
+  if ( is_dir ( $plugindir))
+  {
+    plugin_apply_removal ( $plugindir, $parameters["ORIGINAL"]["Dirname"], $parameters);
+  }
+
+  /**
    * Remove plugin database record
    */
   if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Plugins` WHERE `Dirname` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Plugin"]) . "'"))
@@ -3374,7 +3475,10 @@ function plugins_remove ( $buffer, $parameters)
   /**
    * Remove plugin directory and information files
    */
-  unlink_recursive ( $_in["general"]["spooldir"] . "/plugins/" . ( $parameters["ORIGINAL"]["Status"] == "I" ? "disabled_" : "") . $parameters["ORIGINAL"]["Dirname"]);
+  if ( is_dir ( $plugindir))
+  {
+    unlink_recursive ( $plugindir);
+  }
 
   /**
    * Call post hook if exist

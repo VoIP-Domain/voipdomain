@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,12 +32,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Tellows Score
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "configs_tellows", "configs_tellows");
 framework_add_hook ( "configs_tellows_cleanup_remove", "configs_tellows_cleanup");
@@ -46,9 +46,10 @@ framework_add_hook ( "configs_tellows_cleanup_remove", "configs_tellows_cleanup"
  * Cleanup functions
  */
 framework_add_hook ( "config_wipe", "tellows_wipe");
+cleanup_register ( "Tellows", "tellows_wipe");
 
 /**
- * Function to configurate Tellows Score.
+ * Function to configure Tellows Score.
  * Required parameters are: (string) Key, (boolean) AntiSpam, (integer) Score
  * Possible results:
  *   - 200: OK, configuration created (overwritten)

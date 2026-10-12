@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Queues
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "server_task_reply", "server_task_reply");
 
@@ -73,35 +73,42 @@ function server_task_reply ( $buffer, $parameters)
   mysql_check ();
 
   /**
-   * Check certificates
+   * Fetch server public key and tenant private key from database
    */
-  if ( ! array_key_exists ( "privateKey", $_in["keys"]))
+  if ( ! array_key_exists ( "server_" . $parameters["sid"], $_in["keys"]))
   {
-    if ( ! $_in["keys"]["privateKey"] = file_get_contents ( $_in["general"]["privateKey"]))
-    {
-      writeLog ( "Cannot read master server private key!", VoIP_LOG_FATAL);
-      return $buffer;
-    }
+    $_in["keys"]["server_" . $parameters["sid"]] = array ();
   }
-  if ( ! array_key_exists ( "publicKey", $_in["keys"]["server_" . $parameters["sid"]]["publicKey"]))
+  if ( ! array_key_exists ( "publicKey", $_in["keys"]["server_" . $parameters["sid"]]) || ! array_key_exists ( "tenantPrivateKey", $_in["keys"]["server_" . $parameters["sid"]]))
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `PublicKey` FROM `Servers` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["sid"])))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Servers`.`PublicKey`, `Tenants`.`PrivateKey` AS `TenantPrivateKey` FROM `Servers` LEFT JOIN `Tenants` ON `Servers`.`Tenant` = `Tenants`.`ID` WHERE `Servers`.`ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["sid"])))
     {
-      writeLog ( "Cannot fetch server \"" . $parameters["sid"] . "\" public key from database.");
+      writeLog ( "Cannot fetch server \"" . $parameters["sid"] . "\" keys from database.");
       return $buffer;
     }
-    $_in["keys"]["server_" . $parameters["sid"]]["publicKey"] = $result->fetch_assoc ()["PublicKey"];
+    $row = $result->fetch_assoc ();
+    if ( ! $row)
+    {
+      writeLog ( "Server \"" . $parameters["sid"] . "\" not found in database.");
+      return $buffer;
+    }
+    $_in["keys"]["server_" . $parameters["sid"]]["publicKey"] = $row["PublicKey"];
+    $_in["keys"]["server_" . $parameters["sid"]]["tenantPrivateKey"] = $row["TenantPrivateKey"];
   }
 
   /**
-   * Decrypt key
+   * Decrypt key (client encrypts with tenant public key, so decrypt with tenant private key)
    */
-  openssl_private_decrypt ( $parameters["key"], $key, $_in["keys"]["privateKey"]);
+  if ( ! openssl_private_decrypt ( $parameters["key"], $key, $_in["keys"]["server_" . $parameters["sid"]]["tenantPrivateKey"]))
+  {
+    writeLog ( "Cannot decrypt AES key from server \"" . $parameters["sid"] . "\". Tenant private key mismatch!", VoIP_LOG_WARNING);
+    return $buffer;
+  }
 
   /**
    * Check job payload content sign
    */
-  $signcheck = openssl_verify ( $key . $parameters["iv"] . $parameters["hmac"] . $parameters["payload"], $parameters["sign"], $_in["keys"]["server_" . $parameters["sid"]]["publicKey"], OPENSSL_ALGO_SHA1);
+  $signcheck = openssl_verify ( $key . $parameters["iv"] . $parameters["hmac"] . $parameters["payload"], $parameters["sign"], $_in["keys"]["server_" . $parameters["sid"]]["publicKey"], OPENSSL_ALGO_SHA256);
   if ( $signcheck != 1)
   {
     writeLog ( "Received event \"server_task_reply\" from server \"" . $parameters["sid"] . "\" with wrong server signature. Ignoring event!", VoIP_LOG_WARNING);
@@ -135,9 +142,9 @@ function server_task_reply ( $buffer, $parameters)
   {
     case "task_replay":
       /**
-       * Get all commands stalled at database
+       * Get all commands stalled at database with server and tenant keys
        */
-      if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Commands` WHERE `Server` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["sid"])))
+      if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Commands`.*, `Servers`.`PublicKey` AS `ServerPublicKey`, `Tenants`.`PrivateKey` AS `TenantPrivateKey` FROM `Commands` LEFT JOIN `Servers` ON `Commands`.`Server` = `Servers`.`ID` LEFT JOIN `Tenants` ON `Servers`.`Tenant` = `Tenants`.`ID` WHERE `Commands`.`Server` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["sid"])))
       {
         writeLog ( "Cannot fetch stalled commands to replay to server \"" . $parameters["sid"] . "\"!", VoIP_LOG_WARNING);
         return $buffer;
@@ -153,8 +160,10 @@ function server_task_reply ( $buffer, $parameters)
        */
       if ( ! $_in["gearman"]["client"])
       {
+        $gearman_host = ! empty ( $_in["gearman"]["hostname"]) ? $_in["gearman"]["hostname"] : "127.0.0.1";
+        $gearman_port = ! empty ( $_in["gearman"]["port"]) ? (int) $_in["gearman"]["port"] : 4730;
         $_in["gearman"]["client"] = new GearmanClient ();
-        if ( ! $_in["gearman"]["client"]->addServer ( $_in["gearman"]["servers"]))
+        if ( ! $_in["gearman"]["client"]->addServer ( $gearman_host, $gearman_port))
         {
           writeLog ( "Failed connecting to Gearman as a client!", VoIP_LOG_WARNING);
           return $buffer;
@@ -166,14 +175,19 @@ function server_task_reply ( $buffer, $parameters)
        */
       while ( $command = $result->fetch_assoc ())
       {
+        if ( empty ( $command["ServerPublicKey"]) || empty ( $command["TenantPrivateKey"]))
+        {
+          writeLog ( "Cannot replay command ID \"" . $command["ID"] . "\": missing server public key or tenant private key!", VoIP_LOG_WARNING);
+          continue;
+        }
         $commandpayload = json_encode ( array ( "event" => $command["Event"], "id" => $command["ID"], "data" => json_decode ( $command["Data"], true)));
         $iv = secure_rand ( 16, true);
         $key = secure_rand ( 256, true);
         $encrypted = openssl_encrypt ( $commandpayload, "aes-256-cbc", $key, OPENSSL_RAW_DATA, $iv);
         $hmac = hash_hmac ( "sha256", $encrypted, $key, true);
-        openssl_public_encrypt ( $key, $encryptedkey, $_in["keys"]["server_" . $command["Server"]]["publicKey"]);
-        openssl_sign ( $key . $iv . $hmac . $encrypted, $sign, $_in["keys"]["privateKey"], OPENSSL_ALGO_SHA1);
-        $_in["gearman"]["client"]->doBackground ( "vd_server_" . $command["Server"] . "_task", json_encode ( array ( "payload" => base64_encode ( $encrypted), "iv" => base64_encode ( $iv), "key" => base64_encode ( $encryptedkey), "hmac" => base64_encode ( $hmac), "sign" => base64_encode ( $sign))));
+        openssl_public_encrypt ( $key, $encryptedkey, $command["ServerPublicKey"]);
+        openssl_sign ( $key . $iv . $hmac . $encrypted, $sign, $command["TenantPrivateKey"], OPENSSL_ALGO_SHA256);
+        $_in["gearman"]["client"]->doBackground ( gearman_client_task_name ( $command["Server"]), json_encode ( array ( "payload" => base64_encode ( $encrypted), "iv" => base64_encode ( $iv), "key" => base64_encode ( $encryptedkey), "hmac" => base64_encode ( $hmac), "sign" => base64_encode ( $sign))));
       }
       writeLog ( "Replayed stalled commands to server \"" . $parameters["sid"] . "\".");
       break;
@@ -183,16 +197,48 @@ function server_task_reply ( $buffer, $parameters)
         writeLog ( "Received event \"server_task_reply\" from server \"" . $parameters["sid"] . "\" without minimum data for sub event \"task_finished\". Ignoring event!", VoIP_LOG_WARNING);
         return $buffer;
       }
-      if ( $payload["data"]["result"]["code"] && $payload["data"]["result"]["code"] >= 200 && $payload["data"]["result"]["code"] <= 299)
+      $code = (int) $payload["data"]["result"]["code"];
+      $is_success = $code >= 200 && $code <= 299;
+      $is_permanent_error = $code >= 400 && $code <= 499;
+      if ( $is_success || $is_permanent_error)
       {
-        if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Commands` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $payload["data"]["id"]) . " AND `Server` = " . $_in["mysql"]["id"]->real_escape_string ( (int) $parameters["sid"])))
+        $commandId = (int) $payload["data"]["id"];
+        $serverId = (int) $parameters["sid"];
+
+        /**
+         * Decrement GroupedCommands counter if this command belongs to a group
+         */
+        if ( $gcResult = @$_in["mysql"]["id"]->query ( "SELECT `Group` FROM `GroupCommand` WHERE `Command` = " . $commandId))
         {
-          writeLog ( "Cannot remove command ID \"" . (int) $payload["data"]["id"] . "\" from database!", VoIP_LOG_WARNING);
+          if ( $gcResult->num_rows != 0)
+          {
+            $groupId = (int) $gcResult->fetch_assoc ()["Group"];
+            @$_in["mysql"]["id"]->query ( "UPDATE `GroupedCommands` SET `Left` = `Left` - 1 WHERE `ID` = " . $groupId);
+          }
+        }
+
+        /**
+         * Remove command from database (cascades to GroupCommand)
+         */
+        if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `Commands` WHERE `ID` = " . $_in["mysql"]["id"]->real_escape_string ( $commandId) . " AND `Server` = " . $_in["mysql"]["id"]->real_escape_string ( $serverId)))
+        {
+          writeLog ( "Cannot remove command ID \"" . $commandId . "\" from database!", VoIP_LOG_WARNING);
           return $buffer;
         }
-        writeLog ( "Removed command ID \"" . (int) $payload["data"]["id"] . "\" from database.");
+
+        /**
+         * Clean up completed GroupedCommands entries (Left = 0)
+         */
+        @$_in["mysql"]["id"]->query ( "DELETE FROM `GroupedCommands` WHERE `Server` = " . $serverId . " AND `Left` <= 0 AND `Total` > 0");
+
+        if ( $is_success)
+        {
+          writeLog ( "Removed command ID \"" . $commandId . "\" from database (success).");
+        } else {
+          writeLog ( "Removed command ID \"" . $commandId . "\" from database (permanent error: " . $code . " - " . $payload["data"]["result"]["message"] . ").");
+        }
       } else {
-        writeLog ( "Returned fail result for command ID \"" . (int) $payload["data"]["id"] . "\" with code \"" . (int) $payload["data"]["result"]["code"] . "\" and message \"" . $payload["data"]["result"]["message"] . "\".");
+        writeLog ( "Keeping command ID \"" . (int) $payload["data"]["id"] . "\" for retry (temporary error: " . $code . " - " . $payload["data"]["result"]["message"] . ").", VoIP_LOG_WARNING);
       }
       break;
     default:

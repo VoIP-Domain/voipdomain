@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Notifications
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -92,26 +92,26 @@ framework_add_hook (
               "Description" => array (
                 "type" => "string",
                 "description" => __ ( "The description of the notification event."),
-                "example" => __ ( "Event fired when a new call happen at the system.")
+                "example" => __ ( "Event fired when a new call happens in the system.")
               ),
               "DescriptionEN" => array (
                 "type" => "string",
                 "description" => __ ( "The original English description of the notification event."),
-                "example" => "Event fired when a new call happen at the system."
+                "example" => "Event fired when a new call happens in the system."
               )
             )
           )
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Fields" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -169,7 +169,7 @@ function notifications_events_search ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
 
   /**
@@ -279,12 +279,12 @@ framework_add_hook (
             "Description" => array (
               "type" => "string",
               "description" => __ ( "The translated description of the notification event."),
-              "example" => __ ( "Event fired when a new call happen at the system.")
+              "example" => __ ( "Event fired when a new call happens in the system.")
             ),
             "DescriptionEN" => array (
               "type" => "string",
               "description" => __ ( "The original English description of the notification event."),
-              "example" => "Event fired when a new call happen at the system."
+              "example" => "Event fired when a new call happens in the system."
             ),
             "Fields" => array (
               "type" => "array",
@@ -304,7 +304,7 @@ framework_add_hook (
                   ),
                   "NameEN" => array (
                     "type" => "string",
-                    "description" => __ ( "The original english name of the variable."),
+                    "description" => __ ( "The original English name of the variable."),
                     "example" => "Call Type"
                   ),
                   "Type" => array (
@@ -332,7 +332,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -355,7 +355,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "notifications_events_view"),
     "title" => __ ( "View notifications"),
-    "description" => __ ( "Get a system notification information."),
+    "description" => __ ( "Get system notification information."),
     "parameters" => array (
       array (
         "name" => "ID",
@@ -534,12 +534,12 @@ framework_add_hook (
               ),
               "ExpireTimestamp" => array (
                 "type" => "integer",
-                "description" => __ ( "The UNIX timestamp of the expiration of system notification. If doesn't have expiration, will be *0*."),
+                "description" => __ ( "The UNIX timestamp of the notification expiration. If there is no expiration, this will be *0*."),
                 "example" => 1589227252
               ),
               "Expire" => array (
                 "type" => "date-time",
-                "description" => __ ( "The original English event of system notification. If doesn't have expiration, will be empty."),
+                "description" => __ ( "The original English event name of the system notification. If no event is set, this will be empty."),
                 "example" => __ ( "05/11/2020 17:00:00")
               )
             )
@@ -547,14 +547,14 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Fields" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -618,7 +618,7 @@ function notifications_search ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
 
   /**
@@ -720,13 +720,13 @@ framework_add_hook (
             ),
             "Event" => array (
               "type" => "string",
-              "description" => __ ( "The event this notification watch for."),
+              "description" => __ ( "The event this notification watches for."),
               "example" => "NewCall"
             ),
             "EventName" => array (
               "type" => "string",
-              "description" => __ ( "The name and description in format `name (description)` of the event this notification watch for."),
-              "example" => __ ( "New Call (Event fired when a new call happen at the system.)")
+              "description" => __ ( "The name and description in format `name (description)` of the event this notification watches for."),
+              "example" => __ ( "New Call (Event fired when a new call happens in the system.)")
             ),
             "Fields" => array (
               "type" => "array",
@@ -746,7 +746,7 @@ framework_add_hook (
                   ),
                   "NameEN" => array (
                     "type" => "string",
-                    "description" => __ ( "The original english name of the variable."),
+                    "description" => __ ( "The original English name of the variable."),
                     "example" => "Call Type"
                   ),
                   "Type" => array (
@@ -813,14 +813,14 @@ framework_add_hook (
             ),
             "Validity" => array (
               "type" => "date-time",
-              "description" => __ ( "The expiration date of notification in YYYY-MM-DD format. If doesn't have expiration, will be *empty*."),
+              "description" => __ ( "The notification expiration date in YYYY-MM-DD format. If there is no expiration, this will be empty."),
               "example" => "2020-05-01"
             )
           )
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -843,7 +843,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "notifications_view"),
     "title" => __ ( "View notifications"),
-    "description" => __ ( "Get a system notification information."),
+    "description" => __ ( "Get system notification information."),
     "parameters" => array (
       array (
         "name" => "ID",
@@ -1016,7 +1016,7 @@ framework_add_hook (
         ),
         "Event" => array (
           "type" => "string",
-          "description" => __ ( "The event this notification watch for."),
+          "description" => __ ( "The event this notification watches for."),
           "required" => true,
           "example" => "NewCall"
         ),
@@ -1061,7 +1061,7 @@ framework_add_hook (
             "properties" => array (
               "Reference" => array (
                 "type" => "integer",
-                "description" => __ ( "The reference number to header. This is used to report any header name/value error."),
+                "description" => __ ( "The reference number for the header. This is used to report any header name/value error."),
                 "required" => true
               ),
               "Header" => array (
@@ -1095,10 +1095,10 @@ framework_add_hook (
     ),
     "response" => array (
       201 => array (
-        "description" => __ ( "New system notification added successfully.")
+        "description" => __ ( "A new system notification was added successfully.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1309,11 +1309,9 @@ function notifications_add ( $buffer, $parameters)
   }
 
   /**
-   * Notify worker's about new notification
+   * Reload router notification cache
    */
-  $gm = new GearmanClient ();
-  $gm->addServer ( array_key_exists ( "hostname", $_in["gearman"]) ? $_in["gearman"]["hostname"] : "127.0.0.1", array_key_exists ( "port", $_in["gearman"]) ? $_in["gearman"]["port"] : 4730);
-  $gm->doBackground ( "notification_create", json_encode ( array ( "ID" => $parameters["ID"], "Description" => $parameters["Description"], "Event" => $parameters["Event"], "Filters" => $parameters["Filters"], "URL" => $parameters["URL"], "Method" => $parameters["Method"], "Type" => $parameters["Type"], "Variables" => $parameters["Variables"], "Headers" => $parameters["Headers"], "RelaxSSL" => $parameters["SSL"], "Expire" => $parameters["Validity"])));
+  router_request_cache_reload ();
 
   /**
    * Execute finish hook if exist
@@ -1327,7 +1325,7 @@ function notifications_add ( $buffer, $parameters)
    * Return OK to notification
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . $_in["api"]["baseurl"] . "/notifications/" . $parameters["ID"]);
+  header ( "Location: " . voipdomain_location_url ( "/api/notifications/" . $parameters["ID"]));
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 
@@ -1351,7 +1349,7 @@ framework_add_hook (
         ),
         "Event" => array (
           "type" => "string",
-          "description" => __ ( "The event this notification watch for."),
+          "description" => __ ( "The event this notification watches for."),
           "required" => true,
           "example" => "NewCall"
         ),
@@ -1396,7 +1394,7 @@ framework_add_hook (
             "properties" => array (
               "Reference" => array (
                 "type" => "integer",
-                "description" => __ ( "The reference number to header. This is used to report any header name/value error."),
+                "description" => __ ( "The reference number for the header. This is used to report any header name/value error."),
                 "required" => true
               ),
               "Header" => array (
@@ -1433,7 +1431,7 @@ framework_add_hook (
         "description" => __ ( "The system notification was successfully updated.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1486,7 +1484,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "notifications_edit"),
     "title" => __ ( "Edit notifications"),
-    "description" => __ ( "Change a system notification information.")
+    "description" => __ ( "Change system notification information.")
   )
 );
 
@@ -1660,9 +1658,10 @@ function notifications_edit ( $buffer, $parameters)
   /**
    * Notify worker's about notification change
    */
-  $gm = new GearmanClient ();
-  $gm->addServer ( array_key_exists ( "hostname", $_in["gearman"]) ? $_in["gearman"]["hostname"] : "127.0.0.1", array_key_exists ( "port", $_in["gearman"]) ? $_in["gearman"]["port"] : 4730);
-  $gm->doBackground ( "notification_change", json_encode ( array ( "ID" => $parameters["ID"], "Description" => $parameters["Description"], "Event" => $parameters["Event"], "Filters" => $parameters["Filters"], "URL" => $parameters["URL"], "Method" => $parameters["Method"], "Type" => $parameters["Type"], "Variables" => $parameters["Variables"], "Headers" => $parameters["Headers"], "RelaxSSL" => array_key_exists ( "SSL", $parameters) ? $parameters["SSL"] : "", "Expire" => $parameters["Validity"])));
+  /**
+   * Reload router notification cache
+   */
+  router_request_cache_reload ();
 
   /**
    * Execute finish hook if exist
@@ -1691,7 +1690,7 @@ framework_add_hook (
         "description" => __ ( "The system notification was removed.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1714,7 +1713,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "notifications_remove"),
     "title" => __ ( "Remove notifications"),
-    "description" => __ ( "Remove a notification from system.")
+    "description" => __ ( "Remove a notification from the system.")
   )
 );
 
@@ -1820,9 +1819,10 @@ function notifications_remove ( $buffer, $parameters)
   /**
    * Notify worker's about notification removal
    */
-  $gm = new GearmanClient ();
-  $gm->addServer ( array_key_exists ( "hostname", $_in["gearman"]) ? $_in["gearman"]["hostname"] : "127.0.0.1", array_key_exists ( "port", $_in["gearman"]) ? $_in["gearman"]["port"] : 4730);
-  $gm->doBackground ( "notification_destroy", json_encode ( $parameters["ORIGINAL"]));
+  /**
+   * Reload router notification cache
+   */
+  router_request_cache_reload ();
 
   /**
    * Execute finish hook if exist

@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Gateways
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -74,6 +74,7 @@ function gateways_install_db ( $buffer, $parameters)
                                      "  `NAT` boolean NOT NULL DEFAULT false,\n" .
                                      "  `RPID` boolean NOT NULL DEFAULT false,\n" .
                                      "  `Qualify` boolean NOT NULL DEFAULT false,\n" .
+                                     "  `Inbound` boolean NOT NULL DEFAULT true,\n" .
                                      "  PRIMARY KEY (`ID`),\n" .
                                      "  KEY `Description` (`Description`),\n" .
                                      "  KEY `Type` (`Type`),\n" .

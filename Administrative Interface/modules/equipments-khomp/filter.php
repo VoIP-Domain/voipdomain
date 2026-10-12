@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments Khomp
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -126,7 +126,7 @@ function equipments_khomp_view_subpage ( $buffer, $parameters)
                             "  document.execCommand ( 'copy');\n" .
                             "  $(this).focus ();\n" .
                             "  $(target).removeAttr ( 'readonly').attr ( 'disabled', 'disabled').attr ( 'type', 'password');\n" .
-                            "  new PNotify ( { title: '" . __ ( "Equipment view") . "', text: '" . __ ( "Password copied to clipboard!") . "', type: 'success'});\n" .
+                            "  new PNotify ( { title: '" . __ ( "View equipment") . "', text: '" . __ ( "Password copied to clipboard!") . "', type: 'success'});\n" .
                             "});\n";
 
   /**
@@ -204,7 +204,7 @@ function equipments_khomp_view_subpage ( $buffer, $parameters)
                             "  document.execCommand ( 'copy');\n" .
                             "  $(this).focus ();\n" .
                             "  $(target).removeAttr ( 'readonly').attr ( 'disabled', 'disabled').attr ( 'type', 'password');\n" .
-                            "  new PNotify ( { title: '" . __ ( "Equipment view") . "', text: '" . __ ( "Password copied to clipboard!") . "', type: 'success'});\n" .
+                            "  new PNotify ( { title: '" . __ ( "View equipment") . "', text: '" . __ ( "Password copied to clipboard!") . "', type: 'success'});\n" .
                             "});\n";
 
   return $buffer;

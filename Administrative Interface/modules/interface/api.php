@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Interface
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -119,7 +119,7 @@ framework_add_component_documentation (
       "Flow" => array (
         "type" => "string",
         "enum" => array ( "in", "out"),
-        "description" => __ ( "The flow of the call, if is an outbound or inbound call."),
+        "description" => __ ( "The flow of the call, whether it is outbound or inbound."),
         "example" => "out"
       ),
       "Duration" => array (
@@ -280,7 +280,7 @@ framework_add_component_documentation (
       "WhoHungUp" => array (
         "type" => "string",
         "enum" => array ( "Caller", "Called"),
-        "description" => __ ( "Who hung up the call, if was the caller or the called party."),
+        "description" => __ ( "Who hung up the call, whether it was the caller or the called party."),
         "example" => "Called"
       ),
       "Quality" => array (
@@ -428,7 +428,7 @@ framework_add_component_documentation (
       "Flags" => array (
         "type" => "array",
         "description" => __ ( "The flags of the call."),
-        "example" => array ( "transhipped", "hunt"),
+        "example" => array ( "transferred", "hunt"),
         "items" => array (
           "type" => "string",
           "description" => __ ( "The flag itself.")
@@ -691,7 +691,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1032,7 +1032,7 @@ function user_login ( $buffer, $parameters)
    * Return OK
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . $_in["api"]["baseurl"] . "/users/" . $_in["session"]["Data"]["ID"]);
+  header ( "Location: " . voipdomain_location_url ( "/api/users/" . $_in["session"]["Data"]["ID"]));
   return $buffer;
 }
 
@@ -1047,7 +1047,7 @@ framework_add_hook (
   array (
     "response" => array (
       204 => array (
-        "description" => __ ( "User session was successfully destroyed."),
+        "description" => __ ( "User session was destroyed successfully."),
         "headers" => array (
           "Set-Cookie" => array (
             "schema" => array (
@@ -1352,7 +1352,7 @@ framework_add_api_call (
   "Read",
   "dashboard_information",
   array (
-    "permissions" => array ( "User", "Administrator"),
+    "permissions" => array ( "User", "Administrator", "Super-Administrator"),
     "title" => __ ( "System dashboard"),
     "description" => __ ( "Generate the system dashboard statistics.")
   )
@@ -1585,7 +1585,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1767,7 +1767,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1943,7 +1943,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -2131,7 +2131,7 @@ framework_add_hook (
               ),
               "Number" => array (
                 "type" => "integer",
-                "description" => __ ( "The extension number associated to object."),
+                "description" => __ ( "The extension number associated with the object."),
                 "example" => "1000"
               ),
               "Type" => array (
@@ -2149,14 +2149,14 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Fields" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -2220,7 +2220,7 @@ function fastsearch ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
 
   /**

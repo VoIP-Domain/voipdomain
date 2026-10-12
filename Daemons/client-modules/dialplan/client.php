@@ -1,3 +1,4 @@
+<?php
 /**   ___ ___       ___ _______     ______                        __
  *   |   Y   .-----|   |   _   |   |   _  \ .-----.--------.---.-|__.-----.
  *   |.  |   |  _  |.  |.  1   |   |.  |   \|  _  |        |  _  |  |     |
@@ -6,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2018 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,15 +23,35 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-  Asterisk Security Tips
---======================--
+/**
+ * VoIP Domain dialplan bootstrap helpers (client daemon).
+ *
+ * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
+ * @version    1.0
+ * @package    VoIP Domain
+ * @subpackage Dialplan
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
+ * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
+ */
 
-- Avoid keeping your Asterisk server exposed to the Internet.
-- Never use an IP phone with a public Internet address; it will likely have default passwords and other security flaws.
-- If you really need to expose an Asterisk server to the Internet, be sure to:
-  * Use strong passwords (at least 8 characters, lower and upper case letters, numbers and special characters);
-  * Change your user passwords periodically (every 2 to 3 months at most);
-  * Prefer to enable only the TLS port and enforce the use of SRTP;
-  * Try to block calls to unusual destinations.
-- In `sip.conf` under the `[general]` section, set `alwaysauthreject = yes`. This setting makes Asterisk reply with an authentication error instead of “not found”, even when the peer does not exist.
-- Consider using Fail2Ban to block addresses that make repeated requests with an invalid password.
+framework_add_hook ( "server_rebuild_post", "dialplan_server_rebuild_post");
+
+/**
+ * Regenerate plugin dialplan bootstrap fragments after a full server rebuild.
+ *
+ * Plugins register {@code dialplan_bootstrap_regenerate} to rewrite their
+ * {@code dialplan-bootstrap-*.conf} files via {@link write_dialplan_plugin()}.
+ *
+ * @param mixed $buffer Hook buffer
+ * @param array $parameters Server rebuild parameters
+ * @return boolean
+ */
+function dialplan_server_rebuild_post ( $buffer, $parameters)
+{
+  if ( framework_has_hook ( "dialplan_bootstrap_regenerate"))
+  {
+    framework_call ( "dialplan_bootstrap_regenerate", $parameters);
+  }
+  return true;
+}
+?>

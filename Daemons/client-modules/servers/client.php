@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Servers
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "server_add", "server_add");
 framework_add_hook ( "server_change", "server_change");
@@ -51,7 +51,7 @@ cleanup_register ( "Servers", "server_wipe");
 
 /**
  * Function to add a new server.
- * Required parameters are: (int) ID, (string) Description, (string) Address, (int) Port, (string) Password
+ * Required parameters are: (int) ID, (string) Description, (string) Address, (int) Port
  * Possible results:
  *   - 200: OK, server added (overwritten)
  *   - 201: OK, server added
@@ -67,6 +67,8 @@ cleanup_register ( "Servers", "server_wipe");
  */
 function server_add ( $buffer, $parameters)
 {
+  global $_in;
+
   /**
    * Call start hook if exist
    */
@@ -111,14 +113,6 @@ function server_add ( $buffer, $parameters)
   {
     $data["Port"] = "Invalid content";
   }
-  if ( ! array_key_exists ( "Password", $parameters))
-  {
-    $data["Password"] = "Missing parameter";
-  }
-  if ( ! array_key_exists ( "Password", $data) && ! preg_match ( "/^[^\x01-\x1E]*$/u", $parameters["Password"]))
-  {
-    $data["Password"] = "Invalid content";
-  }
 
   /**
    * Call validate hook if exist
@@ -152,12 +146,18 @@ function server_add ( $buffer, $parameters)
     $parameters = framework_call ( "server_add_pre", $parameters, false, $parameters);
   }
 
+  // Verify local server address is configured
+  if ( empty ( $_in["general"]["address"]))
+  {
+    return array ( "code" => 500, "message" => "Local server address not configured. Set 'address' in [general] section of client.conf.");
+  }
+
   // Verify if server exist
   if ( check_config ( "config", "sip-server-" . $parameters["ID"]))
   {
     if ( ! check_overwrite ())
     {
-      return array ( "code" => 400, "message" => "Server already exist.");
+      return array ( "code" => 400, "message" => "Server already exists.");
     } else {
       $overwritten = true;
     }
@@ -167,9 +167,13 @@ function server_add ( $buffer, $parameters)
 
   // Load VoIP Domain servers list
   $servers = read_config ( "datafile", "vd-servers");
+  if ( ! is_array ( $servers))
+  {
+    $servers = array ();
+  }
 
   // Add new server IP
-  if ( ! array_key_exist ( $parameters["ID"], $servers))
+  if ( ! array_key_exists ( $parameters["ID"], $servers))
   {
     $servers[$parameters["ID"]] = array ( "Address" => $parameters["Address"], "Port" => (int) $parameters["Port"], "Description" => $parameters["Description"]);
     if ( ! write_config ( "datafile", "vd-servers", $servers))
@@ -192,37 +196,27 @@ function server_add ( $buffer, $parameters)
     return array ( "code" => 500, "message" => "Error writing file.");
   }
 
-  // Create file structure
+  // Create file structure (IP-based trust for internal server interconnection)
   $server = "; VoIP Domain network server " . $parameters["ID"] . ": " . $parameters["Description"] . "\n" .
             "[vd_server_" . $parameters["ID"] . "]\n" .
             "type=endpoint\n" .
+            "context=VoIPDomain-Internal\n" .
             "allow=all\n" .
             "direct_media=no\n" .
             "ice_support=yes\n" .
             "rtp_symmetric=no\n" .
             "force_rport=yes\n" .
             "rewrite_contact=no\n" .
-            "outbound_auth=vd_server_" . $parameters["ID"] . "_auth\n" .
             "aors=vd_server_" . $parameters["ID"] . "_aor\n" .
             "\n" .
             "[vd_server_" . $parameters["ID"] . "_aor]\n" .
             "type=aor\n" .
             "contact=sip:" . $parameters["Address"] . ":" . $parameters["Port"] . "\n" .
             "\n" .
-            "[vd_server_" . $parameters["ID"] . "_auth]\n" .
-            "type=auth\n" .
-            "auth_type=userpass\n" .
-            "username=vd_server_" . $parameters["ID"] . "\n" .
-            "password=" . $parameters["Password"] . "\n" .
-            "\n" .
-            "[vd_server_" . $parameters["ID"] . "_registration]\n" .
-            "type=registration\n" .
-            "transport=transport-udp\n" .
-            "outbound_auth=vd_server_" . $parameters["ID"] . "_auth\n" .
-            "server_uri=sip:" . $parameters["Address"] . "\n" .
-            "client_uri=sip:vd_server_" . $parameters["ID"] . "@" . $_in["general"]["address"] . "\n" .
-            "contact_user=vd_server_" . $parameters["ID"] . "\n" .
-            "retry_interval=60\n";
+            "[vd_server_" . $parameters["ID"] . "_identify]\n" .
+            "type=identify\n" .
+            "endpoint=vd_server_" . $parameters["ID"] . "\n" .
+            "match=" . $parameters["Address"] . "\n";
 
   // Write server file
   if ( ! write_config ( "config", "sip-server-" . $parameters["ID"], $server))
@@ -266,7 +260,7 @@ function server_add ( $buffer, $parameters)
 
 /**
  * Function to edit an existing server.
- * Required parameters are: (int) ID, (string) Description, (string) Address, (int) Port, (string) Password
+ * Required parameters are: (int) ID, (string) Description, (string) Address, (int) Port
  * Possible results:
  *   - 200: OK, server edited
  *   - 404: Server doesn't exist
@@ -282,6 +276,8 @@ function server_add ( $buffer, $parameters)
  */
 function server_change ( $buffer, $parameters)
 {
+  global $_in;
+
   /**
    * Call start hook if exist
    */
@@ -326,14 +322,6 @@ function server_change ( $buffer, $parameters)
   {
     $data["Port"] = "Invalid content";
   }
-  if ( ! array_key_exists ( "Password", $parameters))
-  {
-    $data["Password"] = "Missing parameter";
-  }
-  if ( ! array_key_exists ( "Password", $data) && ! preg_match ( "/^[^\x01-\x1E]*$/u", $parameters["Password"]))
-  {
-    $data["Password"] = "Invalid content";
-  }
 
   /**
    * Call validate hook if exist
@@ -367,6 +355,12 @@ function server_change ( $buffer, $parameters)
     $parameters = framework_call ( "server_change_pre", $parameters, false, $parameters);
   }
 
+  // Verify local server address is configured
+  if ( empty ( $_in["general"]["address"]))
+  {
+    return array ( "code" => 500, "message" => "Local server address not configured. Set 'address' in [general] section of client.conf.");
+  }
+
   // Verify if server exist
   if ( ! check_config ( "config", "sip-server-" . $parameters["ID"]))
   {
@@ -375,6 +369,10 @@ function server_change ( $buffer, $parameters)
 
   // Load VoIP Domain servers list
   $servers = read_config ( "datafile", "vd-servers");
+  if ( ! is_array ( $servers))
+  {
+    $servers = array ();
+  }
 
   // Override server IP
   $servers[$parameters["ID"]] = array ( "Address" => $parameters["Address"], "Port" => (int) $parameters["Port"], "Description" => $parameters["Description"]);
@@ -400,42 +398,32 @@ function server_change ( $buffer, $parameters)
   }
 
   // Remove current server files
-  if ( ! unlink_config ( "config", "sip-server-" . $parameters["ID"]) || ! remove_config ( "datafile", "server-" . $parameters["ID"]))
+  if ( ! unlink_config ( "config", "sip-server-" . $parameters["ID"]) || ! unlink_config ( "datafile", "server-" . $parameters["ID"]))
   {
     return array ( "code" => 500, "message" => "Error removing file.");
   }
 
-  // Create file structure
+  // Create file structure (IP-based trust for internal server interconnection)
   $server = "; VoIP Domain network server " . $parameters["ID"] . ": " . $parameters["Description"] . "\n" .
             "[vd_server_" . $parameters["ID"] . "]\n" .
             "type=endpoint\n" .
+            "context=VoIPDomain-Internal\n" .
             "allow=all\n" .
             "direct_media=no\n" .
             "ice_support=yes\n" .
             "rtp_symmetric=no\n" .
             "force_rport=yes\n" .
             "rewrite_contact=no\n" .
-            "outbound_auth=vd_server_" . $parameters["ID"] . "_auth\n" .
             "aors=vd_server_" . $parameters["ID"] . "_aor\n" .
             "\n" .
             "[vd_server_" . $parameters["ID"] . "_aor]\n" .
             "type=aor\n" .
             "contact=sip:" . $parameters["Address"] . ":" . $parameters["Port"] . "\n" .
             "\n" .
-            "[vd_server_" . $parameters["ID"] . "_auth]\n" .
-            "type=auth\n" .
-            "auth_type=userpass\n" .
-            "username=vd_server_" . $parameters["ID"] . "\n" .
-            "password=" . $parameters["Password"] . "\n" .
-            "\n" .
-            "[vd_server_" . $parameters["ID"] . "_registration]\n" .
-            "type=registration\n" .
-            "transport=transport-udp\n" .
-            "outbound_auth=vd_server_" . $parameters["ID"] . "_auth\n" .
-            "server_uri=sip:" . $parameters["Address"] . "\n" .
-            "client_uri=sip:vd_server_" . $parameters["ID"] . "@" . $_in["general"]["address"] . "\n" .
-            "contact_user=vd_server_" . $parameters["ID"] . "\n" .
-            "retry_interval=60\n";
+            "[vd_server_" . $parameters["ID"] . "_identify]\n" .
+            "type=identify\n" .
+            "endpoint=vd_server_" . $parameters["ID"] . "\n" .
+            "match=" . $parameters["Address"] . "\n";
 
   // Write server file
   if ( ! write_config ( "config", "sip-server-" . $parameters["ID"], $server))
@@ -550,13 +538,17 @@ function server_remove ( $buffer, $parameters)
   }
 
   // Remove server files
-  if ( ! unlink_config ( "config", "sip-server-" . $parameters["ID"]) || ! remove_config ( "datafile", "server-" . $parameters["ID"]))
+  if ( ! unlink_config ( "config", "sip-server-" . $parameters["ID"]) || ! unlink_config ( "datafile", "server-" . $parameters["ID"]))
   {
     return array ( "code" => 500, "message" => "Error removing file.");
   }
 
   // Load VoIP Domain servers list
   $servers = read_config ( "datafile", "vd-servers");
+  if ( ! is_array ( $servers))
+  {
+    $servers = array ();
+  }
 
   // Override server IP
   unset ( $servers[$parameters["ID"]]);
@@ -630,37 +622,26 @@ function server_wipe ( $buffer, $parameters)
     framework_call ( "server_wipe_pre", $parameters, false, true);
   }
 
-  // Load VoIP Domain servers list
-  $servers = read_config ( "datafile", "vd-servers");
-
-  // Remove server files
-  foreach ( $servers as $serverid => $server)
+  // Remove all server config files by glob
+  foreach ( list_config ( "config", "sip-server-*") as $filename)
   {
-    if ( ! unlink_config ( "config", "server-" . $serverid) || ! unlink_config ( "datafile", "server-" . $serverid))
-    {
-      return array ( "code" => 500, "message" => "Error removing file.");
-    }
-
-    // Remove server information
-    unset ( $servers[$serverid]);
+    unlink_config ( "config", $filename);
   }
 
-  // Write VoIP Domain servers list
-  if ( ! write_config ( "datafile", "vd-servers", $servers))
+  // Remove all server datafiles by glob
+  foreach ( list_config ( "datafile", "server") as $filename)
+  {
+    unlink_config ( "datafile", $filename);
+  }
+
+  // Reset VoIP Domain servers list
+  if ( ! write_config ( "datafile", "vd-servers", array ()))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
 
-  // Overwrite Asterisk servers list
-  $serverlist = "; VoIP Domain servers IP list\n" .
-                "[vd_servers_ips](!)\n";
-  foreach ( $servers as $server)
-  {
-    $serverlist .= "match=" . $server["Address"] . "\n";
-  }
-
-  // Write Asterisk server list file
-  if ( ! write_config ( "config", "sip-vd-serverlist", $serverlist))
+  // Reset Asterisk servers list
+  if ( ! write_config ( "config", "sip-vd-serverlist", ""))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }

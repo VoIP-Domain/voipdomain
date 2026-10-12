@@ -6,7 +6,7 @@
 --    \:.. ./      |::.|::.|       |::.. . /
 --     `---'       `---`---'       `------'
 --
--- Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+-- Copyright (C) 2016-2026 Ernani José Camargo Azevedo
 --
 -- This program is free software: you can redistribute it and/or modify
 -- it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 --
 
 --
--- VoIP Domain country database filters. This module add the filter calls
+-- VoIP Domain country database filters. This module adds the filter calls
 -- related to country database of Brazil.
 --
 -- Reference: https://www.itu.int/oth/T020200001D/en (2016-01-28)
@@ -33,7 +33,7 @@
 -- @version    1.0
 -- @package    VoIP Domain
 -- @subpackage CountryDB
--- @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+-- @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
 -- @license    https://www.gnu.org/licenses/gpl-3.0.en.html
 --
 

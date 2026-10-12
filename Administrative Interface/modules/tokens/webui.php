@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Tokens
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -106,7 +106,7 @@ function tokens_search_page ( $buffer, $parameters)
   $output = "<table id=\"datatables\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"></table>\n";
 
   /**
-   * Add token remove modal code
+   * Add token removal modal code
    */
   $output .= "<div id=\"token_delete\" class=\"modal fade\" role=\"dialog\" aria-labelledby=\"token_delete\" aria-hidden=\"true\">\n";
   $output .= "  <div class=\"modal-dialog\">\n";
@@ -154,11 +154,11 @@ function tokens_search_page ( $buffer, $parameters)
               "  VoIP.rest ( '/tokens/' + encodeURIComponent ( $('#token_delete_id').val ()), 'DELETE').done ( function ( data, textStatus, jqXHR)\n" .
               "  {\n" .
               "    $('#token_delete').modal ( 'hide');\n" .
-              "    new PNotify ( { title: '" . __ ( "Token remove") . "', text: '" . __ ( "Token removed successfully!") . "', type: 'success'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Token removal") . "', text: '" . __ ( "Token removed successfully!") . "', type: 'success'});\n" .
               "    $('#token_delete_id').data ( 'dtrow').remove ().draw ();\n" .
               "  }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "  {\n" .
-              "    new PNotify ( { title: '" . __ ( "Token remove") . "', text: '" . __ ( "Error removing token!") . "', type: 'error'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Token removal") . "', text: '" . __ ( "Error removing token!") . "', type: 'error'});\n" .
               "  }).always ( function ()\n" .
               "  {\n" .
               "    l.stop ();\n" .
@@ -185,7 +185,7 @@ function tokens_add_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Tokens"));
-  sys_set_subtitle ( __ ( "tokens addition"));
+  sys_set_subtitle ( __ ( "Add tokens"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Tokens"), "link" => "/tokens"),
     2 => array ( "title" => __ ( "Add"))
@@ -329,7 +329,7 @@ function tokens_add_page ( $buffer, $parameters)
               "    method: 'POST',\n" .
               "    button: $('button.add'),\n" .
               "    filters: { Validity: 'datetime'},\n" .
-              "    title: '" . __ ( "Token addition") . "',\n" .
+              "    title: '" . __ ( "Add token") . "',\n" .
               "    fail: '" . __ ( "Error adding token!") . "',\n" .
               "    success: '" . __ ( "Token added successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
@@ -395,7 +395,7 @@ function tokens_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Token cloning") . "', text: '" . __ ( "Error retrieving token data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Clone token") . "', text: '" . __ ( "Error retrieving token data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -559,7 +559,7 @@ function tokens_edit_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Tokens"));
-  sys_set_subtitle ( __ ( "tokens edition"));
+  sys_set_subtitle ( __ ( "Edit tokens"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Tokens"), "link" => "/tokens"),
     2 => array ( "title" => __ ( "Edit"))
@@ -708,7 +708,7 @@ function tokens_edit_page ( $buffer, $parameters)
               "  $('#token_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Token edition") . "', text: '" . __ ( "Error retrieving token data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Edit token") . "', text: '" . __ ( "Error retrieving token data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#token_edit_form').alerts ( 'form',\n" .
               "{\n" .
@@ -718,7 +718,7 @@ function tokens_edit_page ( $buffer, $parameters)
               "    method: 'PATCH',\n" .
               "    button: $('button.edit'),\n" .
               "    filters: { Validity: 'datetime'},\n" .
-              "    title: '" . __ ( "Token edition") . "',\n" .
+              "    title: '" . __ ( "Edit token") . "',\n" .
               "    fail: '" . __ ( "Error changing token!") . "',\n" .
               "    success: '" . __ ( "Token changed successfully!") . "',\n" .
               "    onsuccess: function ()\n" .

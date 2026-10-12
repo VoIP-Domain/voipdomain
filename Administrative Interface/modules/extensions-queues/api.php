@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Extensions Queues
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API hook to extend extensions addition of queue type
+ * API hook to extend Add extensions of queue type
  */
 framework_add_function_documentation (
   "extensions_search",
@@ -267,7 +267,7 @@ function extensions_view_queue ( $buffer, $parameters)
 }
 
 /**
- * Function to extend extensions addition/edition validate of queue type.
+ * Function to extend Add extensions/edit validate of queue type.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -309,7 +309,7 @@ function extensions_queue_validate ( $buffer, $parameters)
   }
 
   /**
-   * If it's an edition, fetch old queue
+   * If it's an edit, fetch old queue
    */
   if ( array_key_exists ( "ORIGINAL", $buffer))
   {
@@ -378,7 +378,7 @@ function extensions_add_queue_post ( $buffer, $parameters)
   {
     $notify = framework_call ( "extension_queue_add_notify", $parameters, false, $notify);
   }
-  notify_server ( $range["Server"], "extension_queue_add", $notify);
+  notify_server ( $parameters["Range"]["Server"], "extension_queue_add", $notify);
 
   /**
    * Return data
@@ -387,7 +387,7 @@ function extensions_add_queue_post ( $buffer, $parameters)
 }
 
 /**
- * Function to extend extensions post edition of queue type.
+ * Function to extend extensions post edit of queue type.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -436,7 +436,7 @@ function extensions_edit_queue_post ( $buffer, $parameters)
   {
     $notify = framework_call ( "extensions_queue_change_notify", $parameters, false, $notify);
   }
-  notify_server ( $parameters["range"]["Server"], "extension_queue_change", $notify);
+  notify_server ( $parameters["Range"]["Server"], "extension_queue_change", $notify);
 
   /**
    * Return data
@@ -502,7 +502,7 @@ function extensions_remove_queue_pre ( $buffer, $parameters)
   {
     $notify = framework_call ( "extension_queue_remove_notify", $parameters, false, $notify);
   }
-  notify_server ( $parameters["ORIGINAL"]["range"]["Server"], "extension_queue_remove", $notify);
+  notify_server ( $parameters["ORIGINAL"]["Range"]["Server"], "extension_queue_remove", $notify);
 
   /**
    * Return data
@@ -528,7 +528,7 @@ function extensions_queue_server_reconfig ( $buffer, $parameters)
   /**
    * Fetch all extension queues and send to server
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ExtensionQueue`.`Queue`, `Extensions`.`Number` FROM `ExtensionQueue` LEFT JOIN `Extensions` ON `ExtensionQueue`.`Extension` = `Extensions`.`ID` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Ranges`.`Server` = " . (int) $parameters["ID"]))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Queues`.`Name` AS `Queue`, `Extensions`.`Number` FROM `ExtensionQueue` LEFT JOIN `Extensions` ON `ExtensionQueue`.`Extension` = `Extensions`.`ID` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` LEFT JOIN `Queues` ON `ExtensionQueue`.`Queue` = `Queues`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Ranges`.`Server` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -540,7 +540,7 @@ function extensions_queue_server_reconfig ( $buffer, $parameters)
     {
       $notify = framework_call ( "extension_queue_add_notify", $parameters, false, $notify);
     }
-    notify_server ( (int) $parameters["id"], "extension_queue_add", $notify);
+    notify_server ( (int) $parameters["ID"], "extension_queue_add", $notify);
   }
 
   /**

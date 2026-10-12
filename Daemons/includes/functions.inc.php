@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Generic Functions
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -41,6 +41,11 @@ define ( "VoIP_LOG_NOTICE", 0);
 define ( "VoIP_LOG_WARNING", 1);
 define ( "VoIP_LOG_ERROR", 2);
 define ( "VoIP_LOG_FATAL", 3);
+
+/**
+ * Global log file handle (opened before privilege drop, kept open)
+ */
+$_loghandle = null;
 
 /**
  * Function to calculate the distance between two geographic positions
@@ -162,7 +167,7 @@ function array_compare_with_keys ( $array1, $array2, $strict = false)
 
 /**
  * Function to explode a string to array, respecting the key and value of each
- * field. Usefull to Asterisk QOS fields.
+ * field. Useful to Asterisk QOS fields.
  *
  * @param $string string String to be exploded
  * @return array
@@ -407,7 +412,7 @@ function cidr_match ( $ip, $cidr)
 }
 
 /**
- * For PHP versions <= 5.5.0, we doesn't have hash_pbkdf2 function, so, implement it if needed.
+ * For PHP versions <= 5.5.0, we don't have hash_pbkdf2 function, so, implement it if needed.
  */
 if ( ! function_exists ( "hash_pbkdf2"))
 {
@@ -466,9 +471,75 @@ if ( ! function_exists ( "hash_pbkdf2"))
 }
 
 /**
- * Function to write messages to log file, with pre defined constant levels.
+ * Function to open log file and keep handle open. Must be called before
+ * dropping privileges so the daemon can continue writing after privilege drop.
  *
  * @global array $_in Framework global configuration variable
+ * @global resource $_loghandle Global log file handle
+ * @return bool True on success, false on failure
+ */
+function openLogFile ()
+{
+  global $_in, $_loghandle;
+
+  if ( ! isset ( $_in["general"]["logfile"]) || empty ( $_in["general"]["logfile"]))
+  {
+    echo "FATAL: Log file path not configured!\n";
+    return false;
+  }
+
+  $logdir = dirname ( $_in["general"]["logfile"]);
+  if ( ! is_dir ( $logdir))
+  {
+    if ( ! @mkdir ( $logdir, 0750, true))
+    {
+      echo "FATAL: Cannot create log directory: " . $logdir . "\n";
+      return false;
+    }
+  }
+
+  $_loghandle = @fopen ( $_in["general"]["logfile"], "a");
+  if ( $_loghandle === false)
+  {
+    echo "FATAL: Cannot open log file for writing: " . $_in["general"]["logfile"] . "\n";
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Function to reopen log file after rotation. Called by SIGHUP handler.
+ *
+ * @global array $_in Framework global configuration variable
+ * @global resource $_loghandle Global log file handle
+ * @return bool True on success, false on failure
+ */
+function reopenLogFile ()
+{
+  global $_in, $_loghandle;
+
+  if ( $_loghandle !== null && is_resource ( $_loghandle))
+  {
+    @fclose ( $_loghandle);
+  }
+
+  $_loghandle = @fopen ( $_in["general"]["logfile"], "a");
+  if ( $_loghandle === false)
+  {
+    return false;
+  }
+
+  writeLog ( "Log file reopened after rotation.");
+  return true;
+}
+
+/**
+ * Function to write messages to log file, with pre defined constant levels.
+ * Uses persistent file handle opened by openLogFile() before privilege drop.
+ *
+ * @global array $_in Framework global configuration variable
+ * @global resource $_loghandle Global log file handle
  * @global array $_lastlog Global variable that keep last log message
  * @global array $_lasttime Global variable that keep last log message timestamp
  * @param $msg String Mensage to be recorded
@@ -480,7 +551,7 @@ if ( ! function_exists ( "hash_pbkdf2"))
  */
 function writeLog ( $msg, $severity = VoIP_LOG_NOTICE)
 {
-  global $_in, $_lastlog, $_lasttime, $_lastdate;
+  global $_in, $_loghandle, $_lastlog, $_lasttime, $_lastdate;
 
   // Check if last message are equal
   if ( $_lastlog == $msg)
@@ -490,14 +561,13 @@ function writeLog ( $msg, $severity = VoIP_LOG_NOTICE)
   } else {
     if ( $_lasttime == 1)
     {
-      file_put_contents ( $_in["general"]["logfile"], $_lastdate . $_lastlog, FILE_APPEND);
+      _writeToLog ( $_lastdate . $_lastlog);
     }
     if ( $_lasttime > 1)
     {
-      // Register the number of times
       $msgdate = date ( "M") . " " . sprintf ( "% 2s", date ( "j")) . " " . date ( "H:i:s") . " " . php_uname ( "n") . " voipdomain[" . getmypid () . "]: ";
       $message = "WARNING: Last message repeated " . $_lasttime . " times.\n";
-      file_put_contents ( $_in["general"]["logfile"], $msgdate . $message, FILE_APPEND);
+      _writeToLog ( $msgdate . $message);
       echo $message;
     }
     $_lasttime = 0;
@@ -507,13 +577,34 @@ function writeLog ( $msg, $severity = VoIP_LOG_NOTICE)
   // Write message to log file
   $msgdate = date ( "M") . " " . sprintf ( "% 2s", date ( "j")) . " " . date ( "H:i:s") . " " . php_uname ( "n") . " voipdomain[" . getmypid () . "]: ";
   $message = ( $severity == VoIP_LOG_ERROR ? "ERROR: " : "") . ( $severity == VoIP_LOG_WARNING ? "WARNING: " : "") . ( $severity == VoIP_LOG_FATAL ? "FATAL: " : "") . $msg . "\n";
-  file_put_contents ( $_in["general"]["logfile"], $msgdate . $message, FILE_APPEND);
+  _writeToLog ( $msgdate . $message);
   echo $message;
   if ( $severity == VoIP_LOG_FATAL || $severity == VoIP_LOG_ERROR)
   {
     exit ( 1);
   }
   $_lastdate = $msgdate;
+}
+
+/**
+ * Internal function to write to log file using persistent handle or fallback.
+ *
+ * @global array $_in Framework global configuration variable
+ * @global resource $_loghandle Global log file handle
+ * @param $data String Data to write
+ * @return void
+ */
+function _writeToLog ( $data)
+{
+  global $_in, $_loghandle;
+
+  if ( $_loghandle !== null && is_resource ( $_loghandle))
+  {
+    fwrite ( $_loghandle, $data);
+    fflush ( $_loghandle);
+  } else {
+    @file_put_contents ( $_in["general"]["logfile"], $data, FILE_APPEND);
+  }
 }
 
 /**
@@ -627,19 +718,20 @@ function mysql_check ()
 {
   global $_in;
 
-  if ( ! @$_in["mysql"]["id"] || ! @$_in["mysql"]["id"]->ping ())
+  try
   {
-    if ( @$_in["mysql"]["id"])
+    if ( ! @$_in["mysql"]["id"] || ! @$_in["mysql"]["id"]->ping ())
     {
-      @$_in["mysql"]["id"]->close ();
+      if ( @$_in["mysql"]["id"])
+      {
+        @$_in["mysql"]["id"]->close ();
+      }
+      $_in["mysql"]["id"] = new mysqli ( $_in["mysql"]["hostname"] . ( ! empty ( $_in["mysql"]["port"]) ? ":" . $_in["mysql"]["port"] : ""), $_in["mysql"]["username"], $_in["mysql"]["password"], $_in["mysql"]["database"]);
+      writeLog ( "Reconnected to MySQL database.", VoIP_LOG_WARNING);
     }
-    $_in["mysql"]["id"] = @new mysqli ( $_in["mysql"]["hostname"] . ( ! empty ( $_in["mysql"]["port"]) ? ":" . $_in["mysql"]["port"] : ""), $_in["mysql"]["username"], $_in["mysql"]["password"], $_in["mysql"]["database"]);
-    if ( $_in["mysql"]["id"]->connect_errno)
-    {
-      writeLog ( "Cannot reconnect to database!", VoIP_LOG_WARNING);
-    } else {
-      writeLog ( "Reconnecting to MySQL database!", VoIP_LOG_WARNING);
-    }
+  } catch ( mysqli_sql_exception $e)
+  {
+    writeLog ( "Cannot reconnect to database: " . $e->getMessage (), VoIP_LOG_WARNING);
   }
 
   return;
@@ -705,6 +797,47 @@ function unlink_recursive ( $filename)
 }
 
 /**
+ * Gearman function name for the client daemon task worker on a server.
+ *
+ * @param int $serverid Server ID
+ * @return string
+ */
+function gearman_client_task_name ( $serverid)
+{
+  return "vd_client_" . (int) $serverid . "_task";
+}
+
+/**
+ * Gearman function name for the backup client daemon task worker.
+ *
+ * @param int $serverid Primary server ID
+ * @return string
+ */
+function gearman_backup_task_name ( $serverid)
+{
+  return "vd_backup_server_" . (int) $serverid . "_task";
+}
+
+/**
+ * Check whether client daemon backup mode is enabled in configuration.
+ *
+ * @param mixed $value Configuration value
+ * @return boolean
+ */
+function gearman_backup_mode_enabled ( $value)
+{
+  if ( $value === true || $value === 1)
+  {
+    return true;
+  }
+  if ( ! is_string ( $value))
+  {
+    return false;
+  }
+  return in_array ( strtolower ( $value), array ( "1", "true", "yes", "on"), true);
+}
+
+/**
  * Function to send an event to system.
  *
  * @global array $_in Framework global configuration variable
@@ -721,8 +854,10 @@ function system_event ( $event, $data)
    */
   if ( ! $_in["gearman"]["client"])
   {
+    $gearman_host = ! empty ( $_in["gearman"]["hostname"]) ? $_in["gearman"]["hostname"] : "127.0.0.1";
+    $gearman_port = ! empty ( $_in["gearman"]["port"]) ? (int) $_in["gearman"]["port"] : 4730;
     $_in["gearman"]["client"] = new GearmanClient ();
-    if ( ! $_in["gearman"]["client"]->addServer ( $_in["gearman"]["servers"]))
+    if ( ! $_in["gearman"]["client"]->addServer ( $gearman_host, $gearman_port))
     {
       unset ( $_in["gearman"]["client"]);
       return false;
@@ -754,12 +889,33 @@ function system_event ( $event, $data)
   $encrypted = openssl_encrypt ( $payload, "aes-256-cbc", $key, OPENSSL_RAW_DATA, $iv);
   $hmac = hash_hmac ( "sha256", $encrypted, $key, true);
   openssl_public_encrypt ( $key, $encryptedkey, $_in["keys"]["masterPublicKey"]);
-  openssl_sign ( $key . $iv . $hmac . $encrypted, $sign, $_in["keys"]["privateKey"], OPENSSL_ALGO_SHA1);
+  openssl_sign ( $key . $iv . $hmac . $encrypted, $sign, $_in["keys"]["privateKey"], OPENSSL_ALGO_SHA256);
 
   /**
-   * Send event data
+   * Send event data (with retry on failure)
    */
-  return $_in["gearman"]["client"]->doBackground ( "server_task_reply", json_encode ( array ( "payload" => base64_encode ( $encrypted), "iv" => base64_encode ( $iv), "key" => base64_encode ( $encryptedkey), "hmac" => base64_encode ( $hmac), "sign" => base64_encode ( $sign), "sid" => $_in["daemon"]["serverid"])));
+  $jobdata = json_encode ( array ( "payload" => base64_encode ( $encrypted), "iv" => base64_encode ( $iv), "key" => base64_encode ( $encryptedkey), "hmac" => base64_encode ( $hmac), "sign" => base64_encode ( $sign), "sid" => $_in["daemon"]["serverid"]));
+  $result = @$_in["gearman"]["client"]->doBackground ( "server_task_reply", $jobdata);
+  if ( $_in["gearman"]["client"]->returnCode () != GEARMAN_SUCCESS)
+  {
+    writeLog ( "Gearman doBackground failed (code " . $_in["gearman"]["client"]->returnCode () . "), reconnecting...", VoIP_LOG_WARNING);
+    $_in["gearman"]["client"] = null;
+    $gearman_host = ! empty ( $_in["gearman"]["hostname"]) ? $_in["gearman"]["hostname"] : "127.0.0.1";
+    $gearman_port = ! empty ( $_in["gearman"]["port"]) ? (int) $_in["gearman"]["port"] : 4730;
+    $_in["gearman"]["client"] = new GearmanClient ();
+    if ( ! $_in["gearman"]["client"]->addServer ( $gearman_host, $gearman_port))
+    {
+      unset ( $_in["gearman"]["client"]);
+      return false;
+    }
+    $result = @$_in["gearman"]["client"]->doBackground ( "server_task_reply", $jobdata);
+    if ( $_in["gearman"]["client"]->returnCode () != GEARMAN_SUCCESS)
+    {
+      writeLog ( "Gearman doBackground retry also failed (code " . $_in["gearman"]["client"]->returnCode () . ")!", VoIP_LOG_WARNING);
+      return false;
+    }
+  }
+  return $result;
 }
 
 /**
@@ -1278,6 +1434,11 @@ function list_config ( $type, $search = "*")
       $prefix = "";
       $postfix = ".json";
       $search = basename ( $search);
+      // Add wildcard if not present (to match patterns like "group-1.json", "group-2.json", etc.)
+      if ( strpos ( $search, "*") === false)
+      {
+        $search = $search . "-*";
+      }
       break;
     default:
       writeLog ( "Config list: Invalid configuration type \"" . $type . "\"!", VoIP_LOG_WARNING);
@@ -1381,7 +1542,7 @@ function check_config ( $type, $filename)
  *                     "audiodir" or "datafile")
  * @param string $source The source filename
  * @param string $target The target filename
- * @return boolean If operation was successfully done
+ * @return boolean If the operation completed successfully
  */
 function copy_config ( $type, $source, $target)
 {
@@ -1440,7 +1601,7 @@ function copy_config ( $type, $source, $target)
  *                     "audiodir" or "datafile")
  * @param string $source The source filename
  * @param string $target The target filename
- * @return boolean If operation was successfully done
+ * @return boolean If the operation completed successfully
  */
 function rename_config ( $type, $source, $target)
 {
@@ -1497,11 +1658,10 @@ function rename_config ( $type, $source, $target)
  * @global array $_in Framework global configuration variable
  * @param string $type The configuration type ("config", "ap", "audio" or
  *                     "datafile")
- * @param string $filename The file to be written
- * @param binary $content The file content
- * @return mixed The configuration file content
+ * @param string $filename The file to be read
+ * @return mixed The configuration file content or false if not found
  */
-function read_config ( $type, $filename, $content)
+function read_config ( $type, $filename)
 {
   global $_in;
 
@@ -1581,14 +1741,152 @@ function read_config ( $type, $filename, $content)
 }
 
 /**
+ * Write a configuration file by streaming from a source path.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $type The configuration type ("config", "ap", "audio" or "datafile")
+ * @param string $filename The file to be written
+ * @param string $sourcepath Readable source file path
+ * @return boolean If the operation completed successfully
+ */
+function write_config_from_path ( $type, $filename, $sourcepath)
+{
+  global $_in;
+
+  if ( ! is_readable ( $sourcepath))
+  {
+    return false;
+  }
+
+  switch ( $type)
+  {
+    case "config":
+      $dir = $_in["general"]["confdir"];
+      $prefix = "";
+      $postfix = ".conf";
+      break;
+    case "audio":
+      $dir = $_in["general"]["soundsdir"];
+      $prefix = "";
+      $postfix = "";
+      break;
+    case "ap":
+      $dir = $_in["general"]["tftpdir"];
+      $prefix = "";
+      $postfix = "";
+      break;
+    case "datafile":
+      $dir = $_in["general"]["datadir"];
+      $prefix = "";
+      $postfix = ".json";
+      break;
+    default:
+      writeLog ( "Config write from path: Invalid configuration type \"" . $type . "\"!", VoIP_LOG_WARNING);
+      return false;
+  }
+
+  $dir = preg_replace ( "/\/+$/", "", $dir) . "/";
+  $dest = $dir . $prefix . preg_replace ( "/^\/+/", "", $filename) . $postfix;
+
+  if ( ( $type == "audio" || $type == "ap") && ! file_exists ( dirname ( $dest)))
+  {
+    @mkdir ( dirname ( $dest), 0775, true);
+  }
+
+  $source = fopen ( $sourcepath, "rb");
+  if ( ! $source)
+  {
+    return false;
+  }
+  $desthandle = fopen ( $dest, "wb");
+  if ( ! $desthandle)
+  {
+    fclose ( $source);
+    return false;
+  }
+  while ( ! feof ( $source))
+  {
+    $chunk = fread ( $source, 1048576);
+    if ( $chunk === false)
+    {
+      fclose ( $source);
+      fclose ( $desthandle);
+      @unlink ( $dest);
+      return false;
+    }
+    if ( $chunk !== "" && fwrite ( $desthandle, $chunk) === false)
+    {
+      fclose ( $source);
+      fclose ( $desthandle);
+      @unlink ( $dest);
+      return false;
+    }
+  }
+  fclose ( $source);
+  fclose ( $desthandle);
+  return true;
+}
+
+/**
+ * Write a binary payload from inline data or a staged file path.
+ *
+ * @param string $destpath Absolute destination path
+ * @param array $parameters Payload parameters with Data and/or FilePath
+ * @return boolean
+ */
+function write_payload_to_file ( $destpath, $parameters)
+{
+  if ( array_key_exists ( "FilePath", $parameters) && is_readable ( $parameters["FilePath"]))
+  {
+    $source = fopen ( $parameters["FilePath"], "rb");
+    if ( ! $source)
+    {
+      return false;
+    }
+    $dest = fopen ( $destpath, "wb");
+    if ( ! $dest)
+    {
+      fclose ( $source);
+      return false;
+    }
+    while ( ! feof ( $source))
+    {
+      $chunk = fread ( $source, 1048576);
+      if ( $chunk === false)
+      {
+        fclose ( $source);
+        fclose ( $dest);
+        @unlink ( $destpath);
+        return false;
+      }
+      if ( $chunk !== "" && fwrite ( $dest, $chunk) === false)
+      {
+        fclose ( $source);
+        fclose ( $dest);
+        @unlink ( $destpath);
+        return false;
+      }
+    }
+    fclose ( $source);
+    fclose ( $dest);
+    @unlink ( $parameters["FilePath"]);
+    return true;
+  }
+  if ( array_key_exists ( "Data", $parameters))
+  {
+    return file_put_contents ( $destpath, $parameters["Data"]) !== false;
+  }
+  return false;
+}
+
+/**
  * Function to write configuration files.
  *
  * @global array $_in Framework global configuration variable
- * @param string $type The configuration type ("config", "ap", "audio" or
- *                     "datafile")
+ * @param string $type The configuration type ("config", "configdb", "ap", "audio" or "datafile")
  * @param string $filename The file to be written
  * @param binary $content The file content
- * @return boolean If operation was successfully done
+ * @return boolean If the operation completed successfully
  */
 function write_config ( $type, $filename, $content)
 {
@@ -1639,17 +1937,83 @@ function write_config ( $type, $filename, $content)
   // Be sure that the directory has a trailing "/":
   $dir = preg_replace ( "/\/+$/", "", $dir) . "/";
 
-  // Add directory name and remove trailing "/" from filename:
-  $filename = $dir . $prefix . preg_replace ( "/^\/+/", "", $filename) . $postfix;
+  // Logical filename (without directory) for hooks and path assembly:
+  $logical = $prefix . preg_replace ( "/^\/+/", "", $filename);
+
+  // Add directory name:
+  $filename = $dir . $logical . $postfix;
 
   // If it's an audio or ap file, check if directory exists, if not, create it:
   if ( ( $type == "audio" || $type == "ap") && ! file_exists ( dirname ( $filename)))
   {
-    @mkdir ( dirname ( $filename), 0775, true);
+    if ( ! @mkdir ( dirname ( $filename), 0775, true))
+    {
+      writeLog ( "Config write: Cannot create directory \"" . dirname ( $filename) . "\" - check permissions!", VoIP_LOG_WARNING);
+      return false;
+    }
+  }
+
+  // Check if directory is writable:
+  if ( ! is_writable ( dirname ( $filename)))
+  {
+    writeLog ( "Config write: Directory \"" . dirname ( $filename) . "\" is not writable - check ownership/permissions!", VoIP_LOG_WARNING);
+    return false;
+  }
+
+  // Allow plugins to adjust generated dialplan fragments before write:
+  if ( ( $type == "config" || $type == "configdb") && preg_match ( '/^dialplan-/', $logical) && framework_has_hook ( "dialplan_write_post"))
+  {
+    $hooked = framework_call ( "dialplan_write_post", array ( "type" => $type, "filename" => $logical, "content" => $content));
+    if ( is_string ( $hooked))
+    {
+      $content = $hooked;
+    }
   }
 
   // Write file content:
-  return file_put_contents ( $filename, $content);
+  $result = file_put_contents ( $filename, $content);
+  if ( $result === false)
+  {
+    writeLog ( "Config write: Failed to write file \"" . $filename . "\" - " . ( error_get_last ()["message"] ?? "unknown error"), VoIP_LOG_WARNING);
+  }
+  return $result;
+}
+
+/**
+ * Write a plugin-owned dialplan bootstrap fragment.
+ *
+ * Fragments are included from bootstrap/dialplan.conf via
+ * dialplan-bootstrap-*.conf. Use the same [context] headers as core
+ * bootstrap files; Asterisk merges extensions into existing contexts.
+ *
+ * @param string $name Plugin-safe suffix (alphanumeric, dash, underscore)
+ * @param string $content Dialplan text
+ * @return boolean
+ */
+function write_dialplan_plugin ( $name, $content)
+{
+  $name = preg_replace ( "/[^A-Za-z0-9_-]/", "", $name);
+  if ( $name === "")
+  {
+    return false;
+  }
+  return write_config ( "config", "dialplan-bootstrap-" . $name, $content);
+}
+
+/**
+ * Remove a plugin dialplan bootstrap fragment.
+ *
+ * @param string $name Plugin-safe suffix
+ * @return boolean
+ */
+function unlink_dialplan_plugin ( $name)
+{
+  $name = preg_replace ( "/[^A-Za-z0-9_-]/", "", $name);
+  if ( $name === "")
+  {
+    return false;
+  }
+  return unlink_config ( "config", "dialplan-bootstrap-" . $name);
 }
 
 /**
@@ -1659,7 +2023,7 @@ function write_config ( $type, $filename, $content)
  * @param string $type The configuration type ("config", "ap", "apdir", "audio",
  *                     "audiodir" or "datafile")
  * @param string $filename The file to be removed
- * @return boolean If operation was successfully done
+ * @return boolean If the operation completed successfully
  */
 function unlink_config ( $type, $filename)
 {

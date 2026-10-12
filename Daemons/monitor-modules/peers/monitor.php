@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Peers
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "FullyBooted", "peers_bootup");
 framework_add_hook ( "Load", "peers_load");
@@ -86,7 +86,7 @@ function peers_load ( $buffer, $parameters)
   global $_in, $ami;
 
   // Execute only if loaded specific peers module:
-  if ( $parameters["Module"] == "app_peer.so" || $parameters["Module"] == "app_peer")
+  if ( $parameters["Module"] == "chan_sip.so" || $parameters["Module"] == "chan_sip" || $parameters["Module"] == "app_peer.so" || $parameters["Module"] == "app_peer")
   {
     // Setup peers variables:
     $_in["Peers"] = array ();

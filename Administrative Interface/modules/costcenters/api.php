@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Cost Centers
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -88,14 +88,14 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Filter" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -154,7 +154,7 @@ function costcenters_search ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
 
   /**
@@ -270,7 +270,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -293,7 +293,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "costcenters_view"),
     "title" => __ ( "View cost centers"),
-    "description" => __ ( "Get a cost center information."),
+    "description" => __ ( "Get cost center information."),
     "parameters" => array (
       array (
         "name" => "ID",
@@ -448,10 +448,10 @@ framework_add_hook (
     ),
     "response" => array (
       201 => array (
-        "description" => __ ( "New cost center added successfully.")
+        "description" => __ ( "A new cost center was added successfully.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -463,7 +463,7 @@ framework_add_hook (
             "Code" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The informed code is invalid.")
+              "example" => __ ( "The provided code is invalid.")
             )
           )
         )
@@ -519,7 +519,7 @@ function costcenters_add ( $buffer, $parameters)
   }
   if ( ! array_key_exists ( "Code", $data) && ! preg_match ( "/^[0-9]+$/", $parameters["Code"]))
   {
-    $data["Code"] = __ ( "The informed code is invalid.");
+    $data["Code"] = __ ( "The provided code is invalid.");
   }
 
   /**
@@ -601,7 +601,7 @@ function costcenters_add ( $buffer, $parameters)
    * Return OK to user
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . $_in["general"]["baseurl"] . "costcenters/" . $parameters["ID"] . "/view");
+  header ( "Location: " . voipdomain_location_url ( "/costcenters/" . $parameters["ID"] . "/view"));
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 
@@ -637,7 +637,7 @@ framework_add_hook (
         "description" => __ ( "The cost center was successfully updated.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -649,7 +649,7 @@ framework_add_hook (
             "Code" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The informed code is invalid.")
+              "example" => __ ( "The provided code is invalid.")
             )
           )
         )
@@ -705,7 +705,7 @@ function costcenters_edit ( $buffer, $parameters)
   }
   if ( ! array_key_exists ( "Code", $data) && ! preg_match ( "/^[0-9]+$/", $parameters["Code"]))
   {
-    $data["Code"] = __ ( "The informed code is invalid.");
+    $data["Code"] = __ ( "The provided code is invalid.");
   }
 
   /**
@@ -820,7 +820,7 @@ framework_add_hook (
         "description" => __ ( "The cost center was removed.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (

@@ -1,0 +1,39 @@
+# VoIP Domain SELinux file contexts
+
+# Daemon executables
+/var/lib/voipdomain/daemons(/.*)?                   gen_context(system_u:object_r:voipdomain_exec_t,s0)
+/var/lib/voipdomain/daemons/.*\.php                 gen_context(system_u:object_r:voipdomain_exec_t,s0)
+/usr/libexec/voipdomain/daemons                     gen_context(system_u:object_r:voipdomain_exec_t,s0)
+
+# Configuration files
+/etc/voipdomain(/.*)?                               gen_context(system_u:object_r:voipdomain_etc_t,s0)
+/etc/voipdomain/webinterface\.conf                  gen_context(system_u:object_r:voipdomain_etc_t,s0)
+/etc/voipdomain/router\.conf                        gen_context(system_u:object_r:voipdomain_etc_t,s0)
+/etc/voipdomain/client\.conf                        gen_context(system_u:object_r:voipdomain_etc_t,s0)
+/etc/voipdomain/fastagi\.conf                       gen_context(system_u:object_r:voipdomain_etc_t,s0)
+/etc/voipdomain/monitor\.conf                       gen_context(system_u:object_r:voipdomain_etc_t,s0)
+/etc/voipdomain/master-certificate\.key             gen_context(system_u:object_r:voipdomain_etc_t,s0)
+
+# Asterisk VoIP Domain configuration
+/etc/asterisk/voipdomain(/.*)?                      gen_context(system_u:object_r:asterisk_etc_t,s0)
+
+# Runtime/PID directory
+/run/voipdomain(/.*)?                               gen_context(system_u:object_r:voipdomain_var_run_t,s0)
+/var/run/voipdomain(/.*)?                           gen_context(system_u:object_r:voipdomain_var_run_t,s0)
+
+# Data and webroot
+/var/lib/voipdomain(/.*)?                           gen_context(system_u:object_r:voipdomain_var_lib_t,s0)
+/var/lib/voipdomain/webroot(/.*)?                   gen_context(system_u:object_r:voipdomain_var_lib_t,s0)
+/var/lib/voipdomain/storage(/.*)?                   gen_context(system_u:object_r:voipdomain_var_lib_t,s0)
+/var/lib/voipdomain/data(/.*)?                      gen_context(system_u:object_r:voipdomain_var_lib_t,s0)
+
+# Log files
+/var/log/voipdomain(/.*)?                           gen_context(system_u:object_r:voipdomain_log_t,s0)
+
+# Spool directory
+/var/spool/voipdomain(/.*)?                         gen_context(system_u:object_r:voipdomain_spool_t,s0)
+/var/spool/voipdomain/file-transfer(/.*)?           gen_context(system_u:object_r:voipdomain_spool_t,s0)
+
+# Systemd unit files (use standard systemd_unit_file_t)
+/usr/lib/systemd/system/voipdomain-.*\.service      gen_context(system_u:object_r:systemd_unit_file_t,s0)
+/usr/lib/systemd/system/voipdomain-.*\.path         gen_context(system_u:object_r:systemd_unit_file_t,s0)

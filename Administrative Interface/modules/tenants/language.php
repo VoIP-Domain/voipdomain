@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Multi-Tenant
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -71,7 +71,7 @@ i18n_add ( "An object containing system tenant information.");
 i18n_add ( "The ID of the tenant.");
 i18n_add ( "The country code information of the tenant.");
 i18n_add ( "The country code unique identifier.");
-i18n_add ( "The english name of the country.");
+i18n_add ( "The English name of the country.");
 i18n_add ( "The translated name of the country.");
 i18n_add ( "United States of America");
 i18n_add ( "The *ISO3166-2* of the country.");
@@ -91,7 +91,7 @@ i18n_add ( "The name of the tenant.");
 i18n_add ( "The domain of the tenant.");
 i18n_add ( "The password of the tenant administrator.");
 i18n_add ( "The confirmation of the tenant administrator password.");
-i18n_add ( "New system tenant added successfully.");
+i18n_add ( "A new system tenant was added successfully.");
 i18n_add ( "The tenant name is required.");
 i18n_add ( "The tenant domain must be valid.");
 i18n_add ( "Add tenants");
@@ -108,22 +108,22 @@ i18n_add ( "The tenant currency is required.");
 i18n_add ( "The tenant administrator name is required.");
 i18n_add ( "The tenant administrator login name is required.");
 i18n_add ( "The tenant administrator e-mail is required.");
-i18n_add ( "The informed tenant administrator e-mail is invalid.");
+i18n_add ( "The provided tenant administrator e-mail is invalid.");
 i18n_add ( "The tenant administrator password is required.");
 i18n_add ( "The tenant administrator confirmation password is required.");
 i18n_add ( "The passwords didn't match.");
-i18n_add ( "The informed currency is invalid.");
-i18n_add ( "The informed country is invalid.");
+i18n_add ( "The provided currency is invalid.");
+i18n_add ( "The provided country is invalid.");
 i18n_add ( "The provided domain was already in use.");
 i18n_add ( "System tenant updated successfully.");
 i18n_add ( "Edit tenant");
 i18n_add ( "Edit a system tenant.");
 i18n_add ( "The system tenant was removed.");
 i18n_add ( "Remove tenants");
-i18n_add ( "Remove a tenant from system.");
+i18n_add ( "Remove a tenant from the system.");
 i18n_add ( "Tenants");
 i18n_add ( "Master authentication");
-i18n_add ( "tenants search");
+i18n_add ( "Search tenants");
 i18n_add ( "Remove tenant");
 i18n_add ( "Are you sure you want to remove tenant %s (%s)?");
 i18n_add ( "Name");
@@ -134,7 +134,7 @@ i18n_add ( "Gateways");
 i18n_add ( "Tenant removal");
 i18n_add ( "Tenant removed successfully!");
 i18n_add ( "Error removing tenant!");
-i18n_add ( "tenants addition");
+i18n_add ( "Add tenants");
 i18n_add ( "Geographical");
 i18n_add ( "Account");
 i18n_add ( "Tenant name");
@@ -156,22 +156,22 @@ i18n_add ( "Tenant administrator login name");
 i18n_add ( "Tenant administrator password");
 i18n_add ( "Confirmation");
 i18n_add ( "Tenant administrator password confirmation");
-i18n_add ( "Tenant addition");
+i18n_add ( "Add tenant");
 i18n_add ( "Error adding tenant!");
 i18n_add ( "Tenant added successfully!");
-i18n_add ( "Tenant cloning");
+i18n_add ( "Clone tenant");
 i18n_add ( "Error retrieving tenant data!");
-i18n_add ( "tenants visualization");
+i18n_add ( "View tenants");
 i18n_add ( "Statistics");
 i18n_add ( "Tenant status");
 i18n_add ( "Visit tenant site");
 i18n_add ( "Number of users on tenant");
 i18n_add ( "Number of extensions on tenant");
 i18n_add ( "Number of gateways on tenant");
-i18n_add ( "Tenants view");
+i18n_add ( "View tenants");
 i18n_add ( "Error viewing tenant!");
-i18n_add ( "tenants editing");
-i18n_add ( "Tenant edition");
+i18n_add ( "Edit tenants");
+i18n_add ( "Edit tenant");
 i18n_add ( "Error changing tenant!");
 i18n_add ( "Tenant changed successfully!");
 i18n_add ( "Status");
@@ -179,7 +179,7 @@ i18n_add ( "Status");
 /**
  * Add Brazilian Portuguese support
  */
-i18n_add ( "Filter search with this string. If not provided, return all tenants.", "Filtrar busca com esta string. Se não for fornecida, retornar todos os locatários.", "pt_BR");
+i18n_add ( "Filter search with this string. If not provided, return all tenants.", "Filtrar a pesquisa com esta string. Se omitida, retorna todos os locatários.", "pt_BR");
 i18n_add ( "customer", "cliente", "pt_BR");
 i18n_add ( "Filter by tenant status.", "Filtrar pelo status do locatário.", "pt_BR");
 i18n_add ( "An array containing the system tenants.", "Um array contendo os locatários do sistema.", "pt_BR");
@@ -213,7 +213,7 @@ i18n_add ( "An object containing system tenant information.", "Um objeto contend
 i18n_add ( "The ID of the tenant.", "O ID do locatário.", "pt_BR");
 i18n_add ( "The country code information of the tenant.", "Informações do código do país do locatário.", "pt_BR");
 i18n_add ( "The country code unique identifier.", "O identificador único do código do país.", "pt_BR");
-i18n_add ( "The english name of the country.", "O nome do país em inglês.", "pt_BR");
+i18n_add ( "The English name of the country.", "O nome do país em inglês.", "pt_BR");
 i18n_add ( "The translated name of the country.", "O nome traduzido do país.", "pt_BR");
 i18n_add ( "United States of America", "Estados Unidos da América", "pt_BR");
 i18n_add ( "The *ISO3166-2* of the country.", "O *ISO3166-2* do país.", "pt_BR");
@@ -233,7 +233,7 @@ i18n_add ( "The name of the tenant.", "O nome do locatário.", "pt_BR");
 i18n_add ( "The domain of the tenant.", "O domínio do locatário.", "pt_BR");
 i18n_add ( "The password of the tenant administrator.", "A senha do administrador do locatário.", "pt_BR");
 i18n_add ( "The confirmation of the tenant administrator password.", "A confirmação da senha do administrador do locatário.", "pt_BR");
-i18n_add ( "New system tenant added successfully.", "Novo locatário do sistema adicionado com sucesso.", "pt_BR");
+i18n_add ( "A new system tenant was added successfully.", "Um novo locatário do sistema foi adicionado com sucesso.", "pt_BR");
 i18n_add ( "The tenant name is required.", "O nome do locatário é obrigatório.", "pt_BR");
 i18n_add ( "The tenant domain must be valid.", "O domínio do locatário deve ser válido.", "pt_BR");
 i18n_add ( "Add tenants", "Adicionar locatários", "pt_BR");
@@ -250,22 +250,22 @@ i18n_add ( "The tenant currency is required.", "A moeda do locatário é obrigat
 i18n_add ( "The tenant administrator name is required.", "O nome do administrador do locatário é obrigatório.", "pt_BR");
 i18n_add ( "The tenant administrator login name is required.", "O nome de login do administrador do locatário é obrigatório.", "pt_BR");
 i18n_add ( "The tenant administrator e-mail is required.", "O e-mail do administrador do locatário é obrigatório.", "pt_BR");
-i18n_add ( "The informed tenant administrator e-mail is invalid.", "O e-mail informado do administrador do locatário é inválido.", "pt_BR");
+i18n_add ( "The provided tenant administrator e-mail is invalid.", "O e-mail informado do administrador do locatário é inválido.", "pt_BR");
 i18n_add ( "The tenant administrator password is required.", "A senha do administrador do locatário é obrigatória.", "pt_BR");
 i18n_add ( "The tenant administrator confirmation password is required.", "A confirmação da senha do administrador do locatário é obrigatória.", "pt_BR");
 i18n_add ( "The passwords didn't match.", "As senhas não coincidem.", "pt_BR");
-i18n_add ( "The informed currency is invalid.", "A moeda informada é inválida.", "pt_BR");
-i18n_add ( "The informed country is invalid.", "O país informado é inválido.", "pt_BR");
+i18n_add ( "The provided currency is invalid.", "A moeda informada é inválida.", "pt_BR");
+i18n_add ( "The provided country is invalid.", "O país informado é inválido.", "pt_BR");
 i18n_add ( "The provided domain was already in use.", "O domínio informado já está em uso.", "pt_BR");
 i18n_add ( "System tenant updated successfully.", "Locatário do sistema atualizado com sucesso.", "pt_BR");
 i18n_add ( "Edit tenant", "Editar locatário", "pt_BR");
 i18n_add ( "Edit a system tenant.", "Editar um locatário do sistema.", "pt_BR");
 i18n_add ( "The system tenant was removed.", "O locatário do sistema foi removido.", "pt_BR");
 i18n_add ( "Remove tenants", "Remover locatários", "pt_BR");
-i18n_add ( "Remove a tenant from system.", "Remover um locatário do sistema.", "pt_BR");
+i18n_add ( "Remove a tenant from the system.", "Remover um locatário do sistema.", "pt_BR");
 i18n_add ( "Tenants", "Locatários", "pt_BR");
 i18n_add ( "Master authentication", "Autenticação mestre", "pt_BR");
-i18n_add ( "tenants search", "busca de locatários", "pt_BR");
+i18n_add ( "Search tenants", "busca de locatários", "pt_BR");
 i18n_add ( "Remove tenant", "Remover locatário", "pt_BR");
 i18n_add ( "Are you sure you want to remove tenant %s (%s)?", "Tem certeza de que deseja remover o locatário %s (%s)?", "pt_BR");
 i18n_add ( "Name", "Nome", "pt_BR");
@@ -273,10 +273,10 @@ i18n_add ( "Domain", "Domínio", "pt_BR");
 i18n_add ( "Users", "Usuários", "pt_BR");
 i18n_add ( "Extensions", "Ramais", "pt_BR");
 i18n_add ( "Gateways", "Gateways", "pt_BR");
-i18n_add ( "Tenant removal", "Remoção de locatário", "pt_BR");
+i18n_add ( "Tenant removal", "Remover locatário", "pt_BR");
 i18n_add ( "Tenant removed successfully!", "Locatário removido com sucesso!", "pt_BR");
 i18n_add ( "Error removing tenant!", "Erro ao remover o locatário!", "pt_BR");
-i18n_add ( "tenants addition", "adição de locatários", "pt_BR");
+i18n_add ( "Add tenants", "adicionar locatários", "pt_BR");
 i18n_add ( "Geographical", "Geográfico", "pt_BR");
 i18n_add ( "Account", "Conta", "pt_BR");
 i18n_add ( "Tenant name", "Nome do locatário", "pt_BR");
@@ -298,22 +298,22 @@ i18n_add ( "Tenant administrator login name", "Nome de login do administrador do
 i18n_add ( "Tenant administrator password", "Senha do administrador do locatário", "pt_BR");
 i18n_add ( "Confirmation", "Confirmação", "pt_BR");
 i18n_add ( "Tenant administrator password confirmation", "Confirmação da senha do administrador do locatário", "pt_BR");
-i18n_add ( "Tenant addition", "Adição de locatário", "pt_BR");
+i18n_add ( "Add tenant", "Adicionar locatário", "pt_BR");
 i18n_add ( "Error adding tenant!", "Erro ao adicionar locatário!", "pt_BR");
 i18n_add ( "Tenant added successfully!", "Locatário adicionado com sucesso!", "pt_BR");
-i18n_add ( "Tenant cloning", "Clonagem de locatário", "pt_BR");
+i18n_add ( "Clone tenant", "Clonar locatário", "pt_BR");
 i18n_add ( "Error retrieving tenant data!", "Erro ao solicitar dados do locatário!", "pt_BR");
-i18n_add ( "tenants visualization", "visualização de locatários", "pt_BR");
+i18n_add ( "View tenants", "visualizar locatários", "pt_BR");
 i18n_add ( "Statistics", "Estatísticas", "pt_BR");
 i18n_add ( "Tenant status", "Status do locatário", "pt_BR");
 i18n_add ( "Visit tenant site", "Visitar site do locatário", "pt_BR");
 i18n_add ( "Number of users on tenant", "Número de usuários no locatário", "pt_BR");
 i18n_add ( "Number of extensions on tenant", "Número de ramais no locatário", "pt_BR");
 i18n_add ( "Number of gateways on tenant", "Número de gateways no locatário", "pt_BR");
-i18n_add ( "Tenants view", "Visualização de locatários", "pt_BR");
+i18n_add ( "View tenants", "Visualizar locatários", "pt_BR");
 i18n_add ( "Error viewing tenant!", "Erro ao visualizar locatário!", "pt_BR");
-i18n_add ( "tenants editing", "edição de locatários", "pt_BR");
-i18n_add ( "Tenant edition", "Edição de locatário", "pt_BR");
+i18n_add ( "Edit tenants", "editar locatários", "pt_BR");
+i18n_add ( "Edit tenant", "Editar locatário", "pt_BR");
 i18n_add ( "Error changing tenant!", "Erro ao alterar locatário!", "pt_BR");
 i18n_add ( "Tenant changed successfully!", "Locatário alterado com sucesso!", "pt_BR");
 i18n_add ( "Status", "Status", "pt_BR");

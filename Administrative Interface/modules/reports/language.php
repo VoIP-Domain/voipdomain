@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,23 +30,23 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Reports
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
  * Add basic language structure (english)
  */
-i18n_add ( "Request extensions listing");
-i18n_add ( "Request ranges listing");
+i18n_add ( "Request Extensions listing");
+i18n_add ( "Request Ranges listing");
 i18n_add ( "Request financial cost centers report");
-i18n_add ( "Request financial groups report");
+i18n_add ( "Request financial Groups report");
 i18n_add ( "Request financial gateways report");
 i18n_add ( "Request server health");
 i18n_add ( "Request extensions activity report");
 i18n_add ( "Heat map");
 i18n_add ( "Graphical reports");
-i18n_add ( "heat map graph");
+i18n_add ( "Heat map graph");
 i18n_add ( "Heat map graph");
 i18n_add ( "Call type");
 i18n_add ( "All types");
@@ -58,12 +58,12 @@ i18n_add ( "Mobile calls");
 i18n_add ( "Interstate calls");
 i18n_add ( "International calls");
 i18n_add ( "Error retrieving information!");
-i18n_add ( "extensions listing");
+i18n_add ( "Extensions listing");
 i18n_add ( "Name");
 i18n_add ( "Group");
-i18n_add ( "ranges listing");
+i18n_add ( "Ranges listing");
 i18n_add ( "Range");
-i18n_add ( "financial by cost center");
+i18n_add ( "Financial by cost center");
 i18n_add ( "Calls");
 i18n_add ( "Time");
 i18n_add ( "The cost center is required.");
@@ -83,7 +83,7 @@ i18n_add ( "processor(s)");
 i18n_add ( "Used space * 100 / Total space");
 i18n_add ( "Storage");
 i18n_add ( "Server health");
-i18n_add ( "activity listing");
+i18n_add ( "Activity listing");
 i18n_add ( "Last dialed");
 i18n_add ( "Last received");
 i18n_add ( "Never dialed");
@@ -146,9 +146,9 @@ i18n_add ( "An array with 7 arrays, starting at `sunday` *0* to `saturday` *6*."
 i18n_add ( "An array with 24 integers, starting at *0* to *23* of numbers of calls for each hour.");
 i18n_add ( "The type is invalid.");
 i18n_add ( "The start date is invalid.");
-i18n_add ( "Request week hourly usage count report");
-i18n_add ( "Week hourly usage count report");
-i18n_add ( "Generate a week call week hourly usage count report.");
+i18n_add ( "Request weekly hourly usage count report");
+i18n_add ( "Weekly hourly usage count report");
+i18n_add ( "Generate a weekly hourly usage count report.");
 i18n_add ( "Missing start date.");
 i18n_add ( "Invalid start date.");
 i18n_add ( "Invalid type.");
@@ -208,7 +208,7 @@ i18n_add ( "The total of storage.");
 i18n_add ( "System usage health report");
 i18n_add ( "Provide the system usage health of server (Memory, CPU and Storage).");
 i18n_add ( "An array containing the report results.");
-i18n_add ( "Last date and time that extension did a call.");
+i18n_add ( "Last date and time that the extension placed a call.");
 i18n_add ( "The date and time of last placed call. Empty if none.");
 i18n_add ( "The timestamp of last placed call. Empty if none.");
 i18n_add ( "Last date and time that extension received a call.");
@@ -251,16 +251,16 @@ i18n_add ( "MM/DD/YYYY LTS");
 /**
  * Add Brazilian Portuguese support
  */
-i18n_add ( "Request extensions listing", "Requisitar listagem de ramais", "pt_BR");
-i18n_add ( "Request ranges listing", "Requisitar listagem de faixas", "pt_BR");
-i18n_add ( "Request financial cost centers report", "Requisitar relatório financeiro de centros de custo", "pt_BR");
-i18n_add ( "Request financial groups report", "Requisitar relatório financeiro de grupos", "pt_BR");
-i18n_add ( "Request financial gateways report", "Requisitar relatório financeiro de gateways", "pt_BR");
-i18n_add ( "Request server health", "Requisitar estado do servidor", "pt_BR");
-i18n_add ( "Request extensions activity report", "Requisitar listagem de atividade de ramais", "pt_BR");
+i18n_add ( "Request Extensions listing", "Solicitar listagem de ramais", "pt_BR");
+i18n_add ( "Request Ranges listing", "Solicitar listagem de faixas", "pt_BR");
+i18n_add ( "Request financial cost centers report", "Solicitar relatório financeiro de centros de custo", "pt_BR");
+i18n_add ( "Request financial Groups report", "Solicitar relatório financeiro de grupos", "pt_BR");
+i18n_add ( "Request financial gateways report", "Solicitar relatório financeiro de gateways", "pt_BR");
+i18n_add ( "Request server health", "Solicitar estado do servidor", "pt_BR");
+i18n_add ( "Request extensions activity report", "Solicitar listagem de atividade de ramais", "pt_BR");
 i18n_add ( "Heat map", "Calor", "pt_BR");
 i18n_add ( "Graphical reports", "Relatórios gráficos", "pt_BR");
-i18n_add ( "heat map graph", "gráfico de calor", "pt_BR");
+i18n_add ( "Heat map graph", "gráfico de calor", "pt_BR");
 i18n_add ( "Heat map graph", "Gráfico de calor", "pt_BR");
 i18n_add ( "Call type", "Tipo de ligação", "pt_BR");
 i18n_add ( "All types", "Todos tipos", "pt_BR");
@@ -271,13 +271,13 @@ i18n_add ( "External calls (With cost)", "Ligações externas (Com custo)", "pt_
 i18n_add ( "Mobile calls", "Ligações para celulares", "pt_BR");
 i18n_add ( "Interstate calls", "Ligações interurbanas", "pt_BR");
 i18n_add ( "International calls", "Ligações internacionais", "pt_BR");
-i18n_add ( "Error retrieving information!", "Erro ao requisitar informações!", "pt_BR");
-i18n_add ( "extensions listing", "listagem de ramais", "pt_BR");
+i18n_add ( "Error retrieving information!", "Erro ao obter informações!", "pt_BR");
+i18n_add ( "Extensions listing", "listagem de ramais", "pt_BR");
 i18n_add ( "Name", "Nome", "pt_BR");
 i18n_add ( "Group", "Grupo", "pt_BR");
-i18n_add ( "ranges listing", "listagem de faixas", "pt_BR");
+i18n_add ( "Ranges listing", "listagem de faixas", "pt_BR");
 i18n_add ( "Range", "Faixa", "pt_BR");
-i18n_add ( "financial by cost center", "financeiro por centro de custo", "pt_BR");
+i18n_add ( "Financial by cost center", "financeiro por centro de custo", "pt_BR");
 i18n_add ( "Calls", "Ligações", "pt_BR");
 i18n_add ( "Time", "Tempo", "pt_BR");
 i18n_add ( "The cost center is required.", "O centro de custo é obrigatório.", "pt_BR");
@@ -297,7 +297,7 @@ i18n_add ( "processor(s)", "processador(es)", "pt_BR");
 i18n_add ( "Used space * 100 / Total space", "Espaço utilizado * 100 / Espaço total", "pt_BR");
 i18n_add ( "Storage", "Armazenamento", "pt_BR");
 i18n_add ( "Server health", "Estado do servidor", "pt_BR");
-i18n_add ( "activity listing", "listagem por atividade", "pt_BR");
+i18n_add ( "Activity listing", "listagem por atividade", "pt_BR");
 i18n_add ( "Last dialed", "Última discada", "pt_BR");
 i18n_add ( "Last received", "Última recebida", "pt_BR");
 i18n_add ( "Never dialed", "Nunca discado", "pt_BR");
@@ -359,9 +359,9 @@ i18n_add ( "An array with 7 arrays, starting at `sunday` *0* to `saturday` *6*."
 i18n_add ( "An array with 24 integers, starting at *0* to *23* of numbers of calls for each hour.", "Um array com 24 inteiros, iniciando em *0* até *23* com o número de chamadas por hora.", "pt_BR");
 i18n_add ( "The type is invalid.", "O tipo é inválido.", "pt_BR");
 i18n_add ( "The start date is invalid.", "A data de início é inválida.", "pt_BR");
-i18n_add ( "Request week hourly usage count report", "Requisita relatório de utilização semanal de ligações por hora", "pt_BR");
-i18n_add ( "Week hourly usage count report", "Relatório semanal de uso por hora", "pt_BR");
-i18n_add ( "Generate a week call week hourly usage count report.", "Gerar um relatório de utilização por hora e por semana.", "pt_BR");
+i18n_add ( "Request weekly hourly usage count report", "Solicitar relatório de utilização semanal de ligações por hora", "pt_BR");
+i18n_add ( "Weekly hourly usage count report", "Relatório semanal de uso por hora", "pt_BR");
+i18n_add ( "Generate a weekly hourly usage count report.", "Gerar um relatório de utilização por hora e por semana.", "pt_BR");
 i18n_add ( "Missing start date.", "Data de início obrigatória.", "pt_BR");
 i18n_add ( "Invalid start date.", "Data de início inválida.", "pt_BR");
 i18n_add ( "Invalid type.", "Tipo inválido.", "pt_BR");
@@ -407,7 +407,7 @@ i18n_add ( "My SIP Provider", "Meu Provedor SIP", "pt_BR");
 i18n_add ( "Gateways financial reports", "Relatórios financeiros por gateway", "pt_BR");
 i18n_add ( "Generate gateways financial reports.", "Gerar relatórios financeiros por gateway.", "pt_BR");
 i18n_add ( "An object containing information about the system health.", "Um objeto contendo informações sobre a saúde do sistema.", "pt_BR");
-i18n_add ( "An object containing memory usage information.", "Um objeto contento informações do uso de memória.", "pt_BR");
+i18n_add ( "An object containing memory usage information.", "Um objeto contendo informações do uso de memória.", "pt_BR");
 i18n_add ( "The percentage of used memory (rounded).", "A porcentagem do uso de memória (arrendondado).", "pt_BR");
 i18n_add ( "The total of used memory.", "Total do uso de memória.", "pt_BR");
 i18n_add ( "The total of memory.", "Total de memória.", "pt_BR");
@@ -421,7 +421,7 @@ i18n_add ( "The total of storage.", "O total de armazenamento.", "pt_BR");
 i18n_add ( "System usage health report", "Relatório de saúde da utilização do sistema", "pt_BR");
 i18n_add ( "Provide the system usage health of server (Memory, CPU and Storage).", "Provê a saúde de utilização do servidor (Memória, CPU e Armazenamento).", "pt_BR");
 i18n_add ( "An array containing the report results.", "Um array contendo os resultados do relatório.", "pt_BR");
-i18n_add ( "Last date and time that extension did a call.", "Última data e hora que a extensão realizou uma chamada.", "pt_BR");
+i18n_add ( "Last date and time that the extension placed a call.", "Última data e hora que a extensão realizou uma chamada.", "pt_BR");
 i18n_add ( "The date and time of last placed call. Empty if none.", "A data e hora da última chamada efetuada. Vazio se nenhuma.", "pt_BR");
 i18n_add ( "The timestamp of last placed call. Empty if none.", "O timestamp da última chamada efetuada. Vazio se nenhuma.", "pt_BR");
 i18n_add ( "Last date and time that extension received a call.", "Última data e hora que a extensão recebeu uma chamada.", "pt_BR");
@@ -448,7 +448,7 @@ i18n_add ( "Local calls made by extension.", "Chamadas locais efetuadas por exte
 i18n_add ( "Interstate calls made by extension.", "Chamadas interestaduais efetuadas por extensão.", "pt_BR");
 i18n_add ( "International calls made by extension.", "Chamadas internacionais efetuadas por extensão.", "pt_BR");
 i18n_add ( "Others calls made by extension.", "Outras chamadas efetuadas por extensão.", "pt_BR");
-i18n_add ( "Requested month date is invalid.", "A data de mês requisitada é inválida.", "pt_BR");
+i18n_add ( "Requested month date is invalid.", "A data do mês solicitada é inválida.", "pt_BR");
 i18n_add ( "Generate a consolidated calls report grouped by extensions.", "Gerar relatório consolidado de chamadas agrupadas por extensão.", "pt_BR");
 i18n_add ( "Group unique system internal identification.", "Identificador interno único do sistema do grupo.", "pt_BR");
 i18n_add ( "Group description.", "Descrição do grupo.", "pt_BR");

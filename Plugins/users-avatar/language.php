@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage User Avatar
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -41,7 +41,7 @@ i18n_add ( "Remove user avatar");
 i18n_add ( "Change user avatar");
 i18n_add ( "Change image");
 i18n_add ( "Remove avatar");
-i18n_add ( "User edition");
+i18n_add ( "Edit user");
 i18n_add ( "The selected file type is not valid.");
 i18n_add ( "The selected file size is too big.");
 i18n_add ( "Image changed successfully!");
@@ -51,17 +51,17 @@ i18n_add ( "Error removing image!");
 i18n_add ( "The avatar hash of the user.");
 i18n_add ( "An object containing information about the system user avatar.");
 i18n_add ( "View users avatar");
-i18n_add ( "Get a system user avatar information. Note that the user avatar will be replied successfully only if the user was already logged in previously to the system.");
+i18n_add ( "Get system user avatar information. Note that the user avatar will be returned successfully only if the user was already logged in previously to the system.");
 i18n_add ( "The username of the system user.");
 i18n_add ( "admin");
 i18n_add ( "The system user avatar was removed.");
 i18n_add ( "Remove users avatar");
-i18n_add ( "Remove a system user avatar.");
+i18n_add ( "Remove system user avatar.");
 i18n_add ( "The user internal system unique identifier.");
 i18n_add ( "The user avatar image in base 64 format.");
 i18n_add ( "The system user avatar was successfully updated.");
 i18n_add ( "Edit users avatar");
-i18n_add ( "Change a system user avatar.");
+i18n_add ( "Change system user avatar.");
 i18n_add ( "The base64 encoded avatar JPEG image file.");
 i18n_add ( "The md5 hash of the image.");
 i18n_add ( "Invalid user name.");
@@ -74,7 +74,7 @@ i18n_add ( "Remove user avatar", "Remover avatar de usuário", "pt_BR");
 i18n_add ( "Change user avatar", "Alterar avatar de usuário", "pt_BR");
 i18n_add ( "Change image", "Alterar imagem", "pt_BR");
 i18n_add ( "Remove avatar", "Remover avatar", "pt_BR");
-i18n_add ( "User edition", "Edição de usuário", "pt_BR");
+i18n_add ( "Edit user", "Editar usuário", "pt_BR");
 i18n_add ( "The selected file type is not valid.", "O tipo de arquivo selecionado não é válido.", "pt_BR");
 i18n_add ( "The selected file size is too big.", "O tamanho do arquivo selecionado é muito grande.", "pt_BR");
 i18n_add ( "Image changed successfully!", "Imagem alterada com sucesso!", "pt_BR");
@@ -84,17 +84,17 @@ i18n_add ( "Error removing image!", "Erro ao remover imagem!", "pt_BR");
 i18n_add ( "The avatar hash of the user.", "O hash do avatar do usuário.", "pt_BR");
 i18n_add ( "An object containing information about the system user avatar.", "Um objeto contendo informações sobre o avatar do usuário do sistema.", "pt_BR");
 i18n_add ( "View users avatar", "Visualizar avatar de usuário", "pt_BR");
-i18n_add ( "Get a system user avatar information. Note that the user avatar will be replied successfully only if the user was already logged in previously to the system.", "Requisita informações de avatar de um usuário do sistema. Note que o avatar do usuário será retornado com sucesso apenas quando o usuário já estiver realizado um login anteriormente no sistema.", "pt_BR");
+i18n_add ( "Get system user avatar information. Note that the user avatar will be returned successfully only if the user was already logged in previously to the system.", "Obtém informações de avatar de um usuário do sistema. O avatar só é retornado com sucesso se o usuário já tiver feito login anteriormente no sistema.", "pt_BR");
 i18n_add ( "The username of the system user.", "O nome de login do usuário do sistema.", "pt_BR");
 i18n_add ( "admin", "administrador", "pt_BR");
 i18n_add ( "The system user avatar was removed.", "O avatar do usuário do sistema foi removido.", "pt_BR");
 i18n_add ( "Remove users avatar", "Remover avatar de usuários", "pt_BR");
-i18n_add ( "Remove a system user avatar.", "Remove o avatar de um usuário do sistema.", "pt_BR");
+i18n_add ( "Remove system user avatar.", "Remove o avatar de um usuário do sistema.", "pt_BR");
 i18n_add ( "The user internal system unique identifier.", "O identificador interno único do usuário do sistema.", "pt_BR");
 i18n_add ( "The user avatar image in base 64 format.", "A imagem do avatar do usuário no formato base 64.", "pt_BR");
 i18n_add ( "The system user avatar was successfully updated.", "O avatar do usuário do sistema foi atualizado com sucesso.", "pt_BR");
 i18n_add ( "Edit users avatar", "Alterar o avatar de usuários", "pt_BR");
-i18n_add ( "Change a system user avatar.", "Altera o avatar de um usuário do sistema.", "pt_BR");
+i18n_add ( "Change system user avatar.", "Altera o avatar de um usuário do sistema.", "pt_BR");
 i18n_add ( "The base64 encoded avatar JPEG image file.", "O arquivo de imagem JPEG do avatar codificado em base64.", "pt_BR");
 i18n_add ( "The md5 hash of the image.", "O hash md5 da imagem.", "pt_BR");
 i18n_add ( "Invalid user name.", "Nome de usuário inválido.", "pt_BR");

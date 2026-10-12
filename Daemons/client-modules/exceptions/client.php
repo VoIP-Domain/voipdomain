@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Exceptions
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "exception_add", "exception_add");
 framework_add_hook ( "exception_change", "exception_change");
@@ -132,7 +132,7 @@ function exception_add ( $buffer, $parameters)
   {
     if ( ! check_overwrite ())
     {
-      return array ( "code" => 400, "message" => "Exception already exist.");
+      return array ( "code" => 400, "message" => "Exception already exists.");
     } else {
       $overwritten = true;
     }
@@ -280,7 +280,7 @@ function exception_change ( $buffer, $parameters)
   // Verify if new exception exist
   if ( $parameters["Number"] != $parameters["NewNumber"] && check_config ( "config", "dialplan-exception-" . substr ( $parameters["NewNumber"], 1)))
   {
-    return array ( "code" => 409, "message" => "Exception new number already exist.");
+    return array ( "code" => 409, "message" => "Exception new number already exists.");
   }
 
   // Remove exception file
@@ -460,10 +460,14 @@ function exception_wipe ( $buffer, $parameters)
     framework_call ( "exception_wipe_pre", $parameters, false, true);
   }
 
-  // Remove all files
+  // Remove all config files by glob pattern
+  foreach ( list_config ( "config", "dialplan-exception-*") as $filename)
+  {
+    unlink_config ( "config", $filename);
+  }
+  // Remove all datafiles
   foreach ( list_config ( "datafile", "exception") as $filename)
   {
-    unlink_config ( "config", "dialplan-exception-" . (int) substr ( $filename, strrpos ( $filename, "-") + 1));
     unlink_config ( "datafile", $filename);
   }
 

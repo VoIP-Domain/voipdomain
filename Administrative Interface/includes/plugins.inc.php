@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Core
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -141,10 +141,10 @@ function framework_add_hook ( $hook, $function, $options = 0, $documentation = a
 }
 
 /**
- * Function to add extra documentation to a hook. This is usefull when your hook
- * call's other hoooks, that's not directly associated to your main hook.
+ * Function to add extra documentation to a hook. This is useful when your hook
+ * calls other hooks, that are not directly associated with your main hook.
  *
- * global array $_plugins The main plugin system variable
+ * @global array $_plugins The main plugin system variable
  * @param string $function The name of the function
  * @param array $documentation The documentation array
  * @return void
@@ -164,11 +164,11 @@ function framework_add_function_documentation ( $function, $documentation)
 }
 
 /**
- * Function to add documentation component. This is usefull to create
- * documentation component schemas, pointing complex objects reponses to one
+ * Function to add documentation component. This is useful to create
+ * documentation component schemas, pointing complex objects responses to one
  * documentation schema.
  *
- * global array $_plugins The main plugin system variable
+ * @global array $_plugins The main plugin system variable
  * @param string $component The name of the component
  * @param array $documentation The object documentation array
  * @return void

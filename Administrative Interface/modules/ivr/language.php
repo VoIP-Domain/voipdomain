@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage IVR
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -38,11 +38,11 @@
  * Add basic language structure (english)
  */
 i18n_add ( "IVRs");
-i18n_add ( "IVR search");
+i18n_add ( "Search IVRs");
 i18n_add ( "Name");
-i18n_add ( "IVR addition");
-i18n_add ( "IVR visualization");
-i18n_add ( "IVR edition");
+i18n_add ( "Add IVR");
+i18n_add ( "View IVR");
+i18n_add ( "Edit IVR");
 i18n_add ( "IVR name");
 i18n_add ( "IVR description");
 i18n_add ( "Start options");
@@ -76,11 +76,11 @@ i18n_add ( "call-center");
 i18n_add ( "Main Call Center IVR workflow");
 i18n_add ( "View IVRs information");
 i18n_add ( "View IVRs");
-i18n_add ( "Get a system IVR information.");
+i18n_add ( "Get system IVR information.");
 i18n_add ( "The IVR internal system unique identifier.");
 i18n_add ( "The name of the system IVR.");
 i18n_add ( "The description of the system IVR.");
-i18n_add ( "New system IVR added successfully.");
+i18n_add ( "A new system IVR was added successfully.");
 i18n_add ( "The IVR name is required.");
 i18n_add ( "The IVR description is required.");
 i18n_add ( "The IVR workflow is required.");
@@ -91,10 +91,10 @@ i18n_add ( "The IVR workflow cannot be empty.");
 i18n_add ( "The IVR name is already in use.");
 i18n_add ( "The system IVR was successfully updated.");
 i18n_add ( "Edit IVRs");
-i18n_add ( "Change a system IVR information.");
+i18n_add ( "Change system IVR information.");
 i18n_add ( "The system IVR was removed.");
 i18n_add ( "Remove IVRs");
-i18n_add ( "Remove a IVR from system.");
+i18n_add ( "Remove an IVR from the system.");
 i18n_add ( "Other");
 i18n_add ( "Time");
 i18n_add ( "Time options");
@@ -200,10 +200,10 @@ i18n_add ( "Action validation error");
 i18n_add ( "Delay can't be empty when enabled.");
 i18n_add ( "Error adding IVR!");
 i18n_add ( "IVR added successfully!");
-i18n_add ( "IVR view");
+i18n_add ( "View IVR");
 i18n_add ( "Error viewing IVR!");
 i18n_add ( "Error editing IVR!");
-i18n_add ( "IVR edited successfully!");
+i18n_add ( "IVR changed successfully!");
 i18n_add ( "IVR edit");
 i18n_add ( "The IVR module operator type.");
 i18n_add ( "Any property related to the IVR module operator type.");
@@ -289,7 +289,7 @@ i18n_add ( "mainmenu");
 i18n_add ( "The audio file internal system unique identifier to play at menu start.");
 i18n_add ( "The audio file internal system unique identifier to play when selected invalid option.");
 i18n_add ( "If the system should say back the dialed option.");
-i18n_add ( "The maximum retries to get a valid response.");
+i18n_add ( "The maximum number of retries to obtain a valid response.");
 i18n_add ( "If the digit 0 is considered a valid option.");
 i18n_add ( "If the digit 1 is considered a valid option.");
 i18n_add ( "If the digit 2 is considered a valid option.");
@@ -401,18 +401,18 @@ i18n_add ( "Email options");
 i18n_add ( "Destination email");
 i18n_add ( "Message body");
 i18n_add ( "required field.");
-i18n_add ( "IVR cloning");
+i18n_add ( "Clone IVR");
 i18n_add ( "Error retrieving IVR data!");
 
 /**
  * Add Brazilian Portuguese support
  */
 i18n_add ( "IVRs", "URAs", "pt_BR");
-i18n_add ( "IVR search", "pesquisa de URA's", "pt_BR");
+i18n_add ( "Search IVRs", "Pesquisar URA's", "pt_BR");
 i18n_add ( "Name", "Nome", "pt_BR");
-i18n_add ( "IVR addition", "adição de usuários", "pt_BR");
-i18n_add ( "IVR visualization", "visualização de usuários", "pt_BR");
-i18n_add ( "IVR edition", "edição de usuários", "pt_BR");
+i18n_add ( "Add IVR", "adicionar usuários", "pt_BR");
+i18n_add ( "View IVR", "visualizar usuários", "pt_BR");
+i18n_add ( "Edit IVR", "editar usuários", "pt_BR");
 i18n_add ( "IVR name", "Nome da URA", "pt_BR");
 i18n_add ( "IVR description", "Descrição da URA", "pt_BR");
 i18n_add ( "Start options", "Opções de início", "pt_BR");
@@ -446,11 +446,11 @@ i18n_add ( "call-center", "call-center", "pt_BR");
 i18n_add ( "Main Call Center IVR workflow", "Workflow da URA do Call Center", "pt_BR");
 i18n_add ( "View IVRs information", "Visualizar informações das URAs", "pt_BR");
 i18n_add ( "View IVRs", "Visualizar URAs", "pt_BR");
-i18n_add ( "Get a system IVR information.", "Requisitar informações de URA do sistema.", "pt_BR");
+i18n_add ( "Get system IVR information.", "Obter informações da URA do sistema.", "pt_BR");
 i18n_add ( "The IVR internal system unique identifier.", "O identificador interno único da URA do sistema.", "pt_BR");
 i18n_add ( "The name of the system IVR.", "O nome da URA do sistema.", "pt_BR");
 i18n_add ( "The description of the system IVR.", "A descrição da URA do sistema.", "pt_BR");
-i18n_add ( "New system IVR added successfully.", "A nova URA do sistema foi adicionada com sucesso.", "pt_BR");
+i18n_add ( "A new system IVR was added successfully.", "Uma nova URA do sistema foi adicionada com sucesso.", "pt_BR");
 i18n_add ( "The IVR name is required.", "O nome da URA é obrigatório.", "pt_BR");
 i18n_add ( "The IVR description is required.", "A descrição da URA é obrigatória.", "pt_BR");
 i18n_add ( "The IVR workflow is required.", "O fluxo da URA é obrigatório.", "pt_BR");
@@ -461,10 +461,10 @@ i18n_add ( "The IVR workflow cannot be empty.", "O fluxo da URA não pode ser va
 i18n_add ( "The IVR name is already in use.", "O nome da URA já está em uso.", "pt_BR");
 i18n_add ( "The system IVR was successfully updated.", "A URA do sistema foi atualizada com sucesso.", "pt_BR");
 i18n_add ( "Edit IVRs", "Editar URAs", "pt_BR");
-i18n_add ( "Change a system IVR information.", "Alterar informações de URA do sistema.", "pt_BR");
+i18n_add ( "Change system IVR information.", "Alterar informações de URA do sistema.", "pt_BR");
 i18n_add ( "The system IVR was removed.", "A URA do sistema foi removida.", "pt_BR");
 i18n_add ( "Remove IVRs", "Remove URAs", "pt_BR");
-i18n_add ( "Remove a IVR from system.", "Remover uma URA do sistema.", "pt_BR");
+i18n_add ( "Remove an IVR from the system.", "Remover uma URA do sistema.", "pt_BR");
 i18n_add ( "Other", "Outro", "pt_BR");
 i18n_add ( "Time", "Horas", "pt_BR");
 i18n_add ( "Time options", "Opções de horas", "pt_BR");
@@ -557,8 +557,8 @@ i18n_add ( "Variable to missing.", "Falta variável para.", "pt_BR");
 i18n_add ( "Variable subject missing.", "Falta variável de assunto.", "pt_BR");
 i18n_add ( "Variable body missing.", "Falta variável de corpo.", "pt_BR");
 i18n_add ( "IVR", "URA", "pt_BR");
-i18n_add ( "IVR removal", "Remoção de URA", "pt_BR");
-i18n_add ( "Are you sure you want to remove the IVR %s (%s)?", "Você tem certeza que deseja remover a URA %s (%s)?", "pt_BR");
+i18n_add ( "IVR removal", "Remover URA", "pt_BR");
+i18n_add ( "Are you sure you want to remove the IVR %s (%s)?", "Você tem certeza de que deseja remover a URA %s (%s)?", "pt_BR");
 i18n_add ( "Uses", "Usos", "pt_BR");
 i18n_add ( "IVR removed successfully!", "URA removida com sucesso!", "pt_BR");
 i18n_add ( "Error removing IVR!", "Erro removendo URA!", "pt_BR");
@@ -570,10 +570,10 @@ i18n_add ( "Action validation error", "Erro validando ação", "pt_BR");
 i18n_add ( "Delay can't be empty when enabled.", "Atraso não pode ser vazio quando habilitado.", "pt_BR");
 i18n_add ( "Error adding IVR!", "Erro adicionando URA!", "pt_BR");
 i18n_add ( "IVR added successfully!", "URA adicionada com sucesso!", "pt_BR");
-i18n_add ( "IVR view", "Visualizar URA", "pt_BR");
+i18n_add ( "View IVR", "Visualizar URA", "pt_BR");
 i18n_add ( "Error viewing IVR!", "Erro ao visualizar URA!", "pt_BR");
 i18n_add ( "Error editing IVR!", "Erro ao editar URA!", "pt_BR");
-i18n_add ( "IVR edited successfully!", "URA editada com sucesso!", "pt_BR");
+i18n_add ( "IVR changed successfully!", "URA editada com sucesso!", "pt_BR");
 i18n_add ( "IVR edit", "Editar URA", "pt_BR");
 i18n_add ( "The IVR module operator type.", "O tipo de operador do módulo de URA.", "pt_BR");
 i18n_add ( "Any property related to the IVR module operator type.", "Quaisquer propriedade relacionada ao tipo de operador de URA.", "pt_BR");
@@ -659,7 +659,7 @@ i18n_add ( "mainmenu", "menuprincipal", "pt_BR");
 i18n_add ( "The audio file internal system unique identifier to play at menu start.", "O identificador interno único do arquivo de áudio do sistema para tocar ao iniciar o menu.", "pt_BR");
 i18n_add ( "The audio file internal system unique identifier to play when selected invalid option.", "O identificador interno único do arquivo de áudio do sistema para tocar quando uma opção inválida é selecionada.", "pt_BR");
 i18n_add ( "If the system should say back the dialed option.", "Se o sistema deve falar de volta a opção discada.", "pt_BR");
-i18n_add ( "The maximum retries to get a valid response.", "O máximo de tentativas para obter uma resposta válida.", "pt_BR");
+i18n_add ( "The maximum number of retries to obtain a valid response.", "O máximo de tentativas para obter uma resposta válida.", "pt_BR");
 i18n_add ( "If the digit 0 is considered a valid option.", "Se o dígito 0 é considerado uma opção válida.", "pt_BR");
 i18n_add ( "If the digit 1 is considered a valid option.", "Se o dígito 1 é considerado uma opção válida.", "pt_BR");
 i18n_add ( "If the digit 2 is considered a valid option.", "Se o dígito 2 é considerado uma opção válida.", "pt_BR");
@@ -771,6 +771,6 @@ i18n_add ( "Email options", "Opções de email", "pt_BR");
 i18n_add ( "Destination email", "Destino do email", "pt_BR");
 i18n_add ( "Message body", "Corpo da mensagem", "pt_BR");
 i18n_add ( "required field.", "campo obrigatório.", "pt_BR");
-i18n_add ( "IVR cloning", "Clonagem de URA", "pt_BR");
-i18n_add ( "Error retrieving IVR data!", "Erro ao requisitar dados da URA!", "pt_BR");
+i18n_add ( "Clone IVR", "Clonar URA", "pt_BR");
+i18n_add ( "Error retrieving IVR data!", "Erro ao obter dados da URA!", "pt_BR");
 ?>

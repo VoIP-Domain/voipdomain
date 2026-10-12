@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,12 +30,29 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage IVRs
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * Resolve an audio ID to its Asterisk playback path.
+ * Reads the local audio datafile and returns "audio-{ID}/{filename_without_ext}".
+ * Returns false if the audio datafile is not found.
+ */
+function ivr_resolve_audio_path ( $audioID)
+{
+  $data = read_config ( "datafile", "audio-" . $audioID);
+  if ( ! is_array ( $data) || ! array_key_exists ( "Filename", $data))
+  {
+    writeLog ( "ivr_resolve_audio_path(" . $audioID . ") - Audio datafile not found or missing Filename.", VoIP_LOG_WARNING);
+    return false;
+  }
+  $filename = substr ( $data["Filename"], 0, strrpos ( $data["Filename"], "."));
+  return "voipdomain/audio-" . $audioID . "/" . $filename;
+}
+
+/**
+ * API call hooks
  */
 framework_add_hook ( "ivr_operator_start", "ivr_operator_start");
 framework_add_hook ( "ivr_operator_answer", "ivr_operator_answer");
@@ -67,6 +84,7 @@ framework_add_hook ( "ivr_operator_email", "ivr_operator_email");
  */
 function ivr_operator_start ( $buffer, $parameters)
 {
+  $buffer .= " same => n,Ringing()\n";
   if ( $parameters["Properties"]["AutoAnswer"])
   {
     $buffer .= " same => n,Wait(" . (int) $parameters["Properties"]["Delay"] . ")\n";
@@ -185,6 +203,10 @@ function ivr_operator_date ( $buffer, $parameters)
       writeLog ( "IVR \"date\" operator \"Start\" or \"Finish\" date for condition " . $x . " are invalid!", VoIP_LOG_WARNING);
     }
   }
+  if ( array_key_exists ( "other", $parameters["Links"]))
+  {
+    $buffer .= " same => n,GoTo(" . $parameters["Links"]["other"] . ")\n";
+  }
 
   return $buffer;
 }
@@ -224,7 +246,7 @@ function ivr_operator_weekday ( $buffer, $parameters)
 
 /**
  * Function to implement play IVR operator.
- * Required parameters are: (string) Filename
+ * Required parameters are: (string) File (audio ID)
  *
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
@@ -233,7 +255,13 @@ function ivr_operator_weekday ( $buffer, $parameters)
  */
 function ivr_operator_play ( $buffer, $parameters)
 {
-  $buffer .= " same => n,PlayBack(" . basename ( $parameters["Properties"]["Filename"]) . ")\n";
+  $audioPath = ivr_resolve_audio_path ( $parameters["Properties"]["File"]);
+  if ( $audioPath === false)
+  {
+    $buffer .= " same => n,Verbose(1,IVR ERROR: Audio ID " . $parameters["Properties"]["File"] . " not found)\n";
+  } else {
+    $buffer .= " same => n,PlayBack(" . $audioPath . ")\n";
+  }
   if ( array_key_exists ( "output", $parameters["Links"]))
   {
     $buffer .= " same => n,GoTo(" . $parameters["Links"]["output"] . ")\n";
@@ -303,6 +331,10 @@ function ivr_operator_read ( $buffer, $parameters)
   {
     $buffer .= " same => n,GoToIf(\$[\"\${vd_ivr_status}\" = \"TIMEOUT\"]?" . $parameters["Links"]["timedout"] . ")\n";
   }
+  if ( array_key_exists ( "ok", $parameters["Links"]))
+  {
+    $buffer .= " same => n,GoTo(" . $parameters["Links"]["ok"] . ")\n";
+  }
 
   return $buffer;
 }
@@ -318,9 +350,14 @@ function ivr_operator_read ( $buffer, $parameters)
  */
 function ivr_operator_menu ( $buffer, $parameters)
 {
-  $buffer .= " same => n,Set(audio=" . $parameters["Properties"]["Filename"] . ")\n";
+  $audioPath = ivr_resolve_audio_path ( $parameters["Properties"]["File"]);
+  if ( $audioPath === false)
+  {
+    $audioPath = "invalid-audio";
+  }
+  $buffer .= " same => n,Set(audio=" . $audioPath . ")\n";
   $buffer .= " same => n,Set(tries=0)\n";
-  $buffer .= " same => n(" . $parameters["ID"] . "_read,Read(vd_ivr_var_" . $parameters["Properties"]["Variable"] . "),\${audio},1,s,1," . (int) $parameters["Properties"]["Timeout"] . ")\n";
+  $buffer .= " same => n(" . $parameters["ID"] . "_read),Read(vd_ivr_var_" . $parameters["Properties"]["Variable"] . ",\${audio},1,s,1," . (int) $parameters["Properties"]["Timeout"] . ")\n";
   if ( $parameters["Properties"]["Option0"])
   {
     $buffer .= " same => n,GoToIf(\$[\"\${vd_ivr_var_" . $parameters["Properties"]["Variable"] . "}\" = \"0\"]?" . $parameters["ID"] . "_valid)\n";
@@ -369,7 +406,12 @@ function ivr_operator_menu ( $buffer, $parameters)
   {
     $buffer .= " same => n,GoToIf(\$[\"\${vd_ivr_var_" . $parameters["Properties"]["Variable"] . "}\" = \"#\"]?" . $parameters["ID"] . "_valid)\n";
   }
-  $buffer .= " same => n,Set(audio=" . $parameters["Properties"]["InvalidFilename"] . ")\n";
+  $invalidAudioPath = ivr_resolve_audio_path ( $parameters["Properties"]["InvalidFile"]);
+  if ( $invalidAudioPath === false)
+  {
+    $invalidAudioPath = "invalid-audio";
+  }
+  $buffer .= " same => n,Set(audio=" . $invalidAudioPath . ")\n";
   $buffer .= " same => n,Set(tries=\$[\${tries} + 1])\n";
   $buffer .= " same => n,GoToIf(\$[\${tries} <= " . (int) $parameters["Properties"]["Retries"] . "]?" . $parameters["ID"] . "_read)\n";
   $buffer .= " same => n,Set(vd_ivr_var_" . $parameters["Properties"]["Variable"] . "=)\n";
@@ -491,6 +533,10 @@ function ivr_operator_router ( $buffer, $parameters)
 function ivr_operator_setvar ( $buffer, $parameters)
 {
   $buffer .= " same => n,Set(vd_ivr_var_" . $parameters["Properties"]["Variable"] . "=" . $parameters["Properties"]["Value"] . ")\n";
+  if ( array_key_exists ( "output", $parameters["Links"]))
+  {
+    $buffer .= " same => n,GoTo(" . $parameters["Links"]["output"] . ")\n";
+  }
 
   return $buffer;
 }     
@@ -506,7 +552,7 @@ function ivr_operator_setvar ( $buffer, $parameters)
  */
 function ivr_operator_dial ( $buffer, $parameters)
 {
-  $buffer .= " same => n,Dial(LOCAL/\${FILTER(\"0-9\"," . operator_apply_variables ( $parameters["Properties"]["Destination"], array ( "{var_VARIABLE}")) . ")}@VoIPDomain-extensions," . (int) $parameters["Properties"]["Timeout"] . ",g)\n";
+  $buffer .= " same => n,Dial(LOCAL/\${FILTER(0-9," . operator_apply_variables ( $parameters["Properties"]["Destination"], array ( "{var_VARIABLE}")) . ")}@VoIPDomain-extensions," . (int) $parameters["Properties"]["Timeout"] . ",g)\n";
   if ( array_key_exists ( "ok", $parameters["Links"]))
   {
     $buffer .= " same => n,GoToIf(\$[\"\${DIALSTATUS}\" = \"ANSWER\"]?" . $parameters["Links"]["ok"] . ")\n";
@@ -525,7 +571,28 @@ function ivr_operator_dial ( $buffer, $parameters)
   }
 
   return $buffer;
-}     
+}
+
+/**
+ * Function to implement redirect IVR operator.
+ * Required parameters are: (string) Destination
+ *
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return string Asterisk dialplan code
+ */
+function ivr_operator_redirect ( $buffer, $parameters)
+{
+  $destination = operator_apply_variables ( $parameters["Properties"]["Destination"], array ( "{var_VARIABLE}"));
+  $buffer .= " same => n,Dial(LOCAL/\${FILTER(0-9," . $destination . ")}@VoIPDomain-extensions,,g)\n";
+  if ( array_key_exists ( "output", $parameters["Links"]))
+  {
+    $buffer .= " same => n,GoTo(" . $parameters["Links"]["output"] . ")\n";
+  }
+
+  return $buffer;
+}
 
 /**
  * Function to implement script IVR operator.
@@ -539,7 +606,7 @@ function ivr_operator_dial ( $buffer, $parameters)
 function ivr_operator_script ( $buffer, $parameters)
 {
   $buffer .= " same => n,Set(vd_ivr_var_" . $parameters["Properties"]["Variable"] . "=\${SHELL(/usr/share/asterisk/agi-bin/" . basename ( $parameters["Properties"]["Name"]);
-  foreach ( $parameters["Parameters"] as $parameter)
+  foreach ( $parameters["Properties"]["Parameters"] as $parameter)
   {
     $buffer .= " \"" . str_replace ( "\$", "\\\$", str_replace ( "\"", "\\\"", str_replace ( "\\", "\\\\", str_replace ( chr ( 0x13), "", str_replace ( chr ( 0x10), "", $parameter)))));
   }
@@ -560,7 +627,7 @@ function ivr_operator_script ( $buffer, $parameters)
  */
 function ivr_operator_email ( $buffer, $parameters)
 {
-  $buffer .= " same => n,Set(vd_ivr_mailfile=mailbody-${EPOCH}.txt)\n";
+  $buffer .= " same => n,Set(vd_ivr_mailfile=mailbody-\${EPOCH}.txt)\n";
   $buffer .= " same => n,System(echo \"" . str_replace ( "\$", "\\\$", str_replace ( "\\", "\\\\", str_replace ( chr ( 0x13), "\\n", str_replace ( "\"", "\\\"", $parameters["Properties"]["Body"])))) . "\" | sed \"s/\\\\n/\\n/g\" > /tmp/\${vd_ivr_mailfile})\n";
   $buffer .= " same => n,System(mail -s \"" . str_replace ( "\$", "\\\$", str_replace ( "\\", "\\\\", str_replace ( "\"", "\\\"", $parameters["Properties"]["Subject"]))) . "\" " . $parameters["Properties"]["To"] . " < /tmp/\${vd_ivr_mailfile})\n";
   $buffer .= " same => n,System(rm -f /tmp/\${vd_ivr_mailfile})\n";

@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Servers
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -179,11 +179,11 @@ function servers_search_page ( $buffer, $parameters)
               "  VoIP.rest ( '/servers/' + encodeURIComponent ( $('#server_delete_id').val ()), 'DELETE').done ( function ( data, textStatus, jqXHR)\n" .
               "  {\n" .
               "    $('#server_delete').modal ( 'hide');\n" .
-              "    new PNotify ( { title: '" . __ ( "Server remove") . "', text: '" . __ ( "Server removed successfully!") . "', type: 'success'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Server removal") . "', text: '" . __ ( "Server removed successfully!") . "', type: 'success'});\n" .
               "    $('#server_delete_id').data ( 'dtrow').remove ().draw ();\n" .
               "  }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "  {\n" .
-              "    new PNotify ( { title: '" . __ ( "Server remove") . "', text: '" . __ ( "Error removing server!") . "', type: 'error'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Server removal") . "', text: '" . __ ( "Error removing server!") . "', type: 'error'});\n" .
               "  }).always ( function ()\n" .
               "  {\n" .
               "    l.stop ();\n" .
@@ -191,11 +191,13 @@ function servers_search_page ( $buffer, $parameters)
               "});\n" .
               "$('#datatables').on ( 'click', 'button.btn-primary', function ( e)\n" .
               "{\n" .
+              "  var btn = $(this);\n" .
+              "  var serverId = btn.data ( 'id');\n" .
               "  var l = Ladda.create ( this);\n" .
               "  l.start ();\n" .
-              "  VoIP.rest ( '/servers/' + encodeURIComponent ( $(this).data ( 'id')) + '/install', 'GET').done ( function ( data, textStatus, jqXHR)\n" .
+              "  VoIP.rest ( '/servers/' + encodeURIComponent ( serverId) + '/install', 'GET').done ( function ( data, textStatus, jqXHR)\n" .
               "  {\n" .
-              "    download ( atob ( data.script), 'vdclient-install-' + $(this).data ( 'id') + '.sh', 'text/x-shellscript');\n" .
+              "    download ( atob ( data.script), 'vdclient-install-' + serverId + '.sh', 'text/x-shellscript');\n" .
               "    new PNotify ( { title: '" . __ ( "Server install script") . "', text: '" . __ ( "Server install script generated successfully!") . "', type: 'success'});\n" .
               "  }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "  {\n" .
@@ -223,14 +225,21 @@ function servers_search_page ( $buffer, $parameters)
               "});\n" .
               "$('#server_rebuild button.rebuild').on ( 'click', function ( event)\n" .
               "{\n" .
-              "  if ( $('#server_rebuild_serverlist').find ( 'input').length == 0)\n" .
+              "  var selected = $('#server_rebuild_serverlist').find ( 'input:checked');\n" .
+              "  if ( selected.length == 0)\n" .
               "  {\n" .
               "    new PNotify ( { title: '" . __ ( "Server rebuild") . "', text: '" . __ ( "At least one server must be selected!") . "', type: 'error'});\n" .
               "    return;\n" .
               "  }\n" .
               "  var l = Ladda.create ( this);\n" .
               "  l.start ();\n" .
-              "  VoIP.rest ( '/servers/' + encodeURIComponent ( $('#server_rebuild_id').val ()) + '/rebuild', 'POST', { Clean: $('#server_rebuild_clean').prop ( 'checked')}).done ( function ( data, textStatus, jqXHR)\n" .
+              "  var rebuildMain = $('#server_rebuild_server_main').prop ( 'checked');\n" .
+              "  var rebuildBackups = [];\n" .
+              "  $('#server_rebuild_serverlist').find ( 'input[id^=\"server_rebuild_backup_\"]:checked').each ( function ()\n" .
+              "  {\n" .
+              "    rebuildBackups.push ( parseInt ( $(this).attr ( 'id').replace ( 'server_rebuild_backup_', '')));\n" .
+              "  });\n" .
+              "  VoIP.rest ( '/servers/' + encodeURIComponent ( $('#server_rebuild_id').val ()) + '/rebuild', 'POST', { Clean: $('#server_rebuild_clean').prop ( 'checked'), RebuildMain: rebuildMain, RebuildBackups: rebuildBackups}).done ( function ( data, textStatus, jqXHR)\n" .
               "  {\n" .
               "    $('#server_rebuild').modal ( 'hide');\n" .
               "    new PNotify ( { title: '" . __ ( "Server rebuild") . "', text: '" . __ ( "Server rebuilt successfully!") . "', type: 'success'});\n" .
@@ -260,7 +269,7 @@ function servers_add_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Servers"));
-  sys_set_subtitle ( __ ( "servers addition"));
+  sys_set_subtitle ( __ ( "Add servers"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Servers"), "link" => "/servers"),
     2 => array ( "title" => __ ( "Add"))
@@ -271,6 +280,7 @@ function servers_add_page ( $buffer, $parameters)
    */
   sys_addcss ( array ( "name" => "bootstrap-toggle", "src" => "/vendors/bootstrap-toggle/css/bootstrap-toggle.css", "dep" => array ( "bootstrap")));
   sys_addcss ( array ( "name" => "tempus-dominus", "src" => "/vendors/tempus-dominus/build/css/bootstrap-datetimepicker.css", "dep" => array ( "bootstrap")));
+  sys_addcss ( array ( "name" => "flag-icons", "src" => "/vendors/flag-icons/css/flag-icons.css", "dep" => array ()));
 
   /**
    * Add page JavaScript requirements
@@ -317,6 +327,14 @@ function servers_add_page ( $buffer, $parameters)
   $output .= "        <label for=\"server_add_port\" class=\"control-label col-xs-2\">" . __ ( "Port") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Port\" class=\"form-control\" id=\"server_add_port\" placeholder=\"" . __ ( "Server port") . "\" />\n";
+  $output .= "        </div>\n";
+  $output .= "      </div>\n";
+
+  // Add server country selector
+  $output .= "      <div class=\"form-group\">\n";
+  $output .= "        <label for=\"server_add_country\" class=\"control-label col-xs-2\">" . __ ( "Country") . "</label>\n";
+  $output .= "        <div class=\"col-xs-10\">\n";
+  $output .= "          <select name=\"Country\" id=\"server_add_country\" class=\"form-control\" data-placeholder=\"" . __ ( "Server country") . "\"><option value=\"\"></option></select>\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";
 
@@ -445,6 +463,33 @@ function servers_add_page ( $buffer, $parameters)
               "});\n" .
               "Sortable.create ( document.getElementById ( 'server_add_ntp_servers'), { animation: 150, handle: '.drag-handle', draggable: '.form-ntpserver'});\n" .
               "$('#server_add_port').mask ( '0#');\n" .
+              "$('#server_add_country').select2 (\n" .
+              "{\n" .
+              "  allowClear: true,\n" .
+              "  templateResult: function ( e)\n" .
+              "                  {\n" .
+              "                    if ( id = e.text.match ( /.*\\((.*)\\)$/))\n" .
+              "                    {\n" .
+              "                      return '<span class=\"fi fi-' + id[1].toLowerCase () + '\"></span> ' + e.text;\n" .
+              "                    } else {\n" .
+              "                      return e.text;\n" .
+              "                    }\n" .
+              "                  },\n" .
+              "  templateSelection: function ( e)\n" .
+              "                     {\n" .
+              "                       if ( id = e.text.match ( /.*\\((.*)\\)$/))\n" .
+              "                       {\n" .
+              "                         return '<span class=\"fi fi-' + id[1].toLowerCase () + '\"></span> ' + e.text;\n" .
+              "                       } else {\n" .
+              "                         return e.text;\n" .
+              "                       }\n" .
+              "                     },\n" .
+              "  escapeMarkup: function ( m)\n" .
+              "                {\n" .
+              "                  return m;\n" .
+              "                },\n" .
+              "  data: VoIP.APIsearch ( { path: '/countries', fields: 'Code,Name,Alpha2', formatID: 'Alpha2', formatText: '%Name% (%Alpha2%)'})\n" .
+              "});\n" .
               "$('#server_add_form input[type=checkbox]').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});\n" .
               "$('#server_add_window').on ( 'change', function ( event)\n" .
               "{\n" .
@@ -479,7 +524,7 @@ function servers_add_page ( $buffer, $parameters)
               "  event && event.preventDefault ();\n" .
               "  if ( $('#server_add_backups').find ( 'div.input-group').length >= 3)\n" .
               "  {\n" .
-              "    new PNotify ( { title: '" . __ ( "Server addition") . "', text: '" . __ ( "Maximum number of backup servers reached!") . "', type: 'error'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Add server") . "', text: '" . __ ( "Maximum number of backup servers reached!") . "', type: 'error'});\n" .
               "    return;\n" .
               "  }\n" .
               "  $(this).data ( 'id', $(this).data ( 'id') + 1);\n" .
@@ -504,7 +549,7 @@ function servers_add_page ( $buffer, $parameters)
               "    URL: '/servers',\n" .
               "    method: 'POST',\n" .
               "    button: $('button.add'),\n" .
-              "    title: '" . __ ( "Server addition") . "',\n" .
+              "    title: '" . __ ( "Add server") . "',\n" .
               "    fail: '" . __ ( "Error adding server!") . "',\n" .
               "    success: '" . __ ( "Server added successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
@@ -605,7 +650,7 @@ function servers_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Server cloning") . "', text: '" . __ ( "Error retrieving server data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Clone server") . "', text: '" . __ ( "Error retrieving server data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -623,7 +668,7 @@ function servers_view_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Servers"));
-  sys_set_subtitle ( __ ( "servers visualization"));
+  sys_set_subtitle ( __ ( "View servers"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Servers"), "link" => "/servers"),
     2 => array ( "title" => __ ( "View"))
@@ -634,6 +679,7 @@ function servers_view_page ( $buffer, $parameters)
    */
   sys_addcss ( array ( "name" => "bootstrap-toggle", "src" => "/vendors/bootstrap-toggle/css/bootstrap-toggle.css", "dep" => array ( "bootstrap")));
   sys_addcss ( array ( "name" => "jquery-labelauty", "src" => "/vendors/jquery-labelauty/source/jquery-labelauty.css", "dep" => array ()));
+  sys_addcss ( array ( "name" => "flag-icons", "src" => "/vendors/flag-icons/css/flag-icons.css", "dep" => array ()));
 
   /**
    * Add page JavaScript requirements
@@ -677,6 +723,14 @@ function servers_view_page ( $buffer, $parameters)
   $output .= "        <label for=\"server_view_port\" class=\"control-label col-xs-2\">" . __ ( "Port") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Port\" class=\"form-control\" id=\"server_view_port\" placeholder=\"" . __ ( "Server port") . "\" disabled=\"disabled\" />\n";
+  $output .= "        </div>\n";
+  $output .= "      </div>\n";
+
+  // Add server country selector
+  $output .= "      <div class=\"form-group\">\n";
+  $output .= "        <label for=\"server_view_country\" class=\"control-label col-xs-2\">" . __ ( "Country") . "</label>\n";
+  $output .= "        <div class=\"col-xs-10\">\n";
+  $output .= "          <select name=\"Country\" id=\"server_view_country\" class=\"form-control\" data-placeholder=\"" . __ ( "Server country") . "\" disabled=\"disabled\"></select>\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";
 
@@ -755,12 +809,30 @@ function servers_view_page ( $buffer, $parameters)
   /**
    * Add view form JavaScript code
    */
-  sys_addjs ( "$('#server_view_form input[type=checkbox]').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});\n" .
+  sys_addjs ( "$('#server_view_country').select2 (\n" .
+              "{\n" .
+              "  templateSelection: function ( e)\n" .
+              "                     {\n" .
+              "                       if ( id = e.text.match ( /.*\\((.*)\\)$/))\n" .
+              "                       {\n" .
+              "                         return '<span class=\"fi fi-' + id[1].toLowerCase () + '\"></span> ' + e.text;\n" .
+              "                       } else {\n" .
+              "                         return e.text;\n" .
+              "                       }\n" .
+              "                     },\n" .
+              "  escapeMarkup: function ( m)\n" .
+              "                {\n" .
+              "                  return m;\n" .
+              "                },\n" .
+              "  data: VoIP.APIsearch ( { path: '/countries', fields: 'Code,Name,Alpha2', formatID: 'Alpha2', formatText: '%Name% (%Alpha2%)'})\n" .
+              "});\n" .
+              "$('#server_view_form input[type=checkbox]').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});\n" .
               "$('#server_view_form').on ( 'fill', function ( event, data)\n" .
               "{\n" .
               "  $('#server_view_description').val ( data.Description);\n" .
               "  $('#server_view_address').val ( data.Address);\n" .
               "  $('#server_view_port').val ( data.Port);\n" .
+              "  $('#server_view_country').val ( data.Country).trigger ( 'change');\n" .
               "  for ( var index in data.NTP)\n" .
               "  {\n" .
               "    if ( data.NTP.hasOwnProperty ( index))\n" .
@@ -816,7 +888,7 @@ function servers_edit_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Servers"));
-  sys_set_subtitle ( __ ( "servers edition"));
+  sys_set_subtitle ( __ ( "Edit servers"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Servers"), "link" => "/servers"),
     2 => array ( "title" => __ ( "Edit"))
@@ -827,6 +899,7 @@ function servers_edit_page ( $buffer, $parameters)
    */
   sys_addcss ( array ( "name" => "bootstrap-toggle", "src" => "/vendors/bootstrap-toggle/css/bootstrap-toggle.css", "dep" => array ( "bootstrap")));
   sys_addcss ( array ( "name" => "tempus-dominus", "src" => "/vendors/tempus-dominus/build/css/bootstrap-datetimepicker.css", "dep" => array ( "bootstrap")));
+  sys_addcss ( array ( "name" => "flag-icons", "src" => "/vendors/flag-icons/css/flag-icons.css", "dep" => array ()));
 
   /**
    * Add page JavaScript requirements
@@ -873,6 +946,14 @@ function servers_edit_page ( $buffer, $parameters)
   $output .= "        <label for=\"server_edit_port\" class=\"control-label col-xs-2\">" . __ ( "Port") . "</label>\n";
   $output .= "        <div class=\"col-xs-10\">\n";
   $output .= "          <input type=\"text\" name=\"Port\" class=\"form-control\" id=\"server_edit_port\" placeholder=\"" . __ ( "Server port") . "\" />\n";
+  $output .= "        </div>\n";
+  $output .= "      </div>\n";
+
+  // Add server country selector
+  $output .= "      <div class=\"form-group\">\n";
+  $output .= "        <label for=\"server_edit_country\" class=\"control-label col-xs-2\">" . __ ( "Country") . "</label>\n";
+  $output .= "        <div class=\"col-xs-10\">\n";
+  $output .= "          <select name=\"Country\" id=\"server_edit_country\" class=\"form-control\" data-placeholder=\"" . __ ( "Server country") . "\"><option value=\"\"></option></select>\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";
 
@@ -994,6 +1075,33 @@ function servers_edit_page ( $buffer, $parameters)
               "});\n" .
               "Sortable.create ( document.getElementById ( 'server_edit_ntp_servers'), { animation: 150, handle: '.drag-handle', draggable: '.form-ntpserver'});\n" .
               "$('#server_edit_port').mask ( '0#');\n" .
+              "$('#server_edit_country').select2 (\n" .
+              "{\n" .
+              "  allowClear: true,\n" .
+              "  templateResult: function ( e)\n" .
+              "                  {\n" .
+              "                    if ( id = e.text.match ( /.*\\((.*)\\)$/))\n" .
+              "                    {\n" .
+              "                      return '<span class=\"fi fi-' + id[1].toLowerCase () + '\"></span> ' + e.text;\n" .
+              "                    } else {\n" .
+              "                      return e.text;\n" .
+              "                    }\n" .
+              "                  },\n" .
+              "  templateSelection: function ( e)\n" .
+              "                     {\n" .
+              "                       if ( id = e.text.match ( /.*\\((.*)\\)$/))\n" .
+              "                       {\n" .
+              "                         return '<span class=\"fi fi-' + id[1].toLowerCase () + '\"></span> ' + e.text;\n" .
+              "                       } else {\n" .
+              "                         return e.text;\n" .
+              "                       }\n" .
+              "                     },\n" .
+              "  escapeMarkup: function ( m)\n" .
+              "                {\n" .
+              "                  return m;\n" .
+              "                },\n" .
+              "  data: VoIP.APIsearch ( { path: '/countries', fields: 'Code,Name,Alpha2', formatID: 'Alpha2', formatText: '%Name% (%Alpha2%)'})\n" .
+              "});\n" .
               "$('#server_edit_form input[type=checkbox]').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});\n" .
               "$('#server_edit_window').on ( 'change', function ( event)\n" .
               "{\n" .
@@ -1028,7 +1136,7 @@ function servers_edit_page ( $buffer, $parameters)
               "  event && event.preventDefault ();\n" .
               "  if ( $('#server_edit_backups').find ( 'div.input-group').length >= 4)\n" .
               "  {\n" .
-              "    new PNotify ( { title: '" . __ ( "Server addition") . "', text: '" . __ ( "Maximum number of backup servers reached!") . "', type: 'error'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Add server") . "', text: '" . __ ( "Maximum number of backup servers reached!") . "', type: 'error'});\n" .
               "    return;\n" .
               "  }\n" .
               "  $(this).data ( 'id', $(this).data ( 'id') + 1);\n" .
@@ -1048,6 +1156,7 @@ function servers_edit_page ( $buffer, $parameters)
               "  $('#server_edit_description').val ( data.Description);\n" .
               "  $('#server_edit_address').val ( data.Address);\n" .
               "  $('#server_edit_port').val ( data.Port);\n" .
+              "  $('#server_edit_country').val ( data.Country).trigger ( 'change');\n" .
               "  for ( var index in data.NTP)\n" .
               "  {\n" .
               "    if ( data.NTP.hasOwnProperty ( index))\n" .
@@ -1084,7 +1193,7 @@ function servers_edit_page ( $buffer, $parameters)
               "  $('#server_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Server edition") . "', text: '" . __ ( "Error retrieving data from server!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Edit server") . "', text: '" . __ ( "Error retrieving data from server!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#server_edit_form').alerts ( 'form',\n" .
               "{\n" .
@@ -1093,7 +1202,7 @@ function servers_edit_page ( $buffer, $parameters)
               "    URL: '/servers/' + VoIP.parameters.id,\n" .
               "    method: 'PATCH',\n" .
               "    button: $('button.edit'),\n" .
-              "    title: '" . __ ( "Server edition") . "',\n" .
+              "    title: '" . __ ( "Edit server") . "',\n" .
               "    fail: '" . __ ( "Error changing server!") . "',\n" .
               "    success: '" . __ ( "Server changed successfully!") . "',\n" .
               "    onsuccess: function ()\n" .

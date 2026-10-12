@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage CountryDB
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -61,7 +61,7 @@ framework_add_hook (
     ),
     "response" => array (
       200 => array (
-        "description" => __ ( "An array containing the countries information."),
+        "description" => __ ( "An array containing countries' information."),
         "schema" => array (
           "type" => "array",
           "xml" => array (
@@ -86,7 +86,7 @@ framework_add_hook (
               ),
               "NameEN" => array (
                 "type" => "string",
-                "description" => __ ( "The english name of the country."),
+                "description" => __ ( "The English name of the country."),
                 "example" => "Brazil"
               ),
               "Alpha2" => array (
@@ -128,14 +128,14 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Filter" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -179,7 +179,7 @@ function countries_search ( $buffer, $parameters)
   /**
    * Call start hook if exist
    */
-  if ( framework_has_hook ( "counries_search_start"))
+  if ( framework_has_hook ( "countries_search_start"))
   {
     $parameters = framework_call ( "countries_search_start", $parameters);
   }
@@ -199,7 +199,7 @@ function countries_search ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
 
   /**
@@ -305,7 +305,7 @@ framework_add_hook (
             ),
             "NameEN" => array (
               "type" => "string",
-              "description" => __ ( "The english name of the country."),
+              "description" => __ ( "The English name of the country."),
               "example" => "Brazil"
             ),
             "Alpha2" => array (
@@ -346,7 +346,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -361,7 +361,7 @@ framework_add_hook (
     )
   )
 );
-framework_add_permission ( "countries_view", __ ( "View countries information"));
+framework_add_permission ( "countries_view", __ ( "View countries' information"));
 framework_add_api_call (
   "/countries/:Code",
   "Read",
@@ -369,12 +369,12 @@ framework_add_api_call (
   array (
     "permissions" => array ( "User", "Administrator", "Super-Administrator", "Token", "countries_view"),
     "title" => __ ( "View country"),
-    "description" => __ ( "View a country information."),
+    "description" => __ ( "View country information."),
     "parameters" => array (
       array (
         "name" => "Code",
         "type" => "integer",
-        "description" => __ ( "The code of country to be requested."),
+        "description" => __ ( "The country code to be requested."),
         "example" => 76
       )
     )

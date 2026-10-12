@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Extensions
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -44,9 +44,9 @@ ini_set ( "display_errors", 0);
 // error_reporting ( E_ALL); ini_set ( "display_errors", 1);
 
 /**
- * Include main configuration parser and functions
+ * Bootstrap webroot and load configuration (does not depend on PHP-FPM chdir).
  */
-require_once ( "includes/config.inc.php");
+require_once ( __DIR__ . "/includes/bootstrap.inc.php");
 
 /**
  * Check if user is authenticated

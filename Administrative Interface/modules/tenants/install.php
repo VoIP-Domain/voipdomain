@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Multi-Tenant
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -65,6 +65,8 @@ function multitenant_install_db ( $buffer, $parameters)
                                     "  `Offset` int(2) NOT NULL,\n" .
                                     "  `Currency` int(2) UNSIGNED NOT NULL DEFAULT 840,\n" .
                                     "  `Language` varchar(5) NOT NULL DEFAULT 'en_US',\n" .
+                                    "  `PublicKey` blob NOT NULL,\n" .
+                                    "  `PrivateKey` blob NOT NULL,\n" .
                                     "  PRIMARY KEY (`ID`),\n" .
                                     "  UNIQUE KEY `Domain` (`Domain`),\n" .
                                     "  KEY `Status` (`Status`),\n" .

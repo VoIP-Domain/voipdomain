@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments Yealink
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -54,7 +54,7 @@ function equipments_yealink_view_subpage ( $buffer, $parameters)
   /**
    * Add extra fields for administrator and user name and password
    */
-  $extrausersmodels = array ( "t18p", "t19pe2", "t20p", "t21p", "t21pe2", "t22p", "t23p", "t23g", "t26p", "t27p", "t27g", "t29g", "t30p", "t31", "t31p", "t31g", "t38g", "t40p", "t46s", "t48s", "cp920", "vp530");
+  $extrausersmodels = array ( "t18p", "t19pe2", "t20p", "t21p", "t21pe2", "t22p", "t23p", "t23g", "t26p", "t27p", "t27g", "t28p", "t29g", "t30p", "t31", "t31p", "t31g", "t38g", "t40p", "t46s", "t48s", "cp920", "vp530");
   foreach ( $extrausersmodels as $model)
   {
     // Model options:
@@ -130,7 +130,7 @@ function equipments_yealink_view_subpage ( $buffer, $parameters)
                               "  document.execCommand ( 'copy');\n" .
                               "  $(this).focus ();\n" .
                               "  $(target).removeAttr ( 'readonly').attr ( 'disabled', 'disabled').attr ( 'type', 'password');\n" .
-                              "  new PNotify ( { title: '" . __ ( "Equipment view") . "', text: '" . __ ( "Password copied to clipboard!") . "', type: 'success'});\n" .
+                              "  new PNotify ( { title: '" . __ ( "View equipment") . "', text: '" . __ ( "Password copied to clipboard!") . "', type: 'success'});\n" .
                               "});\n";
   }
 
@@ -151,7 +151,7 @@ function equipments_yealink_configure_subpage ( $buffer, $parameters)
    * Add extra fields for administrator and user name and password
    */
   $output = "";
-  $extrausersmodels = array ( "t18p", "t19pe2", "t20p", "t21p", "t21pe2", "t22p", "t23p", "t23g", "t26p", "t27p", "t27g", "t29g", "t30p", "t31", "t31p", "t31g", "t38g", "t40p", "t46s", "t48s", "cp920", "vp530");
+  $extrausersmodels = array ( "t18p", "t19pe2", "t20p", "t21p", "t21pe2", "t22p", "t23p", "t23g", "t26p", "t27p", "t27g", "t28p", "t29g", "t30p", "t31", "t31p", "t31g", "t38g", "t40p", "t46s", "t48s", "cp920", "vp530");
   foreach ( $extrausersmodels as $model)
   {
     // Model options:

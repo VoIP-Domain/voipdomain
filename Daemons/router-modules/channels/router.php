@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Channels
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "channels_bootup", "channels_bootup");
 framework_add_hook ( "channels_unload", "channels_unload");
@@ -141,7 +141,7 @@ function channels_state ( $buffer, $parameters)
   $_in["Channels"][$parameters["ServerID"]][$parameters["Channel"]]["State"] = $parameters["State"];
 
   // Log event:
-  writeLog ( "Updated channel \"" . $parameters["Channel"] . "\" to server #" . $parameters["ServerID"] . " status \"" . $parameters["Status"] . "\".");
+  writeLog ( "Updated channel \"" . $parameters["Channel"] . "\" to server #" . $parameters["ServerID"] . " status \"" . $parameters["State"] . "\".");
 
   // End event:
   return $buffer;

@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Extensions Queues
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "extension_queue_add", "extension_queue_add");
 framework_add_hook ( "extension_queue_change", "extension_queue_change");
@@ -49,7 +49,7 @@ framework_add_hook ( "extension_queue_wipe", "extension_queue_wipe");
 cleanup_register ( "Extensions-Queue", "extension_queue_wipe", array ( "Before" => array ( "Extensions")));
 
 /**
- * Function to create a new extension associated to a queue.
+ * Function to create a new extension associated with a queue.
  * Required parameters are: (int) Number, (string) Queue
  * Possible results:
  *   - 200: OK, extension queue created (overwritten)
@@ -91,7 +91,7 @@ function extension_queue_add ( $buffer, $parameters)
   {
     $data["Queue"] = "Missing parameter";
   }
-  if ( ! array_key_exists ( "Queue", $data) && ! preg_match ( "/^[a-z0-9\-\.]$/", $parameters["Queue"]))
+  if ( ! array_key_exists ( "Queue", $data) && ! preg_match ( "/^[a-z0-9\-\.]+$/", $parameters["Queue"]))
   {
     $data["Queue"] = "Invalid content";
   }
@@ -193,7 +193,7 @@ function extension_queue_add ( $buffer, $parameters)
 }
 
 /**
- * Function to change an existing extension associated to a queue.
+ * Function to change an existing extension associated with a queue.
  * Required parameters are: (int) Number, (int) NewNumber, (string) Queue
  * Possible results:
  *   - 200: OK, extension queue changed
@@ -244,7 +244,7 @@ function extension_queue_change ( $buffer, $parameters)
   {
     $data["Queue"] = "Missing parameter";
   }
-  if ( ! array_key_exists ( "Queue", $data) && ! preg_match ( "/^[a-z0-9\-\.]$/", $parameters["Queue"]))
+  if ( ! array_key_exists ( "Queue", $data) && ! preg_match ( "/^[a-z0-9\-\.]+$/", $parameters["Queue"]))
   {
     $data["Queue"] = "Invalid content";
   }
@@ -290,11 +290,11 @@ function extension_queue_change ( $buffer, $parameters)
   // Verify if new extension exists
   if ( $parameters["Number"] != $parameters["NewNumber"] && check_config ( "config", "dialplan-extension-" . $parameters["NewNumber"]))
   {
-    return array ( "code" => 409, "message" => "New number already exist.");
+    return array ( "code" => 409, "message" => "New number already exists.");
   }
 
   // Verify if queue exist
-  if ( ! config_check ( "config", "queue-" . $parameters["Queue"]))
+  if ( ! check_config ( "config", "queue-" . $parameters["Queue"]))
   {
     return array ( "code" => 404, "message" => "Queue not found.");
   }
@@ -485,8 +485,8 @@ function extension_queue_wipe ( $buffer, $parameters)
     if ( $data["Type"] == "queue")
     {
       $entryid = (int) substr ( $filename, strrpos ( $filename, "-") + 1);
-      config_unlink ( "config", "dialplan-extension-" . $entryid);
-      config_unlink ( "datafile", $filename);
+      unlink_config ( "config", "dialplan-extension-" . $entryid);
+      unlink_config ( "datafile", $filename);
     }
   }
 

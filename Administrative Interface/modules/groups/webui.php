@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,14 +25,14 @@
 
 /**
  * VoIP Domain groups module WebUI. This module manage the group function of
- * system, that allow you to create user groups, usefull to create pickup groups
+ * system, that allows you to create user groups, useful to create pickup groups
  * and to organize reports and company sectors.
  *
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Groups
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -71,7 +71,7 @@ function groups_search_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Groups"));
-  sys_set_subtitle ( __ ( "groups search"));
+  sys_set_subtitle ( __ ( "Search groups"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Groups"))
   ));
@@ -117,7 +117,7 @@ function groups_search_page ( $buffer, $parameters)
   $output .= "    <div class=\"modal-content\">\n";
   $output .= "      <div class=\"modal-header\">\n";
   $output .= "        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n";
-  $output .= "        <h3 class=\"modal-title\">" . __ ( "Group remove") . "</h3>\n";
+  $output .= "        <h3 class=\"modal-title\">" . __ ( "Remove group") . "</h3>\n";
   $output .= "      </div>\n";
   $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are you sure you want to remove the group %s (%s)?"), "<span id=\"group_delete_description\"></span>", "<span id=\"group_delete_costcenter\"></span>") . "</p><input type=\"hidden\" id=\"group_delete_id\" value=\"\"></div>\n";
   $output .= "      <div class=\"modal-footer\">\n";
@@ -188,7 +188,7 @@ function groups_add_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Groups"));
-  sys_set_subtitle ( __ ( "groups addition"));
+  sys_set_subtitle ( __ ( "Add groups"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Groups"), "link" => "/groups"),
     2 => array ( "title" => __ ( "Add"))
@@ -267,7 +267,7 @@ function groups_add_page ( $buffer, $parameters)
               "    URL: '/groups',\n" .
               "    method: 'POST',\n" .
               "    button: $('button.add'),\n" .
-              "    title: '" . __ ( "Group addition") . "',\n" .
+              "    title: '" . __ ( "Add group") . "',\n" .
               "    fail: '" . __ ( "Error adding group!") . "',\n" .
               "    success: '" . __ ( "Group added successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
@@ -312,7 +312,7 @@ function groups_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Group cloning") . "', text: '" . __ ( "Error retrieving group data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Clone group") . "', text: '" . __ ( "Error retrieving group data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -330,7 +330,7 @@ function groups_view_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Groups"));
-  sys_set_subtitle ( __ ( "groups visualization"));
+  sys_set_subtitle ( __ ( "View groups"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Groups"), "link" => "/groups"),
     2 => array ( "title" => __ ( "View"))
@@ -391,7 +391,7 @@ function groups_view_page ( $buffer, $parameters)
               "  $('#group_view_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Group view") . "', text: '" . __ ( "Error viewing group!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "View group") . "', text: '" . __ ( "Error viewing group!") . "', type: 'error'});\n" .
               "});\n");
 
   return $output;
@@ -411,7 +411,7 @@ function groups_edit_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Groups"));
-  sys_set_subtitle ( __ ( "groups edition"));
+  sys_set_subtitle ( __ ( "Edit groups"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Groups"), "link" => "/groups"),
     2 => array ( "title" => __ ( "Edit"))
@@ -484,7 +484,7 @@ function groups_edit_page ( $buffer, $parameters)
               "  $('#group_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Group edition") . "', text: '" . __ ( "Error retrieving group data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Edit group") . "', text: '" . __ ( "Error retrieving group data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#group_edit_form').alerts ( 'form',\n" .
               "{\n" .
@@ -493,7 +493,7 @@ function groups_edit_page ( $buffer, $parameters)
               "    URL: '/groups/' + VoIP.parameters.id,\n" .
               "    method: 'PATCH',\n" .
               "    button: $('button.edit'),\n" .
-              "    title: '" . __ ( "Group edition") . "',\n" .
+              "    title: '" . __ ( "Edit group") . "',\n" .
               "    fail: '" . __ ( "Error changing group!") . "',\n" .
               "    success: '" . __ ( "Group changed successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
@@ -520,7 +520,7 @@ function groups_report_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Groups"));
-  sys_set_subtitle ( __ ( "groups report"));
+  sys_set_subtitle ( __ ( "Groups report"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Groups"), "link" => "/groups"),
     2 => array ( "title" => __ ( "Report"))

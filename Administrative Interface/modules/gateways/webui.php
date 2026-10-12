@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Gateways
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -159,7 +159,7 @@ function gateways_search_page ( $buffer, $parameters)
               "  VoIP.rest ( '/gateways/' + encodeURIComponent ( $('#gateway_delete_id').val ()), 'DELETE').done ( function ( data, textStatus, jqXHR)\n" .
               "  {\n" .
               "    $('#gateway_delete').modal ( 'hide');\n" .
-              "    new PNotify ( { title: '" . __ ( "Gateway removal") . "', text: '" . __ ( "Gateway successfully removed!") . "', type: 'success'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Gateway removal") . "', text: '" . __ ( "Gateway removed successfully!") . "', type: 'success'});\n" .
               "    $('#gateway_delete_id').data ( 'dtrow').remove ().draw ();\n" .
               "  }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "  {\n" .
@@ -187,7 +187,7 @@ function gateways_add_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Gateways"));
-  sys_set_subtitle ( __ ( "gateways addition"));
+  sys_set_subtitle ( __ ( "Add gateways"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Gateways"), "link" => "/gateways"),
     2 => array ( "title" => __ ( "Add"))
@@ -356,6 +356,14 @@ function gateways_add_page ( $buffer, $parameters)
   $output .= "          <input type=\"checkbox\" name=\"Qualify\" id=\"gateway_add_qualify\" value=\"true\" class=\"form-control\" />\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";
+
+  // Add inbound option
+  $output .= "      <div class=\"form-group\">\n";
+  $output .= "        <label for=\"gateway_add_inbound\" class=\"control-label col-xs-2\">" . __ ( "Inbound") . "</label>\n";
+  $output .= "        <div class=\"col-xs-10\">\n";
+  $output .= "          <input type=\"checkbox\" name=\"Inbound\" id=\"gateway_add_inbound\" value=\"true\" class=\"form-control\" checked=\"checked\" />\n";
+  $output .= "        </div>\n";
+  $output .= "      </div>\n";
   $output .= "    </div>\n";
 
   // Timing options panel
@@ -421,7 +429,7 @@ function gateways_add_page ( $buffer, $parameters)
   $output .= "          <div class=\"col-xs-10 inputGroupContainer\">\n";
   $output .= "            <div class=\"input-group\">\n";
   $output .= "              <input type=\"text\" name=\"Pattern__X_\" class=\"form-control\" id=\"gateway_add_pattern__X_\" placeholder=\"" . __ ( "Pattern (match content)") . "\" />\n";
-  $output .= "              <input type=\"text\" name=\"Remove__X_\" class=\"form-control\" id=\"gateway_add_remove__X_\" placeholder=\"" . __ ( "Content to remove") . "\" />\n";
+  $output .= "              <input type=\"text\" name=\"Remove__X_\" class=\"form-control\" id=\"gateway_add_remove__X_\" placeholder=\"" . __ ( "Content to be removed") . "\" />\n";
   $output .= "              <input type=\"text\" name=\"Add__X_\" class=\"form-control\" id=\"gateway_add_add__X_\" placeholder=\"" . __ ( "Content to add") . "\" />\n";
   $output .= "              <span class=\"input-group-addon input-icon-button btn btn-error btn-deltranslation\" data-toggle=\"tooltip\" data-placement=\"left\" title=\"" . __ ( "Remove translation") . "\"><i class=\"fa fa-minus\"></i></span>\n";
   $output .= "            </div>\n";
@@ -574,10 +582,10 @@ function gateways_add_page ( $buffer, $parameters)
               "      $('.btn-addtranslation').trigger ( 'click');\n" .
               "    }\n" .
               "    $('#gateway_add_files').val ( null).trigger ( 'change').trigger ( 'select2:unselect');\n" .
-              "    new PNotify ( { title: '" . __ ( "Gateway addition") . "', text: '" . __ ( "Fares file loaded successfully!") . "', type: 'success'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Add gateway") . "', text: '" . __ ( "Fares file loaded successfully!") . "', type: 'success'});\n" .
               "  }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "  {\n" .
-              "    new PNotify ( { title: '" . __ ( "Gateway addition") . "', text: '" . __ ( "Error loading fares file!") . "', type: 'error'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Add gateway") . "', text: '" . __ ( "Error loading fares file!") . "', type: 'error'});\n" .
               "  }).always ( function ()\n" .
               "  {\n" .
               "    l.stop ();\n" .
@@ -614,7 +622,7 @@ function gateways_add_page ( $buffer, $parameters)
               "}\n" .
               "$('#gateway_add_number').mask ( '+0#');\n" .
               "$('#gateway_add_port').mask ( '09999');\n" .
-              "$('#gateway_add_nat,#gateway_add_rpid,#gateway_add_qualify').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});\n" .
+              "$('#gateway_add_nat,#gateway_add_rpid,#gateway_add_qualify,#gateway_add_inbound').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});\n" .
               "$('#gateway_add_discard,#gateway_add_minimum,#gateway_add_fraction').mask ( '0#');\n" .
               "$('.btn-addroute,.btn-addtranslation').trigger ( 'click');\n" .
               "Sortable.create ( document.getElementById ( 'gateway_add_routes'), { animation: 150, handle: '.drag-handle', draggable: '.form-route'});\n" .
@@ -627,7 +635,7 @@ function gateways_add_page ( $buffer, $parameters)
               "    URL: '/gateways',\n" .
               "    method: 'POST',\n" .
               "    button: $('button.add'),\n" .
-              "    title: '" . __ ( "Gateway addition") . "',\n" .
+              "    title: '" . __ ( "Add gateway") . "',\n" .
               "    fail: '" . __ ( "Error adding gateway!") . "',\n" .
               "    success: '" . __ ( "Gateway added successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
@@ -679,6 +687,7 @@ function gateways_add_page ( $buffer, $parameters)
               "  formData.NAT = $('#gateway_add_nat').prop ( 'checked');\n" .
               "  formData.RPID = $('#gateway_add_rpid').prop ( 'checked');\n" .
               "  formData.Qualify = $('#gateway_add_qualify').prop ( 'checked');\n" .
+              "  formData.Inbound = $('#gateway_add_inbound').prop ( 'checked');\n" .
               "  $('#gateway_add_form').data ( 'formData', formData);\n" .
               "});");
 
@@ -724,6 +733,7 @@ function gateways_clone_function ( $buffer, $parameters)
               "    $('#gateway_add_nat').bootstrapToggle ( ( data.NAT ? 'on' : 'off'));\n" .
               "    $('#gateway_add_rpid').bootstrapToggle ( ( data.RPID ? 'on' : 'off'));\n" .
               "    $('#gateway_add_qualify').bootstrapToggle ( ( data.Qualify ? 'on' : 'off'));\n" .
+              "    $('#gateway_add_inbound').bootstrapToggle ( ( data.Inbound ? 'on' : 'off'));\n" .
               "    $('#gateway_add_discard').val ( data.Discard);\n" .
               "    $('#gateway_add_minimum').val ( data.Minimum);\n" .
               "    $('#gateway_add_fraction').val ( data.Fraction);\n" .
@@ -760,7 +770,7 @@ function gateways_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Gateway cloning") . "', text: '" . __ ( "Error retrieving gateway data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Clone gateway") . "', text: '" . __ ( "Error retrieving gateway data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -778,7 +788,7 @@ function gateways_view_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Gateways"));
-  sys_set_subtitle ( __ ( "gateways visualization"));
+  sys_set_subtitle ( __ ( "View gateways"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Gateways"), "link" => "/gateways"),
     2 => array ( "title" => __ ( "View"))
@@ -944,6 +954,14 @@ function gateways_view_page ( $buffer, $parameters)
   $output .= "          <input type=\"checkbox\" name=\"Qualify\" value=\"true\" id=\"gateway_view_qualify\" class=\"form-control\" disabled=\"disabled\" />\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";
+
+  // Add inbound option
+  $output .= "      <div class=\"form-group\">\n";
+  $output .= "        <label for=\"gateway_view_inbound\" class=\"control-label col-xs-2\">" . __ ( "Inbound") . "</label>\n";
+  $output .= "        <div class=\"col-xs-10\">\n";
+  $output .= "          <input type=\"checkbox\" name=\"Inbound\" value=\"true\" id=\"gateway_view_inbound\" class=\"form-control\" disabled=\"disabled\" />\n";
+  $output .= "        </div>\n";
+  $output .= "      </div>\n";
   $output .= "    </div>\n";
 
   // Timing options panel
@@ -1002,7 +1020,7 @@ function gateways_view_page ( $buffer, $parameters)
   $output .= "          <div class=\"col-xs-10 inputGroupContainer\">\n";
   $output .= "            <div class=\"input-group\">\n";
   $output .= "              <input type=\"text\" name=\"Pattern__X_\" class=\"form-control\" id=\"gateway_view_pattern__X_\" placeholder=\"" . __ ( "Pattern (match content)") . "\" disabled=\"disabled\" />\n";
-  $output .= "              <input type=\"text\" name=\"Remove__X_\" class=\"form-control\" id=\"gateway_view_remove__X_\" placeholder=\"" . __ ( "Content to remove") . "\" disabled=\"disabled\" />\n";
+  $output .= "              <input type=\"text\" name=\"Remove__X_\" class=\"form-control\" id=\"gateway_view_remove__X_\" placeholder=\"" . __ ( "Content to be removed") . "\" disabled=\"disabled\" />\n";
   $output .= "              <input type=\"text\" name=\"Add__X_\" class=\"form-control\" id=\"gateway_view_add__X_\" placeholder=\"" . __ ( "Content to add") . "\" disabled=\"disabled\" />\n";
   $output .= "              <span class=\"input-group-addon input-icon-button btn btn-error\"></span>\n";
   $output .= "            </div>\n";
@@ -1045,7 +1063,7 @@ function gateways_view_page ( $buffer, $parameters)
               "  })\n" .
               "});\n" .
               "$('#gateway_view_config').select2 ( { allowClear: true, placeholder: 'Selecione o tipo de configuração do gateway' });\n" .
-              "$('#gateway_view_nat,#gateway_view_rpid,#gateway_view_qualify').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});\n" .
+              "$('#gateway_view_nat,#gateway_view_rpid,#gateway_view_qualify,#gateway_view_inbound').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});\n" .
               "$('#gateway_view_form').on ( 'fill', function ( event, data)\n" .
               "{\n" .
               "  $('#gateway_view_description').val ( data.Description);\n" .
@@ -1062,6 +1080,7 @@ function gateways_view_page ( $buffer, $parameters)
               "  $('#gateway_view_nat').bootstrapToggle ( 'enable').bootstrapToggle ( ( data.NAT ? 'on' : 'off')).bootstrapToggle ( 'disable');\n" .
               "  $('#gateway_view_rpid').bootstrapToggle ( 'enable').bootstrapToggle ( ( data.RPID ? 'on' : 'off')).bootstrapToggle ( 'disable');\n" .
               "  $('#gateway_view_qualify').bootstrapToggle ( 'enable').bootstrapToggle ( ( data.Qualify ? 'on' : 'off')).bootstrapToggle ( 'disable');\n" .
+              "  $('#gateway_view_inbound').bootstrapToggle ( 'enable').bootstrapToggle ( ( data.Inbound ? 'on' : 'off')).bootstrapToggle ( 'disable');\n" .
               "  $('#gateway_view_discard').val ( data.Discard);\n" .
               "  $('#gateway_view_minimum').val ( data.Minimum);\n" .
               "  $('#gateway_view_fraction').val ( data.Fraction);\n" .
@@ -1098,7 +1117,7 @@ function gateways_view_page ( $buffer, $parameters)
               "  $('#gateway_view_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Gateway visualization") . "', text: '" . __ ( "Error viewing gateway!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "View gateway") . "', text: '" . __ ( "Error viewing gateway!") . "', type: 'error'});\n" .
               "});\n");
 
   return $output;
@@ -1118,7 +1137,7 @@ function gateways_edit_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Gateways"));
-  sys_set_subtitle ( __ ( "gateways edition"));
+  sys_set_subtitle ( __ ( "Edit gateways"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Gateways"), "link" => "/gateways"),
     2 => array ( "title" => __ ( "Edit"))
@@ -1287,6 +1306,14 @@ function gateways_edit_page ( $buffer, $parameters)
   $output .= "          <input type=\"checkbox\" name=\"Qualify\" id=\"gateway_edit_qualify\" value=\"true\" class=\"form-control\" />\n";
   $output .= "        </div>\n";
   $output .= "      </div>\n";
+
+  // Add inbound option
+  $output .= "      <div class=\"form-group\">\n";
+  $output .= "        <label for=\"gateway_edit_inbound\" class=\"control-label col-xs-2\">" . __ ( "Inbound") . "</label>\n";
+  $output .= "        <div class=\"col-xs-10\">\n";
+  $output .= "          <input type=\"checkbox\" name=\"Inbound\" id=\"gateway_edit_inbound\" value=\"true\" class=\"form-control\" />\n";
+  $output .= "        </div>\n";
+  $output .= "      </div>\n";
   $output .= "    </div>\n";
 
   // Timing options panel
@@ -1352,7 +1379,7 @@ function gateways_edit_page ( $buffer, $parameters)
   $output .= "          <div class=\"col-xs-10 inputGroupContainer\">\n";
   $output .= "            <div class=\"input-group\">\n";
   $output .= "              <input type=\"text\" name=\"Pattern__X_\" class=\"form-control\" id=\"gateway_edit_pattern__X_\" placeholder=\"" . __ ( "Pattern (match content)") . "\" />\n";
-  $output .= "              <input type=\"text\" name=\"Remove__X_\" class=\"form-control\" id=\"gateway_edit_remove__X_\" placeholder=\"" . __ ( "Content to remove") . "\" />\n";
+  $output .= "              <input type=\"text\" name=\"Remove__X_\" class=\"form-control\" id=\"gateway_edit_remove__X_\" placeholder=\"" . __ ( "Content to be removed") . "\" />\n";
   $output .= "              <input type=\"text\" name=\"Add__X_\" class=\"form-control\" id=\"gateway_edit_add__X_\" placeholder=\"" . __ ( "Content to add") . "\" />\n";
   $output .= "              <span class=\"input-group-addon input-icon-button btn btn-error btn-deltranslation\" data-toggle=\"tooltip\" data-placement=\"left\" title=\"" . __ ( "Remove translation") . "\"><i class=\"fa fa-minus\"></i></span>\n";
   $output .= "            </div>\n";
@@ -1495,10 +1522,10 @@ function gateways_edit_page ( $buffer, $parameters)
               "      $('.btn-addtranslation').trigger ( 'click');\n" .
               "    }\n" .
               "    $('#gateway_edit_files').val ( null).trigger ( 'change').trigger ( 'select2:unselect');\n" .
-              "    new PNotify ( { title: '" . __ ( "Gateway edition") . "', text: '" . __ ( "Fares file loaded successfully!") . "', type: 'success'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Edit gateway") . "', text: '" . __ ( "Fares file loaded successfully!") . "', type: 'success'});\n" .
               "  }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "  {\n" .
-              "    new PNotify ( { title: '" . __ ( "Gateway edition") . "', text: '" . __ ( "Error loading fares file!") . "', type: 'error'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Edit gateway") . "', text: '" . __ ( "Error loading fares file!") . "', type: 'error'});\n" .
               "  }).always ( function ()\n" .
               "  {\n" .
               "    l.stop ();\n" .
@@ -1531,7 +1558,7 @@ function gateways_edit_page ( $buffer, $parameters)
               "}\n" .
               "$('#gateway_edit_number').mask ( '+0#');\n" .
               "$('#gateway_edit_port').mask ( '09999');\n" .
-              "$('#gateway_edit_nat,#gateway_edit_rpid,#gateway_edit_qualify').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});\n" .
+              "$('#gateway_edit_nat,#gateway_edit_rpid,#gateway_edit_qualify,#gateway_edit_inbound').bootstrapToggle ( { on: '" . __ ( "Yes") . "', off: '" . __ ( "No") . "'});\n" .
               "$('#gateway_edit_discard,#gateway_edit_minimum,#gateway_edit_fraction').mask ( '0#');\n" .
               "Sortable.create ( document.getElementById ( 'gateway_edit_routes'), { animation: 150, handle: '.drag-handle', draggable: '.form-route'});\n" .
               "Sortable.create ( document.getElementById ( 'gateway_edit_translations'), { animation: 150, handle: '.drag-handle', draggable: '.form-translation'});\n" .
@@ -1551,6 +1578,7 @@ function gateways_edit_page ( $buffer, $parameters)
               "  $('#gateway_edit_nat').bootstrapToggle ( ( data.NAT ? 'on' : 'off'));\n" .
               "  $('#gateway_edit_rpid').bootstrapToggle ( ( data.RPID ? 'on' : 'off'));\n" .
               "  $('#gateway_edit_qualify').bootstrapToggle ( ( data.Qualify ? 'on' : 'off'));\n" .
+              "  $('#gateway_edit_inbound').bootstrapToggle ( ( data.Inbound ? 'on' : 'off'));\n" .
               "  $('#gateway_edit_discard').val ( data.Discard);\n" .
               "  $('#gateway_edit_minimum').val ( data.Minimum);\n" .
               "  $('#gateway_edit_fraction').val ( data.Fraction);\n" .
@@ -1591,7 +1619,7 @@ function gateways_edit_page ( $buffer, $parameters)
               "  $('#gateway_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Gateway edition") . "', text: '" . __ ( "Error viewing gateway!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Edit gateway") . "', text: '" . __ ( "Error viewing gateway!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#gateway_edit_form').alerts ( 'form',\n" .
               "{\n" .
@@ -1600,9 +1628,9 @@ function gateways_edit_page ( $buffer, $parameters)
               "    URL: '/gateways/' + VoIP.parameters.id,\n" .
               "    method: 'PATCH',\n" .
               "    button: $('button.edit'),\n" .
-              "    title: '" . __ ( "Gateway edition") . "',\n" .
+              "    title: '" . __ ( "Edit gateway") . "',\n" .
               "    fail: '" . __ ( "Error changing gateway!") . "',\n" .
-              "    success: '" . __ ( "Gateway successfully changed!") . "',\n" .
+              "    success: '" . __ ( "Gateway changed successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
               "               {\n" .
               "                 VoIP.path.call ( '/gateways', true);\n" .
@@ -1652,6 +1680,7 @@ function gateways_edit_page ( $buffer, $parameters)
               "  formData.NAT = $('#gateway_edit_nat').prop ( 'checked');\n" .
               "  formData.RPID = $('#gateway_edit_rpid').prop ( 'checked');\n" .
               "  formData.Qualify = $('#gateway_edit_qualify').prop ( 'checked');\n" .
+              "  formData.Inbound = $('#gateway_edit_inbound').prop ( 'checked');\n" .
               "  $('#gateway_edit_form').data ( 'formData', formData);\n" .
               "});");
 

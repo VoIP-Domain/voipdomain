@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage IVRs
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -62,7 +62,7 @@ function operator_apply_variables ( $string, $allowed = array ( "{date}", "{time
   }
   if ( in_array ( "{callerid}", $allowed))
   {
-    $string = str_replace ( "{callerid}", "\${FILTER(\"0-9\",\${CALLERID(num)})}", $string);
+    $string = str_replace ( "{callerid}", "\${FILTER(0-9,\${CALLERID(num)})}", $string);
   }
 
   /**
@@ -73,9 +73,11 @@ function operator_apply_variables ( $string, $allowed = array ( "{date}", "{time
   {
     while ( strpos ( $string, "{var_") !== false)
     {
-      $result .= substr ( $string, strpos ( $string, "{var_"));
-      $variable = substr ( $string, 5, strpos ( $string, "}") + 5);
-      $string = substr ( $string, strpos ( $string, "}") + 1);
+      $pos = strpos ( $string, "{var_");
+      $result .= substr ( $string, 0, $pos);
+      $endpos = strpos ( $string, "}", $pos);
+      $variable = substr ( $string, $pos + 5, $endpos - $pos - 5);
+      $string = substr ( $string, $endpos + 1);
       if ( ! preg_match ( "/^[a-z0-9_]+$/", $variable))
       {
         writeLog ( "IVR with invalid variable \"" . $variable . "\", ignoring!", VoIP_LOG_WARNING);
@@ -160,7 +162,7 @@ function create_ivr_workflow ( $name, $description, $revision, $workflow)
 }
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "ivr_add", "ivr_add");
 framework_add_hook ( "ivr_change", "ivr_change");
@@ -264,7 +266,7 @@ function ivr_add ( $buffer, $parameters)
   {
     if ( ! check_overwrite ())
     {
-      return array ( "code" => 400, "message" => "IVR already exist.");
+      return array ( "code" => 400, "message" => "IVR already exists.");
     } else {
       $overwritten = true;
     }
@@ -274,7 +276,7 @@ function ivr_add ( $buffer, $parameters)
 
   // Create file structure
   $ivr = "[vd_ivr_" . $parameters["Name"] . "]\n" .
-         "exten => _X.,1,GoTo(vd_ivr_" . $parameters["Name"] . "_rev_1)\n";
+         "exten => _X.,1,GoTo(vd_ivr_" . $parameters["Name"] . "_rev_1,\${EXTEN},1)\n";
 
   // Write IVR file
   if ( ! write_config ( "config", "dialplan-ivr-" . $parameters["Name"], $ivr))
@@ -436,11 +438,17 @@ function ivr_change ( $buffer, $parameters)
   // Verify if new IVR exist
   if ( $parameters["Name"] != $parameters["NewName"] && check_config ( "config", "dialplan-ivr-" . $parameters["NewName"]))
   {
-    return array ( "code" => 409, "message" => "IVR new name already exist.");
+    return array ( "code" => 409, "message" => "IVR new name already exists.");
   }
 
   // Read datafile
   $data = read_config ( "datafile", "ivr-" . $parameters["Name"]);
+
+  // Remove old revision config files
+  foreach ( list_config ( "config", "dialplan-ivr-" . $parameters["Name"] . "-rev-*") as $filename)
+  {
+    unlink_config ( "config", $filename);
+  }
 
   // Remove IVR files
   if ( ! unlink_config ( "config", "dialplan-ivr-" . $parameters["Name"]) || ! unlink_config ( "datafile", "ivr-" . $parameters["Name"]))
@@ -450,7 +458,7 @@ function ivr_change ( $buffer, $parameters)
 
   // Create file structure
   $ivr = "[vd_ivr_" . $parameters["NewName"] . "]\n" .
-         "exten => _X.,1,GoTo(vd_ivr_" . $parameters["NewName"] . "_rev_" . $parameters["Revision"] . ")\n";
+         "exten => _X.,1,GoTo(vd_ivr_" . $parameters["NewName"] . "_rev_" . $parameters["Revision"] . ",\${EXTEN},1)\n";
 
   // Write IVR file
   if ( ! write_config ( "config", "dialplan-ivr-" . $parameters["NewName"], $ivr))
@@ -640,15 +648,15 @@ function ivr_wipe ( $buffer, $parameters)
     framework_call ( "ivr_wipe_pre", $parameters, false, true);
   }
 
-  // Remove all files
+  // Remove all IVR config files by glob pattern
+  foreach ( list_config ( "config", "dialplan-ivr-*") as $filename)
+  {
+    unlink_config ( "config", $filename);
+  }
+
+  // Remove all IVR data files
   foreach ( list_config ( "datafile", "ivr") as $filename)
   {
-    $data = read_config ( "datafile", $filename);
-    foreach ( $data["Revisions"] as $revision => $revisiondata)
-    {
-      unlink_config ( "config", "dialplan-ivr-" . $revisiondata["Name"] . "-" . str_replace ( "_", "-", $revision));
-    }
-    unlink_config ( "config", "dialplan-ivr-" . $data["Name"]);
     unlink_config ( "datafile", $filename);
   }
 

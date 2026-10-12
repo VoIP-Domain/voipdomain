@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ "$1" = "" ]; then
-  echo "Error: Please provide a certificate filename as parameter."
+  echo "Error: Please provide a certificate filename as a parameter."
   exit
 fi
 

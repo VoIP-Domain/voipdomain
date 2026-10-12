@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -151,14 +151,14 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Fields" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -222,7 +222,7 @@ function equipments_search ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
 
   /**
@@ -512,7 +512,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -535,7 +535,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "Super-Administrator", "equipments_view"),
     "title" => __ ( "View equipments"),
-    "description" => __ ( "Get a equipment information."),
+    "description" => __ ( "Get equipment information."),
     "parameters" => array (
       array (
         "name" => "ID",
@@ -741,7 +741,7 @@ framework_add_hook (
         "description" => __ ( "The system equipment was successfully updated.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -774,7 +774,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "equipments_configure"),
     "title" => __ ( "Configure equipments"),
-    "description" => __ ( "Change a equipment information.")
+    "description" => __ ( "Change equipment information.")
   )
 );
 
@@ -1058,7 +1058,7 @@ framework_add_hook (
     ),
     "response" => array (
       201 => array (
-        "description" => __ ( "New equipment firmware file added successfully."),
+        "description" => __ ( "A new equipment firmware file was added successfully."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1071,7 +1071,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1301,12 +1301,16 @@ function equipments_firmware_add ( $buffer, $parameters)
   /**
    * Add new firmware at Asterisk servers
    */
-  $notify = array ( "Vendor" => $equipment["Vendor"], "UID" => $equipment["UID"], "Filename" => $parameters["Filename"], "Data" => $parameters["FileContent"]);
+  $notify = array ( "Vendor" => $equipment["Vendor"], "UID" => $equipment["UID"], "Filename" => $parameters["Filename"]);
   if ( framework_has_hook ( "equipments_firmware_add_notify"))
   {
     $notify = framework_call ( "equipments_firmware_add_notify", $parameters, false, $notify);
   }
-  notify_server ( 0, "firmware_add", $notify);
+  file_transfer_send ( 0, $_in["general"]["storagedir"] . "/firmwares/" . $equipment["Vendor"] . "/". $parameters["Filename"], array (
+    "TargetEvent" => "firmware_add",
+    "Context" => "firmware",
+    "Metadata" => $notify
+  ));
 
   /**
    * Execute finish hook if exist
@@ -1320,7 +1324,7 @@ function equipments_firmware_add ( $buffer, $parameters)
    * Return OK to user
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . $_in["api"]["baseurl"] . "/equipments/" . $parameters["Equipment"]);
+  header ( "Location: " . voipdomain_location_url ( "/api/equipments/" . $parameters["Equipment"]));
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), array ( "Active" => $active));
 }
 
@@ -1347,7 +1351,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1647,7 +1651,12 @@ function equipments_server_reconfig ( $buffer, $parameters)
       exit ();
     }
     $tenantsettings = json_decode ( $tenantresult->fetch_assoc ()["Data"], true);
-    $notify = array ( "UID" => $equipment["UID"], "AudioCodecs" => json_decode ( $tenantsettings["AudioCodecs"]), "VideoCodecs" => json_decode ( $tenantsettings["VideoCodecs"]), "ExtraSettings" => json_decode ( $tenantsettings["ExtraSettings"]));
+    $notify = array (
+      "UID" => $equipment["UID"],
+      "AudioCodecs" => is_string ( $tenantsettings["AudioCodecs"]) ? json_decode ( $tenantsettings["AudioCodecs"]) : $tenantsettings["AudioCodecs"],
+      "VideoCodecs" => is_string ( $tenantsettings["VideoCodecs"]) ? json_decode ( $tenantsettings["VideoCodecs"]) : $tenantsettings["VideoCodecs"],
+      "ExtraSettings" => is_string ( $tenantsettings["ExtraSettings"]) ? json_decode ( $tenantsettings["ExtraSettings"]) : $tenantsettings["ExtraSettings"]
+    );
     if ( framework_has_hook ( "equipments_configure_notify"))
     {
       $notify = framework_call ( "equipments_configure_notify", $parameters, false, $notify);
@@ -1664,12 +1673,16 @@ function equipments_server_reconfig ( $buffer, $parameters)
       {
         foreach ( $firmware["Files"] as $file)
         {
-          $notify = array ( "Vendor" => $equipment["Vendor"], "UID" => $equipment["UID"], "Filename" => $file["Filename"], "Data" => base64_encode ( file_get_contents ( $_in["general"]["storagedir"] . "/firmwares/" . $equipment["Vendor"] . "/". $file["Filename"])));
+          $notify = array ( "Vendor" => $equipment["Vendor"], "UID" => $equipment["UID"], "Filename" => $file["Filename"]);
           if ( framework_has_hook ( "equipments_firmware_add_notify"))
           {
             $notify = framework_call ( "equipments_firmware_add_notify", $parameters, false, $notify);
           }
-          notify_server ( (int) $parameters["ID"], "firmware_add", $notify);
+          file_transfer_send ( (int) $parameters["ID"], $_in["general"]["storagedir"] . "/firmwares/" . $equipment["Vendor"] . "/". $file["Filename"], array (
+            "TargetEvent" => "firmware_add",
+            "Context" => "firmware",
+            "Metadata" => $notify
+          ));
         }
       }
     }

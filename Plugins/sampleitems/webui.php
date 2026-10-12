@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Sample Items
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -448,7 +448,7 @@ function sampleitems_edit_page ( $buffer, $parameters)
               "  $('#sampleitems_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Sample item edition") . "', text: '" . __ ( "Error requesting sample item data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Edit sample item") . "', text: '" . __ ( "Error requesting sample item data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#sampleitems_edit_form').alerts ( 'form',\n" .
               "{\n" .
@@ -457,7 +457,7 @@ function sampleitems_edit_page ( $buffer, $parameters)
               "    URL: '/sampleitems/' + VoIP.parameters.id,\n" .
               "    method: 'PATCH',\n" .
               "    button: $('button.edit'),\n" .
-              "    title: '" . __ ( "Sample item edition") . "',\n" .
+              "    title: '" . __ ( "Edit sample item") . "',\n" .
               "    fail: '" . __ ( "Error changing sample item!") . "',\n" .
               "    success: '" . __ ( "Sample item changed successfully!") . "',\n" .
               "    onsuccess: function ()\n" .

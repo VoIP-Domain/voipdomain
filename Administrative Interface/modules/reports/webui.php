@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Reports
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -55,7 +55,7 @@ function reports_graph_heat ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Graphical reports"));
-  sys_set_subtitle ( __ ( "heat map graph"));
+  sys_set_subtitle ( __ ( "Heat map graph"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Heat map graph"))
   ));
@@ -101,7 +101,7 @@ function reports_graph_heat ( $buffer, $parameters)
   $output .= "<div id=\"graph\" style=\"width: 100% !important\"></div>\n";
 
   /**
-   * Add heat map graphic JavaScript code
+   * Add Heat map graphic JavaScript code
    */
   sys_addjs ( "$('#type').on ( 'change', function ()\n" .
               "                           {\n" .
@@ -266,7 +266,7 @@ function extensions_list_report_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Reports"));
-  sys_set_subtitle ( __ ( "extensions listing"));
+  sys_set_subtitle ( __ ( "Extensions listing"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Reports"))
   ));
@@ -410,7 +410,7 @@ function ranges_list_report_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Reports"));
-  sys_set_subtitle ( __ ( "ranges listing"));
+  sys_set_subtitle ( __ ( "Ranges listing"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Reports"))
   ));
@@ -537,7 +537,7 @@ function extensions_activity_report_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Reports"));
-  sys_set_subtitle ( __ ( "activity listing"));
+  sys_set_subtitle ( __ ( "Activity listing"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Reports"))
   ));
@@ -648,7 +648,7 @@ function costcenter_financial_report_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Reports"));
-  sys_set_subtitle ( __ ( "financial by cost center"));
+  sys_set_subtitle ( __ ( "Financial by cost center"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Reports"))
   ));

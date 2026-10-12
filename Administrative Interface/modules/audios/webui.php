@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Audio
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -252,7 +252,7 @@ function audios_add_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Audio"));
-  sys_set_subtitle ( __ ( "audio file addition"));
+  sys_set_subtitle ( __ ( "Add audio file"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Audio"), "link" => "/audios"),
     2 => array ( "title" => __ ( "Add"))
@@ -315,7 +315,7 @@ function audios_add_page ( $buffer, $parameters)
               "  var filename = $(this).val ();\n" .
               "  if ( filename.substr ( filename.lastIndexOf ( '.') + 1).toLowerCase () != 'wav' && filename.substr ( filename.lastIndexOf ( '.') + 1).toLowerCase () != 'mp3')\n" .
               "  {\n" .
-              "    new PNotify ( { title: '" . __ ( "Audio file addition") . "', text: '" . __ ( "Selected file extension not valid. Only allowed 'wav' or 'mp3'.") . "', type: 'error'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Add audio file") . "', text: '" . __ ( "Selected file extension not valid. Only allowed 'wav' or 'mp3'.") . "', type: 'error'});\n" .
               "    $(this).val ( '');\n" .
               "    return false;\n" .
               "  }\n" .
@@ -339,7 +339,7 @@ function audios_add_page ( $buffer, $parameters)
               "    URL: '/audios',\n" .
               "    method: 'POST',\n" .
               "    button: $('button.add'),\n" .
-              "    title: '" . __ ( "Audio file addition") . "',\n" .
+              "    title: '" . __ ( "Add audio file") . "',\n" .
               "    fail: '" . __ ( "Error adding audio!") . "',\n" .
               "    success: '" . __ ( "Audio file added successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
@@ -382,7 +382,7 @@ function audios_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Audio cloning") . "', text: '" . __ ( "Error retrieving audio data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Clone audio") . "', text: '" . __ ( "Error retrieving audio data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -471,7 +471,7 @@ function audios_edit_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Audio"));
-  sys_set_subtitle ( __ ( "audio editing"));
+  sys_set_subtitle ( __ ( "Edit audio"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Audio"), "link" => "/audios"),
     2 => array ( "title" => __ ( "Edit"))
@@ -530,14 +530,14 @@ function audios_edit_page ( $buffer, $parameters)
               "  $('#audio_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Audio file edition") . "', text: '" . __ ( "Error retrieving audio file data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Edit audio file") . "', text: '" . __ ( "Error retrieving audio file data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#audio_edit_file').on ( 'change', function ( e)\n" .
               "{\n" .
               "  var filename = $(this).val ();\n" .
               "  if ( filename.substr ( filename.lastIndexOf ( '.') + 1).toLowerCase () != 'wav' && filename.substr ( filename.lastIndexOf ( '.') + 1).toLowerCase () != 'mp3')\n" .
               "  {\n" .
-              "    new PNotify ( { title: '" . __ ( "Audio file addition") . "', text: '" . __ ( "Selected file extension not valid. Only allowed 'wav' or 'mp3'.") . "', type: 'error'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Add audio file") . "', text: '" . __ ( "Selected file extension not valid. Only allowed 'wav' or 'mp3'.") . "', type: 'error'});\n" .
               "    $(this).val ( '');\n" .
               "    return false;\n" .
               "  }\n" .
@@ -560,9 +560,9 @@ function audios_edit_page ( $buffer, $parameters)
               "    URL: '/audios/' + VoIP.parameters.id,\n" .
               "    method: 'PATCH',\n" .
               "    button: $('button.edit'),\n" .
-              "    title: '" . __ ( "Audio file edition") . "',\n" .
+              "    title: '" . __ ( "Edit audio file") . "',\n" .
               "    fail: '" . __ ( "Error changing audio file!") . "',\n" .
-              "    success: '" . __ ( "Audio file successfully changed!") . "',\n" .
+              "    success: '" . __ ( "Audio file changed successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
               "               {\n" .
               "                 VoIP.path.call ( '/audios', true);\n" .

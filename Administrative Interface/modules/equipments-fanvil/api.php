@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments Fanvil
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -53,7 +53,7 @@ framework_add_hook (
 );
 
 /**
- * Function to extend equipments configuration sanitize of Fanvil models.
+ * Function to extend Configure equipment sanitize of Fanvil models.
  *
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
@@ -84,7 +84,7 @@ function equipments_configure_fanvil_userpass_sanitize ( $buffer, $parameters)
 }
 
 /**
- * Function to extend equipments addition/edition validate of Fanvil models.
+ * Function to extend equipments addition/edit validate of Fanvil models.
  *
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before

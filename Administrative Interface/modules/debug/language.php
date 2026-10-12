@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Debug
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -39,9 +39,9 @@
  */
 i18n_add ( "+11235551212");
 i18n_add ( "+1 123 5551212");
-i18n_add ( "Access privileges doesn't fit request.");
+i18n_add ( "Access privileges do not match the request.");
 i18n_add ( "ACME Mobile");
-i18n_add ( "An object containing a large three with internal system API information.");
+i18n_add ( "An object containing a large tree with internal system API information.");
 i18n_add ( "An object containing an OpenAPI v3 documentation of system API.");
 i18n_add ( "An object containing information about the requested number.");
 i18n_add ( "API key is missing or invalid.");
@@ -52,8 +52,8 @@ i18n_add ( "Dump all internal API structure three.");
 i18n_add ( "duplicated internationalization entries");
 i18n_add ( "E.164 debug");
 i18n_add ( "E.164 number debug");
-i18n_add ( "Error processing object creating parameters.");
-i18n_add ( "Error retrieving number debug!");
+i18n_add ( "Error processing object creation parameters.");
+i18n_add ( "Error retrieving number debugging information!");
 i18n_add ( "Export API documentation");
 i18n_add ( "extension dump");
 i18n_add ( "filter dump");
@@ -73,9 +73,9 @@ i18n_add ( "Local VoIP Domain server.");
 i18n_add ( "Method not allowed to requested path. See `Allow` response header for valid methods.");
 i18n_add ( "New York");
 i18n_add ( "Number (E.164 format)");
-i18n_add ( "Object request body available parameters.");
-i18n_add ( "Object successfully created.");
-i18n_add ( "Object successfully removed.");
+i18n_add ( "Available object request body parameters.");
+i18n_add ( "Object created successfully.");
+i18n_add ( "Object removed successfully.");
 i18n_add ( "paths structure dump");
 i18n_add ( "ping");
 i18n_add ( "points!");
@@ -96,14 +96,14 @@ i18n_add ( "The network operator of number, if available.");
 i18n_add ( "The number in E.164 format.");
 i18n_add ( "The number in E.164 format to be explained.");
 i18n_add ( "The numeric telephony country code of number, if available.");
-i18n_add ( "The type of number, if available. The types could be:<br />0 - Unknown;<br />1 - Land line;<br />2 - Mobile;<br />4 - VoIP;<br />8 - Fixed-Mobile Convergence (FMC);<br />16 - Premium Rate Number (PRN);<br />32 - Very-Small-Aperture Terminal (VSAT);<br />64 - Toll free;<br />128 - Pay phone;<br />256 - Audiotext terminal;<br />512 - Marine radio telephone;<br />1024 - Paging;<br />2048 - VPN access;<br />4096 - Terrestrial Trunked Radio (TETRA);<br />8192 - Faximile (FAX);<br />16384 - Voicemail box;<br />32768 - Special charge number;<br />65535 - Services.");
+i18n_add ( "The type of number, if available. The types could be:<br />0 - Unknown;<br />1 - Land line;<br />2 - Mobile;<br />4 - VoIP;<br />8 - Fixed-Mobile Convergence (FMC);<br />16 - Premium Rate Number (PRN);<br />32 - Very-Small-Aperture Terminal (VSAT);<br />64 - Toll free;<br />128 - Pay phone;<br />256 - Audiotext terminal;<br />512 - Marine radio telephone;<br />1024 - Paging;<br />2048 - VPN access;<br />4096 - Terrestrial Trunked Radio (TETRA);<br />8192 - Facsimile (FAX);<br />16384 - Voicemail box;<br />32768 - Special charge number;<br />65535 - Services.");
 i18n_add ( "The URL location of the created object.");
-i18n_add ( "This is the VoIP Domain REST API documentation. You can find more about VoIP Domain at [https://voipdomain.io/](https://voipdomain.io/). You can always access this documentation at your local VoIP Domain installation, logged into system or importing this Swagger documentation json file to an external viewer.");
+i18n_add ( "This is the VoIP Domain REST API documentation. You can find more about VoIP Domain at [https://voipdomain.io/](https://voipdomain.io/). You can always access this documentation at your local VoIP Domain installation, logged into the system or importing this Swagger documentation json file to an external viewer.");
 i18n_add ( "United States of America");
 i18n_add ( "Used API key doesn't have enough permissions.");
 i18n_add ( "VoIP Domain demo server.");
 i18n_add ( "Definitions");
-i18n_add ( "*Variables*: All variables will be [UpperCamelCase](https://en.wikipedia.org/wiki/CamelCase) (also knows as PascalCase);<br />*Date/Time*: The date and time values will **always** be in GMT-0 using ISO-8601 format \"YYYY-MM-DD'T'HH:MM:SS'Z'\", with milliseconds optional (.sss after seconds) (you need to convert to your localtime).");
+i18n_add ( "*Variables*: All variables will be [UpperCamelCase](https://en.wikipedia.org/wiki/CamelCase) (also known as PascalCase);<br />*Date/Time*: The date and time values will **always** be in GMT-0 using ISO-8601 format \"YYYY-MM-DD'T'HH:MM:SS'Z'\", with milliseconds optional (.sss after seconds) (you need to convert to your localtime).");
 i18n_add ( "Object not found.");
 i18n_add ( "Languages");
 i18n_add ( "This documentation is available in the following languages:");
@@ -125,11 +125,11 @@ i18n_add ( "Super-Administrator");
  */
 i18n_add ( "+11235551212", "+11235551212", "pt_BR");
 i18n_add ( "+1 123 5551212", "+1 123 5551212", "pt_BR");
-i18n_add ( "Access privileges doesn't fit request.", "Privilégios de acesso não satisfazem a requisição.", "pt_BR");
+i18n_add ( "Access privileges do not match the request.", "Os privilégios de acesso não correspondem à requisição.", "pt_BR");
 i18n_add ( "ACME Mobile", "Operadora ACME", "pt_BR");
-i18n_add ( "An object containing a large three with internal system API information.", "Uma grande árvore de objetos contendo informações internas da API do sistema.", "pt_BR");
+i18n_add ( "An object containing a large tree with internal system API information.", "Uma grande árvore de objetos contendo informações internas da API do sistema.", "pt_BR");
 i18n_add ( "An object containing an OpenAPI v3 documentation of system API.", "Um objeto contendo a documentação da API do sistema em OpenAPI v3.", "pt_BR");
-i18n_add ( "An object containing information about the requested number.", "Um objeto contendo informações sobre o número requisitado.", "pt_BR");
+i18n_add ( "An object containing information about the requested number.", "Um objeto contendo informações sobre o número solicitado.", "pt_BR");
 i18n_add ( "API key is missing or invalid.", "A chave da API está faltando ou é inválida.", "pt_BR");
 i18n_add ( "Debug", "Depuração", "pt_BR");
 i18n_add ( "Debug E.164 number", "Depurar número E.164", "pt_BR");
@@ -138,8 +138,8 @@ i18n_add ( "Dump all internal API structure three.", "Exportar toda estrutura em
 i18n_add ( "duplicated internationalization entries", "entradas de internacionalização duplicadas", "pt_BR");
 i18n_add ( "E.164 debug", "Depurar E.164", "pt_BR");
 i18n_add ( "E.164 number debug", "Depurar número E.164", "pt_BR");
-i18n_add ( "Error processing object creating parameters.", "Erro processando parâmetros de criação do objeto.", "pt_BR");
-i18n_add ( "Error retrieving number debug!", "Erro requisitando depuração de número!", "pt_BR");
+i18n_add ( "Error processing object creation parameters.", "Erro processando parâmetros de criação do objeto.", "pt_BR");
+i18n_add ( "Error retrieving number debugging information!", "Erro ao obter informações de depuração do número!", "pt_BR");
 i18n_add ( "Export API documentation", "Exportar documentação da API", "pt_BR");
 i18n_add ( "extension dump", "exportar extensão", "pt_BR");
 i18n_add ( "filter dump", "filtrar exportação", "pt_BR");
@@ -156,16 +156,16 @@ i18n_add ( "Invalid authentication used.", "Autenticação inválida utilizada."
 i18n_add ( "Invalid parameters content type.", "Tipo de conteúdo de parâmetros inválido.", "pt_BR");
 i18n_add ( "Invalid response parameters content type.", "Tipo de retorno de conteúdo de parâmetros inválido.", "pt_BR");
 i18n_add ( "Local VoIP Domain server.", "Servidor VoIP Domain local.", "pt_BR");
-i18n_add ( "Method not allowed to requested path. See `Allow` response header for valid methods.", "Método não permitido para o caminho requisitado. Verifique o cabeçalho de resposta de `Allow` para os métodos válidos.", "pt_BR");
+i18n_add ( "Method not allowed to requested path. See `Allow` response header for valid methods.", "Método não permitido para o caminho solicitado. Verifique o cabeçalho de resposta de `Allow` para os métodos válidos.", "pt_BR");
 i18n_add ( "New York", "Nova York", "pt_BR");
 i18n_add ( "Number (E.164 format)", "Número (Formato E.164)", "pt_BR");
-i18n_add ( "Object request body available parameters.", "Objetos dos parâmetros do corpo da requisição disponíveis.", "pt_BR");
-i18n_add ( "Object successfully created.", "Objeto criado com sucesso.", "pt_BR");
-i18n_add ( "Object successfully removed.", "Objeto removido com sucesso.", "pt_BR");
+i18n_add ( "Available object request body parameters.", "Objetos dos parâmetros do corpo da requisição disponíveis.", "pt_BR");
+i18n_add ( "Object created successfully.", "Objeto criado com sucesso.", "pt_BR");
+i18n_add ( "Object removed successfully.", "Objeto removido com sucesso.", "pt_BR");
 i18n_add ( "paths structure dump", "exportar estrutura de caminhos", "pt_BR");
 i18n_add ( "ping", "ping", "pt_BR");
 i18n_add ( "points!", "pontos!", "pt_BR");
-i18n_add ( "Requested endpoint not found.", "Endpoint requisitado não encontrado.", "pt_BR");
+i18n_add ( "Requested endpoint not found.", "Endpoint solicitado não encontrado.", "pt_BR");
 i18n_add ( "Restart", "Reiniciar", "pt_BR");
 i18n_add ( "Score", "Pontuação", "pt_BR");
 i18n_add ( "Springfield", "Springfield", "pt_BR");
@@ -182,25 +182,25 @@ i18n_add ( "The network operator of number, if available.", "A operadora de tele
 i18n_add ( "The number in E.164 format.", "O número no formato E.164.", "pt_BR");
 i18n_add ( "The number in E.164 format to be explained.", "O número a ser explicado no formato E.164.", "pt_BR");
 i18n_add ( "The numeric telephony country code of number, if available.", "O código numérico telefônico do país do número, se disponível.", "pt_BR");
-i18n_add ( "The type of number, if available. The types could be:<br />0 - Unknown;<br />1 - Land line;<br />2 - Mobile;<br />4 - VoIP;<br />8 - Fixed-Mobile Convergence (FMC);<br />16 - Premium Rate Number (PRN);<br />32 - Very-Small-Aperture Terminal (VSAT);<br />64 - Toll free;<br />128 - Pay phone;<br />256 - Audiotext terminal;<br />512 - Marine radio telephone;<br />1024 - Paging;<br />2048 - VPN access;<br />4096 - Terrestrial Trunked Radio (TETRA);<br />8192 - Faximile (FAX);<br />16384 - Voicemail box;<br />32768 - Special charge number;<br />65535 - Services.", "O tipo do número, se disponível. Os tipos podem ser:<br />0 - Desconhecido;<br />1 - Fixo;<br />2 - Móvel;<br />4 - VoIP;<br />8 - Convergência fixo-móvel (FMC);<br />16 - Serviço de tarifação diferenciada;<br />32 - Estação terrestre de comunicação bi-direcional via satélite (VSAT);<br />64 - Gratuíta;<br />128 - Orelhão;<br />256 - Terminal de audiotexto;<br />512 - Telefone marítimo via rádio;<br />1024 - Pagger;<br />2048 - Acesso VPN;<br />4096 - Rádio Troncalizado Terrestre (Terrestrial Trunked Radio Access - TETRA);<br />8192 - Faxímile (FAX);<br />16384 - Correio de voz;<br />32768 - Número com tarifação especial;<br />65535 - Serviços.", "pt_BR");
+i18n_add ( "The type of number, if available. The types could be:<br />0 - Unknown;<br />1 - Land line;<br />2 - Mobile;<br />4 - VoIP;<br />8 - Fixed-Mobile Convergence (FMC);<br />16 - Premium Rate Number (PRN);<br />32 - Very-Small-Aperture Terminal (VSAT);<br />64 - Toll free;<br />128 - Pay phone;<br />256 - Audiotext terminal;<br />512 - Marine radio telephone;<br />1024 - Paging;<br />2048 - VPN access;<br />4096 - Terrestrial Trunked Radio (TETRA);<br />8192 - Facsimile (FAX);<br />16384 - Voicemail box;<br />32768 - Special charge number;<br />65535 - Services.", "O tipo do número, se disponível. Os tipos podem ser:<br />0 - Desconhecido;<br />1 - Fixo;<br />2 - Móvel;<br />4 - VoIP;<br />8 - Convergência fixo-móvel (FMC);<br />16 - Serviço de tarifação diferenciada;<br />32 - Estação terrestre de comunicação bi-direcional via satélite (VSAT);<br />64 - Gratuíta;<br />128 - Orelhão;<br />256 - Terminal de audiotexto;<br />512 - Telefone marítimo via rádio;<br />1024 - Pagger;<br />2048 - Acesso VPN;<br />4096 - Rádio Troncalizado Terrestre (Terrestrial Trunked Radio Access - TETRA);<br />8192 - Faxímile (FAX);<br />16384 - Correio de voz;<br />32768 - Número com tarifação especial;<br />65535 - Serviços.", "pt_BR");
 i18n_add ( "The URL location of the created object.", "A localização da URL do objeto criado.", "pt_BR");
-i18n_add ( "This is the VoIP Domain REST API documentation. You can find more about VoIP Domain at [https://voipdomain.io/](https://voipdomain.io/). You can always access this documentation at your local VoIP Domain installation, logged into system or importing this Swagger documentation json file to an external viewer.", "Esta é a documentação da API do VoIP Domain. Você pode conhecer mais sobre o VoIP Domain em [https://voipdomain.io/](https://voipdomain.io/). Você também pode acessar esta documentação na sua instalação local do VoIP Domain, logado no sistema ou importando este documento json Swagger em um visualizador externo.", "pt_BR");
+i18n_add ( "This is the VoIP Domain REST API documentation. You can find more about VoIP Domain at [https://voipdomain.io/](https://voipdomain.io/). You can always access this documentation at your local VoIP Domain installation, logged into the system or importing this Swagger documentation json file to an external viewer.", "Esta é a documentação da API do VoIP Domain. Você pode conhecer mais sobre o VoIP Domain em [https://voipdomain.io/](https://voipdomain.io/). Você também pode acessar esta documentação na sua instalação local do VoIP Domain, logado no sistema ou importando este documento json Swagger em um visualizador externo.", "pt_BR");
 i18n_add ( "United States of America", "Estados Unidos da América", "pt_BR");
 i18n_add ( "Used API key doesn't have enough permissions.", "A chave de API utilizada não possui permissões suficientes.", "pt_BR");
 i18n_add ( "VoIP Domain demo server.", "Servidor de demonstração do VoIP Domain.", "pt_BR");
 i18n_add ( "Definitions", "Definições", "pt_BR");
-i18n_add ( "*Variables*: All variables will be [UpperCamelCase](https://en.wikipedia.org/wiki/CamelCase) (also knows as PascalCase);<br />*Date/Time*: The date and time values will **always** be in GMT-0 using ISO-8601 format \"YYYY-MM-DD'T'HH:MM:SS'Z'\", with milliseconds optional (.sss after seconds) (you need to convert to your localtime).", "*Variáveis*: Todas variáveis serão no formato [UpperCamelCase](https://en.wikipedia.org/wiki/CamelCase) (também conhecido como PascalCase);<br />*Data/Hora*: Os valores de data e hora serão **sempre** em GMT-0 utilizando o formato ISO-8601 \"YYYY-MM-DD'T'HH:MM:SS'Z'\", com milissegundos opcional (.sss depois dos segundos) (você deve converter para o fuso local).", "pt_BR");
+i18n_add ( "*Variables*: All variables will be [UpperCamelCase](https://en.wikipedia.org/wiki/CamelCase) (also known as PascalCase);<br />*Date/Time*: The date and time values will **always** be in GMT-0 using ISO-8601 format \"YYYY-MM-DD'T'HH:MM:SS'Z'\", with milliseconds optional (.sss after seconds) (you need to convert to your localtime).", "*Variáveis*: Todas variáveis serão no formato [UpperCamelCase](https://en.wikipedia.org/wiki/CamelCase) (também conhecido como PascalCase);<br />*Data/Hora*: Os valores de data e hora serão **sempre** em GMT-0 utilizando o formato ISO-8601 \"YYYY-MM-DD'T'HH:MM:SS'Z'\", com milissegundos opcional (.sss depois dos segundos) (você deve converter para o fuso local).", "pt_BR");
 i18n_add ( "Object not found.", "Objeto não encontrado.", "pt_BR");
 i18n_add ( "Languages", "Idiomas", "pt_BR");
 i18n_add ( "This documentation is available in the following languages:", "Este documento está disponível nos seguintes idiomas:", "pt_BR");
 i18n_add ( "The language of document.", "O idioma do documento.", "pt_BR");
-i18n_add ( "An object containing information about the requested hook.", "Um objeto contendo informações sobre o gancho requisitado.", "pt_BR");
-i18n_add ( "Debug an internal hook", "Depurar um gancho interno", "pt_BR");
-i18n_add ( "Debug an internal hook.", "Depurar um gancho interno.", "pt_BR");
-i18n_add ( "The name of the hook to be called.", "O nome do gancho a ser executado.", "pt_BR");
+i18n_add ( "An object containing information about the requested hook.", "Um objeto contendo informações sobre o hook solicitado.", "pt_BR");
+i18n_add ( "Debug an internal hook", "Depurar um hook interno", "pt_BR");
+i18n_add ( "Debug an internal hook.", "Depurar um hook interno.", "pt_BR");
+i18n_add ( "The name of the hook to be called.", "O nome do hook a ser executado.", "pt_BR");
 i18n_add ( "A string containing a pong.", "Uma string contendo um pong.", "pt_BR");
 i18n_add ( "Pong", "Pong", "pt_BR");
-i18n_add ( "Debug ping/pong hook", "Gancho de depuração ping/pong", "pt_BR");
+i18n_add ( "Debug ping/pong hook", "Hook de depuração ping/pong", "pt_BR");
 i18n_add ( "Debug ping/pong", "Depuração ping/pong", "pt_BR");
 i18n_add ( "Debug ping/pong messages.", "Mensagens de depuração ping/pong.", "pt_BR");
 i18n_add ( "callback ( 'variables')", "callback ( 'variáveis')", "pt_BR");

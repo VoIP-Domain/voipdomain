@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage User Avatar
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -193,12 +193,12 @@ function avatar_users_edit_page ( $buffer, $parameters)
               "  }\n" .
               "  if ( file.type != 'image/png' && file.type != 'image/jpg' && file.type != 'image/gif' && file.type != 'image/jpeg')\n" .
               "  {\n" .
-              "    new PNotify ( { title: '" . __ ( "User edition") . "', text: '" . __ ( "The selected file type is not valid.") . "', type: 'error'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Edit user") . "', text: '" . __ ( "The selected file type is not valid.") . "', type: 'error'});\n" .
               "    return false;\n" .
               "  }\n" .
               "  if ( file.size > 1048576)\n" .
               "  {\n" .
-              "    new PNotify ( { title: '" . __ ( "User edition") . "', text: '" . __ ( "The selected file size is too big.") . "', type: 'error'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Edit user") . "', text: '" . __ ( "The selected file size is too big.") . "', type: 'error'});\n" .
               "    return false;\n" .
               "  }\n" .
               "  $('span.avatar-overlay').css ( 'width', 0);\n" .
@@ -210,7 +210,7 @@ function avatar_users_edit_page ( $buffer, $parameters)
               "  {\n" .
               "    VoIP.rest ( '/users/' + encodeURIComponent ( VoIP.parameters.id) + '/avatar', 'PATCH', { Avatar: $.base64.encode ( event.target.result), 'type': file.type}).done ( function ( data, textStatus, jqXHR)\n" .
               "    {\n" .
-              "      new PNotify ( { title: '" . __ ( "User edition") . "', text: '" . __ ( "Image changed successfully!") . "', type: 'success'});\n" .
+              "      new PNotify ( { title: '" . __ ( "Edit user") . "', text: '" . __ ( "Image changed successfully!") . "', type: 'success'});\n" .
               "      VoIP.rest ( '/users/' + encodeURIComponent ( $('div.profile-picture').data ( 'username')) + '/avatar', 'GET').done ( function ( data, textStatus, jqXHR)\n" . 
               "      {\n" .
               "        var imageArray = [];\n" .
@@ -227,7 +227,7 @@ function avatar_users_edit_page ( $buffer, $parameters)
               "      });\n" .
               "    }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "    {\n" .
-              "      new PNotify ( { title: '" . __ ( "User edition") . "', text: '" . __ ( "Error changing image!") . "', type: 'error'});\n" .
+              "      new PNotify ( { title: '" . __ ( "Edit user") . "', text: '" . __ ( "Error changing image!") . "', type: 'error'});\n" .
               "    }).always ( function ()\n" .
               "    {\n" .
               "      l.stop ();\n" .
@@ -242,7 +242,7 @@ function avatar_users_edit_page ( $buffer, $parameters)
               "  l.start ();\n" .
               "  VoIP.rest ( '/users/' + encodeURIComponent ( VoIP.parameters.id) + '/avatar', 'DELETE').done ( function ( data, textStatus, jqXHR)\n" .
               "  {\n" .
-              "    new PNotify ( { title: '" . __ ( "User edition") . "', text: '" . __ ( "Image removed successfully!") . "', type: 'success'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Edit user") . "', text: '" . __ ( "Image removed successfully!") . "', type: 'success'});\n" .
               "    $('div.profile-picture').css ( 'background-image', 'url(/img/avatar.jpg)');\n" .
               "    if ( VoIP.parameters.id == VoIP.getUID ())\n" .
               "    {\n" .
@@ -250,7 +250,7 @@ function avatar_users_edit_page ( $buffer, $parameters)
               "    }\n" .
               "  }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "  {\n" .
-              "    new PNotify ( { title: '" . __ ( "User edition") . "', text: '" . __ ( "Error removing image!") . "', type: 'error'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Edit user") . "', text: '" . __ ( "Error removing image!") . "', type: 'error'});\n" .
               "  }).always ( function ()\n" .
               "  {\n" .
               "    l.stop ();\n" .

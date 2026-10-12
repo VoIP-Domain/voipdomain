@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Core
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -46,9 +46,9 @@ ini_set ( "display_errors", 0);
 // error_reporting ( E_ALL); ini_set ( "display_errors", 1);
 
 /**
- * Include main configuration parser and functions
+ * Bootstrap webroot and load configuration (does not depend on PHP-FPM chdir).
  */
-require_once ( "includes/config.inc.php");
+require_once ( __DIR__ . "/includes/bootstrap.inc.php");
 
 /**
  * Register shutdown function (post execution hook)
@@ -296,7 +296,7 @@ if ( $_in["mode"] == "install")
   $_in["session"]["Permissions"][] = "Install";
   $_in["session"]["Language"] = $_in["general"]["language"];
 }
-if ( array_key_exists ( "HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_TOKEN", $_SERVER) || array_key_exists ( "token", $_GET))
+if ( $_in["mode"] != "install" && ( array_key_exists ( "HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_TOKEN", $_SERVER) || array_key_exists ( "token", $_GET)))
 {
   // Get token from database:
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Tokens` WHERE `Token` = '" . $_in["mysql"]["id"]->real_escape_string ( ( array_key_exists ( "HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_TOKEN", $_SERVER) ? $_SERVER["HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_TOKEN"] : $_GET["token"])) . "'"))
@@ -343,7 +343,7 @@ if ( array_key_exists ( "HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_
     }
   }
 }
-if ( array_key_exists ( "HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_SID", $_SERVER) && array_key_exists ( "HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_SPWD", $_SERVER))
+if ( $_in["mode"] != "install" && array_key_exists ( "HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_SID", $_SERVER) && array_key_exists ( "HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_SPWD", $_SERVER))
 {
   // Get server from database:
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers` WHERE `ID` = '" . $_in["mysql"]["id"]->real_escape_string ( (int) $_SERVER["HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_SID"]) . "'"))
@@ -373,7 +373,7 @@ if ( array_key_exists ( "HTTP_X_" . strtoupper ( $_in["general"]["cookie"]) . "_
     $_in["session"]["Permissions"][] = "Server";
   }
 }
-if ( array_key_exists ( $_in["general"]["cookie"] . "_authtoken", $_COOKIE))
+if ( $_in["mode"] != "install" && array_key_exists ( $_in["general"]["cookie"] . "_authtoken", $_COOKIE))
 {
   // Get server from database:
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `AuthenticationToken` WHERE `Token` = '" . $_in["mysql"]["id"]->real_escape_string ( $_COOKIE[$_in["general"]["cookie"] . "_authtoken"]) . "'"))
@@ -399,7 +399,7 @@ if ( array_key_exists ( $_in["general"]["cookie"] . "_authtoken", $_COOKIE))
     $_in["session"]["Permissions"][] = "AuthToken";
   }
 }
-if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE))
+if ( $_in["mode"] != "install" && array_key_exists ( $_in["general"]["cookie"], $_COOKIE))
 {
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Sessions`.`SID`, `Sessions`.`LastSeen`, `Users`.* FROM `Sessions`, `Users` WHERE `Sessions`.`SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_COOKIE[$_in["general"]["cookie"]]) . "' AND `Sessions`.`User` = `Users`.`ID`"))
   {
@@ -457,7 +457,7 @@ if ( array_key_exists ( $_in["general"]["cookie"], $_COOKIE))
     }
   }
 }
-if ( array_key_exists ( $_in["general"]["cookie"] . "_adm", $_COOKIE))
+if ( $_in["mode"] != "install" && array_key_exists ( $_in["general"]["cookie"] . "_adm", $_COOKIE))
 {
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `AdminSessions`.`SID`, `AdminSessions`.`LastSeen`, `Admins`.* FROM `AdminSessions`, `Admins` WHERE `AdminSessions`.`SID` = '" . $_in["mysql"]["id"]->real_escape_string ( $_COOKIE[$_in["general"]["cookie"] . "_adm"]) . "' AND `AdminSessions`.`Admin` = `Admins`.`ID`"))
   {

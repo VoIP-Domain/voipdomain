@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Tokens
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -44,23 +44,23 @@ i18n_add ( "tokens search");
 i18n_add ( "Validity");
 i18n_add ( "Remove tokens");
 i18n_add ( "Are you sure you want to remove token %s (expires %s)?");
-i18n_add ( "Token remove");
+i18n_add ( "Token removal");
 i18n_add ( "Token removed successfully!");
 i18n_add ( "Error removing token!");
-i18n_add ( "tokens addition");
+i18n_add ( "Add tokens");
 i18n_add ( "Token description");
 i18n_add ( "CIDR");
 i18n_add ( "Token access CIDR");
 i18n_add ( "Token permissions");
 i18n_add ( "Token validity");
-i18n_add ( "Token addition");
+i18n_add ( "Add token");
 i18n_add ( "Error adding token!");
 i18n_add ( "Token added successfully!");
 i18n_add ( "tokens view");
 i18n_add ( "Token view");
 i18n_add ( "Error retrieving token data!");
-i18n_add ( "tokens edition");
-i18n_add ( "Token edition");
+i18n_add ( "Edit tokens");
+i18n_add ( "Edit token");
 i18n_add ( "Error changing token!");
 i18n_add ( "Token changed successfully!");
 i18n_add ( "View token information");
@@ -84,13 +84,13 @@ i18n_add ( "Add a new system token.");
 i18n_add ( "An array containing all system permission tokens.");
 i18n_add ( "An array containing the system tokens.");
 i18n_add ( "An object containing information about the system token.");
-i18n_add ( "Change a system token information.");
+i18n_add ( "Change system token information.");
 i18n_add ( "CRM integration");
 i18n_add ( "CRM Integration");
 i18n_add ( "Edit token");
 i18n_add ( "Filter search with this string. If not provided, return all tokens.");
-i18n_add ( "Get a system token information.");
-i18n_add ( "New system token added successfully.");
+i18n_add ( "Get system token information.");
+i18n_add ( "A new system token was added successfully.");
 i18n_add ( "Remove a system token.");
 i18n_add ( "Search for system permission tokens.");
 i18n_add ( "Search for system tokens.");
@@ -106,14 +106,14 @@ i18n_add ( "The system token internal system unique identifier.");
 i18n_add ( "The system token was removed.");
 i18n_add ( "The system token was successfully updated.");
 i18n_add ( "The token hash of the token.");
-i18n_add ( "The token permission description, associated to token key.");
+i18n_add ( "The token permission description, associated with the token key.");
 i18n_add ( "The UNIX timestamp of the token expiration.");
 i18n_add ( "View tokens");
 i18n_add ( "Generate random password");
 i18n_add ( "Show calendar");
 i18n_add ( "Invalid token ID.");
 i18n_add ( "Invalid block ID.");
-i18n_add ( "Token cloning");
+i18n_add ( "Clone token");
 
 /**
  * Add Brazilian Portuguese support
@@ -121,27 +121,27 @@ i18n_add ( "Token cloning");
 i18n_add ( "Search tokens", "Pesquisar tokens", "pt_BR");
 i18n_add ( "Tokens", "Tokens", "pt_BR");
 i18n_add ( "Token", "Token", "pt_BR");
-i18n_add ( "tokens search", "pesquisa de tokens", "pt_BR");
+i18n_add ( "tokens search", "Pesquisar tokens", "pt_BR");
 i18n_add ( "Validity", "Validade", "pt_BR");
 i18n_add ( "Remove tokens", "Remover tokens", "pt_BR");
 i18n_add ( "Are you sure you want to remove token %s (expires %s)?", "Você tem certeza de que deseja remover o token %s (com validade em %s)?", "pt_BR");
-i18n_add ( "Token remove", "Remoção de token", "pt_BR");
+i18n_add ( "Token removal", "Remover token", "pt_BR");
 i18n_add ( "Token removed successfully!", "Token removido com sucesso!", "pt_BR");
 i18n_add ( "Error removing token!", "Erro ao remover token!", "pt_BR");
-i18n_add ( "tokens addition", "adição de tokens", "pt_BR");
+i18n_add ( "Add tokens", "adicionar tokens", "pt_BR");
 i18n_add ( "Token description", "Descrição do token", "pt_BR");
 i18n_add ( "CIDR", "CIDR", "pt_BR");
 i18n_add ( "Token access CIDR", "CIDR de acesso do token", "pt_BR");
 i18n_add ( "Token permissions", "Permissões do token", "pt_BR");
 i18n_add ( "Token validity", "Validade do token", "pt_BR");
-i18n_add ( "Token addition", "Adição de token", "pt_BR");
+i18n_add ( "Add token", "Adicionar token", "pt_BR");
 i18n_add ( "Error adding token!", "Erro ao adicionar token!", "pt_BR");
 i18n_add ( "Token added successfully!", "Token adicionado com sucesso!", "pt_BR");
-i18n_add ( "tokens view", "visualização de tokens", "pt_BR");
-i18n_add ( "Token view", "Visualização de token", "pt_BR");
-i18n_add ( "Error retrieving token data!", "Erro ao requisitar dados do token!", "pt_BR");
-i18n_add ( "tokens edition", "edição de tokens", "pt_BR");
-i18n_add ( "Token edition", "Edição de token", "pt_BR");
+i18n_add ( "tokens view", "visualizar tokens", "pt_BR");
+i18n_add ( "Token view", "Visualizar token", "pt_BR");
+i18n_add ( "Error retrieving token data!", "Erro ao obter dados do token!", "pt_BR");
+i18n_add ( "Edit tokens", "editar tokens", "pt_BR");
+i18n_add ( "Edit token", "Editar token", "pt_BR");
 i18n_add ( "Error changing token!", "Erro ao alterar token!", "pt_BR");
 i18n_add ( "Token changed successfully!", "Token alterado com sucesso!", "pt_BR");
 i18n_add ( "View token information", "Visualizar informações de tokens", "pt_BR");
@@ -165,13 +165,13 @@ i18n_add ( "Add a new system token.", "Adicionar um novo token do sistema", "pt_
 i18n_add ( "An array containing all system permission tokens.", "Um array contendo todos os tokens de permissões do sistema.", "pt_BR");
 i18n_add ( "An array containing the system tokens.", "Um array contendo os tokens do sistema.", "pt_BR");
 i18n_add ( "An object containing information about the system token.", "Um objeto contendo informações sobre um token do sistema.", "pt_BR");
-i18n_add ( "Change a system token information.", "Alterar informações de um token do sistema.", "pt_BR");
+i18n_add ( "Change system token information.", "Alterar informações de um token do sistema.", "pt_BR");
 i18n_add ( "CRM integration", "Integração com CRM", "pt_BR");
 i18n_add ( "CRM Integration", "Integração com CRM", "pt_BR");
 i18n_add ( "Edit token", "Editar token", "pt_BR");
-i18n_add ( "Filter search with this string. If not provided, return all tokens.", "Filtrar a pesquisa com esta string. Se não informado, retorna todos os tokens.", "pt_BR");
-i18n_add ( "Get a system token information.", "Requisitar informações de token do sistema.", "pt_BR");
-i18n_add ( "New system token added successfully.", "Novo token do sistema adicionado com sucesso.", "pt_BR");
+i18n_add ( "Filter search with this string. If not provided, return all tokens.", "Filtrar a pesquisa com esta string. Se omitido, retorna todos os tokens.", "pt_BR");
+i18n_add ( "Get system token information.", "Obter informações do token do sistema.", "pt_BR");
+i18n_add ( "A new system token was added successfully.", "Um novo token do sistema foi adicionado com sucesso.", "pt_BR");
 i18n_add ( "Remove a system token.", "Remover um token do sistema.", "pt_BR");
 i18n_add ( "Search for system permission tokens.", "Pesquisar por tokens de permissões do sistema.", "pt_BR");
 i18n_add ( "Search for system tokens.", "Pesquisar por tokens do sistema.", "pt_BR");
@@ -187,11 +187,11 @@ i18n_add ( "The system token internal system unique identifier.", "O identificad
 i18n_add ( "The system token was removed.", "O token do sistema foi removido.", "pt_BR");
 i18n_add ( "The system token was successfully updated.", "O token do sistema foi atualizado com sucesso.", "pt_BR");
 i18n_add ( "The token hash of the token.", "O hash de acesso do token.", "pt_BR");
-i18n_add ( "The token permission description, associated to token key.", "A descrição do token de permissão, associado com a chave do token.", "pt_BR");
+i18n_add ( "The token permission description, associated with the token key.", "A descrição do token de permissão, associado com a chave do token.", "pt_BR");
 i18n_add ( "The UNIX timestamp of the token expiration.", "O timestamp UNIX de expiração do token.", "pt_BR");
 i18n_add ( "Generate random password", "Gerar senha aleatória", "pt_BR");
 i18n_add ( "Show calendar", "Mostrar calendário", "pt_BR");
 i18n_add ( "Invalid token ID.", "ID de token inválido.", "pt_BR");
 i18n_add ( "Invalid block ID.", "ID de bloco inválido.", "pt_BR");
-i18n_add ( "Token cloning", "Clonagem de token", "pt_BR");
+i18n_add ( "Clone token", "Clonar token", "pt_BR");
 ?>

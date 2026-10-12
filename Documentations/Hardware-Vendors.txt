@@ -6,7 +6,7 @@ Products: Media gateway and SIP endpoints
 Default user/pass: root/root
 Models:
   IPS 200 - IP Desk phone with HD audio
-            This equipment is a generic (need to discover the main company), the same as:
+            This equipment is generic; the OEM must be identified. It is the same as:
             - Alcatel-Lucent 8001 DeskPhone
             - Escene ES290 IP Innovative
 
@@ -75,7 +75,7 @@ Models:
   UC902E - Wi-Fi Entry Level Phone
   UC902G - Giga-entry Level Phone
 
-  Acessories:
+  Accessories:
   WFBT60 - Bluetooth 4.2 & Dual-band Wi-Fi Dongle
   UC46 - Expansion Module
   EHS30 - Wireless Headset Adapter
@@ -99,5 +99,5 @@ Models:
   UC802P - 
 
 Notes:
-  - The firmware upgrade process is a really mess. You need to have a lot of patience with commands without immediatelly return, that look's like it's not working or not started. When the upgrade starts, it takes a very long time (took more than 30 minutes to me) with a lot of reboots. Also, take attention that the hardware MAC address was changed when upgrading from 2.0.X to 2.42.X firmware!
-  - Dialplan support second dial tone (same dialtone), but it's buggy to implement, because it removes the code that preceed second dial tone and keep looking for the rest of number. If we implement the dialplan without the outline prefix, could conflict with extensions.
+  - The firmware upgrade process is a real mess. You need to have a lot of patience with commands with no immediate return that look as if they are not working or have not started. When the upgrade starts, it takes a very long time (took more than 30 minutes for me) with a lot of reboots. Also, note that the hardware MAC address changed when upgrading from 2.0.X to 2.42.X firmware!
+  - The dialplan supports a second dial tone (same as the primary dial tone), but it is tricky to implement because it removes the code that precedes the second dial tone and keeps matching the rest of the number. If the dialplan is implemented without the outbound prefix, it may conflict with extensions.

@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Blocks
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -87,14 +87,14 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Filter" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -158,7 +158,7 @@ function blocks_search ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
 
   /**
@@ -332,7 +332,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -355,7 +355,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "blocks_view"),
     "title" => __ ( "View blocks"),
-    "description" => __ ( "Get a blocked number information."),
+    "description" => __ ( "Get blocked number information."),
     "parameters" => array (
       array (
         "name" => "ID",
@@ -509,10 +509,10 @@ framework_add_hook (
     ),
     "response" => array (
       201 => array (
-        "description" => __ ( "New system blocked number added successfully.")
+        "description" => __ ( "A new system blocked number was added successfully.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -673,7 +673,7 @@ function blocks_add ( $buffer, $parameters)
    * Return OK to user
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . $_in["general"]["baseurl"] . "blocks/" . $parameters["ID"] . "/view");
+  header ( "Location: " . voipdomain_location_url ( "/blocks/" . $parameters["ID"] . "/view"));
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 
@@ -708,7 +708,7 @@ framework_add_hook (
         "description" => __ ( "The system blocked number was successfully updated.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -902,7 +902,7 @@ framework_add_hook (
         "description" => __ ( "The system blocked number was removed.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -925,7 +925,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "blocks_remove"),
     "title" => __ ( "Remove blocks"),
-    "description" => __ ( "Remove a blocked number from system.")
+    "description" => __ ( "Remove a blocked number from the system.")
   )
 );
 

@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Tokens
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -89,14 +89,14 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Fields" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -154,7 +154,7 @@ function tokens_permissions_search ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
 
   /**
@@ -293,14 +293,14 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Fields" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -364,7 +364,7 @@ function tokens_search ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
  /**
    * Call validate hook if exist
@@ -483,7 +483,7 @@ framework_add_hook (
                 "type" => "object",
                 "aditionalProperties" => array (
                   "type" => "string",
-                  "description" => __ ( "The token permission description, associated to token key."),
+                  "description" => __ ( "The token permission description, associated with the token key."),
                 )
               ),
               "example" => array (
@@ -506,7 +506,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -529,7 +529,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "tokens_view"),
     "title" => __ ( "View tokens"),
-    "description" => __ ( "Get a system token information."),
+    "description" => __ ( "Get system token information."),
     "parameters" => array (
       array (
         "name" => "ID",
@@ -717,10 +717,10 @@ framework_add_hook (
     ),
     "response" => array (
       201 => array (
-        "description" => __ ( "New system token added successfully.")
+        "description" => __ ( "A new system token was added successfully.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -930,7 +930,7 @@ function tokens_add ( $buffer, $parameters)
    * Return OK to token
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . $_in["api"]["baseurl"] . "/tokens/" . $parameters["ID"]);
+  header ( "Location: " . voipdomain_location_url ( "/api/tokens/" . $parameters["ID"]));
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 
@@ -991,7 +991,7 @@ framework_add_hook (
         "description" => __ ( "The system token was successfully updated.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1039,7 +1039,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "tokens_edit"),
     "title" => __ ( "Edit token"),
-    "description" => __ ( "Change a system token information.")
+    "description" => __ ( "Change system token information.")
   )
 );
 
@@ -1236,7 +1236,7 @@ framework_add_hook (
         "description" => __ ( "The system token was removed.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (

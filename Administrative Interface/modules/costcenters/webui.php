@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,13 +24,13 @@
  */
 
 /**
- * VoIP Domain cost centers module WebUI. This module add cost centers support.
+ * VoIP Domain cost centers module WebUI. This module Add cost centers support.
  *
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Cost Centers
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -66,7 +66,7 @@ function costcenters_search_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Cost centers"));
-  sys_set_subtitle ( __ ( "cost centers search"));
+  sys_set_subtitle ( __ ( "Search cost centers"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Cost centers"))
   ));
@@ -153,11 +153,11 @@ function costcenters_search_page ( $buffer, $parameters)
               "  VoIP.rest ( '/costcenters/' + encodeURIComponent ( $('#costcenter_delete_id').val ()), 'DELETE').done ( function ( data, textStatus, jqXHR)\n" .
               "  {\n" .
               "    $('#costcenter_delete').modal ( 'hide');\n" .
-              "    new PNotify ( { title: '" . __ ( "Cost center remove") . "', text: '" . __ ( "Cost center removed successfully!") . "', type: 'success'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Cost center removal") . "', text: '" . __ ( "Cost center removed successfully!") . "', type: 'success'});\n" .
               "    $('#costcenter_delete_id').data ( 'dtrow').remove ().draw ();\n" .
               "  }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "  {\n" .
-              "    new PNotify ( { title: '" . __ ( "Cost center remove") . "', text: '" . __ ( "Error removing cost center!") . "', type: 'error'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Cost center removal") . "', text: '" . __ ( "Error removing cost center!") . "', type: 'error'});\n" .
               "  }).always ( function ()\n" .
               "  {\n" .
               "    l.stop ();\n" .
@@ -181,7 +181,7 @@ function costcenters_add_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Cost centers"));
-  sys_set_subtitle ( __ ( "add cost centers"));
+  sys_set_subtitle ( __ ( "Add cost centers"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Cost centers"), "link" => "/costcenters"),
     2 => array ( "title" => __ ( "Add"))
@@ -247,7 +247,7 @@ function costcenters_add_page ( $buffer, $parameters)
               "    URL: '/costcenters',\n" .
               "    method: 'POST',\n" .
               "    button: $('button.add'),\n" .
-              "    title: '" . __ ( "Cost center addition") . "',\n" .
+              "    title: '" . __ ( "Add cost center") . "',\n" .
               "    fail: '" . __ ( "Error adding cost center!") . "',\n" .
               "    success: '" . __ ( "Cost center added successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
@@ -290,7 +290,7 @@ function costcenters_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Cost center cloning") . "', text: '" . __ ( "Error retrieving cost center data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Clone cost center") . "', text: '" . __ ( "Error retrieving cost center data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -308,7 +308,7 @@ function costcenters_view_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Cost centers"));
-  sys_set_subtitle ( __ ( "cost centers view"));
+  sys_set_subtitle ( __ ( "View cost centers"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Cost centers"), "link" => "/costcenters"),
     2 => array ( "title" => __ ( "View"))
@@ -379,7 +379,7 @@ function costcenters_edit_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Cost centers"));
-  sys_set_subtitle ( __ ( "cost centers editing"));
+  sys_set_subtitle ( __ ( "Edit cost centers"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Cost centers"), "link" => "/costcenters"),
     2 => array ( "title" => __ ( "Edit"))
@@ -438,7 +438,7 @@ function costcenters_edit_page ( $buffer, $parameters)
               "  $('#costcenter_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Cost center edition") . "', text: '" . __ ( "Error retrieving cost center data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Edit cost center") . "', text: '" . __ ( "Error retrieving cost center data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#costcenter_edit_form').alerts ( 'form',\n" .
               "{\n" .
@@ -447,9 +447,9 @@ function costcenters_edit_page ( $buffer, $parameters)
               "    URL: '/costcenters/' + VoIP.parameters.id,\n" .
               "    method: 'PATCH',\n" .
               "    button: $('button.edit'),\n" .
-              "    title: '" . __ ( "Cost center edition") . "',\n" .
+              "    title: '" . __ ( "Edit cost center") . "',\n" .
               "    fail: '" . __ ( "Error changing cost center!") . "',\n" .
-              "    success: '" . __ ( "Cost center successfully changed!") . "',\n" .
+              "    success: '" . __ ( "Cost center changed successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
               "               {\n" .
               "                 VoIP.path.call ( '/costcenters', true);\n" .

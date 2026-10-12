@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Extensions Hunts
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API hook to extend extensions addition of group hunt type
+ * API hook to extend Add extensions of group hunt type
  */
 framework_add_function_documentation (
   "extensions_search",
@@ -281,7 +281,7 @@ function extensions_view_hunt ( $buffer, $parameters)
 }
 
 /**
- * Function to extend extensions addition/edition sanitize of group hunt type.
+ * Function to extend Add extensions/edit sanitize of group hunt type.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -322,7 +322,7 @@ function extensions_hunt_sanitize ( $buffer, $parameters)
   }
 
   /**
-   * If it's an edition, fetch old extensions
+   * If it's an edit, fetch old extensions
    */
   if ( array_key_exists ( "ORIGINAL", $buffer))
   {
@@ -345,7 +345,7 @@ function extensions_hunt_sanitize ( $buffer, $parameters)
 }
 
 /**
- * Function to extend extensions addition/edition validate of group hunt type.
+ * Function to extend Add extensions/edit validate of group hunt type.
  *
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
@@ -425,7 +425,7 @@ function extensions_add_hunt_post ( $buffer, $parameters)
 }
 
 /**
- * Function to extend extensions post edition of group hunt type.
+ * Function to extend extensions post edit of group hunt type.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -515,7 +515,7 @@ function extensions_remove_hunt_pre ( $buffer, $parameters)
   $buffer["ORIGINAL"]["Hunts"] = array ();
   while ( $hunt = $result->fetch_assoc ())
   {
-    $buffer["ORIGINAL"]["Hunts"][$hunt["ID"]] = $hung["Number"];
+    $buffer["ORIGINAL"]["Hunts"][$hunt["ID"]] = $hunt["Number"];
   }
 
   /**
@@ -535,7 +535,7 @@ function extensions_remove_hunt_pre ( $buffer, $parameters)
   {
     $notify = framework_call ( "extension_hunt_remove_notify", $parameters, false, $notify);
   }
-  notify_server ( $buffer["ORIGINAL"]["Server"], "extension_hunt_remove", $notify);
+  notify_server ( $buffer["ORIGINAL"]["Range"]["Server"], "extension_hunt_remove", $notify);
 
   /**
    * Return data
@@ -561,27 +561,66 @@ function extension_hunt_extensions_changed ( $buffer, $parameters)
 {
   global $_in;
 
+  $tenant = (int) $_in["session"]["Tenant"];
+  $id = (int) $parameters["ID"];
+
   /**
-   * Search for extension hunts that has the changed extension
+   * Hunt groups that include this extension as a member (number may have changed).
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ExtensionHunt`.`Hunt`, `ExtensionHunt`.`Extension`, `Extensions`.`Number`, `Extensions`.`Description` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionHunt`.`Extension` = " . (int) $parameters["ID"]))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ExtensionHunt`.`Extension`, `HuntExt`.`Number`, `HuntExt`.`Description`, `Ranges`.`Server` FROM `ExtensionHunt` LEFT JOIN `Extensions` AS `HuntExt` ON `ExtensionHunt`.`Extension` = `HuntExt`.`ID` LEFT JOIN `Ranges` ON `HuntExt`.`Range` = `Ranges`.`ID` WHERE `HuntExt`.`Tenant` = " . $tenant . " AND `ExtensionHunt`.`Hunt` = " . $id))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   while ( $hunt = $result->fetch_assoc ())
   {
-    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`Extensions`.`Number` SEPARATOR ',') AS `Extensions` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionHunt`.`Hunt` = " . (int) $hunt["Hunt"]))
+    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`MemberExt`.`Number` SEPARATOR ',') AS `Extensions` FROM `ExtensionHunt` LEFT JOIN `Extensions` AS `MemberExt` ON `ExtensionHunt`.`Hunt` = `MemberExt`.`ID` WHERE `MemberExt`.`Tenant` = " . $tenant . " AND `ExtensionHunt`.`Extension` = " . (int) $hunt["Extension"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
     }
-    $notify = array ( "Number" => $hunt["Number"], "NewNumber" => $hunt["Number"], "Description" => $hunt["Description"], "Extensions" => explode ( ",", $result2->fetch_assoc ()["Extensions"]));
+    $members = $result2->fetch_assoc ()["Extensions"];
+    if ( $members == "")
+    {
+      continue;
+    }
+    $notify = array ( "Number" => $hunt["Number"], "NewNumber" => $hunt["Number"], "Description" => $hunt["Description"], "Extensions" => explode ( ",", $members));
     if ( framework_has_hook ( "extension_hunt_edit_notify"))
     {
       $notify = framework_call ( "extension_hunt_edit_notify", $parameters, false, $notify);
     }
-    notify_server ( $parameters["Range"]["Server"], "extension_hunt_change", $notify);
+    notify_server ( (int) $hunt["Server"], "extension_hunt_change", $notify);
+  }
+
+  /**
+   * This extension is a hunt group whose dial number changed.
+   */
+  if ( array_key_exists ( "Old", $parameters) && array_key_exists ( "New", $parameters) && (int) $parameters["Old"] != (int) $parameters["New"])
+  {
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `HuntExt`.`Description`, `Ranges`.`Server` FROM `Extensions` AS `HuntExt` LEFT JOIN `Ranges` ON `HuntExt`.`Range` = `Ranges`.`ID` WHERE `HuntExt`.`Tenant` = " . $tenant . " AND `HuntExt`.`ID` = " . $id . " AND `HuntExt`.`Type` = 'hunt'"))
+    {
+      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+      exit ();
+    }
+    if ( $result->num_rows != 0)
+    {
+      $hunt = $result->fetch_assoc ();
+      if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`MemberExt`.`Number` SEPARATOR ',') AS `Extensions` FROM `ExtensionHunt` LEFT JOIN `Extensions` AS `MemberExt` ON `ExtensionHunt`.`Hunt` = `MemberExt`.`ID` WHERE `MemberExt`.`Tenant` = " . $tenant . " AND `ExtensionHunt`.`Extension` = " . $id))
+      {
+        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+        exit ();
+      }
+      $members = $result2->fetch_assoc ()["Extensions"];
+      if ( $members != "")
+      {
+        $notify = array ( "Number" => (int) $parameters["Old"], "NewNumber" => (int) $parameters["New"], "Description" => $hunt["Description"], "Extensions" => explode ( ",", $members));
+        if ( framework_has_hook ( "extension_hunt_edit_notify"))
+        {
+          $notify = framework_call ( "extension_hunt_edit_notify", $parameters, false, $notify);
+        }
+        notify_server ( (int) $hunt["Server"], "extension_hunt_change", $notify);
+      }
+    }
   }
 
   /**
@@ -608,72 +647,50 @@ function extension_hunt_extensions_remove_pre ( $buffer, $parameters)
 {
   global $_in;
 
+  $tenant = (int) $_in["session"]["Tenant"];
+  $id = (int) $parameters["ID"];
+
   /**
-   * Search for extension hunts that has the removed extension
+   * Removed extension was a member of hunt group(s): refresh those dialplans.
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ExtensionHunt`.`Hunt`, `ExtensionHunt`.`Extension`, `Extensions`.`Number`, `Extensions`.`Description` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionHunt`.`Extension` = " . (int) $parameters["ID"]))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ExtensionHunt`.`Extension`, `HuntExt`.`Number`, `HuntExt`.`Description`, `Ranges`.`Server` FROM `ExtensionHunt` LEFT JOIN `Extensions` AS `HuntExt` ON `ExtensionHunt`.`Extension` = `HuntExt`.`ID` LEFT JOIN `Ranges` ON `HuntExt`.`Range` = `Ranges`.`ID` WHERE `HuntExt`.`Tenant` = " . $tenant . " AND `ExtensionHunt`.`Hunt` = " . $id))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ExtensionHunt` WHERE `Extension` = " . (int) $parameters["ID"]))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ExtensionHunt` WHERE `Hunt` = " . $id))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   while ( $hunt = $result->fetch_assoc ())
   {
-    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`Extensions`.`Number` SEPARATOR ',') AS `Extensions` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionHunt`.`Hunt` = " . (int) $hunt["Hunt"]))
+    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`MemberExt`.`Number` SEPARATOR ',') AS `Extensions` FROM `ExtensionHunt` LEFT JOIN `Extensions` AS `MemberExt` ON `ExtensionHunt`.`Hunt` = `MemberExt`.`ID` WHERE `MemberExt`.`Tenant` = " . $tenant . " AND `ExtensionHunt`.`Extension` = " . (int) $hunt["Extension"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
     }
-    $hunts = $result2->fetch_assoc ()["Extensions"];
-    if ( $hunts == "")
+    $members = $result2->fetch_assoc ()["Extensions"];
+    if ( $members == "")
     {
-      framework_call ( "extensions_remove", array ( "ID" => $hunt["Hunt"]));
+      framework_call ( "extensions_remove", array ( "ID" => $hunt["Extension"]));
     } else {
-      $notify = array ( "Number" => $hunt["Number"], "NewNumber" => $hunt["Number"], "Description" => $hunt["Description"], "Extensions" => explode ( ",", $hunts));
+      $notify = array ( "Number" => $hunt["Number"], "NewNumber" => $hunt["Number"], "Description" => $hunt["Description"], "Extensions" => explode ( ",", $members));
       if ( framework_has_hook ( "extension_hunt_edit_notify"))
       {
         $notify = framework_call ( "extension_hunt_edit_notify", $parameters, false, $notify);
       }
-      notify_server ( $parameters["Range"]["Server"], "extension_hunt_change", $notify);
+      notify_server ( (int) $hunt["Server"], "extension_hunt_change", $notify);
     }
   }
 
   /**
-   * Check if the removed extesion exist into any other extension hunt and remove it
+   * Removed extension was a hunt group: drop member rows only (remove notify is type-specific).
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `ExtensionHunt`.`Hunt`, `ExtensionHunt`.`Extension`, `Extensions`.`Number`, `Extensions`.`Description` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionHunt`.`Hunt` = " . (int) $parameters["ID"]))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ExtensionHunt` WHERE `Extension` = " . $id))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
-  }
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `ExtensionHunt` WHERE `Hunt` = " . (int) $parameters["ID"]))
-  {
-    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-    exit ();
-  }
-  while ( $hunt = $result->fetch_assoc ())
-  {
-    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`Extensions`.`Number` SEPARATOR ',') AS `Extensions` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionHunt`.`Extension` = " . (int) $hunt["Extension"]))
-    {
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
-      exit ();
-    }
-    $hunts = $result2->fetch_assoc ()["Extensions"];
-    if ( $hunts == "")
-    {
-      framework_call ( "extensions_remove", array ( "ID" => $hunt["Hunt"]));
-    } else {
-      $notify = array ( "Number" => $hunt["Number"], "NewNumber" => $hunt["Number"], "Description" => $hunt["Description"], "Extensions" => explode ( ",", $hunts));
-      if ( framework_has_hook ( "extension_hunt_edit_notify"))
-      {
-        $notify = framework_call ( "extension_hunt_edit_notify", $parameters, false, $notify);
-      }
-      notify_server ( $parameters["Range"]["Server"], "extension_hunt_change", $notify);
-    }
   }
 
   /**
@@ -703,7 +720,7 @@ function extension_hunt_server_reconfig ( $buffer, $parameters)
   /**
    * Fetch all hunts and send to server
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT (SELECT `Number` FROM `Extensions` WHERE `ID` = `ExtensionHunt`.`Extension`) AS `Number`, `Extensions`.`Description`, GROUP_CONCAT(`Extensions`.`Number` SEPARATOR ',') AS `Extensions` FROM `ExtensionHunt` LEFT JOIN `Extensions` ON `ExtensionHunt`.`Extension` = `Extensions`.`ID` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Extensions`.`Type` = 'hunt' AND `Ranges`.`Server` = " . (int) $parameters["ID"] . " GROUP BY `ExtensionHunt`.`Extension`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `HuntExt`.`Number`, `HuntExt`.`Description`, GROUP_CONCAT(`MemberExt`.`Number` SEPARATOR ',') AS `Extensions` FROM `ExtensionHunt` LEFT JOIN `Extensions` AS `HuntExt` ON `ExtensionHunt`.`Extension` = `HuntExt`.`ID` LEFT JOIN `Extensions` AS `MemberExt` ON `ExtensionHunt`.`Hunt` = `MemberExt`.`ID` LEFT JOIN `Ranges` ON `HuntExt`.`Range` = `Ranges`.`ID` WHERE `HuntExt`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `HuntExt`.`Type` = 'hunt' AND `Ranges`.`Server` = " . (int) $parameters["ID"] . " GROUP BY `ExtensionHunt`.`Extension`, `HuntExt`.`Number`, `HuntExt`.`Description`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();

@@ -25,8 +25,8 @@ function timezone_picker_parse_files($map_width, $map_height, $tz_world, $tz_isl
   // Pacific/Marjuro and Pacific/Kwaljalein which have overlapping borders but
   // separate timezones.
   // Also note that the TZ Database has different offsets for countries based on
-  // year, so using the current year refects current offsets.
-  $empty_date = date_create('2012-01-01T00:00:00Z');
+  // year, so using the current year reflects current offsets.
+  $empty_date = date_create(gmdate('Y') . '-01-01T00:00:00Z');
 
   // Parse the main timezone export file.
   $contents = file_get_contents($tz_world);
@@ -84,7 +84,7 @@ function timezone_picker_parse_files($map_width, $map_height, $tz_world, $tz_isl
 
   // Optionally make islands easier to select by using bounding boxes.
   if (file_exists($tz_islands)) {
-    $contents = file_get_contents('tz_islands.txt');
+    $contents = file_get_contents($tz_islands);
     $rows = array_filter(explode("\n", $contents));
 
     foreach ($rows as $row) {

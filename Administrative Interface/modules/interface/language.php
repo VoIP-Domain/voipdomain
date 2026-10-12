@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Interface
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -147,7 +147,7 @@ i18n_add ( "Called");
 i18n_add ( "called");
 i18n_add ( "Answered");
 i18n_add ( "Not answered");
-i18n_add ( "Voice mail");
+i18n_add ( "Voicemail");
 i18n_add ( "Busy");
 i18n_add ( "Call failure");
 i18n_add ( "Unknown");
@@ -158,7 +158,7 @@ i18n_add ( "Exception (call without password)");
 i18n_add ( "Blocked");
 i18n_add ( "Do not disturb!");
 i18n_add ( "Picked up call");
-i18n_add ( "Transhipped");
+i18n_add ( "Transferred");
 i18n_add ( "Central");
 i18n_add ( "Call details");
 i18n_add ( "Basic");
@@ -233,14 +233,14 @@ i18n_add ( "Last 7 days");
 i18n_add ( "Last 30 days");
 i18n_add ( "This month");
 i18n_add ( "Previous month");
-i18n_add ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found.");
+i18n_add ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found.");
 i18n_add ( "The text description of this field error.");
 i18n_add ( "A comma delimited list of fields that should be returned.");
 i18n_add ( "filter");
 i18n_add ( "About");
 i18n_add ( "system information");
-i18n_add ( "VoIP Domain was created in 2016 by Ernani Azevedo, with the intention to create a simpler way to deploy a medium to big VoIP telephony system. The system tries to keep complex tasks as simpler they can be, with the least computational terms and automatized everything possible, so any manager with a little knowledge of VoIP can deploy a big, stable and feature rich PBX.");
-i18n_add ( "This project was published as Open Source under GPL version 3 license. Fell free to contribute and make this a great tool to every company.");
+i18n_add ( "VoIP Domain was created in 2016 by Ernani Azevedo with the intention of providing a simpler way to deploy medium-to-large VoIP telephony systems. The system tries to keep complex tasks as simple as possible, using minimal technical jargon and automating everything it can, so managers with basic VoIP knowledge can deploy a large, stable, feature-rich PBX.");
+i18n_add ( "This project was published as Open Source under GPL version 3 license. Feel free to contribute and make this a great tool for every company.");
 i18n_add ( "English (United States)");
 i18n_add ( "Portuguese (Brazil)");
 i18n_add ( "An object containing the call dates and timestamps.");
@@ -255,7 +255,7 @@ i18n_add ( "The server information of the call.");
 i18n_add ( "The server unique identifier of the call.");
 i18n_add ( "The server description of the call.");
 i18n_add ( "Warehouse 1");
-i18n_add ( "The flow of the call, if is an outbound or inbound call.");
+i18n_add ( "The flow of the call, whether it is outbound or inbound.");
 i18n_add ( "The total duration of call in seconds.");
 i18n_add ( "The total ringing duration of call in seconds.");
 i18n_add ( "The total billing duration of call in seconds.");
@@ -292,7 +292,7 @@ i18n_add ( "The description of call destination endpoint.");
 i18n_add ( "The translated description of call destination endpoint.");
 i18n_add ( "The destination name.");
 i18n_add ( "The destination number.");
-i18n_add ( "Who hung up the call, if was the caller or the called party.");
+i18n_add ( "Who hung up the call, whether it was the caller or the called party.");
 i18n_add ( "The call quality analysis.");
 i18n_add ( "The MOS (Mean Opinion Score) of the call based on call statistics.");
 i18n_add ( "The quality semaphore of the call quality.");
@@ -341,7 +341,7 @@ i18n_add ( "User requires second factor authentication to login.");
 i18n_add ( "System user authentication.");
 i18n_add ( "Create a new system user session.");
 i18n_add ( "Invalid second factor authentication code.");
-i18n_add ( "User session was successfully destroyed.");
+i18n_add ( "User session was destroyed successfully.");
 i18n_add ( "Empty system access cookie token.");
 i18n_add ( "Destroy system user session.");
 i18n_add ( "Destroy the system user session.");
@@ -392,7 +392,7 @@ i18n_add ( "View call recording information");
 i18n_add ( "Get recording information about a call.");
 i18n_add ( "An array containing the system objects.");
 i18n_add ( "The internal unique identification number of the object.");
-i18n_add ( "The extension number associated to object.");
+i18n_add ( "The extension number associated with the object.");
 i18n_add ( "The type of the object.");
 i18n_add ( "The description of the object.");
 i18n_add ( "Interface objects search.");
@@ -431,7 +431,7 @@ i18n_add ( "Added to clipboard");
 i18n_add ( "Press <i>Ctrl</i> or </i>\u2318</i> + <i>C</i> to copy table to clipboard.<br />To cancel, click on this message or press ESC key.");
 i18n_add ( "Total of %d records");
 i18n_add ( "Total of 1 record");
-i18n_add ( "Fields contains invalid values.");
+i18n_add ( "Fields contain invalid values.");
 i18n_add ( "Clone");
 i18n_add ( "Toggle options");
 i18n_add ( "and create new");
@@ -511,7 +511,7 @@ i18n_add ( "September", "Setembro", "pt_BR");
 i18n_add ( "October", "Outubro", "pt_BR");
 i18n_add ( "November", "Novembro", "pt_BR");
 i18n_add ( "December", "Dezembro", "pt_BR");
-i18n_add ( "Error retrieving statistics!", "Erro ao requisitar estatísticas!", "pt_BR");
+i18n_add ( "Error retrieving statistics!", "Erro ao obter estatísticas!", "pt_BR");
 i18n_add ( "Invalid username and/or password.", "Usuário e/ou senha inválidos", "pt_BR");
 i18n_add ( "Message not found.", "Mensagem não encontrada.", "pt_BR");
 i18n_add ( "Session expired.", "Sessão expirada.", "pt_BR");
@@ -551,18 +551,18 @@ i18n_add ( "Called", "Efetuada", "pt_BR");
 i18n_add ( "called", "efetuada", "pt_BR");
 i18n_add ( "Answered", "Atendida", "pt_BR");
 i18n_add ( "Not answered", "Não atendida", "pt_BR");
-i18n_add ( "Voice mail", "Correio de voz", "pt_BR");
+i18n_add ( "Voicemail", "Correio de voz", "pt_BR");
 i18n_add ( "Busy", "Ocupado", "pt_BR");
 i18n_add ( "Call failure", "Falha na ligação", "pt_BR");
 i18n_add ( "Unknown", "Desconhecido", "pt_BR");
 i18n_add ( "Valid password!", "Senha válida!", "pt_BR");
 i18n_add ( "Cached password!", "Senha em cache!", "pt_BR");
 i18n_add ( "Wrong password!", "Senha errada!", "pt_BR");
-i18n_add ( "Exception (call without password)", "Excessão (sem senha)", "pt_BR");
+i18n_add ( "Exception (call without password)", "Exceção (sem senha)", "pt_BR");
 i18n_add ( "Blocked", "Bloqueado", "pt_BR");
 i18n_add ( "Do not disturb!", "Não perturbe!", "pt_BR");
 i18n_add ( "Picked up call", "Ligação capturada", "pt_BR");
-i18n_add ( "Transhipped", "Transbordada", "pt_BR");
+i18n_add ( "Transferred", "Transbordada", "pt_BR");
 i18n_add ( "Central", "Central", "pt_BR");
 i18n_add ( "Call details", "Detalhes da ligação", "pt_BR");
 i18n_add ( "Basic", "Básico", "pt_BR");
@@ -598,8 +598,8 @@ i18n_add ( "PCAP", "PCAP", "pt_BR");
 i18n_add ( "Text", "Texto", "pt_BR");
 i18n_add ( "Audio", "Áudio", "pt_BR");
 i18n_add ( "Close", "Fechar", "pt_BR");
-i18n_add ( "Call view", "Visualização de ligação", "pt_BR");
-i18n_add ( "Error retrieving call information!", "Erro ao requisitar informações da ligação!", "pt_BR");
+i18n_add ( "Call view", "Visualizar ligação", "pt_BR");
+i18n_add ( "Error retrieving call information!", "Erro ao obter informações da ligação!", "pt_BR");
 i18n_add ( "Details", "Detalhes", "pt_BR");
 i18n_add ( "%s call", "%s ligação", "pt_BR");
 i18n_add ( "%s calls", "%s ligações", "pt_BR");
@@ -637,14 +637,14 @@ i18n_add ( "Last 7 days", "Últimos 7 dias", "pt_BR");
 i18n_add ( "Last 30 days", "Últimos 30 dias", "pt_BR");
 i18n_add ( "This month", "Este mês", "pt_BR");
 i18n_add ( "Previous month", "Mês anterior", "pt_BR");
-i18n_add ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found.", "Ocorreu um erro ao processar a solicitação. Um objeto com o nome do campo e uma mensagem de erro de texto serão retornados para todas as inconsistências encontradas.", "pt_BR");
+i18n_add ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found.", "Ocorreu um erro ao processar a solicitação. Um objeto com o nome do campo e uma mensagem de erro de texto serão retornados para todas as inconsistências encontradas.", "pt_BR");
 i18n_add ( "The text description of this field error.", "O texto descrevendo o erro deste campo.", "pt_BR");
 i18n_add ( "A comma delimited list of fields that should be returned.", "Uma lista separada por vírgula dos campos que devem ser retornados.", "pt_BR");
 i18n_add ( "filter", "filtro", "pt_BR");
 i18n_add ( "About", "Sobre", "pt_BR");
 i18n_add ( "system information", "informações do sistema", "pt_BR");
-i18n_add ( "VoIP Domain was created in 2016 by Ernani Azevedo, with the intention to create a simpler way to deploy a medium to big VoIP telephony system. The system tries to keep complex tasks as simpler they can be, with the least computational terms and automatized everything possible, so any manager with a little knowledge of VoIP can deploy a big, stable and feature rich PBX.", "O VoIP Domain foi criado em 2016 por Ernani Azevedo, com a intenção de criar uma maneira simples de instalar um sistema de telefonia VoIP médio a grande. O sistema tenta manter tarefas complexas o mais simples que elas possam ser, com o mínimo de termos computacionais e automatizando tudo que seja possível, para que quaisquer gerente com pouco conhecimento de VoIP possa instalar um PABX grande, estável e repleto de recursos.", "pt_BR");
-i18n_add ( "This project was published as Open Source under GPL version 3 license. Fell free to contribute and make this a great tool to every company.", "Este projeto foi publicado com Código Aberto, sob a licença GPL versão 3. Sinta-se a vontade para contribuir e fazer deste uma grande ferramenta para todas empresas.", "pt_BR");
+i18n_add ( "VoIP Domain was created in 2016 by Ernani Azevedo with the intention of providing a simpler way to deploy medium-to-large VoIP telephony systems. The system tries to keep complex tasks as simple as possible, using minimal technical jargon and automating everything it can, so managers with basic VoIP knowledge can deploy a large, stable, feature-rich PBX.", "O VoIP Domain foi criado em 2016 por Ernani Azevedo, com a intenção de criar uma maneira simples de instalar um sistema de telefonia VoIP médio a grande. O sistema tenta manter tarefas complexas o mais simples que elas possam ser, com o mínimo de termos computacionais e automatizando tudo que seja possível, para que quaisquer gerente com pouco conhecimento de VoIP possa instalar um PABX grande, estável e repleto de recursos.", "pt_BR");
+i18n_add ( "This project was published as Open Source under GPL version 3 license. Feel free to contribute and make this a great tool for every company.", "Este projeto foi publicado com Código Aberto, sob a licença GPL versão 3. Sinta-se à vontade para contribuir e fazer desta uma grande ferramenta para todas as empresas.", "pt_BR");
 i18n_add ( "English (United States)", "Inglês (Estados Unidos)", "pt_BR");
 i18n_add ( "Portuguese (Brazil)", "Português (Brasil)", "pt_BR");
 i18n_add ( "An object containing the call dates and timestamps.", "Um objeto contendo a data e hora das ligações.", "pt_BR");
@@ -659,7 +659,7 @@ i18n_add ( "The server information of the call.", "As informações do servidor 
 i18n_add ( "The server unique identifier of the call.", "O identificador único do servidor da ligação.", "pt_BR");
 i18n_add ( "The server description of the call.", "A descrição do servidor da ligação.", "pt_BR");
 i18n_add ( "Warehouse 1", "Depósito 1", "pt_BR");
-i18n_add ( "The flow of the call, if is an outbound or inbound call.", "O fluxo da ligação, se é uma chamada sainte ou entrate.", "pt_BR");
+i18n_add ( "The flow of the call, whether it is outbound or inbound.", "O fluxo da ligação, se é uma chamada sainte ou entrate.", "pt_BR");
 i18n_add ( "The total duration of call in seconds.", "A duração total da chamada em segundos.", "pt_BR");
 i18n_add ( "The total ringing duration of call in seconds.", "A duração do toque de chamada da ligação em segundos.", "pt_BR");
 i18n_add ( "The total billing duration of call in seconds.", "A duração total de bilhetagem da ligação em segundos.", "pt_BR");
@@ -696,7 +696,7 @@ i18n_add ( "The description of call destination endpoint.", "A descrição do di
 i18n_add ( "The translated description of call destination endpoint.", "A descrição do dispositivo de destino da chamada traduzida.", "pt_BR");
 i18n_add ( "The destination name.", "O nome do destinatário.", "pt_BR");
 i18n_add ( "The destination number.", "O número do destinatário.", "pt_BR");
-i18n_add ( "Who hung up the call, if was the caller or the called party.", "Quem finalizou a ligação, se foi o chamador ou o destinatário.", "pt_BR");
+i18n_add ( "Who hung up the call, whether it was the caller or the called party.", "Quem finalizou a ligação, se foi o chamador ou o destinatário.", "pt_BR");
 i18n_add ( "The call quality analysis.", "A análise de qualidade da ligação.", "pt_BR");
 i18n_add ( "The MOS (Mean Opinion Score) of the call based on call statistics.", "O MOS (Mean Opinion Score/Pontuação de Opinião Média) da chamada baseado nas estatísticas da ligação.", "pt_BR");
 i18n_add ( "The quality semaphore of the call quality.", "O semáforo de qualidade da qualidade da ligação.", "pt_BR");
@@ -745,7 +745,7 @@ i18n_add ( "User requires second factor authentication to login.", "Usuário req
 i18n_add ( "System user authentication.", "Autenticação de usuário do sistema.", "pt_BR");
 i18n_add ( "Create a new system user session.", "Criar uma nova sessão de usuário no sistema.", "pt_BR");
 i18n_add ( "Invalid second factor authentication code.", "Código de autenticação de dois fatores inválido.", "pt_BR");
-i18n_add ( "User session was successfully destroyed.", "Sessão de usuário foi destruída com sucesso.", "pt_BR");
+i18n_add ( "User session was destroyed successfully.", "Sessão de usuário foi destruída com sucesso.", "pt_BR");
 i18n_add ( "Empty system access cookie token.", "Cookie de acesso ao sistema vazia.", "pt_BR");
 i18n_add ( "Destroy system user session.", "Destruir sessão de usuário do sistema.", "pt_BR");
 i18n_add ( "Destroy the system user session.", "Destrói a sessão do usuário do sistema.", "pt_BR");
@@ -780,23 +780,23 @@ i18n_add ( "System dashboard", "Painel do Sistema", "pt_BR");
 i18n_add ( "Generate the system dashboard statistics.", "Gerar estatísticas para o painel do sistema.", "pt_BR");
 i18n_add ( "An object containing information about the call.", "Um objeto contendo informações sobre a chamada.", "pt_BR");
 i18n_add ( "View call information", "Visualiza informações da chamada", "pt_BR");
-i18n_add ( "Get detailed information about a call.", "Requisita informações detalhadas sobre a chamada.", "pt_BR");
+i18n_add ( "Get detailed information about a call.", "Obtém informações detalhadas sobre a chamada.", "pt_BR");
 i18n_add ( "An object containing information about the call SIP dump.", "Um objeto contendo informações sobre a depuração SIP da chamada.", "pt_BR");
 i18n_add ( "If the SIP dump of the call is available.", "Se a depuração SIP da chamada está disponível.", "pt_BR");
 i18n_add ( "The SIP dump of the call.", "A depuração SIP da chamada.", "pt_BR");
 i18n_add ( "The call flow diagram with brief description.", "O diagrama de fluxo da chamada com breve descrição.", "pt_BR");
 i18n_add ( "The call flow packets into text format.", "O fluxo de pacotes da chamada em formato texto.", "pt_BR");
-i18n_add ( "The call SIP dump PCAP file encoded with base64.", "O arquivo de depuração SIP PCAP da gravação da chamada encodeado com base64.", "pt_BR");
-i18n_add ( "View call SIP dump information", "Visualiza informações de depuração SIP da chamada", "pt_BR");
-i18n_add ( "Get detailed SIP dump information about a call.", "Requisita informações de depuração SIP detalhadas da chamada.", "pt_BR");
+i18n_add ( "The call SIP dump PCAP file encoded with base64.", "O arquivo de depuração SIP PCAP da gravação da chamada codificado em base64.", "pt_BR");
+i18n_add ( "View call SIP dump information", "Visualizar informações de depuração SIP da chamada", "pt_BR");
+i18n_add ( "Get detailed SIP dump information about a call.", "Obtém informações de depuração SIP detalhadas da chamada.", "pt_BR");
 i18n_add ( "An object containing information about the call recording.", "Um objeto contendo informações sobre a gravação da chamada.", "pt_BR");
 i18n_add ( "If the recording of the call is available.", "Se a gravação da chamada está disponível.", "pt_BR");
-i18n_add ( "The call recording MP3 file encoded with base64.", "O arquivo MP3 da gravação da chamada encodeado com base64.", "pt_BR");
+i18n_add ( "The call recording MP3 file encoded with base64.", "O arquivo MP3 da gravação da chamada codificado em base64.", "pt_BR");
 i18n_add ( "View call recording information", "Visualiza informações de gravação da chamada", "pt_BR");
-i18n_add ( "Get recording information about a call.", "Requisita informações de gravação da chamada.", "pt_BR");
+i18n_add ( "Get recording information about a call.", "Obtém informações de gravação da chamada.", "pt_BR");
 i18n_add ( "An array containing the system objects.", "Um array contendo os objetos do sistema.", "pt_BR");
 i18n_add ( "The internal unique identification number of the object.", "O número único de identificação interno do objeto.", "pt_BR");
-i18n_add ( "The extension number associated to object.", "O número da extensão associada ao objeto.", "pt_BR");
+i18n_add ( "The extension number associated with the object.", "O número da extensão associada ao objeto.", "pt_BR");
 i18n_add ( "The type of the object.", "O tipo do objeto.", "pt_BR");
 i18n_add ( "The description of the object.", "A descrição do objeto.", "pt_BR");
 i18n_add ( "Interface objects search.", "Pequisa de objetos de interface.", "pt_BR");
@@ -835,7 +835,7 @@ i18n_add ( "Added to clipboard", "Adicionado para área de tranferência", "pt_B
 i18n_add ( "Press <i>Ctrl</i> or </i>\u2318</i> + <i>C</i> to copy table to clipboard.<br />To cancel, click on this message or press ESC key.", "Pressione <i>Ctrl</i> ou <i>\u2318</i> + <i>C</i> para copiar os dados da tabela para a área de transferência.<br />Para cancelar, clique sobre esta mensagem ou pressione a tecla ESC.", "pt_BR", "I18N_GLOBAL");
 i18n_add ( "Total of %d records", "Total de %d registros", "pt_BR", "I18N_GLOBAL");
 i18n_add ( "Total of 1 record", "Total de 1 registro", "pt_BR", "I18N_GLOBAL");
-i18n_add ( "Fields contains invalid values.", "Filtro de conteúdo contém valor inválido.", "pt_BR");
+i18n_add ( "Fields contain invalid values.", "Filtro de conteúdo contém valor inválido.", "pt_BR");
 i18n_add ( "Clone", "Clonar", "pt_BR");
 i18n_add ( "Toggle options", "Alterar opções", "pt_BR");
 i18n_add ( "and create new", "e criar novo", "pt_BR");

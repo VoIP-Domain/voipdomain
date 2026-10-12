@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Audio
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -40,16 +40,16 @@
 i18n_add ( "Add audio");
 i18n_add ( "Are you sure you want to remove the audio %s (%s)?");
 i18n_add ( "Audio description");
-i18n_add ( "audio editing");
+i18n_add ( "Edit audio");
 i18n_add ( "Audio file added successfully!");
-i18n_add ( "audio file addition");
-i18n_add ( "Audio file addition");
-i18n_add ( "Audio file edition");
+i18n_add ( "Add audio file");
+i18n_add ( "Add audio file");
+i18n_add ( "Edit audio file");
 i18n_add ( "Audio filename");
 i18n_add ( "Audio file removal");
 i18n_add ( "Audio file removed successfully!");
 i18n_add ( "audio files");
-i18n_add ( "Audio file successfully changed!");
+i18n_add ( "Audio file changed successfully!");
 i18n_add ( "audio file view");
 i18n_add ( "Audio file view");
 i18n_add ( "Audio files");
@@ -87,10 +87,10 @@ i18n_add ( "Download audios");
 i18n_add ( "Download system audio files.");
 i18n_add ( "Edit a system audio file.");
 i18n_add ( "Filter search with this string. If not provided, return all audio files.");
-i18n_add ( "Get an audio file information.");
+i18n_add ( "Get audio file information.");
 i18n_add ( "How many times this audio are in use into the system.");
 i18n_add ( "If greater than zero, the result filecontent variable will be an array split of the audio file in chunks of size of this variable.");
-i18n_add ( "New system audio file added successfully.");
+i18n_add ( "A new system audio file was added successfully.");
 i18n_add ( "Remove a system audio file.");
 i18n_add ( "Search for system audio files.");
 i18n_add ( "The audio file internal system unique identifier.");
@@ -104,33 +104,33 @@ i18n_add ( "View audios");
 i18n_add ( "The mime type of the audio file.");
 i18n_add ( "Clear file");
 i18n_add ( "Invalid audio ID.");
-i18n_add ( "Audio cloning");
+i18n_add ( "Clone audio");
 i18n_add ( "Error retrieving audio data!");
 
 /**
  * Add Brazilian Portuguese support
  */
 i18n_add ( "Add audio", "Adicionar áudio", "pt_BR");
-i18n_add ( "Are you sure you want to remove the audio %s (%s)?", "Você tem certeza que deseja remover o áudio %s (%s)?", "pt_BR");
+i18n_add ( "Are you sure you want to remove the audio %s (%s)?", "Você tem certeza de que deseja remover o áudio %s (%s)?", "pt_BR");
 i18n_add ( "Audio description", "Descrição do áudio", "pt_BR");
-i18n_add ( "audio editing", "edição de áudio", "pt_BR");
+i18n_add ( "Edit audio", "editar áudio", "pt_BR");
 i18n_add ( "Audio file added successfully!", "Arquivo de áudio adicionado com sucesso!", "pt_BR");
-i18n_add ( "audio file addition", "adição de arquivo de áudio", "pt_BR");
-i18n_add ( "Audio file addition", "Adição de arquivo de áudio", "pt_BR");
-i18n_add ( "Audio file edition", "Edição de arquivo de áudio", "pt_BR");
+i18n_add ( "Add audio file", "adicionar arquivo de áudio", "pt_BR");
+i18n_add ( "Add audio file", "Adicionar arquivo de áudio", "pt_BR");
+i18n_add ( "Edit audio file", "Editar arquivo de áudio", "pt_BR");
 i18n_add ( "Audio filename", "Nome do arquivo do áudio", "pt_BR");
-i18n_add ( "Audio file removal", "Remoção de arquivo de áudio", "pt_BR");
+i18n_add ( "Audio file removal", "Remover arquivo de áudio", "pt_BR");
 i18n_add ( "Audio file removed successfully!", "Arquivo de áudio removido com sucesso!", "pt_BR");
 i18n_add ( "audio files", "arquivos de áudio", "pt_BR");
-i18n_add ( "Audio file successfully changed!", "Arquivo de áudio alterado com sucesso!", "pt_BR");
-i18n_add ( "audio file view", "visualização de arquivo de áudio", "pt_BR");
-i18n_add ( "Audio file view", "Visualização de arquivo de áudio", "pt_BR");
+i18n_add ( "Audio file changed successfully!", "Arquivo de áudio alterado com sucesso!", "pt_BR");
+i18n_add ( "audio file view", "visualizar arquivo de áudio", "pt_BR");
+i18n_add ( "Audio file view", "Visualizar arquivo de áudio", "pt_BR");
 i18n_add ( "Audio files", "Arquivos de áudio", "pt_BR");
 i18n_add ( "Edit audio", "Editar áudio", "pt_BR");
 i18n_add ( "Error adding audio!", "Erro ao adicionar áudio!", "pt_BR");
 i18n_add ( "Error changing audio file!", "Erro alterando arquivo de áudio!", "pt_BR");
 i18n_add ( "Error removing audio file!", "Erro removendo arquivo de áudio!", "pt_BR");
-i18n_add ( "Error retrieving audio file data!", "Erro ao requisitar informações do arquivo de áudio!", "pt_BR");
+i18n_add ( "Error retrieving audio file data!", "Erro ao obter informações do arquivo de áudio!", "pt_BR");
 i18n_add ( "Error viewing audio file!", "Erro visualizando arquivo de áudio!", "pt_BR");
 i18n_add ( "File", "Arquivo", "pt_BR");
 i18n_add ( "Filename", "Nome do arquivo", "pt_BR");
@@ -159,11 +159,11 @@ i18n_add ( "Default Music On Hold", "Música em espera padrão", "pt_BR");
 i18n_add ( "Download audios", "Baixar áudios", "pt_BR");
 i18n_add ( "Download system audio files.", "Baixar arquivos de áudio do sistema.", "pt_BR");
 i18n_add ( "Edit a system audio file.", "Editar um arquivo de áudio do sistema.", "pt_BR");
-i18n_add ( "Filter search with this string. If not provided, return all audio files.", "Filtrar pesquisa baseado nesta string. Se não informado, retorna todos os áudios.", "pt_BR");
-i18n_add ( "Get an audio file information.", "Requisitar informações de um arquivo de áudio.", "pt_BR");
+i18n_add ( "Filter search with this string. If not provided, return all audio files.", "Filtrar a pesquisa com esta string. Se omitido, retorna todos os áudios.", "pt_BR");
+i18n_add ( "Get audio file information.", "Obter informações de um arquivo de áudio.", "pt_BR");
 i18n_add ( "How many times this audio are in use into the system.", "Quantas vezes este arquivo de áudio está em uso no sistema.", "pt_BR");
 i18n_add ( "If greater than zero, the result filecontent variable will be an array split of the audio file in chunks of size of this variable.", "Se maior que zero, a variável de retorno contendo o arquivo será dividida em um array com pedaços do tamanho desta variável.", "pt_BR");
-i18n_add ( "New system audio file added successfully.", "Novo arquivo de áudio do sistema adicionado com sucesso.", "pt_BR");
+i18n_add ( "A new system audio file was added successfully.", "Um novo arquivo de áudio do sistema foi adicionado com sucesso.", "pt_BR");
 i18n_add ( "Remove a system audio file.", "Remover um arquivo de áudio do sistema.", "pt_BR");
 i18n_add ( "Search for system audio files.", "Pesquisar por arquivos de áudio do sistema.", "pt_BR");
 i18n_add ( "The audio file internal system unique identifier.", "O identificador único interno do sistema para o arquivo de áudio.", "pt_BR");
@@ -177,6 +177,6 @@ i18n_add ( "View audios", "Visualizar áudios", "pt_BR");
 i18n_add ( "The mime type of the audio file.", "O tipo de mime do arquivo de áudio.", "pt_BR");
 i18n_add ( "Clear file", "Limpar arquivo", "pt_BR");
 i18n_add ( "Invalid audio ID.", "ID de áudio inválido.", "pt_BR");
-i18n_add ( "Audio cloning", "Clonagem de áudio", "pt_BR");
-i18n_add ( "Error retrieving audio data!", "Erro requisitando dados do áudio!", "pt_BR");
+i18n_add ( "Clone audio", "Clonar áudio", "pt_BR");
+i18n_add ( "Error retrieving audio data!", "Erro ao obter dados do áudio!", "pt_BR");
 ?>

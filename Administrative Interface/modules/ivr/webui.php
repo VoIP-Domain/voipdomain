@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage IVR
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -67,7 +67,7 @@ function ivrs_search_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "IVR"));
-  sys_set_subtitle ( __ ( "IVR search"));
+  sys_set_subtitle ( __ ( "Search IVRs"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "IVR"))
   ));
@@ -101,7 +101,7 @@ function ivrs_search_page ( $buffer, $parameters)
   sys_addjs ( array ( "name" => "stickytableheaders", "src" => "/vendors/StickyTableHeaders/js/jquery.stickytableheaders.js", "dep" => array ()));
 
   /**
-   * IVR search table
+   * Search IVRs table
    */
   $output = "<table id=\"datatables\" class=\"table table-striped table-bordered\" cellspacing=\"0\" width=\"100%\"></table>\n";
 
@@ -186,7 +186,7 @@ function ivrs_add_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "IVR"));
-  sys_set_subtitle ( __ ( "IVR addition"));
+  sys_set_subtitle ( __ ( "Add IVR"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "IVR"), "link" => "/ivrs"),
     2 => array ( "title" => __ ( "Add"))
@@ -667,7 +667,7 @@ function ivrs_add_page ( $buffer, $parameters)
               "    URL: '/ivrs',\n" .
               "    method: 'POST',\n" .
               "    button: $('button.add'),\n" .
-              "    title: '" . __ ( "IVR addition") . "',\n" .
+              "    title: '" . __ ( "Add IVR") . "',\n" .
               "    fail: '" . __ ( "Error adding IVR!") . "',\n" .
               "    success: '" . __ ( "IVR added successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
@@ -806,12 +806,12 @@ function ivrs_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "IVR cloning") . "', text: '" . __ ( "Error retrieving IVR data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Clone IVR") . "', text: '" . __ ( "Error retrieving IVR data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
 /**
- * Function to generate the IVR view page code.
+ * Function to generate the View IVR page code.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -827,7 +827,7 @@ function ivrs_view_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "IVR"));
-  sys_set_subtitle ( __ ( "IVR visualization"));
+  sys_set_subtitle ( __ ( "View IVR"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "IVR"), "link" => "/ivrs"),
     2 => array ( "title" => __ ( "View"))
@@ -1204,7 +1204,7 @@ function ivrs_view_page ( $buffer, $parameters)
               "  $('#ivr_view_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "IVR view") . "', text: '" . __ ( "Error viewing IVR!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "View IVR") . "', text: '" . __ ( "Error viewing IVR!") . "', type: 'error'});\n" .
               "});\n");
 
   return $output;
@@ -1227,7 +1227,7 @@ function ivrs_edit_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "IVR"));
-  sys_set_subtitle ( __ ( "IVR edition"));
+  sys_set_subtitle ( __ ( "Edit IVR"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "IVR"), "link" => "/ivrs"),
     2 => array ( "title" => __ ( "Edit"))
@@ -1672,9 +1672,9 @@ function ivrs_edit_page ( $buffer, $parameters)
               "    URL: '/ivrs/' + VoIP.parameters.id,\n" .
               "    method: 'PATCH',\n" .
               "    button: $('button.edit'),\n" .
-              "    title: '" . __ ( "IVR edition") . "',\n" .
+              "    title: '" . __ ( "Edit IVR") . "',\n" .
               "    fail: '" . __ ( "Error editing IVR!") . "',\n" .
-              "    success: '" . __ ( "IVR edited successfully!") . "',\n" .
+              "    success: '" . __ ( "IVR changed successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
               "               {\n" .
               "                 VoIP.path.call ( '/ivrs', true);\n" .

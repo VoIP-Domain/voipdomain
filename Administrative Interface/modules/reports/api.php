@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Reports
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -88,7 +88,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -108,15 +108,15 @@ framework_add_hook (
     )
   )
 );
-framework_add_permission ( "reports_weekhour", __ ( "Request week hourly usage count report"));
+framework_add_permission ( "reports_weekhour", __ ( "Request weekly hourly usage count report"));
 framework_add_api_call (
   "/reports/weekhour",
   "Read",
   "reports_weekhour",
   array (
     "permissions" => array ( "Administrator", "reports_weekhour"),
-    "title" => __ ( "Week hourly usage count report"),
-    "description" => __ ( "Generate a week call week hourly usage count report.")
+    "title" => __ ( "Weekly hourly usage count report"),
+    "description" => __ ( "Generate a weekly hourly usage count report.")
   )
 );
 
@@ -289,7 +289,7 @@ function reports_weekhour ( $buffer, $parameters)
 }
 
 /**
- * API call to fetch extensions listing report
+ * API call to fetch Extensions listing report
  */
 framework_add_hook (
   "reports_list",
@@ -353,7 +353,7 @@ framework_add_hook (
     )
   )
 );
-framework_add_permission ( "reports_list", __ ( "Request extensions listing"));
+framework_add_permission ( "reports_list", __ ( "Request Extensions listing"));
 framework_add_api_call (
   "/reports/list",
   "Read",
@@ -485,7 +485,7 @@ function reports_list ( $buffer, $parameters)
 }
 
 /**
- * API call to fetch ranges listing report
+ * API call to fetch Ranges listing report
  */
 framework_add_hook (
   "reports_ranges",
@@ -564,7 +564,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -579,7 +579,7 @@ framework_add_hook (
     )
   )
 );
-framework_add_permission ( "reports_ranges", __ ( "Request ranges listing"));
+framework_add_permission ( "reports_ranges", __ ( "Request Ranges listing"));
 framework_add_api_call (
   "/reports/ranges",
   "Read",
@@ -795,7 +795,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -922,7 +922,7 @@ function reports_financial_costcenters ( $buffer, $parameters)
   /**
    * Request extensions with the requested cost center from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.* FROM `Extensions` LEFT JOIN `ExtensionPhone` ON `Extensions`.`ID` = `ExtensionPhone`.`Extension` LEFT JOIN `Groups` ON `ExtensionPhone`.`Group` = `Groups`.`ID` WHERE `Extension`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND (`ExtensionPhone`.`CostCenter` = " . (int) $parameters["ID"] . " OR ( `ExtensionPhone`.`CostCenter` IS NULL AND `Groups`.`CostCenter` = " . (int) $parameters["ID"] . ")) ORDER BY `Extensions`.`Number`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.* FROM `Extensions` LEFT JOIN `ExtensionPhone` ON `Extensions`.`ID` = `ExtensionPhone`.`Extension` LEFT JOIN `Groups` ON `ExtensionPhone`.`Group` = `Groups`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND (`ExtensionPhone`.`CostCenter` = " . (int) $parameters["ID"] . " OR ( `ExtensionPhone`.`CostCenter` IS NULL AND `Groups`.`CostCenter` = " . (int) $parameters["ID"] . ")) ORDER BY `Extensions`.`Number`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1055,7 +1055,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1075,7 +1075,7 @@ framework_add_hook (
     )
   )
 );
-framework_add_permission ( "reports_financial_groups", __ ( "Request financial groups report"));
+framework_add_permission ( "reports_financial_groups", __ ( "Request financial Groups report"));
 framework_add_api_call (
   "/reports/financial/group/:ID",
   "Read",
@@ -1182,7 +1182,7 @@ function reports_financial_groups ( $buffer, $parameters)
   /**
    * Request extensions with the requested group from database
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` LEFT JOIN `ExtensionPhone` ON `ExtensionPhone`.`Extension` = `Extensions`.`ID` WHERE `Extension`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionPhone`.`Group` = " . (int) $parameters["ID"] . " ORDER BY `Extensions`.`Number`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Extensions` LEFT JOIN `ExtensionPhone` ON `ExtensionPhone`.`Extension` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ExtensionPhone`.`Group` = " . (int) $parameters["ID"] . " ORDER BY `Extensions`.`Number`"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1310,7 +1310,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1681,7 +1681,7 @@ function reports_system_health ( $buffer, $parameters)
 }
 
 /**
- * API call to fetch extensions activity listing report
+ * API call to fetch extensions Activity listing report
  */
 framework_add_hook (
   "reports_activity",
@@ -1725,7 +1725,7 @@ framework_add_hook (
               ),
               "LastDialed" => array (
                 "type" => "object",
-                "description" => __ ( "Last date and time that extension did a call."),
+                "description" => __ ( "Last date and time that the extension placed a call."),
                 "properties" => array (
                   "Datetime" => array (
                     "type" => "date-time",
@@ -1883,7 +1883,7 @@ function reports_activity ( $buffer, $parameters)
 }
 
 /**
- * API call to generate user received call's report
+ * API call to generate user received calls report
  */
 framework_add_hook (
   "user_received_report",
@@ -1922,7 +1922,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -2102,7 +2102,7 @@ function user_received_report ( $buffer, $parameters)
 }
 
 /**
- * API call to generate group received call's report
+ * API call to generate group received calls report
  */
 framework_add_hook (
   "group_received_report",
@@ -2141,7 +2141,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -2317,7 +2317,7 @@ function group_received_report ( $buffer, $parameters)
 }
 
 /**
- * API call to generate gateway received call's report
+ * API call to generate gateway received calls report
  */
 framework_add_hook (
   "gateway_received_report",
@@ -2356,7 +2356,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -2522,7 +2522,7 @@ function gateway_received_report ( $buffer, $parameters)
 }
 
 /**
- * API call to generate system received call's report
+ * API call to generate system received calls report
  */
 framework_add_hook (
   "system_received_report",
@@ -2561,7 +2561,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -2718,7 +2718,7 @@ function system_received_report ( $buffer, $parameters)
 }
 
 /**
- * API call to generate user made call's report
+ * API call to generate user made calls report
  */
 framework_add_hook (
   "user_made_report",
@@ -2757,7 +2757,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -2937,7 +2937,7 @@ function user_made_report ( $buffer, $parameters)
 }
 
 /**
- * API call to generate group made call's report
+ * API call to generate group made calls report
  */
 framework_add_hook (
   "group_made_report",
@@ -2976,7 +2976,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -3152,7 +3152,7 @@ function group_made_report ( $buffer, $parameters)
 }
 
 /**
- * API call to generate gateway made call's report
+ * API call to generate gateway made calls report
  */
 framework_add_hook (
   "gateway_made_report",
@@ -3191,7 +3191,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -3357,7 +3357,7 @@ function gateway_made_report ( $buffer, $parameters)
 }
 
 /**
- * API call to generate system made call's report
+ * API call to generate system made calls report
  */
 framework_add_hook (
   "system_made_report",
@@ -3396,7 +3396,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -3553,7 +3553,7 @@ function system_made_report ( $buffer, $parameters)
 }
 
 /**
- * API call to generate consolidated extensions call's report
+ * API call to generate consolidated extensions calls report
  */
 framework_add_hook (
   "consolidated_extension_report",
@@ -3709,7 +3709,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -3884,7 +3884,7 @@ function consolidated_extension_report ( $buffer, $parameters)
 }
 
 /**
- * API call to generate consolidated groups call's report
+ * API call to generate consolidated groups calls report
  */
 framework_add_hook (
   "consolidated_group_report",
@@ -4030,7 +4030,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -4205,7 +4205,7 @@ function consolidated_group_report ( $buffer, $parameters)
 }
 
 /**
- * API call to generate consolidated gateways call's report
+ * API call to generate consolidated gateways calls report
  */
 framework_add_hook (
   "consolidated_gateway_report",
@@ -4351,7 +4351,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -4526,7 +4526,7 @@ function consolidated_gateway_report ( $buffer, $parameters)
 }
 
 /**
- * API call to generate consolidated servers call's report
+ * API call to generate consolidated servers calls report
  */
 framework_add_hook (
   "consolidated_server_report",
@@ -4672,7 +4672,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (

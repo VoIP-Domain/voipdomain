@@ -8,7 +8,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Asterisk Client Daemon
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -57,6 +57,9 @@ if ( ! defined ( "STDIN"))
  */
 require_once ( dirname ( __FILE__) . "/includes/functions.inc.php");
 require_once ( dirname ( __FILE__) . "/includes/plugins.inc.php");
+require_once ( dirname ( __FILE__) . "/includes/file-transfer.inc.php");
+require_once ( dirname ( __FILE__) . "/includes/systemd.inc.php");
+require_once ( dirname ( __FILE__) . "/includes/plugin-install.inc.php");
 
 /**
  * Parse configuration file. You should put your configuration file OUTSIDE
@@ -65,6 +68,16 @@ require_once ( dirname ( __FILE__) . "/includes/plugins.inc.php");
  * other sensitive configurations.
  */
 $_in = parse_ini_file ( "/etc/voipdomain/client.conf", true);
+if ( $_in === false)
+{
+  echo "Error: Cannot parse configuration file /etc/voipdomain/client.conf\n";
+  exit ( 1);
+}
+if ( ! is_array ( $_in["general"]))
+{
+  echo "Error: Cannot find \"general\" section at configuration file.\n";
+  exit ( 1);
+}
 $_in["processed"] = array ();
 $_in["db"] = array ();
 $_in["module"] = "";
@@ -138,6 +151,7 @@ if ( ! is_array ( $_in["mysql"]))
  * Process parameters
  */
 $_in["debug"] = false;
+$_in["verbose"] = false;
 for ( $x = 1; $x < $argc; $x++)
 {
   switch ( $argv[$x])
@@ -146,11 +160,16 @@ for ( $x = 1; $x < $argc; $x++)
     case "-d":
       $_in["debug"] = true;
       break;
+    case "--verbose":
+    case "-v":
+      $_in["verbose"] = true;
+      break;
     case "--help":
     case "-h":
-      echo "Usage: " . basename ( $argv[0]) . " [--help|-h] [--debug|-d]\n";
-      echo "  --help|-h:    Show this help information\n";
-      echo "  --debug|-d:   Enable debug messages (do not fork the daemon)\n";
+      echo "Usage: " . basename ( $argv[0]) . " [--help|-h] [--debug|-d] [--verbose|-v]\n";
+      echo "  --help|-h:     Show this help information\n";
+      echo "  --debug|-d:    Enable debug messages (do not fork the daemon)\n";
+      echo "  --verbose|-v:  Show loaded configuration\n";
       exit ();
       break;
     default:
@@ -161,16 +180,78 @@ for ( $x = 1; $x < $argc; $x++)
 }
 
 /**
+ * Show loaded configuration if verbose mode
+ */
+if ( $_in["verbose"])
+{
+  echo "Loaded [general] configuration:\n";
+  foreach ( $_in["general"] as $key => $value)
+  {
+    echo "  " . $key . " = '" . $value . "'\n";
+  }
+  echo "\nChecking 'address' key:\n";
+  echo "  array_key_exists('address', \$_in['general']): " . ( array_key_exists ( "address", $_in["general"]) ? "true" : "false") . "\n";
+  if ( array_key_exists ( "address", $_in["general"]))
+  {
+    echo "  Value: '" . $_in["general"]["address"] . "'\n";
+    echo "  empty(): " . ( empty ( $_in["general"]["address"]) ? "true" : "false") . "\n";
+    echo "  trim(): '" . trim ( $_in["general"]["address"]) . "'\n";
+    echo "  strlen(): " . strlen ( $_in["general"]["address"]) . "\n";
+    echo "  Hex dump: ";
+    for ( $i = 0; $i < strlen ( $_in["general"]["address"]); $i++)
+    {
+      echo sprintf ( "%02x ", ord ( $_in["general"]["address"][$i]));
+    }
+    echo "\n";
+  }
+  echo "\n";
+}
+
+/**
+ * Check for cryptography key paths (set defaults if not configured)
+ */
+if ( ! array_key_exists ( "privateKey", $_in["general"]) || empty ( $_in["general"]["privateKey"]))
+{
+  $_in["general"]["privateKey"] = "/etc/voipdomain/client-certificate.key";
+}
+if ( ! array_key_exists ( "publicKey", $_in["general"]) || empty ( $_in["general"]["publicKey"]))
+{
+  $_in["general"]["publicKey"] = "/etc/voipdomain/client-certificate.pub";
+}
+if ( ! array_key_exists ( "masterPublicKey", $_in["general"]) || empty ( $_in["general"]["masterPublicKey"]))
+{
+  $_in["general"]["masterPublicKey"] = "/etc/voipdomain/master-certificate.pub";
+}
+
+/**
  * Load criptography keys
  */
 $_in["keys"] = array ();
+if ( ! file_exists ( $_in["general"]["privateKey"]))
+{
+  echo "Error: Client private key file not found: " . $_in["general"]["privateKey"] . "\n";
+  echo "TIP: Run the installation script to generate and install the client certificates.\n";
+  exit ( 1);
+}
 if ( ! $_in["keys"]["privateKey"] = file_get_contents ( $_in["general"]["privateKey"]))
 {
   writeLog ( "Cannot read client private key!", VoIP_LOG_FATAL);
 }
+if ( ! file_exists ( $_in["general"]["publicKey"]))
+{
+  echo "Error: Client public key file not found: " . $_in["general"]["publicKey"] . "\n";
+  echo "TIP: Run the installation script to generate and install the client certificates.\n";
+  exit ( 1);
+}
 if ( ! $_in["keys"]["publicKey"] = file_get_contents ( $_in["general"]["publicKey"]))
 {
   writeLog ( "Cannot read client public key!", VoIP_LOG_FATAL);
+}
+if ( ! file_exists ( $_in["general"]["masterPublicKey"]))
+{
+  echo "Error: Master server public key file not found: " . $_in["general"]["masterPublicKey"] . "\n";
+  echo "TIP: Run the installation script to download the master server certificate.\n";
+  exit ( 1);
 }
 if ( ! $_in["keys"]["masterPublicKey"] = file_get_contents ( $_in["general"]["masterPublicKey"]))
 {
@@ -178,12 +259,33 @@ if ( ! $_in["keys"]["masterPublicKey"] = file_get_contents ( $_in["general"]["ma
 }
 
 /**
- * Conect to the database
+ * Validate local server address configuration
+ */
+if ( ! array_key_exists ( "address", $_in["general"]) || empty ( trim ( $_in["general"]["address"])))
+{
+  echo "Error: Local server address not configured.\n";
+  echo "TIP: Set 'address = <server_ip>' in [general] section of /etc/voipdomain/client.conf\n";
+  exit ( 1);
+}
+$_in["general"]["address"] = trim ( $_in["general"]["address"]);
+
+/**
+ * Connect to the database
  */
 echo "Executing: Connecting to database... ";
-if ( ! $_in["mysql"]["id"] = @new mysqli ( $_in["mysql"]["hostname"] . ( ! empty ( $_in["mysql"]["port"]) ? ":" . $_in["mysql"]["port"] : ""), $_in["mysql"]["username"], $_in["mysql"]["password"], $_in["mysql"]["database"]))
+try
 {
-  writeLog ( "Cannot connect to database server!", VoIP_LOG_FATAL);
+  $_in["mysql"]["id"] = new mysqli ( $_in["mysql"]["hostname"] . ( ! empty ( $_in["mysql"]["port"]) ? ":" . $_in["mysql"]["port"] : ""), $_in["mysql"]["username"], $_in["mysql"]["password"], $_in["mysql"]["database"]);
+} catch ( mysqli_sql_exception $e)
+{
+  echo chr ( 27) . "[1;31mFAILED" . chr ( 27) . "[1;0m\n\n";
+  echo chr ( 27) . "[1;31mDatabase connection error:" . chr ( 27) . "[1;0m " . $e->getMessage () . "\n\n";
+  echo "Please check:\n";
+  echo "  - MariaDB/MySQL is running: systemctl status mariadb\n";
+  echo "  - Database exists: mysql -e \"SHOW DATABASES LIKE '" . $_in["mysql"]["database"] . "'\"\n";
+  echo "  - User/password in /etc/voipdomain/client.conf matches the database\n";
+  echo "  - User has access: mysql -u " . $_in["mysql"]["username"] . " -p " . $_in["mysql"]["database"] . "\n\n";
+  writeLog ( "Cannot connect to database: " . $e->getMessage (), VoIP_LOG_FATAL);
 }
 echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
 
@@ -212,6 +314,17 @@ if ( extension_loaded ( "proctitle"))
  */
 echo "Executing: Changing working directory... ";
 chdir ( "/");
+echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
+
+/**
+ * Open log file before dropping privileges (keep handle open)
+ */
+echo "Executing: Opening log file... ";
+if ( ! openLogFile ())
+{
+  echo chr ( 27) . "[1;31mFAILED" . chr ( 27) . "[1;0m\n";
+  exit ( 1);
+}
 echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
 
 /**
@@ -274,20 +387,44 @@ if ( ! $_in["debug"])
 }
 
 /**
- * Connect to Gearman server(s)
+ * Register systemd reload handler and continue as worker process
  */
-$_in["gearman"]["worker"] = new GearmanWorker ();
-if ( ! $_in["gearman"]["worker"]->addServer ( $_in["gearman"]["servers"]))
-{
-
-  echo "Error: Cannot connect to Gearman servers (" . $_in["gearman"]["worker"]->error () . ")!\n";
-  exit ( 1);
-}
+daemon_register_systemd_reload_handler ();
 
 /**
- * Register client task
+ * Connect to Gearman server(s)
  */
-$_in["gearman"]["worker"]->addFunction ( "vd_client_" . $_in["daemon"]["serverid"] . "_task", "task_manager");
+echo "Executing: Connecting to Gearman... ";
+$gearman_host = ! empty ( $_in["gearman"]["hostname"]) ? $_in["gearman"]["hostname"] : "127.0.0.1";
+$gearman_port = ! empty ( $_in["gearman"]["port"]) ? (int) $_in["gearman"]["port"] : 4730;
+try
+{
+  $_in["gearman"]["worker"] = new GearmanWorker ();
+  if ( ! @$_in["gearman"]["worker"]->addServer ( $gearman_host, $gearman_port))
+  {
+    throw new Exception ( $_in["gearman"]["worker"]->error () ?: "addServer returned false");
+  }
+} catch ( Exception $e)
+{
+  echo chr ( 27) . "[1;31mFAILED" . chr ( 27) . "[1;0m\n\n";
+  echo chr ( 27) . "[1;31mGearman connection error:" . chr ( 27) . "[1;0m " . $e->getMessage () . "\n\n";
+  echo "Please check:\n";
+  echo "  - Gearman server is running: systemctl status gearmand\n";
+  echo "  - Gearman is listening: gearadmin --status\n";
+  echo "  - Configuration in /etc/voipdomain/client.conf [gearman] section\n";
+  echo "  - Current setting: hostname = ${gearman_host}, port = ${gearman_port}\n\n";
+  writeLog ( "Cannot connect to Gearman: " . $e->getMessage (), VoIP_LOG_FATAL);
+}
+echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
+
+/**
+ * Register client task workers
+ */
+$_in["gearman"]["worker"]->addFunction ( gearman_client_task_name ( $_in["daemon"]["serverid"]), "task_manager");
+if ( array_key_exists ( "backup", $_in["daemon"]) && gearman_backup_mode_enabled ( $_in["daemon"]["backup"]))
+{
+  $_in["gearman"]["worker"]->addFunction ( gearman_backup_task_name ( $_in["daemon"]["serverid"]), "task_manager");
+}
 
 /**
  * Flush all events until no one left
@@ -432,7 +569,7 @@ function mp3towav ( $source, $target)
   exec ( "mpg123 -w \"" . addslashes ( $target) . "\" \"" . addslashes ( $source) . "\" 1>/dev/null 2>&1", $output, $resultcode);
 
   // Return result code:
-  return $resultcode == 0;
+  return $resultcode == 0 && is_readable ( $target);
 }
 
 /**
@@ -464,7 +601,7 @@ function audiotoraw ( $source, $target)
   exec ( "sox \"" . addslashes ( $source) . "\" -t raw -r 8000 -e signed-integer -b 16 -c 1 \"" . addslashes ( $target) . "\" 1>/dev/null 2>&1", $output, $resultcode);
 
   // Return result code:
-  return $resultcode == 0;
+  return $resultcode == 0 && is_readable ( $target);
 }
 
 /**
@@ -501,7 +638,7 @@ function task_manager ( $job)
   /**
    * Check job payload content sign
    */
-  $signcheck = openssl_verify ( $key . $data["iv"] . $data["hmac"] . $data["payload"], $data["sign"], $_in["keys"]["masterPublicKey"], OPENSSL_ALGO_SHA1);
+  $signcheck = openssl_verify ( $key . $data["iv"] . $data["hmac"] . $data["payload"], $data["sign"], $_in["keys"]["masterPublicKey"], OPENSSL_ALGO_SHA256);
   if ( $signcheck != 1)
   {
     writeLog ( "Received task with wrong server signature. Ignoring task!", VoIP_LOG_WARNING);
@@ -537,7 +674,7 @@ function task_manager ( $job)
    */
   if ( $_in["debug"])
   {
-    file_put_contents ( $_in["eventsfile"], "New event received: " . $payload["event"] . "\n" . print_r ( $payload["event"] == "profile_add" ? array_merge ( $payload["data"], array ( "Data" => "***FILE CONTENT***")) : $payload["data"], true) . "\n", FILE_APPEND);
+    file_put_contents ( $_in["eventsfile"], "New event received: " . $payload["event"] . "\n" . print_r ( $payload["event"] == "profile_add" || $payload["event"] == "file_transfer_chunk" ? array_merge ( $payload["data"], array ( "Data" => "***FILE CONTENT***")) : $payload["data"], true) . "\n", FILE_APPEND);
   }
 
   /**
@@ -630,7 +767,7 @@ function task_manager ( $job)
     } else {
       reply_event ( $payload["id"], $result);
       $_in["processed"][$payload["id"]] = $result["code"];
-      writeLog ( $payload["event"] . "(" . $payload["id"] . ") - Result " . $result["code"] . ": " . $result["message"] . ( $result["content"] ? " (Content: " . json_encode ( $result["content"]) : ""), ( $result["code"] < 200 || $result["code"] > 299 ? VoIP_LOG_WARNING : VoIP_LOG_NOTICE));
+      writeLog ( $payload["event"] . "(" . $payload["id"] . ") - Result " . $result["code"] . ": " . $result["message"] . ( $result["content"] ? " (Content: " . json_encode ( $result["content"]) . ")" : ""), ( $result["code"] < 200 || $result["code"] > 299 ? VoIP_LOG_WARNING : VoIP_LOG_NOTICE));
     }
   }
 }

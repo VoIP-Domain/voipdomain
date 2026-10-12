@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -60,7 +60,7 @@ function equipments_search_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Equipments"));
-  sys_set_subtitle ( __ ( "equipments search"));
+  sys_set_subtitle ( __ ( "Search equipment"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Equipments"))
   ));
@@ -132,7 +132,7 @@ function equipments_view_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Equipments"));
-  sys_set_subtitle ( __ ( "equipments visualization"));
+  sys_set_subtitle ( __ ( "View equipment"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Equipments"), "link" => "/equipments"),
     2 => array ( "title" => __ ( "View"))
@@ -150,7 +150,7 @@ function equipments_view_page ( $buffer, $parameters)
   sys_addjs ( array ( "name" => "multiselect", "src" => "/vendors/multiselect/dist/js/multiselect.js", "dep" => array ()));
 
   /**
-   * First, we call sub equipment view hook's to populate tabs
+   * First, we call sub equipment view hooks to populate tabs
    */
   if ( ! in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
   {
@@ -664,7 +664,7 @@ function equipments_view_page ( $buffer, $parameters)
               "  $('#equipment_view_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Equipment view") . "', text: '" . __ ( "Error viewing equipment!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "View equipment") . "', text: '" . __ ( "Error viewing equipment!") . "', type: 'error'});\n" .
               "});\n");
 
   /**
@@ -697,7 +697,7 @@ function equipments_configure_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Equipments"));
-  sys_set_subtitle ( __ ( "equipments configuration"));
+  sys_set_subtitle ( __ ( "Configure equipment"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Equipments"), "link" => "/equipments"),
     2 => array ( "title" => __ ( "Configure"))
@@ -715,7 +715,7 @@ function equipments_configure_page ( $buffer, $parameters)
   sys_addjs ( array ( "name" => "multiselect", "src" => "/vendors/multiselect/dist/js/multiselect.js", "dep" => array ()));
 
   /**
-   * First, we call sub equipment configure hook's to populate tabs
+   * First, we call sub equipment configure hooks to populate tabs
    */
   if ( ! in_array ( "Super-Administrator", $_in["session"]["Permissions"]))
   {
@@ -1094,7 +1094,7 @@ function equipments_configure_page ( $buffer, $parameters)
     $output .= "    <div class=\"modal-content\">\n";
     $output .= "      <div class=\"modal-header\">\n";
     $output .= "        <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button>\n";
-    $output .= "        <h3 class=\"modal-title\">" . __ ( "Firmware remove") . "</h3>\n";
+    $output .= "        <h3 class=\"modal-title\">" . __ ( "Firmware removal") . "</h3>\n";
     $output .= "      </div>\n";
     $output .= "      <div class=\"modal-body\"><p>" . sprintf ( __ ( "Are you sure you want to remove the firmware file %s?"), "<strong><span id=\"equipment_firmware_remove_filename\"></span></strong>") . "</p></div>\n";
     $output .= "      <div class=\"modal-footer\">\n";
@@ -1255,7 +1255,7 @@ function equipments_configure_page ( $buffer, $parameters)
                 "  VoIP.rest ( '/equipments/' + encodeURIComponent ( VoIP.parameters.id) + '/firmware/' + encodeURIComponent ( $('#equipment_firmware_remove_filename').html ()), 'DELETE').done ( function ( data, textStatus, jqXHR)\n" .
                 "  {\n" .
                 "    $('#equipment_firmware_remove').modal ( 'hide');\n" .
-                "    new PNotify ( { title: '" . __ ( "Equipment configuration") . "', text: '" . __ ( "Firmware removed successfully!") . "', type: 'success'});\n" .
+                "    new PNotify ( { title: '" . __ ( "Equipment configuration") . "', text: '" . __ ( "Firmware removald successfully!") . "', type: 'success'});\n" .
                 "    var firmware = $('#equipment_firmware_remove').data ( 'firmware');\n" .
                 "    $(firmware).find ( 'input.firmware-file').val ( '');\n" .
                 "    $(firmware).find ( '.btn-removefile').removeClass ( 'btn-success btn-removefile').addClass ( 'btn-primary btn-uploadfile').attr ( 'data-original-title', '" . __ ( "Upload firmware") . "').find ( 'i').removeClass ( 'fa-times').addClass ( 'fa-file-upload');\n" .

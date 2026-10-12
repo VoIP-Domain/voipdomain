@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Queues
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -105,14 +105,14 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Fields" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -176,7 +176,7 @@ function queues_search ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
 
   /**
@@ -298,7 +298,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -321,7 +321,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "queues_view"),
     "title" => __ ( "View queues"),
-    "description" => __ ( "Get a queue information."),
+    "description" => __ ( "Get queue information."),
     "parameters" => array (
       array (
         "name" => "ID",
@@ -485,10 +485,10 @@ framework_add_hook (
     ),
     "response" => array (
       201 => array (
-        "description" => __ ( "New queue added successfully.")
+        "description" => __ ( "A new queue was added successfully.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -661,7 +661,7 @@ function queues_add ( $buffer, $parameters)
    * Return OK to user
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . $_in["api"]["baseurl"] . "/queues/" . $parameters["ID"]);
+  header ( "Location: " . voipdomain_location_url ( "/api/queues/" . $parameters["ID"]));
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 
@@ -704,7 +704,7 @@ framework_add_hook (
         "description" => __ ( "The queue was successfully updated.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -910,7 +910,7 @@ framework_add_hook (
         "description" => __ ( "The queue was removed.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -933,7 +933,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "queues_remove"),
     "title" => __ ( "Remove queues"),
-    "description" => __ ( "Remove a queue from system.")
+    "description" => __ ( "Remove a queue from the system.")
   )
 );
 
@@ -1088,7 +1088,7 @@ framework_add_hook (
       ),
       201 => array (),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1254,7 +1254,7 @@ function queues_join_member ( $buffer, $parameters)
   /**
    * Notify server to join member
    */
-  $notify = array ( "Queue" => $queue["Name"], "Member" => "Agent/" . $parameters["Agent"]);
+  $notify = array ( "Name" => $queue["Name"], "Member" => "Agent/" . $parameters["Agent"]);
   if ( framework_has_hook ( "queues_join_member_notify"))
   {
     $notify = framework_call ( "queues_join_member_notify", $parameters, false, $notify);
@@ -1289,7 +1289,7 @@ framework_add_hook (
       ),
       201 => array (),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1438,7 +1438,7 @@ function queues_leave_member ( $buffer, $parameters)
   /**
    * Remove database registry
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `QueueMembers` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Queue` = " . (int) $parameters["Queue"] . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . $parameters["Agent"]) . "'"))
+  if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `QueueMembers` WHERE `Queue` = " . (int) $parameters["Queue"] . " AND `Member` = '" . $_in["mysql"]["id"]->real_escape_string ( "Agent/" . $parameters["Agent"]) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1455,7 +1455,7 @@ function queues_leave_member ( $buffer, $parameters)
   /**
    * Notify server to member leave
    */
-  $notify = array ( "Queue" => $queue["Name"], "Member" => "Agent/" . $parameters["Agent"]);
+  $notify = array ( "Name" => $queue["Name"], "Member" => "Agent/" . $parameters["Agent"]);
   if ( framework_has_hook ( "queues_leave_member_notify"))
   {
     $notify = framework_call ( "queues_leave_member_notify", $parameters, false, $notify);
@@ -1486,11 +1486,11 @@ framework_add_hook (
   array (
     "response" => array (
       200 => array (
-        "description" => __ ( "The agent was successfully paused at the queue.")
+        "description" => __ ( "The agent was successfully paused in the queue.")
       ),
       201 => array (),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1517,8 +1517,8 @@ framework_add_api_call (
   "queues_pause_member",
   array (
     "permissions" => array ( "Administrator", "queues_pause_member"),
-    "title" => __ ( "Pause member at queues"),
-    "description" => __ ( "Pause a system agent member at a queue."),
+    "title" => __ ( "Pause member in queues"),
+    "description" => __ ( "Pause a system agent member in a queue."),
     "parameters" => array (
       array (
         "name" => "Queue",
@@ -1647,7 +1647,7 @@ function queues_pause_member ( $buffer, $parameters)
   /**
    * Notify server to member pause
    */
-  $notify = array ( "Queue" => $queue["Name"], "Member" => "Agent/" . $parameters["Agent"]);
+  $notify = array ( "Name" => $queue["Name"], "Member" => "Agent/" . $parameters["Agent"]);
   if ( framework_has_hook ( "queues_pause_member_notify"))
   {
     $notify = framework_call ( "queues_pause_member_notify", $parameters, false, $notify);
@@ -1678,11 +1678,11 @@ framework_add_hook (
   array (
     "response" => array (
       200 => array (
-        "description" => __ ( "The agent was successfully resumed at the queue.")
+        "description" => __ ( "The agent was successfully resumed in the queue.")
       ),
       201 => array (),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1709,8 +1709,8 @@ framework_add_api_call (
   "queues_resume_member",
   array (
     "permissions" => array ( "Administrator", "queues_resume_member"),
-    "title" => __ ( "Resume a paused member at queues"),
-    "description" => __ ( "Resume a paused system agent member at a queue."),
+    "title" => __ ( "Resume a paused member in queues"),
+    "description" => __ ( "Resume a paused system agent member in a queue."),
     "parameters" => array (
       array (
         "name" => "Queue",
@@ -1839,7 +1839,7 @@ function queues_resume_member ( $buffer, $parameters)
   /**
    * Notify server to member resume
    */
-  $notify = array ( "Queue" => $queue["Name"], "Member" => "Agent/" . $parameters["Agent"]);
+  $notify = array ( "Name" => $queue["Name"], "Member" => "Agent/" . $parameters["Agent"]);
   if ( framework_has_hook ( "queues_resume_member_notify"))
   {
     $notify = framework_call ( "queues_resume_member_notify", $parameters, false, $notify);
@@ -1900,19 +1900,19 @@ function queues_server_reconfig ( $buffer, $parameters)
   /**
    * Add all logged members at queues
    */
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Queues`.`Name`, `QueueMembers`.`Member` FROM `QueueMembers` LEFT JOIN `Queues` ON `QueueMembers`.`Queue` = `Queues`.`ID`"))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Queues`.`Name`, `QueueMembers`.`Member` FROM `QueueMembers` LEFT JOIN `Queues` ON `QueueMembers`.`Queue` = `Queues`.`ID` WHERE `Queues`.`Tenant` = " . (int) $_in["session"]["Tenant"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
   while ( $queuemember = $result->fetch_assoc ())
   {
-    $notify = array ( "Queue" => $queuemember["Name"], "Member" => $queuemember["Member"]);
+    $notify = array ( "Name" => $queuemember["Name"], "Member" => $queuemember["Member"]);
     if ( framework_has_hook ( "queues_add_member_notify"))
     {
       $notify = framework_call ( "queues_add_member_notify", $parameters, false, $notify);
     }
-    notify_server ( (int) $parameters["ID"], "queue_add_member", $notify);
+    notify_server ( (int) $parameters["ID"], "queue_join_member", $notify);
   }
 
   /**

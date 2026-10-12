@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,17 +30,17 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments AudioCodes
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "equipment_model_310hd_configure", "equipment_model_audiocodes_basic_configure");
 framework_add_hook ( "equipment_model_310hd_firmware_add", "equipment_model_audiocodes_add_firmware");
 framework_add_hook ( "equipment_model_310hd_firmware_remove", "equipment_model_audiocodes_remove_firmware");
-framework_add_hook ( "ap_type_310hd", "ap_type_audiocodes_310hd");
+framework_add_hook ( "ap_type_310hd", "ap_type_audiocodes_400hd_series");
 framework_add_hook ( "ap_type_310hd_remove", "ap_type_audiocodes_remove");
 framework_add_hook ( "account_type_310hd", "account_type_audiocodes_default");
 
@@ -85,13 +85,13 @@ cleanup_register ( "Firmwares-AudioCodes", "firmware_audiocodes_wipe", array ( "
 function ap_audiocodes_wipe ( $buffer, $parameters)
 {
   // Remove auto provisioning configuration files:
-  foreach ( list_config ( "datafile", "ap") as $ap)
+  foreach ( list_config ( "datafile", "ap") as $filename)
   {
-    $data = read_config ( "datafile", $ap);
-    if ( equipment_model_exists ( $ap["Type"], "AudioCodes"))
+    $data = read_config ( "datafile", $filename);
+    if ( equipment_model_exists ( $data["Type"], "Audiocodes"))
     {
       unlink_config ( "ap", strtolower ( $data["MAC"]) . ".cfg");
-      unlink_config ( "datafile", $ap);
+      unlink_config ( "datafile", $filename);
     }
   }
 
@@ -202,7 +202,7 @@ function equipment_model_audiocodes_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/AudioCodes/310HD/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/AudioCodes/310HD/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -213,7 +213,7 @@ function equipment_model_audiocodes_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/AudioCodes/405HD/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/AudioCodes/405HD/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -224,7 +224,7 @@ function equipment_model_audiocodes_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/AudioCodes/440HD/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/AudioCodes/440HD/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -235,7 +235,7 @@ function equipment_model_audiocodes_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/AudioCodes/450HD/450HD.img", $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/AudioCodes/450HD/450HD.img", $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -330,7 +330,7 @@ function ap_type_audiocodes_400hd_series ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     "PCMA" => "ALAW",

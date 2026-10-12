@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Extensions
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -110,14 +110,14 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Fields" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -181,7 +181,7 @@ function extensions_search ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
 
   /**
@@ -356,7 +356,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -379,7 +379,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "extensions_view"),
     "title" => __ ( "View extensions"),
-    "description" => __ ( "Get a system extension information."),
+    "description" => __ ( "Get system extension information."),
     "parameters" => array (
       array (
         "name" => "ID",
@@ -526,7 +526,7 @@ framework_add_hook (
         "description" => __ ( "The extension number is already in use.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -708,7 +708,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -794,8 +794,8 @@ function extensions_next_number ( $buffer, $parameters)
   /**
    * Sanitize received parameters
    */
-  $parameters["Server"] = (int) array_key_exists ( "Server", $parameters) ? $parameters["Server"] : 0;
-  $parameters["Range"] = (int) array_key_exists ( "Range", $parameters) ? $parameters["Range"] : 0;
+  $parameters["Server"] = (int) (array_key_exists ( "Server", $parameters) ? $parameters["Server"] : 0);
+  $parameters["Range"] = (int) (array_key_exists ( "Range", $parameters) ? $parameters["Range"] : 0);
 
   /**
    * Call sanitize hook if exist
@@ -917,10 +917,10 @@ framework_add_hook (
     ),
     "response" => array (
       201 => array (
-        "description" => __ ( "New system extension added successfully.")
+        "description" => __ ( "A new system extension was added successfully.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1000,7 +1000,7 @@ function extensions_add ( $buffer, $parameters)
   }
   if ( ! array_key_exists ( "Number", $data) && ! is_numeric ( $parameters["Number"]))
   {
-    $data["Number"] = __ ( "The informed number is invalid.");
+    $data["Number"] = __ ( "The provided number is invalid.");
   }
   $parameters["Description"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["Description"])));
   if ( empty ( $parameters["Description"]))
@@ -1163,7 +1163,7 @@ function extensions_add ( $buffer, $parameters)
    * Return OK to user
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . $_in["api"]["baseurl"] . "/extensions/" . $parameters["ID"]);
+  header ( "Location: " . voipdomain_location_url ( "/api/extensions/" . $parameters["ID"]));
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 
@@ -1229,7 +1229,7 @@ framework_add_hook (
     ),
     "response" => array (
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1321,7 +1321,7 @@ function extensions_edit ( $buffer, $parameters)
   }
   if ( ! array_key_exists ( "Number", $data) && ! is_numeric ( $parameters["Number"]))
   {
-    $data["Number"] = __ ( "The informed number is invalid.");
+    $data["Number"] = __ ( "The provided number is invalid.");
   }
   $parameters["Description"] = preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $parameters["Description"])));
   if ( empty ( $parameters["Description"]))
@@ -1442,7 +1442,7 @@ function extensions_edit ( $buffer, $parameters)
   /**
    * Update extension database record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Extensions` SET `Number` = " . (int) $parameters["Number"] . ", `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "' WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Extensions` SET `Number` = " . (int) $parameters["Number"] . ", `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Range` = " . (int) $parameters["Range"]["ID"] . " WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1495,7 +1495,7 @@ function extensions_edit ( $buffer, $parameters)
 }
 
 /**
- * Function to abort an extension edition.
+ * Function to abort an extension edit.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -1535,7 +1535,7 @@ framework_add_hook (
         "description" => __ ( "The system extension was removed.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1584,6 +1584,20 @@ function extensions_remove ( $buffer, $parameters)
     exit ();
   }
   if ( ! $parameters["ORIGINAL"] = $result->fetch_assoc ())
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 400 Bad Request");
+    exit ();
+  }
+
+  /**
+   * Load range (includes Server) for downstream remove hooks and notifications
+   */
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Ranges` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $parameters["ORIGINAL"]["Range"]))
+  {
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+    exit ();
+  }
+  if ( ! $parameters["ORIGINAL"]["Range"] = $result->fetch_assoc ())
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 400 Bad Request");
     exit ();
@@ -1724,7 +1738,7 @@ function extensions_remove ( $buffer, $parameters)
 }
 
 /**
- * API call to generate extension call's report
+ * API call to generate extension calls report
  */
 framework_add_hook (
   "extensions_report",
@@ -1763,7 +1777,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1791,7 +1805,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "extensions_report"),
     "title" => __ ( "Extension report"),
-    "description" => __ ( "Generate an extension call's usage report.", true, false),
+    "description" => __ ( "Generate an extension call usage report.", true, false),
     "parameters" => array (
       array (
         "name" => "ID",
@@ -2080,14 +2094,14 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Fields" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -2151,7 +2165,7 @@ function extensions_webphone_list ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
 
   /**

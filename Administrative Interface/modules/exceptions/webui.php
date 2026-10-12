@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,14 +25,14 @@
 
 /**
  * VoIP Domain exceptions module WebUI. This module add the feature to bypass
- * password requirement for a list of numbers. Usefull to add company tech mobile
+ * password requirement for a list of numbers. Useful to add company tech mobile
  * numbers, and others.
  *
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Exceptions
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -184,7 +184,7 @@ function exceptions_add_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Exceptions"));
-  sys_set_subtitle ( __ ( "exceptions addition"));
+  sys_set_subtitle ( __ ( "Add exceptions"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Exceptions"), "link" => "/exceptions"),
     2 => array ( "title" => __ ( "Add"))
@@ -250,7 +250,7 @@ function exceptions_add_page ( $buffer, $parameters)
               "    URL: '/exceptions',\n" .
               "    method: 'POST',\n" .
               "    button: $('button.add'),\n" .
-              "    title: '" . __ ( "Exception addition") . "',\n" .
+              "    title: '" . __ ( "Add exception") . "',\n" .
               "    fail: '" . __ ( "Error adding exception!") . "',\n" .
               "    success: '" . __ ( "Exception added successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
@@ -293,7 +293,7 @@ function exceptions_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Exception cloning") . "', text: '" . __ ( "Error retrieving exception data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Clone exception") . "', text: '" . __ ( "Error retrieving exception data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -382,7 +382,7 @@ function exceptions_edit_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Exceptions"));
-  sys_set_subtitle ( __ ( "exception editing"));
+  sys_set_subtitle ( __ ( "Edit exception"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Exceptions"), "link" => "/exceptions"),
     2 => array ( "title" => __ ( "Edit"))
@@ -441,7 +441,7 @@ function exceptions_edit_page ( $buffer, $parameters)
               "  $('#exception_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Exception edition") . "', text: '" . __ ( "Error retrieving exception data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Edit exception") . "', text: '" . __ ( "Error retrieving exception data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#exception_edit_form').alerts ( 'form',\n" .
               "{\n" .
@@ -450,9 +450,9 @@ function exceptions_edit_page ( $buffer, $parameters)
               "    URL: '/exceptions/' + VoIP.parameters.id,\n" .
               "    method: 'PATCH',\n" .
               "    button: $('button.edit'),\n" .
-              "    title: '" . __ ( "Exception edition") . "',\n" .
+              "    title: '" . __ ( "Edit exception") . "',\n" .
               "    fail: '" . __ ( "Error changing exception!") . "',\n" .
-              "    success: '" . __ ( "Exception successfully changed!") . "',\n" .
+              "    success: '" . __ ( "Exception changed successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
               "               {\n" .
               "                 VoIP.path.call ( '/exceptions', true);\n" .

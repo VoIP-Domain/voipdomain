@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,12 +30,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments Khomp
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "equipment_model_ips40cc_configure", "equipment_model_khomp_basic_configure");
 framework_add_hook ( "equipment_model_ips40cc_firmware_add", "equipment_model_khomp_add_firmware");
@@ -106,13 +106,13 @@ cleanup_register ( "Firmwares-Khomp", "firmware_khomp_wipe", array ( "Before" =>
 function ap_khomp_wipe ( $buffer, $parameters)
 {
   // Remove auto provisioning configuration files:
-  foreach ( list_config ( "datafile", "ap") as $ap)
+  foreach ( list_config ( "datafile", "ap") as $filename)
   {
-    $data = read_config ( "datafile", $ap);
-    if ( equipment_model_exists ( $ap["Type"], "Khomp"))
+    $data = read_config ( "datafile", $filename);
+    if ( equipment_model_exists ( $data["Type"], "Khomp"))
     {
       unlink_config ( "ap", strtolower ( $data["MAC"]) . ".cfg");
-      unlink_config ( "datafile", $ap);
+      unlink_config ( "datafile", $filename);
     }
   }
 
@@ -226,7 +226,7 @@ function equipment_model_khomp_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Khomp/Kernel/K2_uImage_100N_version2.7.4", $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Khomp/Kernel/K2_uImage_100N_version2.7.4", $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -254,7 +254,7 @@ function equipment_model_khomp_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Khomp/IPS200/S2_IPS_290_KHOMP_290_MD5_version4.5.0.7-11810", $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Khomp/IPS200/S2_IPS_290_KHOMP_290_MD5_version4.5.0.7-11810", $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -279,7 +279,7 @@ function equipment_model_khomp_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Khomp/IPS212/S2_IPS_212_KHOMP_320V3_MD5_version4.6.0.0-12027", $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Khomp/IPS212/S2_IPS_212_KHOMP_320V3_MD5_version4.6.0.0-12027", $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -341,7 +341,7 @@ function equipment_model_khomp_remove_firmware ( $buffer, $parameters)
       @rmdir ( $_in["general"]["tftpdir"] . "/Khomp/IPS212");
       @unlink ( $_in["general"]["tftpdir"] . "/FD000320.cfg");
 
-      return array ( "code" => 212, "message" => "Firmware file removed.");
+      return array ( "code" => 200, "message" => "Firmware file removed.");
       break;
   }
 
@@ -385,7 +385,7 @@ function ap_type_khomp ( $buffer, $parameters)
   $content = str_replace ( "{{{displayname}}}", $parameters["Name"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecs = array (
     "ALAW" => array ( "Type" => "G711A", "Code" => 0),
     "ULAW" => array ( "Type" => "G711U", "Code" => 1),

@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Gateways
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -135,7 +135,7 @@ framework_add_component_documentation (
       ),
       "RPID" => array (
         "type" => "boolean",
-        "description" => __ ( "If the system expose the remote party ID for internal caller to the gateway."),
+        "description" => __ ( "If the system exposes the remote party ID for internal caller to the gateway."),
         "example" => true
       ),
       "Qualify" => array (
@@ -143,15 +143,20 @@ framework_add_component_documentation (
         "description" => __ ( "If the system should qualify the response time of the gateway."),
         "example" => true
       ),
+      "Inbound" => array (
+        "type" => "boolean",
+        "description" => __ ( "If the gateway should accept inbound calls (enables IP-based identification)."),
+        "example" => true
+      ),
       "Discard" => array (
         "type" => "integer",
-        "description" => __ ( "How much seconds of billing time to discard call cost if equal or less than for the gateway."),
+        "description" => __ ( "How many seconds of billing time to discard call cost if equal or less than for the gateway."),
         "minimum" => 0,
         "example" => 3
       ),
       "Minimum" => array (
         "type" => "integer",
-        "description" => __ ( "How much seconds are the minimum billing time for the gateway."),
+        "description" => __ ( "How many seconds constitute the minimum billing time for the gateway."),
         "minimum" => 0,
         "example" => 30
       ),
@@ -266,14 +271,14 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Fields" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -337,7 +342,7 @@ function gateways_search ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
 
   /**
@@ -484,14 +489,14 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Fields" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -555,7 +560,7 @@ function gateways_fares_search ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
 
   /**
@@ -651,7 +656,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -811,7 +816,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -834,7 +839,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "gateways_view"),
     "title" => __ ( "View gateways"),
-    "description" => __ ( "Get a gateway information."),
+    "description" => __ ( "Get gateway information."),
     "parameters" => array (
       array (
         "name" => "ID",
@@ -955,9 +960,10 @@ function gateways_view ( $buffer, $parameters)
   $gateway["NAT"] = (boolean) $gateway["NAT"];
   $gateway["RPID"] = (boolean) $gateway["RPID"];
   $gateway["Qualify"] = (boolean) $gateway["Qualify"];
+  $gateway["Inbound"] = (boolean) $gateway["Inbound"];
   $gateway["Routes"] = json_decode ( $gateway["Routes"], true);
   $gateway["Translations"] = json_decode ( $gateway["Translations"], true);
-  $data = api_filter_entry ( array ( "ID", "Description", "Active", "Type", "TypeEN", "Priority", "PriorityEN", "Config", "Number", "Address", "Port", "Username", "Password", "NAT", "RPID", "Qualify", "Discard", "Minimum", "Fraction", "Routes", "Translations", "Currency"), $gateway);
+  $data = api_filter_entry ( array ( "ID", "Description", "Active", "Type", "TypeEN", "Priority", "PriorityEN", "Config", "Number", "Address", "Port", "Username", "Password", "NAT", "RPID", "Qualify", "Inbound", "Discard", "Minimum", "Fraction", "Routes", "Translations", "Currency"), $gateway);
 
   /**
    * Call post hook if exist
@@ -1010,6 +1016,12 @@ framework_add_hook (
         "Active" => array (
           "type" => "boolean",
           "description" => __ ( "The state of the gateway, if it's active or not.", true, false),
+          "required" => true,
+          "example" => true
+        ),
+        "Inbound" => array (
+          "type" => "boolean",
+          "description" => __ ( "If the gateway should accept inbound calls (enables IP-based identification)."),
           "required" => true,
           "example" => true
         ),
@@ -1075,7 +1087,7 @@ framework_add_hook (
         ),
         "RPID" => array (
           "type" => "boolean",
-          "description" => __ ( "If the system expose the remote party ID for internal caller to the gateway."),
+          "description" => __ ( "If the system exposes the remote party ID for internal caller to the gateway."),
           "required" => true,
           "example" => false
         ),
@@ -1087,14 +1099,14 @@ framework_add_hook (
         ),
         "Discard" => array (
           "type" => "integer",
-          "description" => __ ( "How much seconds of billing time to discard call cost if equal or less than for the gateway."),
+          "description" => __ ( "How many seconds of billing time to discard call cost if equal or less than for the gateway."),
           "minimum" => 0,
           "required" => true,
           "example" => 3
         ),
         "Minimum" => array (
           "type" => "integer",
-          "description" => __ ( "How much seconds are the minimum billing time for the gateway."),
+          "description" => __ ( "How many seconds constitute the minimum billing time for the gateway."),
           "minimum" => 0,
           "required" => true,
           "example" => 30
@@ -1119,7 +1131,7 @@ framework_add_hook (
                   "properties" => array (
                     "Reference" => array (
                       "type" => "integer",
-                      "description" => __ ( "The reference number to gateway route. This is used to report any route route/cost error."),
+                      "description" => __ ( "The reference number for the gateway route. This is used to report any route/cost error."),
                       "required" => true
                     ),
                     "Route" => array (
@@ -1147,7 +1159,7 @@ framework_add_hook (
                   "properties" => array (
                     "Reference" => array (
                       "type" => "integer",
-                      "description" => __ ( "The reference number to gateway translation. This is used to report any translation pattern/remove/add error."),
+                      "description" => __ ( "The reference number for the gateway translation. This is used to report any translation pattern/remove/add error."),
                       "required" => true
                     ),
                     "Pattern" => array (
@@ -1181,10 +1193,10 @@ framework_add_hook (
     ),
     "response" => array (
       201 => array (
-        "description" => __ ( "New system gateway was successfully added.")
+        "description" => __ ( "A new system gateway was successfully added.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1201,7 +1213,7 @@ framework_add_hook (
             "Priority" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The informed priority is invalid.")
+              "example" => __ ( "The provided priority is invalid.")
             ),
             "Number" => array (
               "type" => "string",
@@ -1226,7 +1238,7 @@ framework_add_hook (
             "Pattern_X" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The translation *X* must have a remotion, addition or both procedures.")
+              "example" => __ ( "The translation *X* must have a removal, an addition, or both procedures.")
             )
           )
         )
@@ -1300,7 +1312,7 @@ function gateways_add ( $buffer, $parameters)
       $data["Priority"] = __ ( "The gateway priority is required.");
       break;
     default:
-      $data["Priority"] = __ ( "The informed priority is invalid.");
+      $data["Priority"] = __ ( "The provided priority is invalid.");
       break;
   }
   if ( empty ( $parameters["Currency"]))
@@ -1327,7 +1339,7 @@ function gateways_add ( $buffer, $parameters)
   }
   if ( ! empty ( $parameters["Port"]) && ( (int) $parameters["Port"] < 1 || (int) $parameters["Port"] > 65535))
   {
-    $data["Port"] = __ ( "The informed port is invalid.");
+    $data["Port"] = __ ( "The provided port is invalid.");
   }
 
   /**
@@ -1362,7 +1374,7 @@ function gateways_add ( $buffer, $parameters)
   {
     if ( empty ( $value["Remove"]) && empty ( $value["Add"]))
     {
-      $data["Pattern_" . (int) $value["Reference"]] = __ ( "The translation must have a remotion, addition or both procedures.");
+      $data["Pattern_" . (int) $value["Reference"]] = __ ( "The translation must have a removal, an addition, or both procedures.");
       continue;
     }
     $translations[] = array ( "Pattern" => $value["Pattern"], "Remove" => preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $value["Remove"]))), "Add" => preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $value["Add"]))));
@@ -1377,7 +1389,7 @@ function gateways_add ( $buffer, $parameters)
     $number = filters_call ( "e164_identify", array ( "Number" => $parameters["Number"]));
     if ( ! array_key_exists ( "Number", $number) || sizeof ( $number["Number"]) == 0)
     {
-      $data["Number"] = __ ( "The informed number is invalid.");
+      $data["Number"] = __ ( "The provided number is invalid.");
     }
     $parameters["Number"] = array_key_exists ( "Number", $number) && array_key_exists ( "CallFormats", $number["Number"]) && array_key_exists ( "International", $number["Number"]["CallFormats"]) ? $number["Number"]["CallFormats"]["International"] : $parameters["Number"];
   }
@@ -1392,7 +1404,7 @@ function gateways_add ( $buffer, $parameters)
   }
   if ( $result->num_rows != 1)
   {
-    $data["Currency"] = __ ( "The informed currency is invalid.");
+    $data["Currency"] = __ ( "The provided currency is invalid.");
   }
 
   /**
@@ -1420,6 +1432,7 @@ function gateways_add ( $buffer, $parameters)
   $parameters["NAT"] = (boolean) $parameters["NAT"];
   $parameters["RPID"] = (boolean) $parameters["RPID"];
   $parameters["Qualify"] = (boolean) $parameters["Qualify"];
+  $parameters["Inbound"] = (boolean) $parameters["Inbound"];
   $parameters["Fraction"] = (int) $parameters["Fraction"];
   $parameters["Minimum"] = (int) $parameters["Minimum"];
   $parameters["Discard"] = (int) $parameters["Discard"];
@@ -1443,7 +1456,7 @@ function gateways_add ( $buffer, $parameters)
   /**
    * Add new gateway record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Gateways` (`Description`, `Tenant`, `Config`, `Active`, `Number`, `Type`, `Priority`, `Currency`, `Address`, `Port`, `Username`, `Password`, `Routes`, `Translations`, `Discard`, `Minimum`, `Fraction`, `NAT`, `RPID`, `Qualify`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Config"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Active"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Priority"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Currency"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "', " . (int) $parameters["Port"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Routes"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Translations"])) . "', " . (int) $parameters["Discard"] . ", " . (int) $parameters["Minimum"] . ", " . (int) $parameters["Fraction"] . ", '" . ( $parameters["NAT"] ? 1 : 0) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["RPID"] ? 1 : 0) . "', '" . ( $parameters["Qualify"] ? 1 : 0) . "')"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Gateways` (`Description`, `Tenant`, `Config`, `Active`, `Number`, `Type`, `Priority`, `Currency`, `Address`, `Port`, `Username`, `Password`, `Routes`, `Translations`, `Discard`, `Minimum`, `Fraction`, `NAT`, `RPID`, `Qualify`, `Inbound`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', " . (int) $_in["session"]["Tenant"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Config"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Active"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Priority"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Currency"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "', " . (int) $parameters["Port"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Routes"])) . "', '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Translations"])) . "', " . (int) $parameters["Discard"] . ", " . (int) $parameters["Minimum"] . ", " . (int) $parameters["Fraction"] . ", '" . ( $parameters["NAT"] ? 1 : 0) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["RPID"] ? 1 : 0) . "', '" . ( $parameters["Qualify"] ? 1 : 0) . "', '" . ( $parameters["Inbound"] ? 1 : 0) . "')"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1463,7 +1476,7 @@ function gateways_add ( $buffer, $parameters)
    */
   if ( $parameters["Active"])
   {
-    $notify = array ( "ID" => $parameters["ID"], "Description" => $parameters["Description"], "Domain" => $_in["general"]["domain"], "Username" => $parameters["Username"], "Password" => $parameters["Password"], "Address" => $parameters["Address"], "Port" => $parameters["Port"], "Qualify" => $parameters["Qualify"], "NAT" => $parameters["NAT"], "RPID" => $parameters["RPID"], "Config" => $parameters["Config"], "Number" => str_replace ( " ", "", $parameters["Number"]), "Type" => $parameters["Type"], "Priority" => $parameters["Priority"], "Currency" => $parameters["Currency"], "Routes" => $parameters["Routes"], "Translations" => $parameters["Translations"], "Discard" => $parameters["Discard"], "Minimum" => $parameters["Minimum"], "Fraction" => $parameters["Fraction"]);
+    $notify = array ( "ID" => $parameters["ID"], "Description" => $parameters["Description"], "Domain" => $_in["general"]["domain"], "Username" => $parameters["Username"], "Password" => $parameters["Password"], "Address" => $parameters["Address"], "Port" => $parameters["Port"], "Qualify" => $parameters["Qualify"], "NAT" => $parameters["NAT"], "RPID" => $parameters["RPID"], "Inbound" => $parameters["Inbound"], "Config" => $parameters["Config"], "Number" => str_replace ( " ", "", $parameters["Number"]), "Type" => $parameters["Type"], "Priority" => $parameters["Priority"], "Currency" => $parameters["Currency"], "Routes" => $parameters["Routes"], "Translations" => $parameters["Translations"], "Discard" => $parameters["Discard"], "Minimum" => $parameters["Minimum"], "Fraction" => $parameters["Fraction"]);
     if ( framework_has_hook ( "gateways_add_notify"))
     {
       $notify = framework_call ( "gateways_add_notify", $parameters, false, $notify);
@@ -1483,7 +1496,7 @@ function gateways_add ( $buffer, $parameters)
    * Return OK to user
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . $_in["api"]["baseurl"] . "/gateways/" . $parameters["ID"]);
+  header ( "Location: " . voipdomain_location_url ( "/api/gateways/" . $parameters["ID"]));
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 
@@ -1524,6 +1537,12 @@ framework_add_hook (
         "Active" => array (
           "type" => "boolean",
           "description" => __ ( "The state of the gateway, if it's active or not.", true, false),
+          "required" => true,
+          "example" => true
+        ),
+        "Inbound" => array (
+          "type" => "boolean",
+          "description" => __ ( "If the gateway should accept inbound calls (enables IP-based identification)."),
           "required" => true,
           "example" => true
         ),
@@ -1583,7 +1602,7 @@ framework_add_hook (
         ),
         "RPID" => array (
           "type" => "boolean",
-          "description" => __ ( "If the system expose the remote party ID for internal caller to the gateway."),
+          "description" => __ ( "If the system exposes the remote party ID for internal caller to the gateway."),
           "required" => true,
           "example" => false
         ),
@@ -1595,14 +1614,14 @@ framework_add_hook (
         ),
         "Discard" => array (
           "type" => "integer",
-          "description" => __ ( "How much seconds of billing time to discard call cost if equal or less than for the gateway."),
+          "description" => __ ( "How many seconds of billing time to discard call cost if equal or less than for the gateway."),
           "minimum" => 0,
           "required" => true,
           "example" => 3
         ),
         "Minimum" => array (
           "type" => "integer",
-          "description" => __ ( "How much seconds are the minimum billing time for the gateway."),
+          "description" => __ ( "How many seconds constitute the minimum billing time for the gateway."),
           "minimum" => 0,
           "required" => true,
           "example" => 30
@@ -1627,7 +1646,7 @@ framework_add_hook (
                   "properties" => array (
                     "Reference" => array (
                       "type" => "integer",
-                      "description" => __ ( "The reference number to gateway route. This is used to report any route route/cost error."),
+                      "description" => __ ( "The reference number for the gateway route. This is used to report any route/cost error."),
                       "required" => true
                     ),
                     "Route" => array (
@@ -1655,7 +1674,7 @@ framework_add_hook (
                   "properties" => array (
                     "Reference" => array (
                       "type" => "integer",
-                      "description" => __ ( "The reference number to gateway translation. This is used to report any translation pattern/remove/add error."),
+                      "description" => __ ( "The reference number for the gateway translation. This is used to report any translation pattern/remove/add error."),
                       "required" => true
                     ),
                     "Pattern" => array (
@@ -1686,10 +1705,10 @@ framework_add_hook (
     ),
     "response" => array (
       201 => array (
-        "description" => __ ( "New system call center agent added successfully.")
+        "description" => __ ( "A new system gateway was successfully added.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1706,7 +1725,7 @@ framework_add_hook (
             "Priority" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The informed priority is invalid.")
+              "example" => __ ( "The provided priority is invalid.")
             ),
             "Number" => array (
               "type" => "string",
@@ -1731,7 +1750,7 @@ framework_add_hook (
             "Pattern_X" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "The translation *X* must have a remotion, addition or both procedures.")
+              "example" => __ ( "The translation *X* must have a removal, an addition, or both procedures.")
             )
           )
         )
@@ -1747,7 +1766,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "gateways_edit"),
     "title" => __ ( "Edit gateways"),
-    "description" => __ ( "Change a system gateway information.")
+    "description" => __ ( "Change system gateway information.")
   )
 );
 
@@ -1805,7 +1824,7 @@ function gateways_edit ( $buffer, $parameters)
       $data["Priority"] = __ ( "The gateway priority is required.");
       break;
     default:
-      $data["Priority"] = __ ( "The informed priority is invalid.");
+      $data["Priority"] = __ ( "The provided priority is invalid.");
       break;
   }
   if ( empty ( $parameters["Currency"]))
@@ -1832,7 +1851,7 @@ function gateways_edit ( $buffer, $parameters)
   }
   if ( ! empty ( $parameters["Port"]) && ( (int) $parameters["Port"] < 1 || (int) $parameters["Port"] > 65535))
   {
-    $data["Port"] = __ ( "The informed port is invalid.");
+    $data["Port"] = __ ( "The provided port is invalid.");
   }
 
   /**
@@ -1841,12 +1860,12 @@ function gateways_edit ( $buffer, $parameters)
   $routes = array ();
   foreach ( $parameters["Routes"] as $key => $value)
   {
-    if ( ! $value["Route"])
+    if ( ! array_key_exists ( "Route", $value) || empty ( $value["Route"]))
     {
       $data["Route_" . (int) $value["Reference"]] = __ ( "The route pattern is required.");
       continue;
     }
-    if ( ! $value["Cost"])
+    if ( ! array_key_exists ( "Cost", $value) || $value["Cost"] != (float) $value["Cost"])
     {
       $data["Cost_" . (int) $value["Reference"]] = __ ( "The route cost is required.");
       continue;
@@ -1867,7 +1886,7 @@ function gateways_edit ( $buffer, $parameters)
   {
     if ( empty ( $value["Remove"]) && empty ( $value["Add"]))
     {
-      $data["Pattern_" . (int) $value["Reference"]] = __ ( "The translation must have a remotion, addition or both procedures.");
+      $data["Pattern_" . (int) $value["Reference"]] = __ ( "The translation must have a removal, an addition, or both procedures.");
       continue;
     }
     $translations[] = array ( "Pattern" => $value["Pattern"], "Remove" => preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $value["Remove"]))), "Add" => preg_replace ( "/ ( )+/", " ", trim ( strip_tags ( $value["Add"]))));
@@ -1882,7 +1901,7 @@ function gateways_edit ( $buffer, $parameters)
     $number = filters_call ( "e164_identify", array ( "Number" => $parameters["Number"]));
     if ( sizeof ( $number["Number"]) == 0)
     {
-      $data["Number"] = __ ( "The informed number is invalid.");
+      $data["Number"] = __ ( "The provided number is invalid.");
     }
   }
 
@@ -1896,7 +1915,7 @@ function gateways_edit ( $buffer, $parameters)
   }
   if ( $result->num_rows != 1)
   {
-    $data["Currency"] = __ ( "The informed currency is invalid.");
+    $data["Currency"] = __ ( "The provided currency is invalid.");
   }
 
   /**
@@ -1938,6 +1957,7 @@ function gateways_edit ( $buffer, $parameters)
   $parameters["NAT"] = (boolean) $parameters["NAT"];
   $parameters["RPID"] = (boolean) $parameters["RPID"];
   $parameters["Qualify"] = (boolean) $parameters["Qualify"];
+  $parameters["Inbound"] = (boolean) $parameters["Inbound"];
   $parameters["Fraction"] = (int) $parameters["Fraction"];
   $parameters["Minimum"] = (int) $parameters["Minimum"];
   $parameters["Discard"] = (int) $parameters["Discard"];
@@ -1961,7 +1981,7 @@ function gateways_edit ( $buffer, $parameters)
   /**
    * Update gateway record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Gateways` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Config` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Config"]) . "', `Active` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Active"]) . "', `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "', `Type` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "', `Priority` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Priority"]) . "', `Currency` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Currency"]) . "', `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "', `Port` = " . (int) $parameters["Port"] . ", `Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "', `Password` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "', `Routes` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Routes"])) . "', `Translations` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Translations"])) . "', `Discard` = " . (int) $parameters["Discard"] . ", `Minimum` = " . (int) $parameters["Minimum"] . ", `Fraction` = " . (int) $parameters["Fraction"] . ", `NAT` = '" . ( $parameters["NAT"] ? 1 : 0) . "', `RPID` = '" . ( $parameters["RPID"] ? 1 : 0) . "', `Qualify` = '" . ( $parameters["Qualify"] ? 1 : 0) . "' WHERE `ID` = " . (int) $parameters["ID"]))
+  if ( ! @$_in["mysql"]["id"]->query ( "UPDATE `Gateways` SET `Description` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Description"]) . "', `Config` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Config"]) . "', `Active` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Active"]) . "', `Number` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Number"]) . "', `Type` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Type"]) . "', `Priority` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Priority"]) . "', `Currency` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Currency"]) . "', `Address` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Address"]) . "', `Port` = " . (int) $parameters["Port"] . ", `Username` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "', `Password` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "', `Routes` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Routes"])) . "', `Translations` = '" . $_in["mysql"]["id"]->real_escape_string ( json_encode ( $parameters["Translations"])) . "', `Discard` = " . (int) $parameters["Discard"] . ", `Minimum` = " . (int) $parameters["Minimum"] . ", `Fraction` = " . (int) $parameters["Fraction"] . ", `NAT` = '" . ( $parameters["NAT"] ? 1 : 0) . "', `RPID` = '" . ( $parameters["RPID"] ? 1 : 0) . "', `Qualify` = '" . ( $parameters["Qualify"] ? 1 : 0) . "', `Inbound` = '" . ( $parameters["Inbound"] ? 1 : 0) . "' WHERE `ID` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -1982,9 +2002,9 @@ function gateways_edit ( $buffer, $parameters)
   {
     if ( $parameters["Active"])
     {
-      if ( $parameters["ORIGINAL"]["Description"] != $parameters["Description"] || $parameters["ORIGINAL"]["Address"] != $parameters["Address"] || $parameters["ORIGINAL"]["Port"] != $parameters["Port"] || $parameters["ORIGINAL"]["Username"] != $parameters["Username"] || $parameters["ORIGINAL"]["Password"] != $parameters["Password"] || $parameters["ORIGINAL"]["NAT"] != $parameters["NAT"] || $parameters["ORIGINAL"]["RPID"] != $parameters["RPID"] || $parameters["ORIGINAL"]["Qualify"] != $parameters["Qualify"] || $parameters["ORIGINAL"]["Currency"] != $parameters["Currency"])
+      if ( $parameters["ORIGINAL"]["Description"] != $parameters["Description"] || $parameters["ORIGINAL"]["Address"] != $parameters["Address"] || $parameters["ORIGINAL"]["Port"] != $parameters["Port"] || $parameters["ORIGINAL"]["Username"] != $parameters["Username"] || $parameters["ORIGINAL"]["Password"] != $parameters["Password"] || $parameters["ORIGINAL"]["NAT"] != $parameters["NAT"] || $parameters["ORIGINAL"]["RPID"] != $parameters["RPID"] || $parameters["ORIGINAL"]["Qualify"] != $parameters["Qualify"] || $parameters["ORIGINAL"]["Inbound"] != $parameters["Inbound"] || $parameters["ORIGINAL"]["Currency"] != $parameters["Currency"])
       {
-        $notify = array ( "ID" => $parameters["ID"], "Description" => $parameters["Description"], "Domain" => $_in["general"]["domain"], "Username" => $parameters["Username"], "Password" => $parameters["Password"], "Address" => $parameters["Address"], "Port" => $parameters["Port"], "Qualify" => $parameters["Qualify"], "NAT" => $parameters["NAT"], "RPID" => $parameters["RPID"], "Config" => $parameters["Config"], "Number" => str_replace ( " ", "", $parameters["Number"]), "Type" => $parameters["Type"], "Priority" => $parameters["Priority"], "Currency" => $parameters["Currency"], "Routes" => $parameters["Routes"], "Translations" => $parameters["Translations"], "Discard" => $parameters["Discard"], "Minimum" => $parameters["Minimum"], "Fraction" => $parameters["Fraction"]);
+        $notify = array ( "ID" => $parameters["ID"], "Description" => $parameters["Description"], "Domain" => $_in["general"]["domain"], "Username" => $parameters["Username"], "Password" => $parameters["Password"], "Address" => $parameters["Address"], "Port" => $parameters["Port"], "Qualify" => $parameters["Qualify"], "NAT" => $parameters["NAT"], "RPID" => $parameters["RPID"], "Inbound" => $parameters["Inbound"], "Config" => $parameters["Config"], "Number" => str_replace ( " ", "", $parameters["Number"]), "Type" => $parameters["Type"], "Priority" => $parameters["Priority"], "Currency" => $parameters["Currency"], "Routes" => $parameters["Routes"], "Translations" => $parameters["Translations"], "Discard" => $parameters["Discard"], "Minimum" => $parameters["Minimum"], "Fraction" => $parameters["Fraction"]);
         if ( framework_has_hook ( "gateways_edit_notify"))
         {
           $notify = framework_call ( "gateways_edit_notify", $parameters, false, $notify);
@@ -2006,7 +2026,7 @@ function gateways_edit ( $buffer, $parameters)
    */
   if ( ! $parameters["ORIGINAL"]["Active"] && $parameters["Active"])
   {
-    $notify = array ( "ID" => $parameters["ID"], "Description" => $parameters["Description"], "Domain" => $_in["general"]["domain"], "Username" => $parameters["Username"], "Password" => $parameters["Password"], "Address" => $parameters["Address"], "Port" => $parameters["Port"], "Qualify" => $parameters["Qualify"], "NAT" => $parameters["NAT"], "RPID" => $parameters["RPID"], "Config" => $parameters["Config"], "Number" => str_replace ( " ", "", $parameters["Number"]), "Type" => $parameters["Type"], "Priority" => $parameters["Priority"], "Currency" => $parameters["Currency"], "Routes" => $parameters["Routes"], "Translations" => $parameters["Translations"], "Discard" => $parameters["Discard"], "Minimum" => $parameters["Minimum"], "Fraction" => $parameters["Fraction"]);
+    $notify = array ( "ID" => $parameters["ID"], "Description" => $parameters["Description"], "Domain" => $_in["general"]["domain"], "Username" => $parameters["Username"], "Password" => $parameters["Password"], "Address" => $parameters["Address"], "Port" => $parameters["Port"], "Qualify" => $parameters["Qualify"], "NAT" => $parameters["NAT"], "RPID" => $parameters["RPID"], "Inbound" => $parameters["Inbound"], "Config" => $parameters["Config"], "Number" => str_replace ( " ", "", $parameters["Number"]), "Type" => $parameters["Type"], "Priority" => $parameters["Priority"], "Currency" => $parameters["Currency"], "Routes" => $parameters["Routes"], "Translations" => $parameters["Translations"], "Discard" => $parameters["Discard"], "Minimum" => $parameters["Minimum"], "Fraction" => $parameters["Fraction"]);
     if ( framework_has_hook ( "gateways_add_notify"))
     {
       $notify = framework_call ( "gateways_add_notify", $parameters, false, $notify);
@@ -2041,7 +2061,7 @@ framework_add_hook (
         "description" => __ ( "The system gateway was removed.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -2063,7 +2083,7 @@ framework_add_api_call (
   "gateways_remove",
     array ( "permissions" => array ( "Administrator", "gateways_remove"),
     "title" => __ ( "Remove gateways"),
-    "description" => __ ( "Remove a system gateway from system.")
+    "description" => __ ( "Remove a system gateway from the system.")
   )
 );
 
@@ -2191,7 +2211,7 @@ function gateways_remove ( $buffer, $parameters)
 }
 
 /**
- * API call to generate gateway call's report
+ * API call to generate gateway calls report
  */
 framework_add_hook (
   "gateways_report",
@@ -2230,7 +2250,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -2258,7 +2278,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "gateways_report"),
     "title" => __ ( "Gateways report"),
-    "description" => __ ( "Generate a gateway call's usage report.", true, false),
+    "description" => __ ( "Generate a gateway call usage report.", true, false),
     "parameters" => array (
       array (
         "name" => "ID",
@@ -2439,7 +2459,7 @@ function gateways_server_reconfig ( $buffer, $parameters)
   {
     if ( $gateway["Active"])
     {
-      $notify = array ( "ID" => $gateway["ID"], "Description" => $gateway["Description"], "Domain" => $_in["general"]["domain"], "Username" => $gateway["Username"], "Password" => $gateway["Password"], "Address" => $gateway["Address"], "Port" => $gateway["Port"], "Qualify" => $gateway["Qualify"] == 1, "NAT" => $gateway["NAT"] == 1, "RPID" => $gateway["RPID"] == 1, "Config" => $gateway["Config"], "Number" => str_replace ( " ", "", $gateway["Number"]), "Type" => $gateway["Type"], "Priority" => $gateway["Priority"], "Currency" => $gateway["Currency"], "Routes" => json_decode ( $gateway["Routes"], true), "Translations" => json_decode ( $gateway["Translations"], true), "Discard" => $gateway["Discard"], "Minimum" => $gateway["Minimum"], "Fraction" => $gateway["Fraction"]);
+      $notify = array ( "ID" => $gateway["ID"], "Description" => $gateway["Description"], "Domain" => $_in["general"]["domain"], "Username" => $gateway["Username"], "Password" => $gateway["Password"], "Address" => $gateway["Address"], "Port" => $gateway["Port"], "Qualify" => $gateway["Qualify"] == 1, "NAT" => $gateway["NAT"] == 1, "RPID" => $gateway["RPID"] == 1, "Inbound" => $gateway["Inbound"] == 1, "Config" => $gateway["Config"], "Number" => str_replace ( " ", "", $gateway["Number"]), "Type" => $gateway["Type"], "Priority" => $gateway["Priority"], "Currency" => $gateway["Currency"], "Routes" => json_decode ( $gateway["Routes"], true), "Translations" => json_decode ( $gateway["Translations"], true), "Discard" => $gateway["Discard"], "Minimum" => $gateway["Minimum"], "Fraction" => $gateway["Fraction"]);
       if ( framework_has_hook ( "gateways_add_notify"))
       {
         $notify = framework_call ( "gateways_add_notify", $parameters, false, $notify);

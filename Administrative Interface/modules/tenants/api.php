@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Tenants
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -155,7 +155,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -167,7 +167,7 @@ framework_add_hook (
             "Filter" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -230,7 +230,7 @@ function tenants_search ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
   if ( array_key_exists ( "Status", $parameters) && array_diff ( explode ( ",", $parameters["Status"]), array ( "Active", "Suspended")))
   {
@@ -407,7 +407,7 @@ framework_add_hook (
                 ),
                 "NameEN" => array (
                   "type" => "string",
-                  "description" => __ ( "The english name of the country."),
+                  "description" => __ ( "The English name of the country."),
                   "example" => "United States of America"
                 ),
                 "Name" => array (
@@ -477,7 +477,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -733,10 +733,10 @@ framework_add_hook (
     ),
     "response" => array (
       201 => array (
-        "description" => __ ( "New system tenant added successfully." )
+        "description" => __ ( "A new system tenant was added successfully." )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -820,11 +820,15 @@ function tenants_add ( $buffer, $parameters)
   {
     $data["TimeZone"] = __ ( "The tenant time zone is invalid.");
   }
-  if ( empty ( $parameters["Offset"]))
+  if ( ! array_key_exists ( "TimeZone", $data))
+  {
+    voipdomain_timezonepicker_apply_parameters ( $parameters);
+  }
+  if ( ! array_key_exists ( "Offset", $data) && ( ! isset ( $parameters["Offset"]) || $parameters["Offset"] === ""))
   {
     $data["Offset"] = __ ( "The tenant time offset is required.");
   }
-  if ( ! array_key_exists ( "Offset", $data) && ( $parameters["Offset"] < -13 || $parameters["Offset"] > 13))
+  if ( ! array_key_exists ( "Offset", $data) && ( $parameters["Offset"] < -12 || $parameters["Offset"] > 14))
   {
     $data["Offset"] = __ ( "The tenant time offset is invalid.");
   }
@@ -850,7 +854,7 @@ function tenants_add ( $buffer, $parameters)
   }
   if ( ! empty ( $parameters["Email"]) && ! validate_email ( $parameters["Email"]))
   {
-    $data["Email"] = __ ( "The informed tenant administrator e-mail is invalid.");
+    $data["Email"] = __ ( "The provided tenant administrator e-mail is invalid.");
   }
   if ( empty ( $parameters["Password"]))
   {
@@ -877,7 +881,7 @@ function tenants_add ( $buffer, $parameters)
   {
     if ( ! array_key_exists ( "Currency", $data))
     {
-      $data["Currency"] = __ ( "The informed currency is invalid.");
+      $data["Currency"] = __ ( "The provided currency is invalid.");
     }
   }
 
@@ -893,7 +897,7 @@ function tenants_add ( $buffer, $parameters)
   {
     if ( ! array_key_exists ( "Country", $data))
     {
-      $data["Country"] = __ ( "The informed country is invalid.");
+      $data["Country"] = __ ( "The provided country is invalid.");
     }
   }
 
@@ -958,9 +962,19 @@ function tenants_add ( $buffer, $parameters)
   }
 
   /**
+   * Generate tenant public/private keys
+   */
+  $res = openssl_pkey_new ( array ( "digest_alg" => "sha512", "private_key_bits" => 8192, "private_key_type" => OPENSSL_KEYTYPE_RSA));
+  openssl_pkey_export ( $res, $privKey);
+  $privKey = preg_replace ( "/\n$/m", "", $privKey);
+  $pubKey = openssl_pkey_get_details ( $res);
+  $pubKey = preg_replace ( "/\n$/m", "", $pubKey["key"]);
+  unset ( $res);
+
+  /**
    * Add new tenant record
    */
-  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Tenants` (`Name`, `Domain`, `Status`, `Settings`, `Country`, `TimeZone`, `Offset`, `Currency`, `Language`, `CreatedAt`, `UpdatedAt`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Domain"]) . "', 'Active', '[]', ". (int) $country["Code"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["TimeZone"]) . "', " . (float) $parameters["Offset"] . ", " . (int) $currency["ISO4217"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Language"]) . "', NOW(), NOW())"))
+  if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `Tenants` (`Name`, `Domain`, `Status`, `Settings`, `Country`, `TimeZone`, `Offset`, `Currency`, `Language`, `PublicKey`, `PrivateKey`, `CreatedAt`, `UpdatedAt`) VALUES ('" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Name"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Domain"]) . "', 'Active', '[]', ". (int) $country["Code"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["TimeZone"]) . "', " . (float) $parameters["Offset"] . ", " . (int) $currency["ISO4217"] . ", '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Language"]) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $pubKey) . "', '" . $_in["mysql"]["id"]->real_escape_string ( $privKey) . "', NOW(), NOW())"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -996,7 +1010,7 @@ function tenants_add ( $buffer, $parameters)
    * Return OK to user
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . $_in["general"]["baseurl"] . "tenants/" . $parameters["ID"] . "/view");
+  header ( "Location: " . voipdomain_location_url ( "/tenants/" . $parameters["ID"] . "/view"));
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 
@@ -1071,7 +1085,7 @@ framework_add_hook (
         "description" => __ ( "System tenant updated successfully.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1155,11 +1169,15 @@ function tenants_edit ( $buffer, $parameters)
   {
     $data["TimeZone"] = __ ( "The tenant time zone is invalid.");
   }
-  if ( empty ( $parameters["Offset"]))
+  if ( ! array_key_exists ( "TimeZone", $data))
+  {
+    voipdomain_timezonepicker_apply_parameters ( $parameters);
+  }
+  if ( ! array_key_exists ( "Offset", $data) && ( ! isset ( $parameters["Offset"]) || $parameters["Offset"] === ""))
   {
     $data["Offset"] = __ ( "The tenant time offset is required.");
   }
-  if ( ! array_key_exists ( "Offset", $data) && ( $parameters["Offset"] < -13 || $parameters["Offset"] > 13))
+  if ( ! array_key_exists ( "Offset", $data) && ( $parameters["Offset"] < -12 || $parameters["Offset"] > 14))
   {
     $data["Offset"] = __ ( "The tenant time offset is invalid.");
   }
@@ -1184,7 +1202,7 @@ function tenants_edit ( $buffer, $parameters)
   {
     if ( ! array_key_exists ( "Currency", $data))
     {
-      $data["Currency"] = __ ( "The informed currency is invalid.");
+      $data["Currency"] = __ ( "The provided currency is invalid.");
     }
   }
 
@@ -1200,7 +1218,7 @@ function tenants_edit ( $buffer, $parameters)
   {
     if ( ! array_key_exists ( "Country", $data))
     {
-      $data["Country"] = __ ( "The informed country is invalid.");
+      $data["Country"] = __ ( "The provided country is invalid.");
     }
   }
 
@@ -1317,7 +1335,7 @@ framework_add_hook (
         "description" => __ ( "The system tenant was removed.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1339,7 +1357,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Super-Administrator"),
     "title" => __ ( "Remove tenants"),
-    "description" => __ ( "Remove a tenant from system.")
+    "description" => __ ( "Remove a tenant from the system.")
   )
 );
 

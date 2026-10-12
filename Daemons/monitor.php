@@ -8,7 +8,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage AMI Interface
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -58,6 +58,7 @@ if ( ! defined ( "STDIN"))
 require_once ( dirname ( __FILE__) . "/includes/functions.inc.php");
 require_once ( dirname ( __FILE__) . "/includes/plugins.inc.php");
 require_once ( dirname ( __FILE__) . "/includes/asterisk.inc.php");
+require_once ( dirname ( __FILE__) . "/includes/systemd.inc.php");
 
 /**
  * Parse configuration file. You should put your configuration file OUTSIDE
@@ -181,6 +182,17 @@ if ( extension_loaded ( "proctitle"))
 }
 
 /**
+ * Open log file before dropping privileges (keep handle open)
+ */
+echo "Executing: Opening log file... ";
+if ( ! openLogFile ())
+{
+  echo chr ( 27) . "[1;31mFAILED" . chr ( 27) . "[1;0m\n";
+  exit ( 1);
+}
+echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
+
+/**
  * Change effective UID/GID to an unprivileged user
  */
 echo "Executing: Changing effective UID/GID... ";
@@ -206,8 +218,27 @@ echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
  * Connect to gearman
  */
 echo "Executing: Connecting to message router... ";
-$gm = new GearmanClient ();
-$gm->addServer ( ( $_in["gearman"]["hostname"] ? $_in["gearman"]["hostname"] : "127.0.0.1"), ( $_in["gearman"]["port"] ? $_in["gearman"]["port"] : 4730));
+$gearman_host = ! empty ( $_in["gearman"]["hostname"]) ? $_in["gearman"]["hostname"] : "127.0.0.1";
+$gearman_port = ! empty ( $_in["gearman"]["port"]) ? $_in["gearman"]["port"] : 4730;
+try
+{
+  $gm = new GearmanClient ();
+  if ( ! @$gm->addServer ( $gearman_host, $gearman_port))
+  {
+    throw new Exception ( "addServer returned false");
+  }
+} catch ( Exception $e)
+{
+  echo chr ( 27) . "[1;31mFAILED" . chr ( 27) . "[1;0m\n\n";
+  echo chr ( 27) . "[1;31mGearman connection error:" . chr ( 27) . "[1;0m " . $e->getMessage () . "\n\n";
+  echo "Please check:\n";
+  echo "  - Gearman server is running: systemctl status gearmand\n";
+  echo "  - Gearman is listening on ${gearman_host}:${gearman_port}\n";
+  echo "  - Test connection: nc -zv ${gearman_host} ${gearman_port}\n";
+  echo "  - Firewall allows port ${gearman_port}: firewall-cmd --list-ports\n";
+  echo "  - Configuration in /etc/voipdomain/monitor.conf [gearman] section\n\n";
+  writeLog ( "Cannot connect to Gearman: " . $e->getMessage (), VoIP_LOG_FATAL);
+}
 echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
 
 /**
@@ -237,6 +268,11 @@ if ( ! $debug)
     exit ();
   }
 }
+
+/**
+ * Register systemd reload handler and continue as worker process
+ */
+daemon_register_systemd_reload_handler ();
 
 /**
  * Register the Asterisk server shutdown event.

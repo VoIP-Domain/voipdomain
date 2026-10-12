@@ -3,8 +3,8 @@
 
 Website: https://yealink.com/
 Address:
-  309, 3th Floor, No. 16, Yun Ding North Road, Huli District
-  Xiamen City, Fijian
+  309, 3rd Floor, No. 16, Yun Ding North Road, Huli District
+  Xiamen City, Fujian
   P. R. China
 Products: SIP endpoints
 Default user/pass: admin/admin
@@ -26,7 +26,7 @@ Support URL: https://support.yealink.com/en/portal/docList?archiveType=document&
 Product URL: https://www.yealink.com/en/product-detail/ip-phone-t19pe2
 Launch date: 
 EOL date: September 30, 2021 (replaced by T30P)
-Recommeded firmware: 53.84.0.160
+Recommended firmware: 53.84.0.160
 POE support: Yes
 BLF support: No
 Extension support: No
@@ -41,11 +41,11 @@ SRTP support: Yes
 TLS/SSL support: Yes
 VLAN support: Yes
 QoS support: Yes
-Monophone support: Yes (included in product)
+Monaural handset support: Yes (included in product)
 Headset support: Yes
 Hands-free speakerphone: Yes (with AEC)
 DHCP option 66 auto provisioning support: Yes
-Supported CODEC's:
+Supported codecs:
   - AMR-WB (optional)
   - Opus
   - G.722
@@ -63,7 +63,7 @@ Known bugs:
 Product notes:
   - None
 Developer notes:
-  - Good provisioning, very versatile and resistent equipment. Despite beign reached EoL, it's a very reliable and recommended equipment.
+  - Good provisioning, very versatile and resistant equipment. Despite having reached EoL, it remains a very reliable, recommended device.
 
   Yealink T20P
 --============--
@@ -74,7 +74,7 @@ Support URL:
 Product URL:
 Launch date:
 EOL date: 
-Recommeded firmware: 
+Recommended firmware: 
 POE support: Yes
 BLF support: No
 Extension support: No
@@ -93,7 +93,7 @@ Support URL:
 Product URL:
 Launch date:
 EOL date:
-Recommeded firmware:
+Recommended firmware:
 POE support: Yes
 BLF support: No
 Extension support: No
@@ -112,7 +112,7 @@ Support URL:
 Product URL:
 Launch date:
 EOL date: 
-Recommeded firmware: 
+Recommended firmware: 
 POE support: Yes
 BLF support: No
 Extension support: No
@@ -131,13 +131,13 @@ Support URL:
 Product URL:
 Launch date: 
 EOL date: December 31, 2015
-Recommeded firmware: 7.73.0.50
+Recommended firmware: 7.73.0.50
 POE support: Yes
 BLF support: No
 Extension support: No
 Display type: Graphical B/W
 Known bugs:
-  - Second dialtone uses same dialtone as primary
+  - Second dial tone uses the same dial tone as the primary
 Product notes:
   - None
 
@@ -150,7 +150,7 @@ Support URL:
 Product URL:
 Launch date:
 EOL date: 
-Recommeded firmware: 
+Recommended firmware: 
 POE support: Yes
 BLF support: No
 Extension support: No
@@ -169,7 +169,7 @@ Support URL:
 Product URL:
 Launch date:
 EOL date: 
-Recommeded firmware: 
+Recommended firmware: 
 POE support: Yes
 BLF support: No
 Extension support: No
@@ -188,7 +188,7 @@ Support URL:
 Product URL:
 Launch date:
 EOL date: 
-Recommeded firmware: 
+Recommended firmware: 
 POE support: Yes
 BLF support: No
 Extension support: No
@@ -207,7 +207,7 @@ Support URL:
 Product URL:
 Launch date:
 EOL date: 
-Recommeded firmware: 
+Recommended firmware: 
 POE support: Yes
 BLF support: No
 Extension support: No
@@ -226,7 +226,7 @@ Support URL:
 Product URL:
 Launch date:
 EOL date: 
-Recommeded firmware: 
+Recommended firmware: 
 POE support: Yes
 BLF support: No
 Extension support: No
@@ -245,7 +245,7 @@ Support URL:
 Product URL:
 Launch date:
 EOL date: 
-Recommeded firmware: 
+Recommended firmware: 
 POE support: Yes
 BLF support: No
 Extension support: No

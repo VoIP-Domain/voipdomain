@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Debug
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -776,7 +776,7 @@ function debug_e164 ( $buffer, $parameters)
               "    $('#debug_e164_result').jsonViewer ( data, { collapsed: false, withQuotes: true});\n" .
               "  }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "  {\n" .
-              "    new PNotify ( { title: '" . __ ( "E.164 debug") . "', text: '" . __ ( "Error retrieving number debug!") . "', type: 'error'});\n" .
+              "    new PNotify ( { title: '" . __ ( "E.164 debug") . "', text: '" . __ ( "Error retrieving number debugging information!") . "', type: 'error'});\n" .
               "  });\n" .
               "});\n");
 

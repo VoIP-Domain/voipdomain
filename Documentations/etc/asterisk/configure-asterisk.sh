@@ -30,7 +30,7 @@
 # @version    1.0
 # @package    VoIP Domain
 # @subpackage Core
-# @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+# @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
 # @license    https://www.gnu.org/licenses/gpl-3.0.en.html
 
 # Print script header:
@@ -46,12 +46,12 @@ fi
 # Check basic applications dependency:
 command -v sed 1>/dev/null 2>&1
 if [ $? -ne 0 ]; then
-  echo -e "\e[1mError\e[0m: Cannot find 'sed' application. This script need it to work."
+  echo -e "\e[1mError\e[0m: Cannot find 'sed' application. This script needs it to work."
   exit 2
 fi
 command -v grep 1>/dev/null 2>&1
 if [ $? -ne 0 ]; then
-  echo -e "\e[1mError\e[0m: Cannot find 'grep' application. This script need it to work."
+  echo -e "\e[1mError\e[0m: Cannot find 'grep' application. This script needs it to work."
   exit 2
 fi
 
@@ -61,7 +61,7 @@ serverip="$(hostname --all-ip-addresses | cut -d' ' -f1):5060"
 asteriskpath="/etc/asterisk/"
 dialtime=24
 transtime=12
-fastagi="127.0.0.1:1234"
+fastagi="agi://127.0.0.1:4573"
 
 # Check for parameters:
 while [ -n "${1}" ]; do
@@ -77,9 +77,9 @@ while [ -n "${1}" ]; do
       echo "                    Default: /etc/asterisk/"
       echo "  -i | --localip: The local IP and port of Asterisk server. Default: ${serverip}"
       echo "  -t | --dialtime: Number of seconds that server will allow ringing. Default: 24"
-      echo "  -b | --transtime: Number of seconds that server will wait to start ringing"
-      echo "                    transhipment extensions. Default: 12"
-      echo "  -f | --fastagi: The FastAGI server IP and port. Default: 127.0.0.1:1234"
+      echo "  -b | --transtime: Number of seconds the server waits before ringing"
+      echo "                    transfer targets. Default: 12"
+      echo "  -f | --fastagi: The FastAGI server IP and port. Default: 127.0.0.1:4573"
       exit 1
       ;;
     -d|--directory)
@@ -122,7 +122,7 @@ while [ -n "${1}" ]; do
 done
 
 if [ -z "${serverid}" ]; then
-  echo -e "\e[1mError\e[0m: Missing server ID number. You must provide it as parameter."
+  echo -e "\e[1mError\e[0m: Missing server ID number. You must provide it as a parameter."
   exit 3
 fi
 
@@ -131,7 +131,7 @@ echo -e "\e[1mServer ID\e[0m: ${serverid}"
 echo -e "\e[1mServer IP:Port\e[0m: ${serverip}"
 echo -e "\e[1mAsterisk configuration path\e[0m: ${asteriskpath}"
 echo -e "\e[1mDial time\e[0m: ${dialtime}"
-echo -e "\e[1mTranshipment time\e[0m: ${transtime}"
+echo -e "\e[1mTransfer delay time\e[0m: ${transtime}"
 echo -e "\e[1mFastAGI IP:Port\e[0m: ${fastagi}"
 echo
 echo -n "Proceed with installation (y/yes/n/no)? "
@@ -148,12 +148,24 @@ if [ ! -e "${asteriskpath}voipdomain/configs/dialplan-globals.conf" ]; then
   echo -e "\r\e[2K\e[1m[\e[0m\e[91m\xE2\x9C\x95\e[0m\e[1m]\e[0m Configuring 'dialplan-globals.conf'... FAILED, FILE NOT FOUND!"
   exit 4
 fi
-sed -i -e 's/^SERVER=.*$/SERVER=${serverid}/' "${asteriskpath}voipdomain/configs/dialplan-globals.conf"
-sed -i -e 's/^SERVERADDR=.*$/SERVERADDR=${serverip}/' "${asteriskpath}voipdomain/configs/dialplan-globals.conf"
-sed -i -e 's/^DIALTIME=.*$/DIALTIME=${dialtime}/' "${asteriskpath}voipdomain/configs/dialplan-globals.conf"
-sed -i -e 's/^TRANSTIME=.*$/TRANSTIME=${transtime}/' "${asteriskpath}voipdomain/configs/dialplan-globals.conf"
-sed -i -e 's/^AGIADDR=.*$/AGIADDR=${fastagi}/' "${asteriskpath}voipdomain/configs/dialplan-globals.conf"
+sed -i -e "s/^SERVER=.*\$/SERVER=${serverid}/" "${asteriskpath}voipdomain/configs/dialplan-globals.conf"
+sed -i -e "s/^SERVERADDR=.*\$/SERVERADDR=${serverip}/" "${asteriskpath}voipdomain/configs/dialplan-globals.conf"
+sed -i -e "s/^DIALTIME=.*\$/DIALTIME=${dialtime}/" "${asteriskpath}voipdomain/configs/dialplan-globals.conf"
+sed -i -e "s/^TRANSTIME=.*\$/TRANSTIME=${transtime}/" "${asteriskpath}voipdomain/configs/dialplan-globals.conf"
+sed -i -e "s/^AGIADDR=.*\$/AGIADDR=${fastagi}/" "${asteriskpath}voipdomain/configs/dialplan-globals.conf"
 echo -e "\r\e[2K\e[1m[\e[0m\e[92m\xE2\x9C\x94\e[0m\e[1m]\e[0m Configuring 'dialplan-globals.conf'... DONE"
+
+ensure_include() {
+  local cfgfile="${1}"
+  local incline="${2}"
+  if grep -qF "${incline}" "${cfgfile}"; then
+    echo -e "\r\e[2K\e[1m[\e[33m\xE2\x98\x85\e[0;1m]\e[0m Configuring '${cfgfile##*/}'... SKIPPED, ALREADY CONFIGURED."
+    return 0
+  fi
+  echo "${incline}" >> "${cfgfile}"
+  echo -e "\r\e[2K\e[1m[\e[0m\e[92m\xE2\x9C\x94\e[0m\e[1m]\e[0m Configuring '${cfgfile##*/}'... DONE"
+  return 0
+}
 
 # Configure 'agents.conf' include:
 echo -n -e "\e[2K\e[1m[\e[33m\xE2\x98\x85\e[0m\e[1m]\e[0m Configuring 'agents.conf'..."
@@ -164,7 +176,7 @@ fi
 if [ -n "$(grep "^#include voipdomain/bootstrap/agents.conf" "${asteriskpath}agents.conf")" ]; then
   echo -e "\r\e[2K\e[1m[\e[33m\xE2\x98\x85\e[0;1m]\e[0m Configuring 'agents.conf'... SKIPPED, ALREADY CONFIGURED."
 else
-  echo -e "\r\e[2K\e[1m[\e[0m\e[92m\xE2\x9C\x94\e[0m\e[1m]\e[0m Configuring 'agents.conf'... DONE"
+  ensure_include "${asteriskpath}agents.conf" "#include voipdomain/bootstrap/agents.conf"
 fi
 
 # Configure 'extensions.conf' include:
@@ -176,7 +188,7 @@ fi
 if [ -n "$(grep "^#include voipdomain/bootstrap/dialplan.conf" "${asteriskpath}extensions.conf")" ]; then
   echo -e "\r\e[2K\e[1m[\e[33m\xE2\x98\x85\e[0;1m]\e[0m Configuring 'extensions.conf'... SKIPPED, ALREADY CONFIGURED."
 else
-  echo -e "\r\e[2K\e[1m[\e[0m\e[92m\xE2\x9C\x94\e[0m\e[1m]\e[0m Configuring 'extensions.conf'... DONE"
+  ensure_include "${asteriskpath}extensions.conf" "#include voipdomain/bootstrap/dialplan.conf"
 fi
 
 # Configure 'musiconhold.conf' include:
@@ -188,7 +200,7 @@ fi
 if [ -n "$(grep "^#include voipdomain/bootstrap/musiconhold.conf" "${asteriskpath}musiconhold.conf")" ]; then
   echo -e "\r\e[2K\e[1m[\e[33m\xE2\x98\x85\e[0;1m]\e[0m Configuring 'musiconhold.conf'... SKIPPED, ALREADY CONFIGURED."
 else
-  echo -e "\r\e[2K\e[1m[\e[0m\e[92m\xE2\x9C\x94\e[0m\e[1m]\e[0m Configuring 'musiconhold.conf'... DONE"
+  ensure_include "${asteriskpath}musiconhold.conf" "#include voipdomain/bootstrap/musiconhold.conf"
 fi
 
 # Configure 'pjsip.conf' include:
@@ -200,7 +212,7 @@ fi
 if [ -n "$(grep "^#include voipdomain/bootstrap/pjsip.conf" "${asteriskpath}pjsip.conf")" ]; then
   echo -e "\r\e[2K\e[1m[\e[33m\xE2\x98\x85\e[0;1m]\e[0m Configuring 'pjsip.conf'... SKIPPED, ALREADY CONFIGURED."
 else
-  echo -e "\r\e[2K\e[1m[\e[0m\e[92m\xE2\x9C\x94\e[0m\e[1m]\e[0m Configuring 'pjsip.conf'... DONE"
+  ensure_include "${asteriskpath}pjsip.conf" "#include voipdomain/bootstrap/pjsip.conf"
 fi
 
 # Configure 'pjsip_notify.conf' include:
@@ -212,7 +224,7 @@ fi
 if [ -n "$(grep "^#include voipdomain/bootstrap/pjsip_notify.conf" "${asteriskpath}pjsip_notify.conf")" ]; then
   echo -e "\r\e[2K\e[1m[\e[33m\xE2\x98\x85\e[0;1m]\e[0m Configuring 'pjsip_notify.conf'... SKIPPED, ALREADY CONFIGURED."
 else
-  echo -e "\r\e[2K\e[1m[\e[0m\e[92m\xE2\x9C\x94\e[0m\e[1m]\e[0m Configuring 'pjsip_notify.conf'... DONE"
+  ensure_include "${asteriskpath}pjsip_notify.conf" "#include voipdomain/bootstrap/pjsip_notify.conf"
 fi
 
 # Configure 'queues.conf' include:
@@ -224,7 +236,7 @@ fi
 if [ -n "$(grep "^#include voipdomain/bootstrap/queues.conf" "${asteriskpath}queues.conf")" ]; then
   echo -e "\r\e[2K\e[1m[\e[33m\xE2\x98\x85\e[0;1m]\e[0m Configuring 'queues.conf'... SKIPPED, ALREADY CONFIGURED."
 else
-  echo -e "\r\e[2K\e[1m[\e[0m\e[92m\xE2\x9C\x94\e[0m\e[1m]\e[0m Configuring 'queues.conf'... DONE"
+  ensure_include "${asteriskpath}queues.conf" "#include voipdomain/bootstrap/queues.conf"
 fi
 
 # Configure 'voicemail.conf' include:
@@ -236,8 +248,46 @@ fi
 if [ -n "$(grep "^#include voipdomain/bootstrap/voicemail.conf" "${asteriskpath}voicemail.conf")" ]; then
   echo -e "\r\e[2K\e[1m[\e[33m\xE2\x98\x85\e[0;1m]\e[0m Configuring 'voicemail.conf'... SKIPPED, ALREADY CONFIGURED."
 else
-  echo -e "\r\e[2K\e[1m[\e[0m\e[92m\xE2\x9C\x94\e[0m\e[1m]\e[0m Configuring 'voicemail.conf'... DONE"
+  ensure_include "${asteriskpath}voicemail.conf" "#include voipdomain/bootstrap/voicemail.conf"
+fi
+
+# Configure 'manager.conf' include:
+echo -n -e "\e[2K\e[1m[\e[33m\xE2\x98\x85\e[0m\e[1m]\e[0m Configuring 'manager.conf'..."
+if [ ! -e "${asteriskpath}manager.conf" ]; then
+  echo -e "\r\e[2K\e[1m[\e[0m\e[91m\xE2\x9C\x95\e[0m\e[1m]\e[0m Configuring 'manager.conf'... FAILED, FILE NOT FOUND!"
+  exit 4
+fi
+# Enable AMI if disabled
+if grep -q "^enabled = no" "${asteriskpath}manager.conf" || grep -q "^;enabled = yes" "${asteriskpath}manager.conf"; then
+  sed -i "s/^enabled = no/enabled = yes/" "${asteriskpath}manager.conf"
+  sed -i "s/^;enabled = yes/enabled = yes/" "${asteriskpath}manager.conf"
+fi
+# Ensure bindaddr is set to localhost
+if ! grep -q "^bindaddr = 127.0.0.1" "${asteriskpath}manager.conf"; then
+  sed -i "s/^bindaddr = .*/bindaddr = 127.0.0.1/" "${asteriskpath}manager.conf"
+  sed -i "s/^;bindaddr = .*/bindaddr = 127.0.0.1/" "${asteriskpath}manager.conf"
+fi
+if [ -n "$(grep "^#include voipdomain/bootstrap/manager.conf" "${asteriskpath}manager.conf")" ]; then
+  echo -e "\r\e[2K\e[1m[\e[33m\xE2\x98\x85\e[0;1m]\e[0m Configuring 'manager.conf'... SKIPPED, ALREADY CONFIGURED."
+else
+  ensure_include "${asteriskpath}manager.conf" "#include voipdomain/bootstrap/manager.conf"
+fi
+
+# Configure 'indications.conf' include:
+echo -n -e "\e[2K\e[1m[\e[33m\xE2\x98\x85\e[0m\e[1m]\e[0m Configuring 'indications.conf'..."
+if [ ! -e "${asteriskpath}indications.conf" ]; then
+  echo -e "\r\e[2K\e[1m[\e[0m\e[91m\xE2\x9C\x95\e[0m\e[1m]\e[0m Configuring 'indications.conf'... FAILED, FILE NOT FOUND!"
+  exit 4
+fi
+if [ -n "$(grep "^#include voipdomain/bootstrap/indications.conf" "${asteriskpath}indications.conf")" ]; then
+  echo -e "\r\e[2K\e[1m[\e[33m\xE2\x98\x85\e[0;1m]\e[0m Configuring 'indications.conf'... SKIPPED, ALREADY CONFIGURED."
+else
+  ensure_include "${asteriskpath}indications.conf" "#include voipdomain/bootstrap/indications.conf"
 fi
 
 echo
 echo "DONE!"
+echo
+echo "NOTE: To complete AMI setup, create the user configuration file:"
+echo "      ${asteriskpath}voipdomain/configs/manager-voipdomain.conf"
+echo "      with the appropriate username and secret for the monitor daemon."

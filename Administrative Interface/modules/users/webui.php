@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Users
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -305,7 +305,7 @@ function users_add_page ( $buffer, $parameters)
               "    URL: '/users',\n" .
               "    method: 'POST',\n" .
               "    button: $('button.add'),\n" .
-              "    title: '" . __ ( "User addition") . "',\n" .
+              "    title: '" . __ ( "Add user") . "',\n" .
               "    fail: '" . __ ( "Error adding user!") . "',\n" .
               "    success: '" . __ ( "User added successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
@@ -387,7 +387,7 @@ function users_view_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Users"));
-  sys_set_subtitle ( __ ( "view user"));
+  sys_set_subtitle ( __ ( "View user"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Users"), "link" => "/users"),
     2 => array ( "title" => __ ( "View"))
@@ -493,7 +493,7 @@ function users_view_page ( $buffer, $parameters)
               "  $('#user_view_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "User visualization") . "', text: '" . __ ( "Error retrieving user data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "View user") . "', text: '" . __ ( "Error retrieving user data!") . "', type: 'error'});\n" .
               "});\n");
 
   return $output;

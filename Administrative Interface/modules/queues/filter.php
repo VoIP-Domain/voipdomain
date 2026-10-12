@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Queues
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights queued.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights queued.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 

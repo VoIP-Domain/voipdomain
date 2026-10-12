@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,12 +30,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments Fanvil
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "equipment_model_x1sp_configure", "equipment_model_fanvil_x1sp_configure");
 framework_add_hook ( "equipment_model_x1sp_firmware_add", "equipment_model_fanvil_add_firmware");
@@ -242,7 +242,7 @@ function equipment_model_fanvil_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Fanvil/X1SP/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Fanvil/X1SP/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -261,7 +261,7 @@ function equipment_model_fanvil_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Fanvil/X3SP/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Fanvil/X3SP/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -363,7 +363,7 @@ function ap_type_fanvil_x1sp ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = array ();
   $codecs = array (
     "ULAW" => "PCMU",
@@ -1470,7 +1470,7 @@ function ap_type_fanvil_x3sp ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = array ();
   $codecs = array (
     "ULAW" => "G711U",

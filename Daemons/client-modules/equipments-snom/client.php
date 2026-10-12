@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,12 +30,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments Snom
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "equipment_model_snom710_configure", "equipment_model_snom_basic_configure");
 framework_add_hook ( "equipment_model_snom710_firmware_add", "equipment_model_snom_add_firmware");
@@ -204,7 +204,7 @@ function equipment_model_snom_add_firmware ( $buffer, $parameters)
       $firmwarefile .= "<firmware-settings>";
       $firmwarefile .= "  <firmware perm=\"\">tftp://" . $_in["general"]["address"] . "/Snom/710/snom710-8.9.3.80-SIP-r.bin</firmware>";
       $firmwarefile .= "</firmware-settings>";
-      if ( file_put_contents ( $_in["general"]["tftpdir"] . "/Snom/710/" . $parameters["Filename"], $parameters["Data"]) === false || file_put_contents ( $_in["general"]["tftpdir"] . "/Snom/710/firmware.xml", $firmwarefile) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Snom/710/" . $parameters["Filename"], $parameters) || file_put_contents ( $_in["general"]["tftpdir"] . "/Snom/710/firmware.xml", $firmwarefile) === false)
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -220,7 +220,7 @@ function equipment_model_snom_add_firmware ( $buffer, $parameters)
       $firmwarefile .= "<firmware-settings>";
       $firmwarefile .= "  <firmware perm=\"\">tftp://" . $_in["general"]["address"] . "/Snom/720/snom720-8.9.3.80-SIP-r.bin</firmware>";
       $firmwarefile .= "</firmware-settings>";
-      if ( file_put_contents ( $_in["general"]["tftpdir"] . "/Snom/720/" . $parameters["Filename"], $parameters["Data"]) === false || file_put_contents ( $_in["general"]["tftpdir"] . "/Snom/720/firmware.xml", $firmwarefile) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Snom/720/" . $parameters["Filename"], $parameters) || file_put_contents ( $_in["general"]["tftpdir"] . "/Snom/720/firmware.xml", $firmwarefile) === false)
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -236,7 +236,7 @@ function equipment_model_snom_add_firmware ( $buffer, $parameters)
       $firmwarefile .= "<firmware-settings>";
       $firmwarefile .= "  <firmware perm=\"\">tftp://" . $_in["general"]["address"] . "/Snom/870/snom870-8.7.5.35-SIP-r.bin</firmware>";
       $firmwarefile .= "</firmware-settings>";
-      if ( file_put_contents ( $_in["general"]["tftpdir"] . "/Snom/870/" . $parameters["Filename"], $parameters["Data"]) === false || file_put_contents ( $_in["general"]["tftpdir"] . "/Snom/870/firmware.xml", $firmwarefile) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Snom/870/" . $parameters["Filename"], $parameters) || file_put_contents ( $_in["general"]["tftpdir"] . "/Snom/870/firmware.xml", $firmwarefile) === false)
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -342,7 +342,7 @@ function ap_type_snom_7X0 ( $buffer, $parameters)
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     "G722" => "g722",
@@ -1542,7 +1542,7 @@ function ap_type_snom_870 ( $buffer, $parameters)
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     "G722" => "g722",

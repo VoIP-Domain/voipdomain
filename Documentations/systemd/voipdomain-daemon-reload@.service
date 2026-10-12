@@ -1,0 +1,8 @@
+[Unit]
+Description=Reload VoIP Domain %i daemon through systemd
+After=voipdomain-%i.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/systemctl reload voipdomain-%i.service
+ExecStartPost=-/bin/rm -f /run/voipdomain/reload/%i

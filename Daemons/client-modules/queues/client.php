@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Queues
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "queue_add", "queue_add");
 framework_add_hook ( "queue_change", "queue_change");
@@ -145,7 +145,7 @@ function queue_add ( $buffer, $parameters)
   {
     if ( ! check_overwrite ())
     {
-      return array ( "code" => 400, "message" => "Queue already exist.");
+      return array ( "code" => 400, "message" => "Queue already exists.");
     } else {
       $overwritten = true;
     }
@@ -306,7 +306,7 @@ function queue_change ( $buffer, $parameters)
   // Verify if new queue exist
   if ( $parameters["OldName"] != $parameters["Name"] && config_check ( "config", "queue-" . $parameters["Name"]))
   {
-    return array ( "code" => 402, "message" => "New queue already exist.");
+    return array ( "code" => 409, "message" => "New queue already exists.");
   }
 
   // Remove queue files
@@ -920,9 +920,12 @@ function queue_wipe ( $buffer, $parameters)
   }
 
   // Remove all files
+  foreach ( list_config ( "config", "queue-*") as $filename)
+  {
+    unlink_config ( "config", $filename);
+  }
   foreach ( list_config ( "datafile", "queue") as $filename)
   {
-    unlink_config ( "config", "queue-" . (int) substr ( $filename, strrpos ( $filename, "-") + 1));
     unlink_config ( "datafile", $filename);
   }
 

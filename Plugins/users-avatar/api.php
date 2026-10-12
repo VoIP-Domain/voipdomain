@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage User Avatar
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -126,7 +126,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -148,7 +148,7 @@ framework_add_api_call (
   array (
     "unauthenticated" => true,
     "title" => __ ( "View users avatar"),
-    "description" => __ ( "Get a system user avatar information. Note that the user avatar will be replied successfully only if the user was already logged in previously to the system."),
+    "description" => __ ( "Get system user avatar information. Note that the user avatar will be returned successfully only if the user was already logged in previously to the system."),
     "parameters" => array (
       array (
         "name" => "Username",
@@ -294,7 +294,7 @@ framework_add_hook (
         "description" => __ ( "The system user avatar was removed.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -317,7 +317,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "User", "avatar_user_remove"),
     "title" => __ ( "Remove users avatar"),
-    "description" => __ ( "Remove a system user avatar."),
+    "description" => __ ( "Remove system user avatar."),
     "parameters" => array (
       array (
         "name" => "ID",
@@ -485,7 +485,7 @@ framework_add_hook (
         "description" => __ ( "The system user avatar was successfully updated.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -508,7 +508,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "User", "avatar_user_set"),
     "title" => __ ( "Edit users avatar"),
-    "description" => __ ( "Change a system user avatar.")
+    "description" => __ ( "Change system user avatar.")
   )
 );
 

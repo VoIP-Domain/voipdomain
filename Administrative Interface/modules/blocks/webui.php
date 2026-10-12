@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,14 +25,14 @@
 
 /**
  * VoIP Domain blocks module WebUI. This module add the feature of blocking
- * incoming public external calls. Usefull to block tele marketing, spammers and
+ * incoming public external calls. Useful to block telemarketing, spammers and
  * other annoying calls.
  *
  * @author     Ernani José Camargo Azevedo <azevedo@voipdomain.io>
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Blocks
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -183,7 +183,7 @@ function blocks_add_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Blocks"));
-  sys_set_subtitle ( __ ( "blocks addition"));
+  sys_set_subtitle ( __ ( "Add blocks"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Blocks"), "link" => "/blocks"),
     2 => array ( "title" => __ ( "Add"))
@@ -249,7 +249,7 @@ function blocks_add_page ( $buffer, $parameters)
               "    URL: '/blocks',\n" .
               "    method: 'POST',\n" .
               "    button: $('button.add'),\n" .
-              "    title: '" . __ ( "Block addition") . "',\n" .
+              "    title: '" . __ ( "Add block") . "',\n" .
               "    fail: '" . __ ( "Error adding block!") . "',\n" .
               "    success: '" . __ ( "Block added successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
@@ -292,7 +292,7 @@ function blocks_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Block cloning") . "', text: '" . __ ( "Error retrieving block data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Clone block") . "', text: '" . __ ( "Error retrieving block data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -310,7 +310,7 @@ function blocks_view_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Blocks"));
-  sys_set_subtitle ( __ ( "blocks visualization"));
+  sys_set_subtitle ( __ ( "View blocks"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Blocks"), "link" => "/blocks"),
     2 => array ( "title" => __ ( "View"))
@@ -381,7 +381,7 @@ function blocks_edit_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Blocks"));
-  sys_set_subtitle ( __ ( "blocks editing"));
+  sys_set_subtitle ( __ ( "Edit blocks"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Blocks"), "link" => "/blocks"),
     2 => array ( "title" => __ ( "Edit"))
@@ -440,7 +440,7 @@ function blocks_edit_page ( $buffer, $parameters)
               "  $('#block_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Block edition") . "', text: '" . __ ( "Error retrieving block data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Edit block") . "', text: '" . __ ( "Error retrieving block data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#block_edit_form').alerts ( 'form',\n" .
               "{\n" .
@@ -449,7 +449,7 @@ function blocks_edit_page ( $buffer, $parameters)
               "    URL: '/blocks/' + VoIP.parameters.id,\n" .
               "    method: 'PATCH',\n" .
               "    button: $('button.edit'),\n" .
-              "    title: '" . __ ( "Block edition") . "',\n" .
+              "    title: '" . __ ( "Edit block") . "',\n" .
               "    fail: '" . __ ( "Error changing block!") . "',\n" .
               "    success: '" . __ ( "Block changed successfully!") . "',\n" .
               "    onsuccess: function ()\n" .

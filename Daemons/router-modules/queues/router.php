@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Queues
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "queues_bootup", "queues_bootup");
 framework_add_hook ( "queues_unload", "queues_unload");
@@ -231,10 +231,11 @@ function queues_member_remove ( $buffer, $parameters)
   }
 
   // Remove member:
-  unset ( $_in["Queues"][$parameters["ServerID"]][$parameters["Queue"]]["Members"][$parameters["Name"]]);
+  $member = array_key_exists ( "Member", $parameters) ? $parameters["Member"] : $parameters["Name"];
+  unset ( $_in["Queues"][$parameters["ServerID"]][$parameters["Queue"]]["Members"][$member]);
 
   // Log event:
-  writeLog ( "Removed member \"" . $parameters["Name"] . "\" to server #" . $parameters["ServerID"] . " queue \"" . $parameters["Queue"] . "\".");
+  writeLog ( "Removed member \"" . $member . "\" to server #" . $parameters["ServerID"] . " queue \"" . $parameters["Queue"] . "\".");
 
   // End event:
   return $buffer;
@@ -261,7 +262,7 @@ function queues_caller_add ( $buffer, $parameters)
   }
 
   // Add new caller:
-  $_in["Queues"][$parameters["ServerID"]][$parameters["Queue"]]["Callers"][$parameters["Caller"]["Channel"]] = $parameters["Caller"];
+  $_in["Queues"][$parameters["ServerID"]][$parameters["Queue"]]["Entries"][$parameters["Caller"]["Channel"]] = $parameters["Caller"];
 
   // Log event:
   writeLog ( "Added new caller to server #" . $parameters["ServerID"] . " queue \"" . $parameters["Queue"] . "\".");
@@ -291,9 +292,9 @@ function queues_caller_update ( $buffer, $parameters)
   }
 
   // Update caller:
-  $_in["Queues"][$parameters["ServerID"]][$parameters["Queue"]]["Callers"][$parameters["Channel"]]["Position"] = $parameters["Position"];
-  $_in["Queues"][$parameters["ServerID"]][$parameters["Queue"]]["Callers"][$parameters["Channel"]]["OriginalPosition"] = $parameters["OriginalPosition"];
-  $_in["Queues"][$parameters["ServerID"]][$parameters["Queue"]]["Callers"][$parameters["Channel"]]["HoldTime"] = $parameters["HoldTime"];
+  $_in["Queues"][$parameters["ServerID"]][$parameters["Queue"]]["Entries"][$parameters["Channel"]]["Position"] = $parameters["Position"];
+  $_in["Queues"][$parameters["ServerID"]][$parameters["Queue"]]["Entries"][$parameters["Channel"]]["OriginalPosition"] = $parameters["OriginalPosition"];
+  $_in["Queues"][$parameters["ServerID"]][$parameters["Queue"]]["Entries"][$parameters["Channel"]]["HoldTime"] = $parameters["HoldTime"];
 
   // Log event:
   writeLog ( "Updated caller \"" . $parameters["Channel"] . "\" to server #" . $parameters["ServerID"] . " queue \"" . $parameters["Queue"] . "\".");
@@ -323,10 +324,40 @@ function queues_caller_remove ( $buffer, $parameters)
   }
 
   // Remove caller:
-  unset ( $_in["Queues"][$parameters["ServerID"]][$parameters["Queue"]]["Callers"][$parameters["Channel"]]);
+  unset ( $_in["Queues"][$parameters["ServerID"]][$parameters["Queue"]]["Entries"][$parameters["Channel"]]);
 
   // Log event:
   writeLog ( "Removed caller \"" . $parameters["Channel"] . "\" to server #" . $parameters["ServerID"] . " queue \"" . $parameters["Queue"] . "\".");
+
+  // End event:
+  return $buffer;
+}
+
+/**
+ * Function to remove an abandoned caller from a queue.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return string Output of the generated page
+ */
+function queues_caller_abandon ( $buffer, $parameters)
+{
+  global $_in;
+
+  // Check if queue exist at server:
+  if ( ! array_key_exists ( $parameters["Queue"], $_in["Queues"][$parameters["ServerID"]]))
+  {
+    writeLog ( "Received caller abandon from server #" . $parameters["ServerID"] . " into unknown queue \"" . $parameters["Queue"] . "\".", VoIP_LOG_WARNING);
+    return false;
+  }
+
+  // Remove caller:
+  unset ( $_in["Queues"][$parameters["ServerID"]][$parameters["Queue"]]["Entries"][$parameters["Channel"]]);
+
+  // Log event:
+  writeLog ( "Abandoned caller \"" . $parameters["Channel"] . "\" from server #" . $parameters["ServerID"] . " queue \"" . $parameters["Queue"] . "\".");
 
   // End event:
   return $buffer;

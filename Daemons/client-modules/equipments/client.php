@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "equipment_configure", "equipment_configure");
 framework_add_hook ( "firmware_add", "firmware_add");
@@ -89,9 +89,20 @@ function equipment_configure ( $buffer, $parameters)
   {
     $data["AudioCodecs"] = "Missing parameter";
   }
-  if ( ! array_key_exists ( "AudioCodecs", $data) && ! is_array ( $parameters["AudioCodecs"]))
+  if ( ! array_key_exists ( "AudioCodecs", $data))
   {
-    $data["AudioCodecs"] = "Invalid content";
+    if ( is_string ( $parameters["AudioCodecs"]))
+    {
+      $parameters["AudioCodecs"] = json_decode ( $parameters["AudioCodecs"], true);
+    }
+    if ( ! is_array ( $parameters["AudioCodecs"]))
+    {
+      $data["AudioCodecs"] = "Invalid content";
+    }
+  }
+  if ( ! array_key_exists ( "AudioCodecs", $data) && empty ( $parameters["AudioCodecs"]))
+  {
+    $data["AudioCodecs"] = "At least one audio codec is required";
   }
   if ( ! array_key_exists ( "AudioCodecs", $data))
   {
@@ -107,9 +118,16 @@ function equipment_configure ( $buffer, $parameters)
   {
     $data["VideoCodecs"] = "Missing parameter";
   }
-  if ( ! array_key_exists ( "VideoCodecs", $data) && ! is_array ( $parameters["VideoCodecs"]))
+  if ( ! array_key_exists ( "VideoCodecs", $data))
   {
-    $data["VideoCodecs"] = "Invalid content";
+    if ( is_string ( $parameters["VideoCodecs"]))
+    {
+      $parameters["VideoCodecs"] = json_decode ( $parameters["VideoCodecs"], true);
+    }
+    if ( ! is_array ( $parameters["VideoCodecs"]))
+    {
+      $data["VideoCodecs"] = "Invalid content";
+    }
   }
   if ( ! array_key_exists ( "VideoCodecs", $data))
   {
@@ -248,11 +266,11 @@ function firmware_add ( $buffer, $parameters)
   {
     $data["Filename"] = "Invalid content";
   }
-  if ( ! array_key_exists ( "Data", $parameters))
+  if ( ! array_key_exists ( "Data", $parameters) && ( ! array_key_exists ( "FilePath", $parameters) || ! is_readable ( $parameters["FilePath"])))
   {
     $data["Data"] = "Missing parameter";
   }
-  if ( ! array_key_exists ( "Data", $data) && base64_encode ( base64_decode ( $parameters["Data"], true)) !== $parameters["Data"])
+  if ( array_key_exists ( "Data", $parameters) && ! array_key_exists ( "Data", $data) && base64_encode ( base64_decode ( $parameters["Data"], true)) !== $parameters["Data"])
   {
     $data["Data"] = "Invalid content";
   }
@@ -276,7 +294,10 @@ function firmware_add ( $buffer, $parameters)
   /**
    * Sanitize parameters
    */
-  $parameters["Data"] = base64_decode ( $parameters["Data"]);
+  if ( ! array_key_exists ( "FilePath", $parameters) || ! is_readable ( $parameters["FilePath"]))
+  {
+    $parameters["Data"] = base64_decode ( $parameters["Data"]);
+  }
 
   /**
    * Call sanitize hook if exist
@@ -399,7 +420,10 @@ function firmware_remove ( $buffer, $parameters)
   /**
    * Sanitize parameters
    */
-  $parameters["Data"] = base64_decode ( $parameters["Data"]);
+  if ( array_key_exists ( "Data", $parameters))
+  {
+    $parameters["Data"] = base64_decode ( $parameters["Data"]);
+  }
 
   /**
    * Call sanitize hook if exist
@@ -454,7 +478,7 @@ function firmware_remove ( $buffer, $parameters)
 }
 
 /**
- * Function to remove all existing equipments configurations.
+ * Function to remove all existing Configure equipments.
  *
  * @param string $buffer Buffer from plugin system if processed by other function
  *                       before
@@ -479,10 +503,14 @@ function equipment_wipe ( $buffer, $parameters)
     framework_call ( "equipment_wipe_pre", $parameters, false, true);
   }
 
-  // Remove all files
+  // Remove all config files by glob pattern
+  foreach ( list_config ( "config", "sip-model-*") as $filename)
+  {
+    unlink_config ( "config", $filename);
+  }
+  // Remove all datafiles
   foreach ( list_config ( "datafile", "equipment") as $filename)
   {
-    unlink_config ( "config", "sip-model-" . substr ( $filename, strrpos ( $filename, "-") + 1));
     unlink_config ( "datafile", $filename);
   }
 

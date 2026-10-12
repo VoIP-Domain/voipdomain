@@ -1,0 +1,170 @@
+## <summary>VoIP Domain policy interfaces</summary>
+
+########################################
+## <summary>
+##      Execute voipdomain daemon in the voipdomain domain.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed to transition.
+##      </summary>
+## </param>
+#
+interface(`voipdomain_domtrans',`
+        gen_require(`
+                type voipdomain_t, voipdomain_exec_t;
+        ')
+
+        corecmd_search_bin($1)
+        domtrans_pattern($1, voipdomain_exec_t, voipdomain_t)
+')
+
+########################################
+## <summary>
+##      Read voipdomain configuration files.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`voipdomain_read_config',`
+        gen_require(`
+                type voipdomain_etc_t;
+        ')
+
+        files_search_etc($1)
+        read_files_pattern($1, voipdomain_etc_t, voipdomain_etc_t)
+')
+
+########################################
+## <summary>
+##      Manage voipdomain configuration files.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`voipdomain_manage_config',`
+        gen_require(`
+                type voipdomain_etc_t;
+        ')
+
+        files_search_etc($1)
+        manage_files_pattern($1, voipdomain_etc_t, voipdomain_etc_t)
+')
+
+########################################
+## <summary>
+##      Read voipdomain var_lib files.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`voipdomain_read_var_lib',`
+        gen_require(`
+                type voipdomain_var_lib_t;
+        ')
+
+        files_search_var_lib($1)
+        read_files_pattern($1, voipdomain_var_lib_t, voipdomain_var_lib_t)
+')
+
+########################################
+## <summary>
+##      Manage voipdomain var_lib files.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`voipdomain_manage_var_lib',`
+        gen_require(`
+                type voipdomain_var_lib_t;
+        ')
+
+        files_search_var_lib($1)
+        manage_files_pattern($1, voipdomain_var_lib_t, voipdomain_var_lib_t)
+')
+
+########################################
+## <summary>
+##      Read voipdomain log files.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`voipdomain_read_log',`
+        gen_require(`
+                type voipdomain_log_t;
+        ')
+
+        logging_search_logs($1)
+        read_files_pattern($1, voipdomain_log_t, voipdomain_log_t)
+')
+
+########################################
+## <summary>
+##      Manage voipdomain spool files.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`voipdomain_manage_spool',`
+        gen_require(`
+                type voipdomain_spool_t;
+        ')
+
+        files_search_spool($1)
+        manage_files_pattern($1, voipdomain_spool_t, voipdomain_spool_t)
+')
+
+########################################
+## <summary>
+##      All of the rules required to administrate
+##      a voipdomain environment.
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+#
+interface(`voipdomain_admin',`
+        gen_require(`
+                type voipdomain_t, voipdomain_etc_t, voipdomain_var_lib_t;
+                type voipdomain_log_t, voipdomain_var_run_t, voipdomain_spool_t;
+        ')
+
+        allow $1 voipdomain_t:process { ptrace signal_perms };
+        ps_process_pattern($1, voipdomain_t)
+
+        files_search_etc($1)
+        admin_pattern($1, voipdomain_etc_t)
+
+        files_search_var_lib($1)
+        admin_pattern($1, voipdomain_var_lib_t)
+
+        logging_search_logs($1)
+        admin_pattern($1, voipdomain_log_t)
+
+        files_search_pids($1)
+        admin_pattern($1, voipdomain_var_run_t)
+
+        files_search_spool($1)
+        admin_pattern($1, voipdomain_spool_t)
+')

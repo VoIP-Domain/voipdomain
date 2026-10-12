@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Profiles
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "profile_add", "profile_add");
 framework_add_hook ( "profile_change", "profile_change");
@@ -256,7 +256,7 @@ function profile_add ( $buffer, $parameters)
   {
     if ( ! check_overwrite ())
     {
-      return array ( "code" => 400, "message" => "Profile already exist.");
+      return array ( "code" => 400, "message" => "Profile already exists.");
     } else {
       $overwritten = true;
     }
@@ -714,7 +714,7 @@ function profile_remove ( $buffer, $parameters)
   }
 
   // Finish event
-  return array ( "code" => 200, "message" => "Profile removed.");
+  return array ( "code" => 200, "message" => "Profile removald.");
 }
 
 /**
@@ -744,12 +744,20 @@ function profile_wipe ( $buffer, $parameters)
   }
 
   // Remove all files
+  foreach ( list_config ( "config", "dialplan-profile-*") as $filename)
+  {
+    unlink_config ( "config", $filename);
+  }
+  foreach ( list_config ( "config", "sip-profile-*") as $filename)
+  {
+    unlink_config ( "config", $filename);
+  }
+  foreach ( list_config ( "configdb", "profile-*") as $filename)
+  {
+    unlink_config ( "configdb", $filename);
+  }
   foreach ( list_config ( "datafile", "profile") as $filename)
   {
-    $entryid = (int) substr ( $filename, strrpos ( $filename, "-") + 1);
-    unlink_config ( "config", "dialplan-profile-" . $entryid);
-    unlink_config ( "config", "sip-profile-" . $entryid);
-    unlink_config ( "configdb", "profile-" . $entryid);
     unlink_config ( "datafile", $filename);
   }
 

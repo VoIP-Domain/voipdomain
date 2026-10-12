@@ -8,7 +8,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Message Router Daemon
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -72,6 +72,7 @@ if ( ! extension_loaded ( "pcntl"))
  */
 require_once ( dirname ( __FILE__) . "/includes/functions.inc.php");
 require_once ( dirname ( __FILE__) . "/includes/plugins.inc.php");
+require_once ( dirname ( __FILE__) . "/includes/systemd.inc.php");
 
 /**
  * Parse configuration file. You should put your configuration file OUTSIDE
@@ -163,18 +164,32 @@ foreach ( glob ( dirname ( __FILE__) . "/router-modules/*/router.php") as $filen
 echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
 
 /**
- * Add internal event hook's
+ * Add internal event hooks
  */
 framework_add_hook ( "event", "dump");
-framework_add_hook ( "notifications_reload", "reload_notifications");
+framework_add_hook ( "router_reload_cache", "router_reload_cache", IN_HOOK_INSERT_FIRST);
+framework_add_hook ( "notifications_reload", "router_reload_cache");
+framework_add_hook ( "notification_create", "router_reload_cache");
+framework_add_hook ( "notification_change", "router_reload_cache");
+framework_add_hook ( "notification_destroy", "router_reload_cache");
 
 /**
  * Connect to MySQL database
  */
 echo "Executing: Connecting to database server... ";
-if ( ! $_in["mysql"]["id"] = @new mysqli ( $_in["mysql"]["hostname"] . ( ! empty ( $_in["mysql"]["port"]) ? ":" . $_in["mysql"]["port"] : ""), $_in["mysql"]["username"], $_in["mysql"]["password"], $_in["mysql"]["database"]))
+try
 {
-  writeLog ( "Cannot connect to database server!", VoIP_LOG_FATAL);
+  $_in["mysql"]["id"] = new mysqli ( $_in["mysql"]["hostname"] . ( ! empty ( $_in["mysql"]["port"]) ? ":" . $_in["mysql"]["port"] : ""), $_in["mysql"]["username"], $_in["mysql"]["password"], $_in["mysql"]["database"]);
+} catch ( mysqli_sql_exception $e)
+{
+  echo chr ( 27) . "[1;31mFAILED" . chr ( 27) . "[1;0m\n\n";
+  echo chr ( 27) . "[1;31mDatabase connection error:" . chr ( 27) . "[1;0m " . $e->getMessage () . "\n\n";
+  echo "Please check:\n";
+  echo "  - MariaDB/MySQL is running: systemctl status mariadb\n";
+  echo "  - Database exists: mysql -e \"SHOW DATABASES LIKE '" . $_in["mysql"]["database"] . "'\"\n";
+  echo "  - User/password in /etc/voipdomain/router.conf matches the database\n";
+  echo "  - User has access: mysql -u " . $_in["mysql"]["username"] . " -p " . $_in["mysql"]["database"] . "\n\n";
+  writeLog ( "Cannot connect to database: " . $e->getMessage (), VoIP_LOG_FATAL);
 }
 echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
 
@@ -184,6 +199,34 @@ echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
 echo "Executing: Fetching notifications database... ";
 reload_notifications ();
 echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
+
+/**
+ * Open log file before dropping privileges (keep handle open)
+ */
+echo "Executing: Opening log file... ";
+if ( ! openLogFile ())
+{
+  echo chr ( 27) . "[1;31mFAILED" . chr ( 27) . "[1;0m\n";
+  exit ( 1);
+}
+echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
+
+/**
+ * Pre-load server and tenant cryptographic keys from database (while still root)
+ */
+echo "Executing: Loading server keys... ";
+if ( $result = @$_in["mysql"]["id"]->query ( "SELECT `Servers`.`ID`, `Servers`.`PublicKey`, `Tenants`.`PrivateKey` AS `TenantPrivateKey` FROM `Servers` LEFT JOIN `Tenants` ON `Servers`.`Tenant` = `Tenants`.`ID`"))
+{
+  while ( $row = $result->fetch_assoc ())
+  {
+    $_in["keys"]["server_" . $row["ID"]] = array (
+      "publicKey" => $row["PublicKey"],
+      "tenantPrivateKey" => $row["TenantPrivateKey"]
+    );
+  }
+  $result->free ();
+}
+echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m (" . count ( array_filter ( array_keys ( $_in["keys"]), function ( $k) { return strpos ( $k, "server_") === 0; })) . " servers)\n";
 
 /**
  * Change effective UID/GID to an unprivileged user
@@ -254,6 +297,25 @@ if ( ! $debug)
 }
 
 /**
+ * Register systemd reload handler and continue as worker process
+ */
+daemon_register_systemd_reload_handler ();
+if ( function_exists ( "pcntl_signal"))
+{
+  if ( function_exists ( "pcntl_async_signals"))
+  {
+    pcntl_async_signals ( true);
+  }
+  pcntl_signal ( SIGHUP, "router_systemd_reload_handler");
+}
+
+/**
+ * Watchdog interval for pending commands (in seconds)
+ */
+$_in["watchdog"]["interval"] = ! empty ( $_in["watchdog"]["interval"]) ? (int) $_in["watchdog"]["interval"] : 30;
+$_in["watchdog"]["last_check"] = 0;
+
+/**
  * Start Gearman worker
  */
 while ( true)
@@ -261,8 +323,35 @@ while ( true)
   /**
    * Connect to gearman servers
    */
-  $gm = new GearmanWorker ();
-  $gm->addServer ( ( $_in["gearman"]["hostname"] ? $_in["gearman"]["hostname"] : "127.0.0.1"), ( $_in["gearman"]["port"] ? $_in["gearman"]["port"] : 4730));
+  $gearman_host = ! empty ( $_in["gearman"]["hostname"]) ? $_in["gearman"]["hostname"] : "127.0.0.1";
+  $gearman_port = ! empty ( $_in["gearman"]["port"]) ? $_in["gearman"]["port"] : 4730;
+  try
+  {
+    $gm = new GearmanWorker ();
+    if ( ! @$gm->addServer ( $gearman_host, $gearman_port))
+    {
+      throw new Exception ( "addServer returned false");
+    }
+    $gm->setTimeout ( 5000);
+  } catch ( Exception $e)
+  {
+    writeLog ( "Cannot connect to Gearman at ${gearman_host}:${gearman_port}: " . $e->getMessage (), VoIP_LOG_WARNING);
+    sleep ( 5);
+    continue;
+  }
+
+  /**
+   * Create Gearman client for sending pending commands
+   */
+  try
+  {
+    $gm_client = new GearmanClient ();
+    $gm_client->addServer ( $gearman_host, $gearman_port);
+  } catch ( Exception $e)
+  {
+    writeLog ( "Cannot create Gearman client: " . $e->getMessage (), VoIP_LOG_WARNING);
+    $gm_client = null;
+  }
 
   /**
    * Register worker functions
@@ -275,13 +364,33 @@ while ( true)
   /**
    * Loop waiting for work!
    */
-  while ( @$gm->work ()) {}
+  while ( true)
+  {
+    @$gm->work ();
+
+    if ( $gm->returnCode () == GEARMAN_TIMEOUT)
+    {
+      // Timeout - check for pending commands
+      if ( time () - $_in["watchdog"]["last_check"] >= $_in["watchdog"]["interval"])
+      {
+        process_pending_commands ( $gm_client);
+        $_in["watchdog"]["last_check"] = time ();
+      }
+      continue;
+    }
+
+    if ( $gm->returnCode () != GEARMAN_SUCCESS)
+    {
+      break;
+    }
+  }
 
   /**
    * If exited loop, all gearman servers was gone!
    */
   writeLog ( "Gearman servers disconnected! Retrying in 5 seconds.", VoIP_LOG_WARNING);
   unset ( $gm);
+  unset ( $gm_client);
   sleep ( 5);
 }
 
@@ -496,5 +605,189 @@ function reload_notifications ()
   }
 
   return true;
+}
+
+/**
+ * Reload router in-memory caches from authoritative sources.
+ *
+ * Optional parameters:
+ *   - ServerID: clear monitoring cache for one server only
+ *
+ * @global array $_in Framework global configuration variable
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return array
+ */
+function router_reload_cache ( $buffer, $parameters)
+{
+  global $_in;
+
+  if ( ! is_array ( $buffer))
+  {
+    $buffer = array ( "events" => array (), "return" => "");
+  }
+  if ( ! array_key_exists ( "events", $buffer))
+  {
+    $buffer["events"] = array ();
+  }
+  if ( ! array_key_exists ( "return", $buffer))
+  {
+    $buffer["return"] = "";
+  }
+
+  reload_notifications ();
+  $_in["keys"] = array ();
+
+  /**
+   * Reload server/tenant keys from database
+   */
+  mysql_check ();
+  if ( $result = @$_in["mysql"]["id"]->query ( "SELECT `Servers`.`ID`, `Servers`.`PublicKey`, `Tenants`.`PrivateKey` AS `TenantPrivateKey` FROM `Servers` LEFT JOIN `Tenants` ON `Servers`.`Tenant` = `Tenants`.`ID`"))
+  {
+    while ( $row = $result->fetch_assoc ())
+    {
+      $_in["keys"]["server_" . $row["ID"]] = array (
+        "publicKey" => $row["PublicKey"],
+        "tenantPrivateKey" => $row["TenantPrivateKey"]
+      );
+    }
+    $result->free ();
+  }
+
+  if ( array_key_exists ( "ServerID", $parameters) && preg_match ( "/^[0-9]+$/", (string) $parameters["ServerID"]))
+  {
+    $serverid = (int) $parameters["ServerID"];
+    unset ( $_in["Channels"][$serverid]);
+    unset ( $_in["Queues"][$serverid]);
+    unset ( $_in["Peers"][$serverid]);
+    writeLog ( "Router cache reloaded for server #" . $serverid . ".");
+  } else {
+    $_in["Channels"] = array ();
+    $_in["Queues"] = array ();
+    $_in["Peers"] = array ();
+    writeLog ( "Router cache reloaded.");
+  }
+
+  return $buffer;
+}
+
+/**
+ * Handle systemd reload by refreshing caches in-process.
+ *
+ * @param int $signo Signal number
+ * @return void
+ */
+function router_systemd_reload_handler ( $signo)
+{
+  router_reload_cache ( array ( "events" => array (), "return" => ""), array ());
+  writeLog ( "Router cache reloaded from systemd signal " . $signo . ".", VoIP_LOG_NOTICE);
+}
+
+/**
+ * Process pending commands from the database queue.
+ * This watchdog function re-sends commands that were queued but not delivered
+ * (e.g., when Gearman was unavailable at the time of the original request).
+ *
+ * @global array $_in Framework global configuration variable
+ * @param GearmanClient $gm_client Gearman client for sending commands
+ * @return int Number of commands processed
+ */
+function process_pending_commands ( $gm_client)
+{
+  global $_in;
+
+  if ( ! $gm_client)
+  {
+    return 0;
+  }
+
+  // Check database connection
+  mysql_check ();
+
+  // Fetch pending commands with server information
+  $query = "SELECT c.`ID`, c.`Server`, c.`Event`, c.`Data`, s.`PublicKey`, t.`PrivateKey` AS TenantPrivateKey
+            FROM `Commands` c
+            INNER JOIN `Servers` s ON c.`Server` = s.`ID`
+            INNER JOIN `Tenants` t ON s.`Tenant` = t.`ID`
+            WHERE s.`PublicKey` IS NOT NULL AND s.`PublicKey` != ''
+            ORDER BY c.`ID` ASC
+            LIMIT 100";
+
+  if ( ! $result = @$_in["mysql"]["id"]->query ( $query))
+  {
+    writeLog ( "Watchdog: Failed to fetch pending commands", VoIP_LOG_WARNING);
+    return 0;
+  }
+
+  $processed = 0;
+  while ( $command = $result->fetch_assoc ())
+  {
+    // Skip if no tenant private key
+    if ( empty ( $command["TenantPrivateKey"]))
+    {
+      continue;
+    }
+
+    // Prepare payload
+    $data = json_decode ( $command["Data"], true);
+    $payload = json_encode ( array (
+      "event" => $command["Event"],
+      "id" => $command["ID"],
+      "data" => $data,
+      "group" => null
+    ));
+
+    // Encrypt payload
+    $iv = secure_rand ( 16, true);
+    $key = secure_rand ( 256, true);
+    $encrypted = openssl_encrypt ( $payload, "aes-256-cbc", $key, OPENSSL_RAW_DATA, $iv);
+    $hmac = hash_hmac ( "sha256", $encrypted, $key, true);
+
+    if ( ! openssl_public_encrypt ( $key, $encryptedkey, $command["PublicKey"]))
+    {
+      writeLog ( "Watchdog: Failed to encrypt key for command #" . $command["ID"], VoIP_LOG_WARNING);
+      continue;
+    }
+
+    if ( ! openssl_sign ( $key . $iv . $hmac . $encrypted, $sign, $command["TenantPrivateKey"], OPENSSL_ALGO_SHA256))
+    {
+      writeLog ( "Watchdog: Failed to sign payload for command #" . $command["ID"], VoIP_LOG_WARNING);
+      continue;
+    }
+
+    // Send via Gearman
+    $task_name = gearman_client_task_name ( $command["Server"]);
+    $task_data = json_encode ( array (
+      "payload" => base64_encode ( $encrypted),
+      "iv" => base64_encode ( $iv),
+      "key" => base64_encode ( $encryptedkey),
+      "hmac" => base64_encode ( $hmac),
+      "sign" => base64_encode ( $sign)
+    ));
+
+    try
+    {
+      $gm_client->doBackground ( $task_name, $task_data);
+      $processed++;
+
+      if ( $_in["general"]["debug"])
+      {
+        writeLog ( "Watchdog: Re-sent command #" . $command["ID"] . " to server #" . $command["Server"], VoIP_LOG_NOTICE);
+      }
+    }
+    catch ( Exception $e)
+    {
+      writeLog ( "Watchdog: Failed to send command #" . $command["ID"] . ": " . $e->getMessage (), VoIP_LOG_WARNING);
+      break;
+    }
+  }
+
+  if ( $processed > 0)
+  {
+    writeLog ( "Watchdog: Re-sent " . $processed . " pending command(s)", VoIP_LOG_NOTICE);
+  }
+
+  return $processed;
 }
 ?>

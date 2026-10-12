@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Interface
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -58,6 +58,18 @@ framework_add_hook (
               "type" => "string",
               "description" => __ ( "The description of the result."),
               "example" => __ ( "All permissions are okay.")
+            ),
+            "Checks" => array (
+              "type" => "array",
+              "description" => __ ( "Per-item diagnostic checks."),
+              "items" => array (
+                "type" => "object",
+                "properties" => array (
+                  "Name" => array ( "type" => "string"),
+                  "Result" => array ( "type" => "boolean"),
+                  "Detail" => array ( "type" => "string")
+                )
+              )
             )
           )
         )
@@ -86,23 +98,7 @@ framework_add_api_call (
  */
 function install_check ( $buffer, $parameters)
 {
-  /**
-   * Check for filesystem permissions
-   */
-  $result = array ();
-  if ( ! file_exists ( "/etc/voipdomain/webserver.conf") && is_writable ( "/etc/voipdomain/"))
-  {
-    $result["Result"] = true;
-    $result["Description"] = __ ( "All permissions are okay.");
-  } else {
-    $result["Result"] = false;
-    $result["Description"] = __ ( "Filesystem permissions missing.");
-  }
-
-  /**
-   * Return structured data
-   */
-  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $result);
+  return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), voipdomain_install_check_status ());
 }
 
 /**
@@ -197,6 +193,10 @@ function install_populate ( $buffer, $parameters)
     $parameters["Port"] = (int) substr ( $parameters["Hostname"], strpos ( $parameters["Hostname"], ":") + 1);
     $parameters["Hostname"] = substr ( $parameters["Hostname"], 0, strpos ( $parameters["Hostname"], ":"));
   }
+  if ( $parameters["Hostname"] === "127.0.0.1" || strtolower ( $parameters["Hostname"]) === "::1")
+  {
+    $parameters["Hostname"] = "localhost";
+  }
   if ( ! array_key_exists ( "Hostname", $return) && gethostbyname ( $parameters["Hostname"]) == "")
   {
     $return["Hostname"] = __ ( "Invalid hostname.");
@@ -205,13 +205,21 @@ function install_populate ( $buffer, $parameters)
   {
     $return["Username"] = __ ( "The username is required.");
   }
-  if ( empty ( $parameters["Password"]))
-  {
-    $return["Password"] = __ ( "The password is required.");
-  }
   if ( sizeof ( $return) != 0)
   {
     $return["Result"] = false;
+    return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $return);
+  }
+
+  /**
+   * Filesystem preflight (config write probe) before any database work
+   */
+  $preflight = voipdomain_install_check_status ();
+  if ( ! $preflight["Result"])
+  {
+    $return["Result"] = false;
+    $return["Message"] = ! empty ( $preflight["Description"]) ? $preflight["Description"] : __ ( "Installation check failed.");
+    header ( $_SERVER["SERVER_PROTOCOL"] . " 422 Unprocessable Entity");
     return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $return);
   }
 
@@ -230,8 +238,8 @@ function install_populate ( $buffer, $parameters)
   /**
    * Check database server connection
    */
-  $_in["mysql"]["id"] = @new mysqli ( $_in["mysql"]["hostname"], $_in["mysql"]["username"], $_in["mysql"]["password"], $_in["mysql"]["database"]);
-  if ( $_in["mysql"]["id"]->connect_errno)
+  $db = voipdomain_mysqli_connect ( $_in["mysql"]["hostname"], $_in["mysql"]["username"], $_in["mysql"]["password"], $_in["mysql"]["database"]);
+  if ( ! $db["id"])
   {
     $return["Username"] = __ ( "Username or password invalid.");
   }
@@ -240,6 +248,7 @@ function install_populate ( $buffer, $parameters)
     $return["Result"] = false;
     return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $return);
   }
+  $_in["mysql"]["id"] = $db["id"];
 
   /**
    * Create VoIP Domain database (default database name will be `vd`)
@@ -258,137 +267,7 @@ function install_populate ( $buffer, $parameters)
   /**
    * Create database variable structure
    */
-  $_in["install"] = array ();
-  $_in["install"]["db"] = array (
-    "procedures" => array (),
-    "tables" => array (),
-    "triggers" => array (),
-    "data" => array ()
-  );
-
-  /**
-   * Database installation methods
-   */
-
-  /**
-   * Function to add a procedure to the system database installation.
-   *
-   * @global array $_in Framework global configuration variable
-   * @param string $name The name of the procedure
-   * @param string $data The procedure itself
-   * @param array $deps[optional] Array with name of dependencies
-   * @return boolean If the procedure was added
-   */
-  function install_add_db_procedure ( $name, $data, $deps = array ())
-  {
-    global $_in;
-
-    /**
-     * Check if name already exist
-     */
-    if ( array_key_exists ( $name, $_in["install"]["db"]["procedures"]))
-    {
-      return false;
-    }
-
-    /**
-     * Add procedure to internal variable
-     */
-    $_in["install"]["db"]["procedures"][$name] = array ( "data" => $data, "deps" => $deps);
-
-    return true;
-  }
-
-  /**
-   * Function to add a table to the system database installation.
-   *
-   * @global array $_in Framework global configuration variable
-   * @param string $name The name of the table
-   * @param string $data The table itself
-   * @param array $deps[optional] Array with name of dependencies
-   * @return boolean If the table was added
-   */
-  function install_add_db_table ( $name, $data, $deps = array ())
-  {
-    global $_in;
-
-    /**
-     * Check if name already exist
-     */
-    if ( array_key_exists ( $name, $_in["install"]["db"]["tables"]))
-    {
-      return false;
-    }
-
-    /**
-     * Add table to internal variable
-     */
-    $_in["install"]["db"]["tables"][$name] = array ( "data" => $data, "deps" => $deps);
-
-    return true;
-  }
-
-  /**
-   * Function to add a triggers to the system database installation.
-   *
-   * @global array $_in Framework global configuration variable
-   * @param string $name The name of the trigger
-   * @param string $data The trigger itself
-   * @param array $deps[optional] Array with name of dependencies
-   * @return boolean If the trigger was added
-   */
-  function install_add_db_trigger ( $name, $data, $deps = array ())
-  {
-    global $_in;
-
-    /**
-     * Check if name already exist
-     */
-    if ( array_key_exists ( $name, $_in["install"]["db"]["triggers"]))
-    {
-      return false;
-    }
-
-    /**
-     * Add trigger to internal variable
-     */
-    $_in["install"]["db"]["triggers"][$name] = array ( "data" => $data, "deps" => $deps);
-
-    return true;
-  }
-
-  /**
-   * Function to add a table data to the system database installation.
-   *
-   * @global array $_in Framework global configuration variable
-   * @param string $name The name of the table
-   * @param array $data The data itself
-   * @param array $deps[optional] Array with name of dependencies
-   * @return boolean If the table data was added
-   */
-  function install_add_db_data ( $name, $data, $deps = array ())
-  {
-    global $_in;
-
-    /**
-     * If table name already exist, merge data, otherwise create table data
-     */
-    if ( array_key_exists ( $name, $_in["install"]["db"]["data"]))
-    {
-      $_in["install"]["db"]["data"][$name]["data"] = array_merge_recursive ( $_in["install"]["db"]["data"][$name]["data"], $data);
-      foreach ( $deps as $dep)
-      {
-        if ( ! in_array ( $dep, $_in["install"]["db"]["data"][$name]["deps"]))
-        {
-          $_in["install"]["db"]["data"][$name]["deps"][] = $dep;
-        }
-      }
-    } else {
-      $_in["install"]["db"]["data"][$name] = array ( "data" => $data, "deps" => $deps);
-    }
-
-    return true;
-  }
+  plugin_install_db_init ();
 
   /**
    * Add basic system procedures
@@ -526,241 +405,9 @@ function install_populate ( $buffer, $parameters)
   }
 
   /**
-   * Create database procedures
+   * Create database objects collected from install hooks
    */
-  if ( sizeof ( $_in["install"]["db"]["procedures"]))
-  {
-    foreach ( $_in["install"]["db"]["procedures"] as $name => $data)
-    {
-      $_in["install"]["db"]["procedures"][$name]["installed"] = false;
-    }
-    $toinstall = sizeof ( $_in["install"]["db"]["procedures"]);
-    while ( $toinstall > 0)
-    {
-      $lastinst = $toinstall;
-      $pending = false;
-      foreach ( $_in["install"]["db"]["procedures"] as $name => $data)
-      {
-        if ( $data["installed"] == false)
-        {
-          $depsok = true;
-          foreach ( $data["deps"] as $dep)
-          {
-            if ( $_in["install"]["db"]["procedures"][$dep]["installed"] != true)
-            {
-              $depsok = false;
-            }
-          }
-          if ( $depsok)
-          {
-            $toinstall--;
-            if ( @$_in["mysql"]["id"]->query ( $data["data"]))
-            {
-              $_in["install"]["db"]["procedures"][$name]["installed"] = true;
-            } else {
-              if ( ! array_key_exists ( "Procedures", $return))
-              {
-                $return["Procedures"] = array ();
-              }
-              $return["Procedures"][] = sprintf ( __ ( "Error installing database procedure \"%s\"!", true, false), $name);
-            }
-          } else {
-            $pending = true;
-          }
-        }
-      }
-      if ( $lastinst == $toinstall && $pending == true)
-      {
-        $return["Procedures"][] = __ ( "There are pending procedures not installed due to dependency error.");
-        $toinstall = 0;
-      }
-    }
-  }
-
-  /**
-   * Create database tables
-   */
-  if ( sizeof ( $_in["install"]["db"]["tables"]))
-  {
-    foreach ( $_in["install"]["db"]["tables"] as $name => $data)
-    {
-      $_in["install"]["db"]["tables"][$name]["installed"] = false;
-    }
-    $toinstall = sizeof ( $_in["install"]["db"]["tables"]);
-    while ( $toinstall > 0)
-    {
-      $lastinst = $toinstall;
-      $pending = false;
-      foreach ( $_in["install"]["db"]["tables"] as $name => $data)
-      {
-        if ( $data["installed"] == false)
-        {
-          $depsok = true;
-          foreach ( $data["deps"] as $dep)
-          {
-            if ( $_in["install"]["db"]["tables"][$dep]["installed"] != true)
-            {
-              $depsok = false;
-            }
-          }
-          if ( $depsok)
-          {
-            $toinstall--;
-            if ( @$_in["mysql"]["id"]->query ( $data["data"]))
-            {
-              $_in["install"]["db"]["tables"][$name]["installed"] = true;
-            } else {
-              if ( ! array_key_exists ( "Tables", $return))
-              {
-                $return["Tables"] = array ();
-              }
-              $return["Tables"][] = sprintf ( __ ( "Error installing database table \"%s\"!", true, false), $name);
-            }
-          } else {
-            $pending = true;
-          }
-        }
-      }
-      if ( $lastinst == $toinstall && $pending == true)
-      {
-        $return["Tables"][] = __ ( "There are pending tables not installed due to dependency error.");
-        $toinstall = 0;
-      }
-    }
-  }
-
-  /**
-   * Create database triggers
-   */
-  if ( sizeof ( $_in["install"]["db"]["triggers"]))
-  {
-    foreach ( $_in["install"]["db"]["triggers"] as $name => $data)
-    {
-      $_in["install"]["db"]["triggers"][$name]["installed"] = false;
-    }
-    $toinstall = sizeof ( $_in["install"]["db"]["triggers"]);
-    while ( $toinstall > 0)
-    {
-      $lastinst = $toinstall;
-      $pending = false;
-      foreach ( $_in["install"]["db"]["triggers"] as $name => $data)
-      {
-        if ( $data["installed"] == false)
-        {
-          $depsok = true;
-          foreach ( $data["deps"] as $dep)
-          {
-            if ( $_in["install"]["db"]["triggers"][$dep]["installed"] != true)
-            {
-              $depsok = false;
-            }
-          }
-          if ( $depsok)
-          {
-            $toinstall--;
-            if ( @$_in["mysql"]["id"]->query ( $data["data"]))
-            {
-              $_in["install"]["db"]["triggers"][$name]["installed"] = true;
-            } else {
-              if ( ! array_key_exists ( "Triggers", $return))
-              {
-                $return["Triggers"] = array ();
-              }
-              $return["Triggers"][] = sprintf ( __ ( "Error installing database trigger \"%s\"!", true, false), $name);
-            }
-          } else {
-            $pending = true;
-          }
-        }
-      }
-      if ( $lastinst == $toinstall && $pending == true)
-      {
-        $return["Triggers"][] = __ ( "There are pending triggers not installed due to dependency error.");
-        $toinstall = 0;
-      }
-    }
-  }
-
-  /**
-   * Create database table data
-   */
-  if ( sizeof ( $_in["install"]["db"]["data"]))
-  {
-    foreach ( $_in["install"]["db"]["data"] as $name => $data)
-    {
-      $_in["install"]["db"]["data"][$name]["installed"] = false;
-    }
-    $toinstall = sizeof ( $_in["install"]["db"]["data"]);
-    while ( $toinstall > 0)
-    {
-      $lastinst = $toinstall;
-      $pending = false;
-      foreach ( $_in["install"]["db"]["data"] as $name => $data)
-      {
-        if ( $data["installed"] == false)
-        {
-          $depsok = true;
-          foreach ( $data["deps"] as $dep)
-          {
-            if ( $_in["install"]["db"]["data"][$dep]["installed"] != true)
-            {
-              $depsok = false;
-            }
-          }
-          if ( $depsok)
-          {
-            $toinstall--;
-            $failed = false;
-            $query = "";
-            $order = array ();
-            foreach ( $data["data"] as $entry)
-            {
-              if ( $query == "")
-              {
-                $query = "INSERT INTO `" . $name . "` (";
-                foreach ( $entry as $key => $value)
-                {
-                  $query .= "`" . $key . "`, ";
-                  $order[] = $key;
-                }
-                $query = substr ( $query, 0, -2) . ") VALUES";
-              } else {
-                $query .= ",";
-              }
-              $query .= " (";
-              foreach ( $order as $key)
-              {
-                if ( is_bool ( $entry[$key]))
-                {
-                  $query .= ( $entry[$key] ? "true" : "false") . ", ";
-                } else {
-                  $query .= "'" . $_in["mysql"]["id"]->real_escape_string ( $entry[$key]) . "', ";
-                }
-              }
-              $query = substr ( $query, 0, -2) . ")";
-            }
-            if ( ! @$_in["mysql"]["id"]->query ( $query) && $failed == false)
-            {
-              if ( ! array_key_exists ( "Data", $return))
-              {
-                $return["Data"] = array ();
-              }
-              $return["Data"][] = sprintf ( __ ( "Error inserting database table \"%s\" data!", true, false), $name);
-              $failed = true;
-            }
-            $_in["install"]["db"]["data"][$name]["installed"] = true;
-          } else {
-            $pending = true;
-          }
-        }
-      }
-      if ( $lastinst == $toinstall && $pending == true)
-      {
-        $return["Data"][] = __ ( "There are pending table data not installed due to dependency error.");
-        $toinstall = 0;
-      }
-    }
-  }
+  $return = plugin_process_db ( $return);
 
   /**
    * Create unprivileged VoIP Domain user
@@ -819,7 +466,7 @@ function install_populate ( $buffer, $parameters)
     $config .= ";    \:.. ./      |::.|::.|       |::.. . /\n";
     $config .= ";     `---'       `---`---'       `------'\n";
     $config .= ";\n";
-    $config .= "; Copyright (C) 2016-2025 Ernani José Camargo Azevedo\n";
+    $config .= "; Copyright (C) 2016-2026 Ernani José Camargo Azevedo\n";
     $config .= ";\n";
     $config .= "; This program is free software: you can redistribute it and/or modify\n";
     $config .= "; it under the terms of the GNU General Public License as published by\n";
@@ -842,7 +489,7 @@ function install_populate ( $buffer, $parameters)
     $config .= "; @version    1.0\n";
     $config .= "; @package    VoIP Domain\n";
     $config .= "; @subpackage Interface\n";
-    $config .= "; @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.\n";
+    $config .= "; @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.\n";
     $config .= "; @license    https://www.gnu.org/licenses/gpl-3.0.en.html\n";
     $config .= ";\n";
     $config .= "\n";
@@ -860,6 +507,7 @@ function install_populate ( $buffer, $parameters)
     $config .= "soundsdir = /var/lib/asterisk/sounds/voipdomain\n";
     $config .= "storagedir = /var/lib/voipdomain/storage\n";
     $config .= "installdate = " . date ( "Y-m-d") . "\n";
+    $config .= "installed = true\n";
     $config .= "timeout = 1800\n";
     $config .= "debug = false\n";
     $config .= "defaultcurrency = USD\n";
@@ -889,6 +537,9 @@ function install_populate ( $buffer, $parameters)
     if ( ! file_put_contents ( "/etc/voipdomain/webinterface.conf", $config))
     {
       $return["Message"] = __ ( "Unable to write configuration file!");
+    } else {
+      @chmod ( "/etc/voipdomain/webinterface.conf", 0660);
+      @chgrp ( "/etc/voipdomain/webinterface.conf", "nginx");
     }
   }
 

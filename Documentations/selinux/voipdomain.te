@@ -1,0 +1,168 @@
+policy_module(voipdomain, 1.0.0)
+
+########################################
+#
+# Declarations
+#
+
+type voipdomain_t;
+type voipdomain_exec_t;
+init_daemon_domain(voipdomain_t, voipdomain_exec_t)
+
+type voipdomain_etc_t;
+files_config_file(voipdomain_etc_t)
+
+type voipdomain_var_lib_t;
+files_type(voipdomain_var_lib_t)
+
+type voipdomain_log_t;
+logging_log_file(voipdomain_log_t)
+
+type voipdomain_var_run_t;
+files_pid_file(voipdomain_var_run_t)
+
+type voipdomain_tmp_t;
+files_tmp_file(voipdomain_tmp_t)
+
+type voipdomain_spool_t;
+files_type(voipdomain_spool_t)
+
+########################################
+#
+# voipdomain_t local policy
+#
+
+allow voipdomain_t self:process { fork signal_perms setpgid setsched setrlimit };
+allow voipdomain_t self:fifo_file rw_fifo_file_perms;
+allow voipdomain_t self:unix_stream_socket create_stream_socket_perms;
+allow voipdomain_t self:unix_dgram_socket create_socket_perms;
+allow voipdomain_t self:tcp_socket create_stream_socket_perms;
+allow voipdomain_t self:udp_socket create_socket_perms;
+allow voipdomain_t self:netlink_route_socket r_netlink_socket_perms;
+
+# Capabilities for setuid/setgid
+allow voipdomain_t self:capability { setuid setgid dac_read_search dac_override };
+
+# Configuration files
+allow voipdomain_t voipdomain_etc_t:dir list_dir_perms;
+allow voipdomain_t voipdomain_etc_t:file read_file_perms;
+
+# Var lib (data, webroot, storage)
+allow voipdomain_t voipdomain_var_lib_t:dir manage_dir_perms;
+allow voipdomain_t voipdomain_var_lib_t:file manage_file_perms;
+allow voipdomain_t voipdomain_var_lib_t:lnk_file read_lnk_file_perms;
+
+# Log files
+allow voipdomain_t voipdomain_log_t:dir manage_dir_perms;
+allow voipdomain_t voipdomain_log_t:file manage_file_perms;
+logging_log_filetrans(voipdomain_t, voipdomain_log_t, { dir file })
+
+# PID/runtime files
+allow voipdomain_t voipdomain_var_run_t:dir manage_dir_perms;
+allow voipdomain_t voipdomain_var_run_t:file manage_file_perms;
+files_pid_filetrans(voipdomain_t, voipdomain_var_run_t, { dir file })
+
+# Temp files
+allow voipdomain_t voipdomain_tmp_t:dir manage_dir_perms;
+allow voipdomain_t voipdomain_tmp_t:file manage_file_perms;
+files_tmp_filetrans(voipdomain_t, voipdomain_tmp_t, { dir file })
+
+# PHP OPCache support (shared memory in tmpfs)
+allow voipdomain_t tmpfs_t:file { lock map read write };
+
+# PHP OPCache huge pages support (optional - may not exist on all systems)
+optional_policy(`
+    gen_require(`
+        type hugetlbfs_t;
+    ')
+    allow voipdomain_t hugetlbfs_t:file { map read write };
+')
+
+# Allow reading executable directories (for includes/modules)
+allow voipdomain_t voipdomain_exec_t:dir list_dir_perms;
+allow voipdomain_t voipdomain_exec_t:file read_file_perms;
+
+# Spool files
+allow voipdomain_t voipdomain_spool_t:dir manage_dir_perms;
+allow voipdomain_t voipdomain_spool_t:file manage_file_perms;
+
+# Execute PHP and shell
+corecmd_exec_bin(voipdomain_t)
+corecmd_exec_shell(voipdomain_t)
+
+# Read system files
+kernel_read_system_state(voipdomain_t)
+files_read_etc_files(voipdomain_t)
+files_read_usr_files(voipdomain_t)
+
+# Network
+corenet_tcp_connect_all_ports(voipdomain_t)
+corenet_tcp_bind_generic_node(voipdomain_t)
+corenet_tcp_bind_all_unreserved_ports(voipdomain_t)
+sysnet_dns_name_resolve(voipdomain_t)
+
+# MySQL connection
+optional_policy(`
+    mysql_stream_connect(voipdomain_t)
+')
+
+# NSS/passwd lookups
+auth_use_nsswitch(voipdomain_t)
+
+# Locale and timezone
+miscfiles_read_localization(voipdomain_t)
+
+# Process state
+domain_read_all_domains_state(voipdomain_t)
+
+########################################
+#
+# httpd_t (PHP-FPM/Nginx) policy
+#
+
+optional_policy(`
+    gen_require(`
+        type httpd_t;
+        type httpd_sys_rw_content_t;
+    ')
+
+    # Allow httpd to read/write voipdomain files
+    allow httpd_t voipdomain_etc_t:dir list_dir_perms;
+    allow httpd_t voipdomain_etc_t:file rw_file_perms;
+    allow httpd_t voipdomain_var_lib_t:dir manage_dir_perms;
+    allow httpd_t voipdomain_var_lib_t:file manage_file_perms;
+    allow httpd_t voipdomain_var_lib_t:lnk_file read_lnk_file_perms;
+    allow httpd_t voipdomain_var_run_t:dir manage_dir_perms;
+    allow httpd_t voipdomain_var_run_t:file manage_file_perms;
+    allow httpd_t voipdomain_log_t:dir list_dir_perms;
+    allow httpd_t voipdomain_log_t:file read_file_perms;
+    allow httpd_t voipdomain_spool_t:dir manage_dir_perms;
+    allow httpd_t voipdomain_spool_t:file manage_file_perms;
+
+    # Allow voipdomain daemons to access /etc/voipdomain when labeled httpd_sys_rw_content_t
+    allow voipdomain_t httpd_sys_rw_content_t:dir { search getattr open read };
+    allow voipdomain_t httpd_sys_rw_content_t:file { read getattr open };
+')
+
+########################################
+#
+# Asterisk integration (optional)
+#
+
+optional_policy(`
+    asterisk_stream_connect(voipdomain_t)
+')
+
+optional_policy(`
+    gen_require(`
+        type asterisk_t;
+        type asterisk_port_t;
+    ')
+
+    # Allow Asterisk to read VoIP Domain configuration files in /etc/asterisk/voipdomain/
+    allow asterisk_t voipdomain_etc_t:dir list_dir_perms;
+    allow asterisk_t voipdomain_etc_t:file read_file_perms;
+
+    # Allow Asterisk to connect to FastAGI port (4573)
+    allow asterisk_t asterisk_port_t:tcp_socket name_connect;
+')

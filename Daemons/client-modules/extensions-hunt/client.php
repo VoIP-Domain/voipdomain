@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Extensions Hunts
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "extension_hunt_add", "extension_hunt_add");
 framework_add_hook ( "extension_hunt_change", "extension_hunt_change");
@@ -313,7 +313,7 @@ function extension_hunt_change ( $buffer, $parameters)
   // Verify if new extension hunt number is in use
   if ( $parameters["Number"] != $parameters["NewNumber"] && check_config ( "config", "dialplan-extension-" . $parameters["NewNumber"]))
   {
-    return array ( "code" => 409, "message" => "New number already exist.");
+    return array ( "code" => 409, "message" => "New number already exists.");
   }
 
   // Remove extension hunt files

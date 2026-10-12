@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,12 +30,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments Yealink
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "equipment_model_t18p_configure", "equipment_model_yealink_basic_configure");
 framework_add_hook ( "equipment_model_t18p_firmware_add", "equipment_model_yealink_add_firmware");
@@ -383,6 +383,9 @@ function equipment_model_yealink_basic_configure ( $buffer, $parameters)
         break;
       case "GSM":
         $codecs[] = "gsm";
+        break;
+      case "OPUS":
+        $codecs[] = "opus";
         break;
       default:
         writeLog ( "Invalid audio codec \"" . $codec . "\" to model \"" . $parameters["UID"] . "\"!", VoIP_LOG_WARNING);
@@ -737,7 +740,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T18P/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T18P/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -749,7 +752,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T19PE2/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T19PE2/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -761,7 +764,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T20P/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T20P/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -773,7 +776,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T21P/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T21P/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -785,7 +788,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T21PE2/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T21PE2/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -797,7 +800,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T22P/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T22P/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -811,7 +814,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
         {
           return array ( "code" => 500, "message" => "Error creating directory structure.");
         }
-        if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T23P/" . $parameters["Filename"], $parameters["Data"]) === false)
+        if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T23P/" . $parameters["Filename"], $parameters))
         {
           return array ( "code" => 500, "message" => "Error writing file.");
         }
@@ -822,7 +825,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
         {
           return array ( "code" => 500, "message" => "Error creating directory structure.");
         }
-        if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T23G/" . $parameters["Filename"], $parameters["Data"]) === false)
+        if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T23G/" . $parameters["Filename"], $parameters))
         {
           return array ( "code" => 500, "message" => "Error writing file.");
         }
@@ -835,7 +838,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T26P/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T26P/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -847,7 +850,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T27P/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T27P/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -859,7 +862,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T27G/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T27G/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -871,7 +874,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T28P/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T28P/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -883,11 +886,11 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T29G/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T29G/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
-      if ( ! copy ( dirname ( __FILE__) . "/wallpaper%20-%20480x272.jpeg", $_in["general"]["tftpdir"] . "/Yealink/SIP-T29G/VoIP%20Domain.jpeg") === false)
+      if ( copy ( dirname ( __FILE__) . "/wallpaper - 480x272.jpeg", $_in["general"]["tftpdir"] . "/Yealink/SIP-T29G/VoIP Domain.jpeg") === false)
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -901,7 +904,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
         {
           return array ( "code" => 500, "message" => "Error creating directory structure.");
         }
-        if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T30P/" . $parameters["Filename"], $parameters["Data"]) === false)
+        if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T30P/" . $parameters["Filename"], $parameters))
         {
           return array ( "code" => 500, "message" => "Error writing file.");
         }
@@ -912,7 +915,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
         {
           return array ( "code" => 500, "message" => "Error creating directory structure.");
         }
-        if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T31/" . $parameters["Filename"], $parameters["Data"]) === false)
+        if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T31/" . $parameters["Filename"], $parameters))
         {
           return array ( "code" => 500, "message" => "Error writing file.");
         }
@@ -923,7 +926,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
         {
           return array ( "code" => 500, "message" => "Error creating directory structure.");
         }
-        if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T31P/" . $parameters["Filename"], $parameters["Data"]) === false)
+        if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T31P/" . $parameters["Filename"], $parameters))
         {
           return array ( "code" => 500, "message" => "Error writing file.");
         }
@@ -934,7 +937,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
         {
           return array ( "code" => 500, "message" => "Error creating directory structure.");
         }
-        if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T31G/" . $parameters["Filename"], $parameters["Data"]) === false)
+        if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T31G/" . $parameters["Filename"], $parameters))
         {
           return array ( "code" => 500, "message" => "Error writing file.");
         }
@@ -947,11 +950,11 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T38G/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T38G/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
-      if ( ! copy ( dirname ( __FILE__) . "/wallpaper%20-%20480x272.jpeg", $_in["general"]["tftpdir"] . "/Yealink/SIP-T38G/VoIP%20Domain.jpeg") === false)
+      if ( copy ( dirname ( __FILE__) . "/wallpaper - 480x272.jpeg", $_in["general"]["tftpdir"] . "/Yealink/SIP-T38G/VoIP Domain.jpeg") === false)
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -963,7 +966,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T40P/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T40P/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -977,11 +980,11 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
         {
           return array ( "code" => 500, "message" => "Error creating directory structure.");
         }
-        if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T46S/" . $parameters["Filename"], $parameters["Data"]) === false)
+        if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T46S/" . $parameters["Filename"], $parameters))
         {
           return array ( "code" => 500, "message" => "Error writing file.");
         }
-        if ( ! copy ( dirname ( __FILE__) . "/wallpaper%20-%20480x272.jpeg", $_in["general"]["tftpdir"] . "/Yealink/SIP-T46S/VoIP%20Domain.jpeg") === false)
+        if ( copy ( dirname ( __FILE__) . "/wallpaper - 480x272.jpeg", $_in["general"]["tftpdir"] . "/Yealink/SIP-T46S/VoIP Domain.jpeg") === false)
         {
           return array ( "code" => 500, "message" => "Error writing file.");
         }
@@ -992,11 +995,11 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
         {
           return array ( "code" => 500, "message" => "Error creating directory structure.");
         }
-        if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/SIP-T48S/" . $parameters["Filename"], $parameters["Data"]) === false)
+        if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/SIP-T48S/" . $parameters["Filename"], $parameters))
         {
           return array ( "code" => 500, "message" => "Error writing file.");
         }
-        if ( ! copy ( dirname ( __FILE__) . "/wallpaper%20-%20800x480.jpeg", $_in["general"]["tftpdir"] . "/Yealink/SIP-T48S/VoIP%20Domain.jpeg") === false)
+        if ( copy ( dirname ( __FILE__) . "/wallpaper - 800x480.jpeg", $_in["general"]["tftpdir"] . "/Yealink/SIP-T48S/VoIP Domain.jpeg") === false)
         {
           return array ( "code" => 500, "message" => "Error writing file.");
         }
@@ -1009,7 +1012,7 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/CP920/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/CP920/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -1021,11 +1024,11 @@ function equipment_model_yealink_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Yealink/VP530/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Yealink/VP530/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
-      if ( ! copy ( dirname ( __FILE__) . "/wallpaper%20-%20800x480.jpeg", $_in["general"]["tftpdir"] . "/Yealink/VP530/VoIP%20Domain.jpg") === false)
+      if ( copy ( dirname ( __FILE__) . "/wallpaper - 800x480.jpeg", $_in["general"]["tftpdir"] . "/Yealink/VP530/VoIP Domain.jpg") === false)
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -1242,7 +1245,7 @@ function ap_type_yealink_t18p ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     "pcma" => "ALAW",
@@ -2484,7 +2487,7 @@ function ap_type_yealink_t19pe2 ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     "ilbc_15_2kbps" => "ILBC",
@@ -3727,7 +3730,7 @@ function ap_type_yealink_t20p ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     array ( "ID" => "1", "Codec" => "ULAW", "Type" => "PCMU", "RTPMap" => 0, "Priority" => 0, "Enabled" => false),
@@ -4896,7 +4899,7 @@ function ap_type_yealink_t21p ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     "ilbc_15_2kbps" => "ILBC",
@@ -6061,7 +6064,7 @@ function ap_type_yealink_t21pe2 ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     "ilbc_15_2kbps" => "ILBC",
@@ -7246,7 +7249,7 @@ function ap_type_yealink_t22p ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     array ( "ID" => "1", "Codec" => "ULAW", "Type" => "PCMU", "RTPMap" => 0, "Priority" => 0, "Enabled" => false),
@@ -8451,7 +8454,7 @@ function ap_type_yealink_t23pg ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     array ( "ID" => "1", "Codec" => "ULAW", "Type" => "PCMU", "RTPMap" => 0, "Priority" => 0, "Enabled" => false),
@@ -9667,7 +9670,7 @@ function ap_type_yealink_t26p ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     array ( "ID" => "1", "Codec" => "ULAW", "Type" => "PCMU", "RTPMap" => 0, "Priority" => 0, "Enabled" => false),
@@ -10885,7 +10888,7 @@ function ap_type_yealink_t27pg ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     array ( "ID" => "1", "Codec" => "ULAW", "Type" => "PCMU", "RTPMap" => 0, "Priority" => 0, "Enabled" => false),
@@ -12221,7 +12224,7 @@ function ap_type_yealink_t28p ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     array ( "ID" => "1", "Codec" => "ULAW", "Type" => "PCMU", "RTPMap" => 0, "Priority" => 0, "Enabled" => false),
@@ -13557,7 +13560,7 @@ function ap_type_yealink_t29g ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     "ilbc_15_2kbps" => "ILBC",
@@ -14820,7 +14823,7 @@ function ap_type_yealink_t38g ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     "ilbc_15_2kbps" => "ILBC",
@@ -16114,7 +16117,7 @@ function ap_type_yealink_t4xs ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     "ilbc_15_2kbps" => "ILBC",
@@ -17377,7 +17380,7 @@ function ap_type_yealink_t30p ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     "ilbc_15_2kbps" => "ILBC",
@@ -18650,7 +18653,7 @@ function ap_type_yealink_t31 ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     "iLBC" => "ILBC",
@@ -19955,7 +19958,7 @@ function ap_type_yealink_t40p ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     "ilbc_15_2kbps" => "ILBC",
@@ -21225,7 +21228,7 @@ function ap_type_yealink_cp920 ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     "opus" => "OPUS",
@@ -22500,7 +22503,7 @@ function ap_type_yealink_vp530 ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment audio CODEC's:
+  // Configure equipment audio codecs:
   $codecconfig = "";
   $codecs = array (
     array ( "ID" => "1", "Codec" => "ULAW", "Type" => "PCMU", "RTPMap" => 0, "Priority" => 0, "Enabled" => false),
@@ -22539,7 +22542,7 @@ function ap_type_yealink_vp530 ( $buffer, $parameters)
   }
   $content = str_replace ( "{{{audiocodecconfig}}}", $codecconfig, $content);
 
-  // Configure equipment video CODEC's:
+  // Configure equipment video codecs:
   $codecconfig = "";
   $codecs = array (
     array ( "ID" => "1", "Codec" => "H264", "Type" => "H264", "RTPMap" => 99, "Parameters" => "profile-level-id=42800D; packetization-mode=0; max-mbps=11880", "Priority" => 0, "Enabled" => false),

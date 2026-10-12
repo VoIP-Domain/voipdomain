@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Interface
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -869,7 +869,7 @@ function framework_page_generate ( $content)
   $footer .= "                {\n";
 
   /**
-   * Call page load onfinish hook's
+   * Call page load onfinish hooks
    */
   if ( framework_has_hook ( "pageload_onfinish"))
   {
@@ -2319,7 +2319,7 @@ function install_page_generate ( $buffer, $parameters)
   $body .= "      <br />\n";
   $body .= "      <p>" . __ ( "Provide the MySQL database server credentials below:") . "</p>\n";
   $body .= "      <form role=\"presentation\" autocomplete=\"off\" action=\"\">\n";
-  $body .= "        <li><input id=\"" . $dbaddr . "\" name=\"" . $dbaddr . "\" type=\"text\" placeholder=\"" . __ ( "Database address") . "\" spellcheck=\"false\" autocapitalize=\"off\" autocorrect=\"off\" autocomplete=\"new-text\" /><i class=\"icon server\"></i></li>\n";
+  $body .= "        <li><input id=\"" . $dbaddr . "\" name=\"" . $dbaddr . "\" type=\"text\" value=\"localhost\" placeholder=\"" . __ ( "Database address") . "\" spellcheck=\"false\" autocapitalize=\"off\" autocorrect=\"off\" autocomplete=\"new-text\" /><i class=\"icon server\"></i></li>\n";
   $body .= "        <li><input id=\"" . $dbuser . "\" name=\"" . $dbuser . "\" type=\"text\" placeholder=\"" . __ ( "Super-user name") . "\" spellcheck=\"false\" autocapitalize=\"off\" autocorrect=\"off\" autocomplete=\"new-text\" /><i class=\"icon user\"></i></li>\n";
   $body .= "        <li><input id=\"" . $dbpass . "\" name=\"" . $dbpass . "\" type=\"password\" placeholder=\"" . __ ( "Super-user password") . "\" spellcheck=\"false\" autocapitalize=\"off\" autocorrect=\"off\" autocomplete=\"new-password\" /><i class=\"icon lock\"></i></li>\n";
   $body .= "      </form>\n";
@@ -2410,7 +2410,7 @@ function install_page_generate ( $buffer, $parameters)
   $footer .= "                          $('#dot2').animate ( { 'background-color': '#ffffff'}, 'slow');\n";
   $footer .= "                          $('#" . $dbaddr . "').focus ();\n";
   $footer .= "                        } else {\n";
-  $footer .= "                          if ( data.hasOwnProperty ( 'Description'))\n";
+  $footer .= "                          if ( data.Description)\n";
   $footer .= "                          {\n";
   $footer .= "                            new PNotify ( { title: '" . __ ( "Installation") . "', text: data.Description, type: 'error', styling: 'bootstrap3', 'animate_speed': 'slow'});\n";
   $footer .= "                          }\n";
@@ -2521,7 +2521,7 @@ function install_page_generate ( $buffer, $parameters)
  * Dashboard
  */
 framework_add_hook ( "dashboard_page", "dashboard_page");
-framework_add_path ( "/dashboard", "dashboard_page", array ( "permissions" => array ( "User", "Administrator")));
+framework_add_path ( "/dashboard", "dashboard_page", array ( "permissions" => array ( "User", "Administrator", "Super-Administrator")));
 
 /**
  * Function to draw a dashboard to user.

@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Audio
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -99,14 +99,14 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Fields" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -170,7 +170,7 @@ function audios_search ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
 
   /**
@@ -282,7 +282,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -305,7 +305,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "audios_view"),
     "title" => __ ( "View audios"),
-    "description" => __ ( "Get an audio file information."),
+    "description" => __ ( "Get audio file information."),
     "parameters" => array (
       array (
         "name" => "ID",
@@ -516,7 +516,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -708,10 +708,10 @@ framework_add_hook (
     ),
     "response" => array (
       201 => array (
-        "description" => __ ( "New system audio file added successfully.")
+        "description" => __ ( "A new system audio file was added successfully.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -862,12 +862,16 @@ function audios_add ( $buffer, $parameters)
   /**
    * Add new audio at Asterisk servers
    */
-  $notify = array ( "ID" => $parameters["ID"], "Filename" => $parameters["Filename"], "Data" => $parameters["Filecontent"]);
+  $notify = array ( "ID" => $parameters["ID"], "Filename" => $parameters["Filename"]);
   if ( framework_has_hook ( "audios_add_notify"))
   {
     $notify = framework_call ( "audios_add_notify", $parameters, false, $notify);
   }
-  notify_server ( 0, "audio_add", $notify);
+  file_transfer_send ( 0, $_in["general"]["storagedir"] . "/sounds/" . $parameters["Filename"], array (
+    "TargetEvent" => "audio_add",
+    "Context" => "audio",
+    "Metadata" => $notify
+  ));
 
   /**
    * Execute finish hook if exist
@@ -881,7 +885,7 @@ function audios_add ( $buffer, $parameters)
    * Return OK to user
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . $_in["api"]["baseurl"] . "/audios/" . $parameters["ID"]);
+  header ( "Location: " . voipdomain_location_url ( "/api/audios/" . $parameters["ID"]));
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 
@@ -922,7 +926,7 @@ framework_add_hook (
         "description" => __ ( "The system audio file was successfully updated.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1096,16 +1100,21 @@ function audios_edit ( $buffer, $parameters)
   }
 
   /**
-   * Notify servers about change
+   * Notify servers when audio file content was replaced (rename or same name)
    */
-  if ( $parameters["ORIGINAL"]["Filename"] != $parameters["Filename"])
+  if ( ! empty ( $parameters["Filename"]))
   {
-    $notify = array ( "ID" => $parameters["ID"], "Filename" => $parameters["ORIGINAL"]["Filename"], "NewFilename" => $parameters["Filename"], "Data" => $parameters["Filecontent"]);
+    $targetfilename = $parameters["Filename"];
+    $notify = array ( "ID" => $parameters["ID"], "Filename" => $parameters["ORIGINAL"]["Filename"], "NewFilename" => $targetfilename);
     if ( framework_has_hook ( "audios_edit_notify"))
     {
       $notify = framework_call ( "audios_edit_notify", $parameters, false, $notify);
     }
-    notify_server ( 0, "audio_change", $notify);
+    file_transfer_send ( 0, $_in["general"]["storagedir"] . "/sounds/" . $targetfilename, array (
+      "TargetEvent" => "audio_change",
+      "Context" => "audio",
+      "Metadata" => $notify
+    ));
   }
 
   /**
@@ -1135,7 +1144,7 @@ framework_add_hook (
         "description" => __ ( "The system audio file was removed.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1320,12 +1329,16 @@ function audios_server_reconfig ( $buffer, $parameters)
   }
   while ( $audio = $result->fetch_assoc ())
   {
-    $notify = array ( "Filename" => $audio["Filename"], "ID" => $audio["ID"], "Data" => base64_encode ( file_get_contents ( $_in["general"]["storagedir"] . "/sounds/" . $audio["Filename"])));
+    $notify = array ( "Filename" => $audio["Filename"], "ID" => $audio["ID"]);
     if ( framework_has_hook ( "audios_add_notify"))
     {
       $notify = framework_call ( "audios_add_notify", $parameters, false, $notify);
     }
-    notify_server ( (int) $parameters["ID"], "audio_add", $notify);
+    file_transfer_send ( (int) $parameters["ID"], $_in["general"]["storagedir"] . "/sounds/" . $audio["Filename"], array (
+      "TargetEvent" => "audio_add",
+      "Context" => "audio",
+      "Metadata" => $notify
+    ));
   }
 
   /**

@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Agents
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -67,7 +67,7 @@ function agents_search_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Agents"));
-  sys_set_subtitle ( __ ( "agents search"));
+  sys_set_subtitle ( __ ( "Search agents"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Agents"))
   ));
@@ -182,7 +182,7 @@ function agents_add_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Agents"));
-  sys_set_subtitle ( __ ( "agents addition"));
+  sys_set_subtitle ( __ ( "Add agents"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Agents"), "link" => "/agents"),
     2 => array ( "title" => __ ( "Add"))
@@ -267,7 +267,7 @@ function agents_add_page ( $buffer, $parameters)
               "    URL: '/agents',\n" .
               "    method: 'POST',\n" .
               "    button: $('button.add'),\n" .
-              "    title: '" . __ ( "Agent addition") . "',\n" .
+              "    title: '" . __ ( "Add agent") . "',\n" .
               "    fail: '" . __ ( "Error adding agent!") . "',\n" .
               "    success: '" . __ ( "Agent added successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
@@ -311,7 +311,7 @@ function agents_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Agent cloning") . "', text: '" . __ ( "Error retrieving agent data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Clone agent") . "', text: '" . __ ( "Error retrieving agent data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -329,7 +329,7 @@ function agents_view_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Agents"));
-  sys_set_subtitle ( __ ( "agents visualization"));
+  sys_set_subtitle ( __ ( "View agents"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Agents"), "link" => "/agents"),
     2 => array ( "title" => __ ( "View"))
@@ -389,7 +389,7 @@ function agents_view_page ( $buffer, $parameters)
               "  $('#agent_view_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Agent view") . "', text: '" . __ ( "Error viewing agent!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "View agent") . "', text: '" . __ ( "Error viewing agent!") . "', type: 'error'});\n" .
               "});\n");
 
   return $output;
@@ -409,7 +409,7 @@ function agents_edit_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Agents"));
-  sys_set_subtitle ( __ ( "agents editing"));
+  sys_set_subtitle ( __ ( "Edit agents"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Agents"), "link" => "/agents"),
     2 => array ( "title" => __ ( "Edit"))
@@ -488,7 +488,7 @@ function agents_edit_page ( $buffer, $parameters)
               "  $('#agent_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Agent edition") . "', text: '" . __ ( "Error retrieving agent data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Edit agent") . "', text: '" . __ ( "Error retrieving agent data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#agent_edit_form').alerts ( 'form',\n" .
               "{\n" .
@@ -497,7 +497,7 @@ function agents_edit_page ( $buffer, $parameters)
               "    URL: '/agents/' + VoIP.parameters.id,\n" .
               "    method: 'PATCH',\n" .
               "    button: $('button.edit'),\n" .
-              "    title: '" . __ ( "Agent edition") . "',\n" .
+              "    title: '" . __ ( "Edit agent") . "',\n" .
               "    fail: '" . __ ( "Error changing agent!") . "',\n" .
               "    success: '" . __ ( "Agent changed successfully!") . "',\n" .
               "    onsuccess: function ()\n" .

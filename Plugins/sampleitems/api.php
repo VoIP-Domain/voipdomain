@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Sample Items
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -110,14 +110,14 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Fields" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -196,7 +196,7 @@ function sampleitems_search ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Filter"], $parameters["function"]["Fields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
 
   /**
@@ -321,7 +321,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -518,10 +518,10 @@ framework_add_hook (
     ),
     "response" => array (
       201 => array (
-        "description" => __ ( "New sample item added successfully.")
+        "description" => __ ( "A new sample item was added successfully.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -665,7 +665,7 @@ function sampleitems_add ( $buffer, $parameters)
    * hook.
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . $_in["api"]["baseurl"] . "/sampleitems/" . $parameters["ID"]);
+  header ( "Location: " . voipdomain_location_url ( "/api/sampleitems/" . $parameters["ID"]));
   return $buffer;
 }
 
@@ -701,7 +701,7 @@ framework_add_hook (
         "description" => __ ( "The sample item was successfully updated.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -734,7 +734,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "User", "sampleitems_edit"),
     "title" => __ ( "Edit sample items"),
-    "description" => __ ( "Change a sample item information.")
+    "description" => __ ( "Change sample item information.")
   )
 );
 
@@ -869,7 +869,7 @@ framework_add_hook (
         "description" => __ ( "The sample item was removed.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -897,7 +897,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "User", "sampleitems_remove"),
     "title" => __ ( "Remove sample items"),
-    "description" => __ ( "Remove a sample item from system.")
+    "description" => __ ( "Remove a sample item from the system.")
   )
 );
 

@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Ranges
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -67,7 +67,7 @@ function ranges_search_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Ranges"));
-  sys_set_subtitle ( __ ( "ranges searching"));
+  sys_set_subtitle ( __ ( "Search ranges"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Ranges"))
   ));
@@ -158,7 +158,7 @@ function ranges_search_page ( $buffer, $parameters)
               "  VoIP.rest ( '/ranges/' + encodeURIComponent ( $('#range_delete_id').val ()), 'DELETE').done ( function ( data, textStatus, jqXHR)\n" .
               "  {\n" .
               "    $('#range_delete').modal ( 'hide');\n" .
-              "    new PNotify ( { title: '" . __ ( "Range removal") . "', text: '" . __ ( "Range successfully removed!") . "', type: 'success'});\n" .
+              "    new PNotify ( { title: '" . __ ( "Range removal") . "', text: '" . __ ( "Range removed successfully!") . "', type: 'success'});\n" .
               "    $('#range_delete_id').data ( 'dtrow').remove ().draw ();\n" .
               "  }).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "  {\n" .
@@ -186,7 +186,7 @@ function ranges_add_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Ranges"));
-  sys_set_subtitle ( __ ( "ranges addition"));
+  sys_set_subtitle ( __ ( "Add ranges"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Ranges"), "link" => "/ranges"),
     2 => array ( "title" => __ ( "Add"))
@@ -274,7 +274,7 @@ function ranges_add_page ( $buffer, $parameters)
               "    URL: '/ranges',\n" .
               "    method: 'POST',\n" .
               "    button: $('button.add'),\n" .
-              "    title: '" . __ ( "Range addition") . "',\n" .
+              "    title: '" . __ ( "Add range") . "',\n" .
               "    fail: '" . __ ( "Error adding range!") . "',\n" .
               "    success: '" . __ ( "Range added successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
@@ -319,7 +319,7 @@ function ranges_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Range cloning") . "', text: '" . __ ( "Error retrieving range data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Clone range") . "', text: '" . __ ( "Error retrieving range data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -337,7 +337,7 @@ function ranges_view_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Ranges"));
-  sys_set_subtitle ( __ ( "ranges visualization"));
+  sys_set_subtitle ( __ ( "View ranges"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Ranges"), "link" => "/ranges"),
     2 => array ( "title" => __ ( "View"))
@@ -407,7 +407,7 @@ function ranges_view_page ( $buffer, $parameters)
               "  $('#range_view_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Range visualization") . "', text: '" . __ ( "Error viewing range!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "View range") . "', text: '" . __ ( "Error viewing range!") . "', type: 'error'});\n" .
               "});\n");
 
   return $output;
@@ -427,7 +427,7 @@ function ranges_edit_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Ranges"));
-  sys_set_subtitle ( __ ( "ranges edition"));
+  sys_set_subtitle ( __ ( "Edit ranges"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Ranges"), "link" => "/ranges"),
     2 => array ( "title" => __ ( "Edit"))
@@ -510,7 +510,7 @@ function ranges_edit_page ( $buffer, $parameters)
               "  $('#range_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Range edition") . "', text: '" . __ ( "Error retrieving range data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Edit range") . "', text: '" . __ ( "Error retrieving range data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#range_edit_form').alerts ( 'form',\n" .
               "{\n" .
@@ -519,7 +519,7 @@ function ranges_edit_page ( $buffer, $parameters)
               "    URL: '/ranges/' + VoIP.parameters.id,\n" .
               "    method: 'PATCH',\n" .
               "    button: $('button.edit'),\n" .
-              "    title: '" . __ ( "Range edition") . "',\n" .
+              "    title: '" . __ ( "Edit range") . "',\n" .
               "    fail: '" . __ ( "Error changing range!") . "',\n" .
               "    success: '" . __ ( "Range changed successfully!") . "',\n" .
               "    onsuccess: function ()\n" .

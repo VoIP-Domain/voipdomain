@@ -1,0 +1,11 @@
+/var/log/voipdomain/router.log
+/var/log/voipdomain/router-access_log {
+    daily
+    rotate 30
+    compress
+    delaycompress
+    missingok
+    notifempty
+    copytruncate
+    create 0640 nobody nobody
+}

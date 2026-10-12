@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,12 +30,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments Htek
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "equipment_model_uc902sp_configure", "equipment_model_htek_basic_configure");
 framework_add_hook ( "equipment_model_uc902sp_firmware_add", "equipment_model_htek_add_firmware");
@@ -175,7 +175,7 @@ function equipment_model_htek_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( file_put_contents ( $_in["general"]["tftpdir"] . "/Htek/UC900/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Htek/UC900/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -256,7 +256,7 @@ function ap_type_htek_uc900 ( $buffer, $parameters)
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
   $content = str_replace ( "{{{domain}}}", $parameters["Domain"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecs = array (
     "ULAW" => 0,
     "G726" => 2,
@@ -275,7 +275,7 @@ function ap_type_htek_uc900 ( $buffer, $parameters)
     {
       $content = str_replace ( "{{{codecconfig" . $codecorder . "}}}", $codecs[$codec], $content);
     } else {
-      writeLog ( "ap_add: Ignoring CODEC \"" . $codec . "\" due to hardware codec prefference limit. Htek UC902SP supports up to 6 codec's.", VoIP_LOG_WARNING);
+      writeLog ( "ap_add: Ignoring CODEC \"" . $codec . "\" due to hardware codec preference limit. Htek UC902SP supports up to 6 codecs.", VoIP_LOG_WARNING);
     }
   }
   if ( $codecorder < 6)

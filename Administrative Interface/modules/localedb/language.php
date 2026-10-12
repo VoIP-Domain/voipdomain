@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage LocaleDB
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -44,12 +44,12 @@ i18n_add ( "An array containing the system locales.");
 i18n_add ( "The locale code");
 i18n_add ( "en_US");
 i18n_add ( "The description of the locale (translated).");
-i18n_add ( "The original english description of the locale.");
+i18n_add ( "The original English description of the locale.");
 i18n_add ( "Search for system locales.");
 i18n_add ( "An object containing information about the locale.");
 i18n_add ( "Invalid locale code.");
 i18n_add ( "View locales");
-i18n_add ( "Get a locale information.");
+i18n_add ( "Get locale information.");
 i18n_add ( "The locale code.");
 
 /**
@@ -62,11 +62,11 @@ i18n_add ( "An array containing the system locales.", "Um array contendo as loca
 i18n_add ( "The locale code", "O código de localização", "pt_BR");
 i18n_add ( "en_US", "pt_BR", "pt_BR");
 i18n_add ( "The description of the locale (translated).", "A descrição da localização (traduzido).", "pt_BR");
-i18n_add ( "The original english description of the locale.", "A descrição original em inglês da localização.", "pt_BR");
+i18n_add ( "The original English description of the locale.", "A descrição original em inglês da localização.", "pt_BR");
 i18n_add ( "Search for system locales.", "Pesquisa por localizações do sistema.", "pt_BR");
 i18n_add ( "An object containing information about the locale.", "Um object contendo informações sobre a localização.", "pt_BR");
 i18n_add ( "Invalid locale code.", "Código de localização inválido.", "pt_BR");
 i18n_add ( "View locales", "Visualizar localizações", "pt_BR");
-i18n_add ( "Get a locale information.", "Requisita informações de uma localização.", "pt_BR");
+i18n_add ( "Get locale information.", "Obtém informações de uma localização.", "pt_BR");
 i18n_add ( "The locale code.", "O código de localização.", "pt_BR");
 ?>

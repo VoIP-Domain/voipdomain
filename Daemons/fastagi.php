@@ -8,7 +8,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Asterisk FastAGI Application Daemon
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -169,6 +169,7 @@ $_agi["clients"] = array ();
  */
 require_once ( dirname ( __FILE__) . "/includes/functions.inc.php");
 require_once ( dirname ( __FILE__) . "/includes/plugins.inc.php");
+require_once ( dirname ( __FILE__) . "/includes/systemd.inc.php");
 
 /**
  * Parse configuration file. You should put your configuration file OUTSIDE
@@ -223,13 +224,14 @@ echo chr ( 27) . "[1;37mVoIP Domain FastAGI Daemon" . chr ( 27) . "[1;0m v" . $_
 echo "\n";
 
 /**
- * Validate MySQL session
+ * Validate data directory configuration
  */
-if ( ! is_array ( $_in["mysql"]))
+if ( ! array_key_exists ( "data", $_in) || ! is_array ( $_in["data"]) || ! array_key_exists ( "datadir", $_in["data"]))
 {
-  echo "Error: Cannot find \"mysql\" session at configuration file.\n";
+  echo "Error: Cannot find \"data\" session with \"datadir\" at configuration file.\n";
   exit ( 1);
 }
+$_in["general"]["datadir"] = $_in["data"]["datadir"];
 
 /**
  * Process parameters
@@ -272,19 +274,9 @@ if ( extension_loaded ( "inotify"))
 }
 
 /**
- * Conect to the database
+ * Fetch gateways from local data files
  */
-echo "Executing: Connecting to database... ";
-if ( ! $_in["mysql"]["id"] = @new mysqli ( $_in["mysql"]["hostname"] . ( ! empty ( $_in["mysql"]["port"]) ? ":" . $_in["mysql"]["port"] : ""), $_in["mysql"]["username"], $_in["mysql"]["password"], $_in["mysql"]["database"]))
-{
-  writeLog ( "Cannot connect to database server!", VoIP_LOG_FATAL);
-}
-echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
-
-/**
- * Fetch gateways database
- */
-echo "Executing: Fetching gateways database... ";
+echo "Executing: Loading gateways from local data... ";
 update_datafiles ( "gateway");
 echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
 
@@ -295,6 +287,17 @@ if ( extension_loaded ( "proctitle"))
 {
   setproctitle ( "VoIP Domain FastAGI daemon (main thread)");
 }
+
+/**
+ * Open log file before dropping privileges (keep handle open)
+ */
+echo "Executing: Opening log file... ";
+if ( ! openLogFile ())
+{
+  echo chr ( 27) . "[1;31mFAILED" . chr ( 27) . "[1;0m\n";
+  exit ( 1);
+}
+echo chr ( 27) . "[1;37mOK" . chr ( 27) . "[1;0m\n";
 
 /**
  * Change effective UID/GID to an unprivileged user
@@ -376,6 +379,11 @@ if ( ! $debug)
 }
 
 /**
+ * Register systemd reload handler and continue as worker process
+ */
+daemon_register_systemd_reload_handler ();
+
+/**
  * Instantiate client array
  */
 $_agi["clients"] = array ( "0" => array ( "socket" => $socket));
@@ -385,6 +393,7 @@ $_agi["clients"] = array ( "0" => array ( "socket" => $socket));
  */
 while ( true)
 {
+  $read = array ();
   $read[0] = $socket;
 
   for ( $i = 1; $i <= count ( $_agi["clients"]); ++$i)
@@ -395,7 +404,9 @@ while ( true)
     }
   }
 
-  $ready = socket_select ( $read, $write = NULL, $except = NULL, $tv_sec = NULL);
+  $write = NULL;
+  $except = NULL;
+  $ready = socket_select ( $read, $write, $except, NULL);
 
   if ( in_array ( $socket, $read))
   {

@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Configuration
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -51,7 +51,7 @@ i18n_add ( "Permissions configuration");
 i18n_add ( "Plugins");
 i18n_add ( "System permissions");
 i18n_add ( "View system permission information");
-i18n_add ( "The system permissions was successfully updated.");
+i18n_add ( "The system permissions were successfully updated.");
 i18n_add ( "Check");
 i18n_add ( "Check VoIP DNS zone");
 i18n_add ( "Debug information");
@@ -83,7 +83,7 @@ i18n_add ( "Error removing plugin!");
 i18n_add ( "Invalid file type.");
 i18n_add ( "Invalid plugin file structure.");
 i18n_add ( "Name");
-i18n_add ( "Plugin configuration file misses own plugin section.");
+i18n_add ( "Plugin configuration file is missing its own plugin section.");
 i18n_add ( "Plugin configuration file missing.");
 i18n_add ( "Plugin file doesn't have the minimum required files.");
 i18n_add ( "Plugin file not found!");
@@ -103,9 +103,9 @@ i18n_add ( "Import");
 i18n_add ( "Import plugin file");
 i18n_add ( "Invalid plugin file.");
 i18n_add ( "Maximum number of files exceeded.");
-i18n_add ( "Plugin addition");
+i18n_add ( "Add plugin");
 i18n_add ( "Plugin already installed.");
-i18n_add ( "Plugin configuration file misses own plugin name.");
+i18n_add ( "Plugin configuration file is missing its own plugin name.");
 i18n_add ( "Plugin parser error.");
 i18n_add ( "Plugin %s (version %s) successfully installed.");
 i18n_add ( "Plugin toggle");
@@ -240,13 +240,13 @@ i18n_add ( "digits");
 i18n_add ( "Currency");
 i18n_add ( "Select default currency");
 i18n_add ( "Error changing configurations!");
-i18n_add ( "Configurations successfully changed!");
+i18n_add ( "Configurations changed successfully!");
 i18n_add ( "Error retrieving configurations!");
 i18n_add ( "The default system extension number length.");
-i18n_add ( "If the system extension number length are immutable.");
+i18n_add ( "If the system extension number length is immutable.");
 i18n_add ( "The country code information of the tenant.");
 i18n_add ( "The country code unique identifier.");
-i18n_add ( "The english name of the country.");
+i18n_add ( "The English name of the country.");
 i18n_add ( "The translated name of the country.");
 i18n_add ( "United States of America");
 i18n_add ( "The *ISO3166-2* of the country.");
@@ -270,8 +270,8 @@ i18n_add ( "The language is required.");
 i18n_add ( "The provided language is not valid.");
 i18n_add ( "The currency is required.");
 i18n_add ( "The number length is immutable.");
-i18n_add ( "The informed currency is invalid.");
-i18n_add ( "The informed country is invalid.");
+i18n_add ( "The provided currency is invalid.");
+i18n_add ( "The provided country is invalid.");
 i18n_add ( "Geographical");
 i18n_add ( "Map");
 i18n_add ( "Country");
@@ -287,7 +287,7 @@ i18n_add ( "system permissions", "permissões do sistema", "pt_BR");
 i18n_add ( "General", "Geral", "pt_BR");
 i18n_add ( "Edit system permissions", "Editar permissões do sistema", "pt_BR");
 i18n_add ( "Error changing permissions!", "Erro alterando permissões!", "pt_BR");
-i18n_add ( "Error retrieving permissions!", "Erro requisitando permissões!", "pt_BR");
+i18n_add ( "Error retrieving permissions!", "Erro ao obter permissões!", "pt_BR");
 i18n_add ( "Invalid value.", "Valor inválido.", "pt_BR");
 i18n_add ( "Language", "Idioma", "pt_BR");
 i18n_add ( "Operator", "Telefonista", "pt_BR");
@@ -328,16 +328,16 @@ i18n_add ( "Error removing plugin!", "Erro removendo plugin!", "pt_BR");
 i18n_add ( "Invalid file type.", "Tipo de arquivo inválido.", "pt_BR");
 i18n_add ( "Invalid plugin file structure.", "Estrutura de arquivo do plugin inválida.", "pt_BR");
 i18n_add ( "Name", "Nome", "pt_BR");
-i18n_add ( "Plugin configuration file misses own plugin section.", "Arquivo de configurações do plugin não possui sessão do próprio plugin.", "pt_BR");
+i18n_add ( "Plugin configuration file is missing its own plugin section.", "Arquivo de configurações do plugin não possui sessão do próprio plugin.", "pt_BR");
 i18n_add ( "Plugin configuration file missing.", "Arquivo de configurações do plugin não encontrado.", "pt_BR");
 i18n_add ( "Plugin file doesn't have the minimum required files.", "Arquivo de plugin não possui o mínimo de arquivos necessários.", "pt_BR");
 i18n_add ( "Plugin file not found!", "Arquivo de plugin não encontrado!", "pt_BR");
-i18n_add ( "Plugin removal", "Remoção de plugin", "pt_BR");
+i18n_add ( "Plugin removal", "Remover plugin", "pt_BR");
 i18n_add ( "Plugin removed successfully!", "Plugin removido com sucesso!", "pt_BR");
 i18n_add ( "plugins", "plugins", "pt_BR");
 i18n_add ( "Search plugins", "Pesquisar plugins", "pt_BR");
 i18n_add ( "Status", "Estado", "pt_BR");
-i18n_add ( "Are you sure you want to remove the plugin %s (%s)?", "Você tem certeza que deseja remover o plugin %s (%s)?", "pt_BR");
+i18n_add ( "Are you sure you want to remove the plugin %s (%s)?", "Você tem certeza de que deseja remover o plugin %s (%s)?", "pt_BR");
 i18n_add ( "Invalid plugin extension.", "Extensão do plugin inválida.", "pt_BR");
 i18n_add ( "Add...", "Adicionar..", "pt_BR");
 i18n_add ( "Error toggling plugin!", "Erro ao habilitar/desabilitar plugin!", "pt_BR");
@@ -348,9 +348,9 @@ i18n_add ( "Import", "Importar", "pt_BR");
 i18n_add ( "Import plugin file", "Importar arquivo de plugin", "pt_BR");
 i18n_add ( "Invalid plugin file.", "Arquivo de plugin inválido.", "pt_BR");
 i18n_add ( "Maximum number of files exceeded.", "Número máximo de arquivos excedido.", "pt_BR");
-i18n_add ( "Plugin addition", "Adição de plugin", "pt_BR");
+i18n_add ( "Add plugin", "Adicionar plugin", "pt_BR");
 i18n_add ( "Plugin already installed.", "Plugin já instalado.", "pt_BR");
-i18n_add ( "Plugin configuration file misses own plugin name.", "Arquivo de configurações do plugin não possui nome do próprio plugin.", "pt_BR");
+i18n_add ( "Plugin configuration file is missing its own plugin name.", "Arquivo de configurações do plugin não possui nome do próprio plugin.", "pt_BR");
 i18n_add ( "Plugin parser error.", "Erro de sintaxe no plugin.", "pt_BR");
 i18n_add ( "Plugin %s (version %s) successfully installed.", "Plugin %s (versão %s) instalado com sucesso.", "pt_BR");
 i18n_add ( "Plugin toggle", "Habilitar/desabilitar plugin", "pt_BR");
@@ -388,12 +388,12 @@ i18n_add ( "Permission to local satellite call.", "Permissão para chamadas via 
 i18n_add ( "Permission to international satellite call.", "Permissão para chamadas via satélite internacionais.", "pt_BR");
 i18n_add ( "View permissions", "Visualizar permissões", "pt_BR");
 i18n_add ( "View system permission information.", "Visualizar informações de permissões do sistema.", "pt_BR");
-i18n_add ( "The system permissions was successfully updated.", "As permissões do sistema foram atualizadas com sucesso.", "pt_BR");
+i18n_add ( "The system permissions were successfully updated.", "As permissões do sistema foram atualizadas com sucesso.", "pt_BR");
 i18n_add ( "Edit permissions", "Editar permissões", "pt_BR");
 i18n_add ( "Change the system maximum permissions.", "Alterar as permissões máximas do sistema.", "pt_BR");
 i18n_add ( "The DNS zone to be checked.", "A zona DNS a ser verificada.", "pt_BR");
 i18n_add ( "example.com", "exemplo.com.br", "pt_BR");
-i18n_add ( "The Name Authority Pointer (NAPTR) for VoIP at requested zone.", "O ponteiro de nome autoritário (NAPTR) para VoIP na zona requisitada.", "pt_BR");
+i18n_add ( "The Name Authority Pointer (NAPTR) for VoIP at requested zone.", "O ponteiro de nome autoritário (NAPTR) para VoIP na zona solicitada.", "pt_BR");
 i18n_add ( "DNS entry details.", "Detalhes do registro de DNS.", "pt_BR");
 i18n_add ( "Full qualified domain name for entry.", "Domínio completo qualificado para o registro.", "pt_BR");
 i18n_add ( "Class of DNS zone entry.", "Classe do registro da zona DNS.", "pt_BR");
@@ -404,13 +404,13 @@ i18n_add ( "The weight of entry.", "O peso do registro.", "pt_BR");
 i18n_add ( "The port of entry.", "A porta do registro.", "pt_BR");
 i18n_add ( "The target of entry.", "O alvo do registro.", "pt_BR");
 i18n_add ( "The text extract of entry.", "O texto extraído do registro.", "pt_BR");
-i18n_add ( "The UDP SIP service (SRV) for VoIP at requested zone.", "O serviço SIP UDP (SRV) para VoIP na zona requisitada.", "pt_BR");
-i18n_add ( "The TCP SIP service (SRV) for VoIP at requested zone.", "O serviço SIP TCP (SRV) para VoIP na zona requisitada.", "pt_BR");
+i18n_add ( "The UDP SIP service (SRV) for VoIP at requested zone.", "O serviço SIP UDP (SRV) para VoIP na zona solicitada.", "pt_BR");
+i18n_add ( "The TCP SIP service (SRV) for VoIP at requested zone.", "O serviço SIP TCP (SRV) para VoIP na zona solicitada.", "pt_BR");
 i18n_add ( "The status of add request.", "O estado da requisição de adição.", "pt_BR");
 i18n_add ( "Check DNS", "Verificar DNS", "pt_BR");
 i18n_add ( "Check VoIP DNS zone.", "Verificar uma zona DNS VoIP.", "pt_BR");
 i18n_add ( "The plugion file to be installed.", "O arquivo de plugin a ser instalado.", "pt_BR");
-i18n_add ( "New system plugin installed successfully.", "Novo plugin do sistema instalado com sucesso.", "pt_BR");
+i18n_add ( "New system plugin installed successfully.", "Um novo plugin do sistema foi instalado com sucesso.", "pt_BR");
 i18n_add ( "Import plugin", "Importar plugin", "pt_BR");
 i18n_add ( "Import a plugin file.", "Importar um arquivo de plugin.", "pt_BR");
 i18n_add ( "The temporary plugin directory location.", "Localização do diretório temporário de plugin.", "pt_BR");
@@ -424,7 +424,7 @@ i18n_add ( "The installed plugins array description.", "Um array descrevendo os 
 i18n_add ( "The installed included files array description.", "Um array descrevendo os arquivos incluídos.", "pt_BR");
 i18n_add ( "Check plugin file", "Verificar arquivo de plugin", "pt_BR");
 i18n_add ( "Internal endpoint to check and validate a plugin file.", "Recurso interno para verificar e validar um arquivo de plugin.", "pt_BR");
-i18n_add ( "Filter search with this string. If not provided, return all plugins.", "Filtrar a pesquisa com esta string. Se não informado, retorna todos os plugins.", "pt_BR");
+i18n_add ( "Filter search with this string. If not provided, return all plugins.", "Filtrar a pesquisa com esta string. Se omitido, retorna todos os plugins.", "pt_BR");
 i18n_add ( "An array containing the system plugins.", "Um array contendo os plugins do sistema.", "pt_BR");
 i18n_add ( "The directory name of the plugin.", "O nome do diretório do plugin.", "pt_BR");
 i18n_add ( "Users avatar", "Avatar de usuários", "pt_BR");
@@ -434,7 +434,7 @@ i18n_add ( "The description of the plugin.", "A descrição do plugin.", "pt_BR"
 i18n_add ( "Add avatar to user profile at system interface.", "Adiciona avatar ao perfil de usuários na interface do sistema.", "pt_BR");
 i18n_add ( "The status of the plugin. If true, it's installed and in use.", "O estado do plugin. Se verdadeiro, está instalado e em uso.", "pt_BR");
 i18n_add ( "An array containing all plugin requirements.", "Um array contendo todos os requisitos do plugin.", "pt_BR");
-i18n_add ( "The required module or plugin.", "O módulo ou plugin requerido.", "pt_BR");
+i18n_add ( "The required module or plugin.", "O módulo ou plugin obrigatório.", "pt_BR");
 i18n_add ( "Search for system plugins.", "Pesquisar por plugins do sistema.", "pt_BR");
 i18n_add ( "Plugin toggled enabled/disabled successfully.", "O plugin foi alternado habilitado/desabilitado com sucesso.", "pt_BR");
 i18n_add ( "Toggle plugin status", "Alternar o estado do plugin", "pt_BR");
@@ -486,13 +486,13 @@ i18n_add ( "digits", "dígitos", "pt_BR");
 i18n_add ( "Currency", "Moeda", "pt_BR");
 i18n_add ( "Select default currency", "Selecione a moeda padrão", "pt_BR");
 i18n_add ( "Error changing configurations!", "Erro ao alterar configurações!", "pt_BR");
-i18n_add ( "Configurations successfully changed!", "Configurações alteradas com sucesso!", "pt_BR");
-i18n_add ( "Error retrieving configurations!", "Erro ao requisitar configurações!", "pt_BR");
+i18n_add ( "Configurations changed successfully!", "Configurações alteradas com sucesso!", "pt_BR");
+i18n_add ( "Error retrieving configurations!", "Erro ao obter configurações!", "pt_BR");
 i18n_add ( "America/Los_Angeles", "America/Los_Angeles", "pt_BR");
 i18n_add ( "BRL", "BRL", "pt_BR");
 i18n_add ( "Country", "País", "pt_BR");
 i18n_add ( "Geographical", "Geográfico", "pt_BR");
-i18n_add ( "If the system extension number length are immutable.", "Se o comprimento do número de ramal do sistema é imutável.", "pt_BR");
+i18n_add ( "If the system extension number length is immutable.", "Se o comprimento do número de ramal do sistema é imutável.", "pt_BR");
 i18n_add ( "Map", "Mapa", "pt_BR");
 i18n_add ( "Select default country", "Selecione o país padrão", "pt_BR");
 i18n_add ( "Select default language", "Selecione o idioma padrão", "pt_BR");
@@ -508,9 +508,9 @@ i18n_add ( "The currency code of the tenant.", "O código da moeda do locatário
 i18n_add ( "The currency is required.", "A moeda é obrigatória.", "pt_BR");
 i18n_add ( "The default system extension number length.", "O comprimento padrão do número de ramal do sistema.", "pt_BR");
 i18n_add ( "The description in English of the language.", "A descrição em inglês do idioma.", "pt_BR");
-i18n_add ( "The english name of the country.", "O nome do país em inglês.", "pt_BR");
-i18n_add ( "The informed country is invalid.", "O país informado é inválido.", "pt_BR");
-i18n_add ( "The informed currency is invalid.", "A moeda informada é inválida.", "pt_BR");
+i18n_add ( "The English name of the country.", "O nome do país em inglês.", "pt_BR");
+i18n_add ( "The provided country is invalid.", "O país informado é inválido.", "pt_BR");
+i18n_add ( "The provided currency is invalid.", "A moeda informada é inválida.", "pt_BR");
 i18n_add ( "The language is required.", "O idioma é obrigatório.", "pt_BR");
 i18n_add ( "The language used on this tenant.", "O idioma utilizado por este locatário.", "pt_BR");
 i18n_add ( "The number length is immutable.", "O comprimento do número é imutável.", "pt_BR");

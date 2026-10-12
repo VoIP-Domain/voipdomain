@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Authentication OpenID
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * Extend system API authentication call view hook's
+ * Extend system API authentication call view hooks
  */
 framework_add_function_documentation (
   "authentication_view",
@@ -132,7 +132,7 @@ function authentication_view_post_openid ( $buffer, $parameters)
 }
 
 /**
- * Extend system API authentication call edit hook's
+ * Extend system API authentication call edit hooks
  */
 framework_add_function_documentation (
   "authentication_edit",
@@ -442,7 +442,7 @@ function authentication_openid_redirect ( $buffer, $parameters)
   if ( ! $cache = $result->fetch_assoc ())
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 302 Redirected");
-    header ( "Location: /auth?Message=" . urlencode ( __ ( "Invalid authentication token!")));
+    header ( "Location: " . voipdomain_location_url ( "/auth?Message=" . urlencode ( __ ( "Invalid authentication token!"))));
     exit ();
   }
 
@@ -481,7 +481,7 @@ function authentication_openid_redirect ( $buffer, $parameters)
   if ( ! array_key_exists ( "access_token", $tokenInfo))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 302 Redirected");
-    header ( "Location: /auth?" . ( $cache["Callback"] ? "Callback=" . urlencode ( $cache["Callback"]) . "&" : "") . "Message=" . urlencode ( __ ( "Invalid authentication token!")));
+    header ( "Location: " . voipdomain_location_url ( "/auth?" . ( $cache["Callback"] ? "Callback=" . urlencode ( $cache["Callback"]) . "&" : "") . "Message=" . urlencode ( __ ( "Invalid authentication token!"))));
     exit ();
   }
   $accessToken = $tokenInfo["access_token"];
@@ -514,7 +514,7 @@ function authentication_openid_redirect ( $buffer, $parameters)
    * Redirect user to authentication page
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 302 Redirected");
-  header ( "Location: " . ( $cache["Callback"] ? $cache["Callback"] : "/auth") . "?Message=" . urlencode ( __ ( "User authenticated!")) . "&MessageType=info");
+  header ( "Location: " . voipdomain_location_url ( ( $cache["Callback"] ? $cache["Callback"] : "/auth") . "?Message=" . urlencode ( __ ( "User authenticated!")) . "&MessageType=info"));
   exit ();
 }
 

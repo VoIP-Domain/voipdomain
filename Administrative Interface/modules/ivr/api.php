@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage IVRs
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -246,7 +246,7 @@ function ivr_operator_filter_start ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "AutoAnswer" => (boolean) array_key_exists ( "AutoAnswer", $parameters["Properties"]) ? $parameters["Properties"]["AutoAnswer"] : false, "Delay" => (int) array_key_exists ( "Delay", $parameters["Properties"]) ? $parameters["Properties"]["Delay"] : 0), "Outputs" => array ( "output"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "AutoAnswer" => (boolean) (array_key_exists ( "AutoAnswer", $parameters["Properties"]) ? $parameters["Properties"]["AutoAnswer"] : false), "Delay" => (int) (array_key_exists ( "Delay", $parameters["Properties"]) ? $parameters["Properties"]["Delay"] : 0)), "Outputs" => array ( "output"));
   if ( ! array_key_exists ( "AutoAnswer", $parameters["Properties"]))
   {
     $data["Errors"]["AutoAnswer"] = __ ( "AutoAnswer field is required.");
@@ -393,7 +393,7 @@ function ivr_operator_filter_wait ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Time" => (int) array_key_exists ( "Time", $parameters["Properties"]) ? $parameters["Properties"]["Time"] : 0), "Outputs" => array ( "output"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Time" => (int) (array_key_exists ( "Time", $parameters["Properties"]) ? $parameters["Properties"]["Time"] : 0)), "Outputs" => array ( "output"));
   if ( ! array_key_exists ( "Time", $parameters["Properties"]))
   {
     $data["Errors"]["Time"] = __ ( "Time field is required.");
@@ -905,12 +905,12 @@ function ivr_operator_filter_play ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "File" => (int) array_key_exists ( "File", $parameters["Properties"]) ? $parameters["Properties"]["File"] : 0), "Outputs" => array ( "output"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "File" => (int) (array_key_exists ( "File", $parameters["Properties"]) ? $parameters["Properties"]["File"] : 0)), "Outputs" => array ( "output"));
   if ( ! array_key_exists ( "File", $parameters["Properties"]))
   {
     $data["Errors"]["File"] = __ ( "Filename is required.");
   }
-  $file = filters_call ( "get_audios", array ( "ID" => (int) array_key_exists ( "File", $parameters["Properties"]) ? $parameters["Properties"]["File"] : 0));
+  $file = filters_call ( "get_audios", array ( "ID" => (int) (array_key_exists ( "File", $parameters["Properties"]) ? $parameters["Properties"]["File"] : 0)));
   if ( sizeof ( $file) == 1)
   {
     $data["Properties"]["Filename"] = "audio-" . $file[0]["ID"] . "/" . $file[0]["Filename"];
@@ -1070,7 +1070,7 @@ function ivr_operator_filter_stop ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Discard" => (boolean) array_key_exists ( "Discard", $parameters["Properties"]) ? $parameters["Properties"]["Discard"] : false), "Outputs" => array ( "output"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Discard" => (boolean) (array_key_exists ( "Discard", $parameters["Properties"]) ? $parameters["Properties"]["Discard"] : false)), "Outputs" => array ( "output"));
   if ( ! array_key_exists ( "Discard", $parameters["Properties"]))
   {
     $data["Errors"]["Discard"] = __ ( "Option Discard is required.");
@@ -1169,7 +1169,7 @@ function ivr_operator_filter_read ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Variable" => array_key_exists ( "Variable", $parameters["Properties"]) ? $parameters["Properties"]["Variable"] : "", "Digits" => (int) array_key_exists ( "Digits", $parameters["Properties"]) ? $parameters["Properties"]["Digits"] : 0, "Timeout" => array_key_exists ( "Timeout", $parameters["Properties"]) ? $parameters["Properties"]["Timeout"] : 0, "Echo" => (boolean) array_key_exists ( "Echo", $parameters["Properties"]) ? $parameters["Properties"]["Echo"] : false), "Outputs" => array ( "ok", "timedout"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Variable" => array_key_exists ( "Variable", $parameters["Properties"]) ? $parameters["Properties"]["Variable"] : "", "Digits" => (int) (array_key_exists ( "Digits", $parameters["Properties"]) ? $parameters["Properties"]["Digits"] : 0), "Timeout" => array_key_exists ( "Timeout", $parameters["Properties"]) ? $parameters["Properties"]["Timeout"] : 0, "Echo" => (boolean) (array_key_exists ( "Echo", $parameters["Properties"]) ? $parameters["Properties"]["Echo"] : false)), "Outputs" => array ( "ok", "timedout"));
   if ( ! array_key_exists ( "Variable", $parameters["Properties"]))
   {
     $data["Errors"]["Variable"] = __ ( "Variable is required.");
@@ -1294,7 +1294,7 @@ framework_add_component_documentation (
                     "Retries" => array (
                       "type" => "integer",
                       "required" => true,
-                      "description" => __ ( "The maximum retries to get a valid response."),
+                      "description" => __ ( "The maximum number of retries to obtain a valid response."),
                       "example" => 3
                     ),
                     "Option0" => array (
@@ -1393,7 +1393,8 @@ function ivr_operator_filter_menu ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters) ? $parameters["Properties"]["Description"] : "", "Variable" => array_key_exists ( "Variable", $parameters) ? $parameters["Properties"]["Variable"] : "", "File" => (int) array_key_exists ( "File", $parameters) ? $parameters["Properties"]["File"] : 0, "InvalidFile" => (int) array_key_exists ( "InvalidFile", $parameters) ? $parameters["Properties"]["InvalidFile"] : 0, "Echo" => (boolean) array_key_exists ( "Echo", $parameters) ? $parameters["Properties"]["Echo"] : false, "Timeout" => (int) array_key_exists ( "Timeout", $parameters) ? $parameters["Properties"]["Timeout"] : 0, "Retries" => (int) array_key_exists ( "Retries", $parameters) ? $parameters["Properties"]["Retries"] : 0, "Option0" => (boolean) array_key_exists ( "Option0", $parameters) ? $parameters["Properties"]["Option0"] : false, "Option1" => (boolean) array_key_exists ( "Option1", $parameters) ? $parameters["Properties"]["Option1"] : false, "Option2" => (boolean) array_key_exists ( "Option2", $parameters) ? $parameters["Properties"]["Option2"] : false, "Option3" => (boolean) array_key_exists ( "Option3", $parameters) ? $parameters["Properties"]["Option3"] : false, "Option4" => (boolean) array_key_exists ( "Option4", $parameters) ? $parameters["Properties"]["Option4"] : false, "Option5" => (boolean) array_key_exists ( "Option5", $parameters) ? $parameters["Properties"]["Option5"] : false, "Option6" => (boolean) array_key_exists ( "Option6", $parameters) ? $parameters["Properties"]["Option6"] : false, "Option7" => (boolean) array_key_exists ( "Option7", $parameters) ? $parameters["Properties"]["Option7"] : false, "Option8" => (boolean) array_key_exists ( "Option8", $parameters) ? $parameters["Properties"]["Option8"] : false, "Option9" => (boolean) array_key_exists ( "Option9", $parameters) ? $parameters["Properties"]["Option9"] : false, "OptionA" => (boolean) array_key_exists ( "OptionA", $parameters) ? $parameters["Properties"]["OptionA"] : false, "OptionS" => (boolean) array_key_exists ( "OptionS", $parameters) ? $parameters["Properties"]["OptionS"] : false), "Outputs" => array ( "timedout"));
+  $props = (array_key_exists ( "Properties", $parameters) && is_array ( $parameters["Properties"])) ? $parameters["Properties"] : array ();
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $props) ? $props["Description"] : "", "Variable" => array_key_exists ( "Variable", $props) ? $props["Variable"] : "", "File" => (int) (array_key_exists ( "File", $props) ? $props["File"] : 0), "InvalidFile" => (int) (array_key_exists ( "InvalidFile", $props) ? $props["InvalidFile"] : 0), "Echo" => (boolean) (array_key_exists ( "Echo", $props) ? $props["Echo"] : false), "Timeout" => (int) (array_key_exists ( "Timeout", $props) ? $props["Timeout"] : 0), "Retries" => (int) (array_key_exists ( "Retries", $props) ? $props["Retries"] : 0), "Option0" => (boolean) (array_key_exists ( "Option0", $props) ? $props["Option0"] : false), "Option1" => (boolean) (array_key_exists ( "Option1", $props) ? $props["Option1"] : false), "Option2" => (boolean) (array_key_exists ( "Option2", $props) ? $props["Option2"] : false), "Option3" => (boolean) (array_key_exists ( "Option3", $props) ? $props["Option3"] : false), "Option4" => (boolean) (array_key_exists ( "Option4", $props) ? $props["Option4"] : false), "Option5" => (boolean) (array_key_exists ( "Option5", $props) ? $props["Option5"] : false), "Option6" => (boolean) (array_key_exists ( "Option6", $props) ? $props["Option6"] : false), "Option7" => (boolean) (array_key_exists ( "Option7", $props) ? $props["Option7"] : false), "Option8" => (boolean) (array_key_exists ( "Option8", $props) ? $props["Option8"] : false), "Option9" => (boolean) (array_key_exists ( "Option9", $props) ? $props["Option9"] : false), "OptionA" => (boolean) (array_key_exists ( "OptionA", $props) ? $props["OptionA"] : false), "OptionS" => (boolean) (array_key_exists ( "OptionS", $props) ? $props["OptionS"] : false)), "Outputs" => array ( "timedout"));
   if ( ! array_key_exists ( "Variable", $parameters["Properties"]))
   {
     $data["Errors"]["Variable"] = __ ( "Variable is required.");
@@ -1410,7 +1411,7 @@ function ivr_operator_filter_menu ( $buffer, $parameters)
   {
     $data["Errors"]["File"] = __ ( "Filename is required.");
   }
-  $file = filters_call ( "get_audios", array ( "ID" => (int) array_key_exists ( "File", $parameters) ? $parameters["Properties"]["File"] : 0));
+  $file = filters_call ( "get_audios", array ( "ID" => (int) (array_key_exists ( "File", $props) ? $props["File"] : 0)));
   if ( sizeof ( $file) == 1)
   {
     $data["Properties"]["Filename"] = "audio-" . $file[0]["ID"] . "/" . $file[0]["Filename"];
@@ -1952,7 +1953,7 @@ function ivr_operator_filter_dial ( $buffer, $parameters)
   /**
    * Check for required parameters
    */
-  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Timeout" => (int) array_key_exists ( "Timeout", $parameters["Properties"]) ? $parameters["Properties"]["Timeout"] : 0), "Outputs" => array ( "ok", "timedout", "busy", "refused"));
+  $data = array ( "Errors" => array (), "Properties" => array ( "Description" => array_key_exists ( "Description", $parameters["Properties"]) ? $parameters["Properties"]["Description"] : "", "Timeout" => (int) (array_key_exists ( "Timeout", $parameters["Properties"]) ? $parameters["Properties"]["Timeout"] : 0)), "Outputs" => array ( "ok", "timedout", "busy", "refused"));
   if ( ! array_key_exists ( "Destination", $parameters["Properties"]))
   {
     $data["Errors"]["Destination"] = __ ( "Destination is required.");
@@ -2273,14 +2274,14 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Fields" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -2344,7 +2345,7 @@ function ivrs_search ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
 
   /**
@@ -2456,7 +2457,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -2479,7 +2480,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "ivrs_view"),
     "title" => __ ( "View IVRs"),
-    "description" => __ ( "Get a system IVR information."),
+    "description" => __ ( "Get system IVR information."),
     "parameters" => array (
       array (
         "name" => "ID",
@@ -2638,10 +2639,10 @@ framework_add_hook (
     ),
     "response" => array (
       201 => array (
-        "description" => __ ( "New system IVR added successfully.")
+        "description" => __ ( "A new system IVR was added successfully.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -2859,7 +2860,7 @@ function ivrs_add ( $buffer, $parameters)
    * Return OK to user
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . $_in["api"]["baseurl"] . "/ivrs/" . $parameters["ID"]);
+  header ( "Location: " . voipdomain_location_url ( "/api/ivrs/" . $parameters["ID"]));
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 
@@ -2898,7 +2899,7 @@ framework_add_hook (
         "description" => __ ( "The system IVR was successfully updated.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -2931,7 +2932,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "ivrs_edit"),
     "title" => __ ( "Edit IVRs"),
-    "description" => __ ( "Change a system IVR information.")
+    "description" => __ ( "Change system IVR information.")
   )
 );
 
@@ -3142,7 +3143,7 @@ framework_add_hook (
         "description" => __ ( "The system IVR was removed.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -3165,7 +3166,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "ivrs_remove"),
     "title" => __ ( "Remove IVRs"),
-    "description" => __ ( "Remove a IVR from system.")
+    "description" => __ ( "Remove an IVR from the system.")
   )
 );
 
@@ -3341,6 +3342,7 @@ function ivrs_server_reconfig ( $buffer, $parameters)
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
     }
+    $lastname = $ivr["Name"];
     while ( $ivrworkflow = $result2->fetch_assoc ())
     {
       if ( $ivrworkflow["Revision"] == 1)
@@ -3359,7 +3361,6 @@ function ivrs_server_reconfig ( $buffer, $parameters)
         }
         notify_server ( (int) $parameters["ID"], "ivr_change", $notify);
       }
-      $lastname = $ivrworkflow["Name"];
     }
   }
 

@@ -25,13 +25,11 @@
 Configuring Asterisk server:
 ----------------------------
 
-You must use asterisk 21 or 22 series (recommended serie 22, because it's the
-current LTS serie).
+You must use Asterisk 21 or 22 (series 22 is recommended because it is the current LTS series).
 
-The Asterisk server configuration is done including the VoIP Domain bootstrap
-files for each required configuration file.
+Configure the Asterisk server by including the VoIP Domain bootstrap files for each required configuration file.
 
-Just install a fresh new Asterisk server and include the lines below in each
+Install a fresh Asterisk server and include the lines below in each
 configuration file:
 - agents.conf:
   #include voipdomain/bootstrap/agents.conf

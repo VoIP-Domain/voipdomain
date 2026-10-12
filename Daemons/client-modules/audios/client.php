@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Audios
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "audio_add", "audio_add");
 framework_add_hook ( "audio_change", "audio_change");
@@ -94,11 +94,11 @@ function audio_add ( $buffer, $parameters)
   {
     $data["Filename"] = "Invalid content";
   }
-  if ( ! array_key_exists ( "Data", $parameters)) 
-  { 
+  if ( ! array_key_exists ( "Data", $parameters) && ( ! array_key_exists ( "FilePath", $parameters) || ! is_readable ( $parameters["FilePath"])))
+  {
     $data["Data"] = "Missing parameter";
   }
-  if ( ! array_key_exists ( "Data", $data) && base64_encode ( base64_decode ( $parameters["Data"], true)) !== $parameters["Data"])
+  if ( array_key_exists ( "Data", $parameters) && ! array_key_exists ( "Data", $data) && base64_encode ( base64_decode ( $parameters["Data"], true)) !== $parameters["Data"])
   {
     $data["Data"] = "Invalid content";
   }
@@ -140,7 +140,7 @@ function audio_add ( $buffer, $parameters)
   {
     if ( ! check_overwrite ())
     {
-      return array ( "code" => 400, "message" => "Audio already exist.");
+      return array ( "code" => 400, "message" => "Audio already exists.");
     } else {
       $overwritten = true;
     }
@@ -149,7 +149,14 @@ function audio_add ( $buffer, $parameters)
   }
 
   // Write audio file
-  if ( ! write_config ( "audio", "audio-" . $parameters["ID"] . "/" . $parameters["Filename"] . "-originalfile.bin", base64_decode ( $parameters["Data"])))
+  if ( array_key_exists ( "FilePath", $parameters) && is_readable ( $parameters["FilePath"]))
+  {
+    $writtencode = write_config_from_path ( "audio", "audio-" . $parameters["ID"] . "/" . $parameters["Filename"] . "-originalfile.bin", $parameters["FilePath"]);
+    @unlink ( $parameters["FilePath"]);
+  } else {
+    $writtencode = write_config ( "audio", "audio-" . $parameters["ID"] . "/" . $parameters["Filename"] . "-originalfile.bin", base64_decode ( $parameters["Data"]));
+  }
+  if ( ! $writtencode)
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -162,7 +169,7 @@ function audio_add ( $buffer, $parameters)
       return array ( "code" => 500, "message" => "Error writing file.");
     }
   } else {
-    copy_config ( "audio-" . $parameters["ID"] . "/" . $parameters["Filename"] . "-originalfile.bin", "audio-" . $parameters["ID"] . "/audio.wav");
+    copy_config ( "audio", "audio-" . $parameters["ID"] . "/" . $parameters["Filename"] . "-originalfile.bin", "audio-" . $parameters["ID"] . "/audio.wav");
   }
 
   // Then, convert to raw
@@ -174,17 +181,25 @@ function audio_add ( $buffer, $parameters)
 
   // Convert audio file using Asterisk server to all available formats
   $filename = substr ( $parameters["Filename"], 0, strrpos ( $parameters["Filename"], "."));
-  $formats = array ( "WAV", "wav16", "wav", "vox", "sln192", "sln96", "sln48", "sln44", "sln32", "sln24", "sln16", "sln12", "sln", "siren7", "siren14", "g722", "ulaw", "alaw", "ogg", "ilbc", "gsm", "g729", "g726-16", "g726-32", "g723");
+  $formats = array ( "WAV", "wav16", "wav", "vox", "sln192", "sln96", "sln48", "sln44", "sln32", "sln24", "sln16", "sln12", "sln", "siren7", "siren14", "g722", "ulaw", "alaw", "ogg", "opus", "ilbc", "gsm", "g729", "g726-16", "g726-24", "g726-32", "g726-40", "g726aal2", "g723", "adpcm", "speex", "speex16", "speex32", "g719", "lpc10", "codec2", "silk8", "silk12", "silk16", "silk24");
   $parameters["AvailableFormats"] = array ();
   foreach ( $formats as $format)
   {
-    exec ( "asterisk -rx \"file convert voipdomain/audio-" . $parameters["ID"] . "/audio.raw voipdomain/audio-" . $parameters["ID"] . "/audio." . $format . "\" 1>/dev/null 2>&1");
+    exec ( "asterisk -rx \"file convert voipdomain/audio-" . $parameters["ID"] . "/audio.raw voipdomain/audio-" . $parameters["ID"] . "/audio." . $format . "\" 2>&1", $astoutput, $astresult);
     if ( rename_config ( "audio", "audio-" . $parameters["ID"] . "/audio." . $format, "audio-" . $parameters["ID"] . "/" . $filename . "." . $format))
     {
       $parameters["AvailableFormats"][] = $format;
+    } else if ( $astresult != 0 || ! empty ( $astoutput))
+    {
+      writeLog ( "audio_add(" . $parameters["ID"] . ") - Asterisk file convert to " . $format . " failed (exit " . $astresult . "): " . implode ( " ", $astoutput), VoIP_LOG_WARNING);
     }
+    $astoutput = array ();
   }
   unlink_config ( "audio", "audio-" . $parameters["ID"] . "/audio.raw");
+  if ( empty ( $parameters["AvailableFormats"]))
+  {
+    writeLog ( "audio_add(" . $parameters["ID"] . ") - No audio formats were generated. Check Asterisk sounds path and loaded format modules.", VoIP_LOG_WARNING);
+  }
 
   // Create Music on Hold for this audio file
   $moh = "[vd_moh_" . $parameters["ID"] . "]\n" .
@@ -286,11 +301,11 @@ function audio_change ( $buffer, $parameters)
   {
     $data["NewFilename"] = "Invalid content";
   }
-  if ( ! array_key_exists ( "Data", $parameters))
+  if ( ! array_key_exists ( "Data", $parameters) && ( ! array_key_exists ( "FilePath", $parameters) || ! is_readable ( $parameters["FilePath"])))
   {
     $data["Data"] = "Missing parameter";
   }
-  if ( ! array_key_exists ( "Data", $data) && base64_encode ( base64_decode ( $parameters["Data"], true)) !== $parameters["Data"])
+  if ( array_key_exists ( "Data", $parameters) && ! array_key_exists ( "Data", $data) && base64_encode ( base64_decode ( $parameters["Data"], true)) !== $parameters["Data"])
   {
     $data["Data"] = "Invalid content";
   }
@@ -349,9 +364,16 @@ function audio_change ( $buffer, $parameters)
   @unlink_config ( "audiodir", "audio-" . $parameters["ID"]);
 
   // Write audio file
-  if ( ! write_config ( "audio", "audio-" . $parameters["ID"] . "/" . $parameters["NewFilename"] . "-originalfile.bin", base64_decode ( $parameters["Data"])))
+  if ( array_key_exists ( "FilePath", $parameters) && is_readable ( $parameters["FilePath"]))
   {
-    return array ( "code" => 500, "message" => "Error writing file.");
+    $writtencode = write_config_from_path ( "audio", "audio-" . $parameters["ID"] . "/" . $parameters["NewFilename"] . "-originalfile.bin", $parameters["FilePath"]);
+    @unlink ( $parameters["FilePath"]);
+  } else {
+    $writtencode = write_config ( "audio", "audio-" . $parameters["ID"] . "/" . $parameters["NewFilename"] . "-originalfile.bin", base64_decode ( $parameters["Data"]));
+  }
+  if ( ! $writtencode)
+  {
+    return array ( "code" => 500, "message" => "Error writing audio file.");
   }
 
   // If it's a MP3, convert file to wav, otherwise just copy the file
@@ -359,32 +381,40 @@ function audio_change ( $buffer, $parameters)
   {
     if ( ! mp3towav ( "audio-" . $parameters["ID"] . "/" . addslashes ( $parameters["NewFilename"]) . "-originalfile.bin", "audio-" . $parameters["ID"] . "/audio.wav"))
     {
-      return array ( "code" => 500, "message" => "Error writing file.");
+      return array ( "code" => 500, "message" => "Error converting audio file.");
     }
   } else {
     copy_config ( "audio", "audio-" . $parameters["ID"] . "/" . $parameters["NewFilename"] . "-originalfile.bin", "audio-" . $parameters["ID"] . "/audio.wav");
   }
 
-  // Then, covert to raw
+  // Then, convert to raw
   if ( ! audiotoraw ( "audio-" . $parameters["ID"] . "/audio.wav", "audio-" . $parameters["ID"] . "/audio.raw"))
   {
-    return array ( "code" => 501, "message" => "Error writing file.");
+    return array ( "code" => 500, "message" => "Error converting audio to raw.");
   }
   unlink_config ( "audio", "audio-" . $parameters["ID"] . "/audio.wav");
 
   // Convert audio file using Asterisk server to all available formats
   $filename = substr ( $parameters["NewFilename"], 0, strrpos ( $parameters["NewFilename"], "."));
-  $formats = array ( "WAV", "wav16", "wav", "vox", "sln192", "sln96", "sln48", "sln44", "sln32", "sln24", "sln16", "sln12", "sln", "siren7", "siren14", "g722", "ulaw", "alaw", "ogg", "ilbc", "gsm", "g729", "g726-16", "g726-32", "g723");
+  $formats = array ( "WAV", "wav16", "wav", "vox", "sln192", "sln96", "sln48", "sln44", "sln32", "sln24", "sln16", "sln12", "sln", "siren7", "siren14", "g722", "ulaw", "alaw", "ogg", "opus", "ilbc", "gsm", "g729", "g726-16", "g726-24", "g726-32", "g726-40", "g726aal2", "g723", "adpcm", "speex", "speex16", "speex32", "g719", "lpc10", "codec2", "silk8", "silk12", "silk16", "silk24");
   $parameters["AvailableFormats"] = array ();
   foreach ( $formats as $format)
   {
-    exec ( "asterisk -rx \"file convert voipdomain/audio-" . $parameters["ID"] . "/audio.raw voipdomain/audio-" . $parameters["ID"] . "/audio." . $format . "\" 1>/dev/null 2>&1");
+    exec ( "asterisk -rx \"file convert voipdomain/audio-" . $parameters["ID"] . "/audio.raw voipdomain/audio-" . $parameters["ID"] . "/audio." . $format . "\" 2>&1", $astoutput, $astresult);
     if ( rename_config ( "audio", "audio-" . $parameters["ID"] . "/audio." . $format, "audio-" . $parameters["ID"] . "/" . $filename . "." . $format))
     {
       $parameters["AvailableFormats"][] = $format;
+    } else if ( $astresult != 0 || ! empty ( $astoutput))
+    {
+      writeLog ( "audio_change(" . $parameters["ID"] . ") - Asterisk file convert to " . $format . " failed (exit " . $astresult . "): " . implode ( " ", $astoutput), VoIP_LOG_WARNING);
     }
+    $astoutput = array ();
   }
   unlink_config ( "audio", "audio-" . $parameters["ID"] . "/audio.raw");
+  if ( empty ( $parameters["AvailableFormats"]))
+  {
+    writeLog ( "audio_change(" . $parameters["ID"] . ") - No audio formats were generated. Check Asterisk sounds path and loaded format modules.", VoIP_LOG_WARNING);
+  }
 
   // Create audio data file
   $parameters["Filename"] = $parameters["NewFilename"];
@@ -392,7 +422,7 @@ function audio_change ( $buffer, $parameters)
   unset ( $parameters["Data"]);
   if ( ! write_config ( "datafile", "audio-" . $parameters["ID"], $parameters))
   {
-    return array ( "code" => 500, "message" => "Error writing file.");
+    return array ( "code" => 500, "message" => "Error writing datafile.");
   }
 
   /**
@@ -400,7 +430,7 @@ function audio_change ( $buffer, $parameters)
    */
   if ( framework_has_hook ( "audio_change_post") && ! framework_call ( "audio_change_post", $parameters, false, true))
   {
-    return array ( "code" => 500, "message" => "Error writing file.");
+    return array ( "code" => 500, "message" => "Error in post hook.");
   }
 
   // Reload Asterisk Music on Hold
@@ -523,6 +553,9 @@ function audio_remove ( $buffer, $parameters)
     return array ( "code" => 500, "message" => "Error removing file.");
   }
 
+  // Remove Music on Hold configuration file
+  unlink_config ( "config", "moh-" . $parameters["ID"]);
+
   // Reload Asterisk Music on Hold
   asterisk_exec ( "moh reload");
 
@@ -564,18 +597,28 @@ function audio_wipe ( $buffer, $parameters)
     framework_call ( "audio_wipe_pre", $parameters, false, true);
   }
 
-  // Remove all files
+  // Remove MoH configs by glob (catches orphans)
+  foreach ( list_config ( "config", "moh-*") as $filename)
+  {
+    unlink_config ( "config", $filename);
+  }
+
+  // Remove audio files (needs datafile data for filenames/formats)
   foreach ( list_config ( "datafile", "audio") as $filename)
   {
-    $entryid = (int) substr ( $filename, strrpos ( $filename, "-") + 1);
     $data = read_config ( "datafile", $filename);
-    unlink_config ( "audio", "audio-" . $data["ID"] . "/" . $data["Filename"] . "-originalfile.bin");
-    foreach ( $data["AvailableFormats"] as $format)
+    if ( is_array ( $data) && array_key_exists ( "ID", $data) && array_key_exists ( "Filename", $data))
     {
-      unlink_config ( "audio", "audio-" . $data["ID"] . "/" . str_replace ( "[", "\\[", str_replace ( "]", "\\]", str_replace ( "\\", "\\\\", substr ( $data["Filename"], 0, strrpos ( $data["Filename"], "."))))) . "." . $format);
+      unlink_config ( "audio", "audio-" . $data["ID"] . "/" . $data["Filename"] . "-originalfile.bin");
+      if ( is_array ( $data["AvailableFormats"]))
+      {
+        foreach ( $data["AvailableFormats"] as $format)
+        {
+          unlink_config ( "audio", "audio-" . $data["ID"] . "/" . str_replace ( "[", "\\[", str_replace ( "]", "\\]", str_replace ( "\\", "\\\\", substr ( $data["Filename"], 0, strrpos ( $data["Filename"], "."))))) . "." . $format);
+        }
+      }
+      unlink_config ( "audiodir", "audio-" . $data["ID"]);
     }
-    unlink_config ( "audiodir", "audio-" . $entryid);
-    unlink_config ( "config", "audio-" . $entryid);
     unlink_config ( "datafile", $filename);
   }
 

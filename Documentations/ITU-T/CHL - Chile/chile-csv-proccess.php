@@ -60,7 +60,7 @@ while ( $line = fgetcsv ( $fp, 1000, ","))
   $data[$type][$prefix] = $company;
 }
 
-// Resume prefixes to reduce data
+// Consolidate prefixes to reduce data
 echo "Reducing data...\n";
 do
 {

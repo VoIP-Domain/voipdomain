@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Users
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -70,11 +70,11 @@ i18n_add ( "edit user");
 i18n_add ( "Error retrieving user data!");
 i18n_add ( "Error changing user!");
 i18n_add ( "User changed successfully!");
-i18n_add ( "User addition");
+i18n_add ( "Add user");
 i18n_add ( "Error adding user!");
 i18n_add ( "User added successfully!");
-i18n_add ( "view user");
-i18n_add ( "User visualization");
+i18n_add ( "View user");
+i18n_add ( "View user");
 i18n_add ( "User language");
 i18n_add ( "System default language");
 i18n_add ( "Language");
@@ -83,15 +83,15 @@ i18n_add ( "Add a new system user.");
 i18n_add ( "An array containing the system users.");
 i18n_add ( "An array with all the system permissions for the user.");
 i18n_add ( "An object containing information about the system user.");
-i18n_add ( "Change a system user's information.");
+i18n_add ( "Change system user information.");
 i18n_add ( "en_US");
 i18n_add ( "Filter search with this string. If not provided, return all users.");
-i18n_add ( "Get a system user information.");
+i18n_add ( "Get system user information.");
 i18n_add ( "john.doe");
 i18n_add ( "john.doe@voipdomain.io");
 i18n_add ( "johndoe@voipdomain.io");
-i18n_add ( "New system user added successfully.");
-i18n_add ( "Remove a user from system.");
+i18n_add ( "A new system user was added successfully.");
+i18n_add ( "Remove a user from the system.");
 i18n_add ( "Search for system users.");
 i18n_add ( "The confirmation of the user's password.");
 i18n_add ( "The date and time of user creation.");
@@ -160,14 +160,14 @@ i18n_add ( "The user login name is already in use.", "O login informado já est�
 i18n_add ( "The user password is required.", "A senha do usuário é obrigatória.", "pt_BR");
 i18n_add ( "Edit user", "Editar usuário", "pt_BR");
 i18n_add ( "Remove users", "Remover usuários", "pt_BR");
-i18n_add ( "users search", "pesquisa de usuários", "pt_BR");
+i18n_add ( "users search", "Pesquisar usuários", "pt_BR");
 i18n_add ( "Name", "Nome", "pt_BR");
 i18n_add ( "Username", "Usuário", "pt_BR");
-i18n_add ( "User removal", "Remoção de usuário", "pt_BR");
+i18n_add ( "User removal", "Remover usuário", "pt_BR");
 i18n_add ( "Are you sure you want to remove user %s (%s)?", "Você tem certeza de que deseja remover o usuário %s (%s)?", "pt_BR");
 i18n_add ( "User removed successfully!", "Usuário removido com sucesso!", "pt_BR");
 i18n_add ( "Error removing user!", "Erro ao remover usuário!", "pt_BR");
-i18n_add ( "add user", "adição de usuário", "pt_BR");
+i18n_add ( "add user", "adicionar usuário", "pt_BR");
 i18n_add ( "E-mail", "E-mail", "pt_BR");
 i18n_add ( "Confirmation", "Confirmação", "pt_BR");
 i18n_add ( "User name", "Nome do usuário", "pt_BR");
@@ -175,15 +175,15 @@ i18n_add ( "User login name", "Login do usuário", "pt_BR");
 i18n_add ( "User e-mail", "E-mail do usuário", "pt_BR");
 i18n_add ( "User password", "Senha do usuário", "pt_BR");
 i18n_add ( "User password confirmation", "Confirmação da senha do usuário", "pt_BR");
-i18n_add ( "edit user", "edição de usuário", "pt_BR");
+i18n_add ( "edit user", "editar usuário", "pt_BR");
 i18n_add ( "Error retrieving user data!", "Erro ao recuperar dados do usuário!", "pt_BR");
 i18n_add ( "Error changing user!", "Erro ao alterar usuário!", "pt_BR");
 i18n_add ( "User changed successfully!", "Usuário alterado com sucesso!", "pt_BR");
-i18n_add ( "User addition", "Adição de usuário", "pt_BR");
+i18n_add ( "Add user", "Adicionar usuário", "pt_BR");
 i18n_add ( "Error adding user!", "Erro ao adicionar usuário!", "pt_BR");
 i18n_add ( "User added successfully!", "Usuário adicionado com sucesso!", "pt_BR");
-i18n_add ( "view user", "visualização de usuários", "pt_BR");
-i18n_add ( "User visualization", "Visualização de usuário", "pt_BR");
+i18n_add ( "View user", "visualizar usuários", "pt_BR");
+i18n_add ( "View user", "Visualizar usuário", "pt_BR");
 i18n_add ( "User language", "Idioma do usuário", "pt_BR");
 i18n_add ( "System default language", "Idioma padrão do sistema", "pt_BR");
 i18n_add ( "Language", "Idioma", "pt_BR");
@@ -192,15 +192,15 @@ i18n_add ( "Add a new system user.", "Adicionar um novo usuário do sistema.", "
 i18n_add ( "An array containing the system users.", "Um array contendo os usuários do sistema.", "pt_BR");
 i18n_add ( "An array with all the system permissions for the user.", "Um array com todas as permissões de sistema para o usuário.", "pt_BR");
 i18n_add ( "An object containing information about the system user.", "Um objeto contendo informações sobre um usuário do sistema.", "pt_BR");
-i18n_add ( "Change a system user's information.", "Alterar informações de um usuário do sistema.", "pt_BR");
+i18n_add ( "Change system user information.", "Alterar informações de um usuário do sistema.", "pt_BR");
 i18n_add ( "en_US", "pt_BR", "pt_BR");
-i18n_add ( "Filter search with this string. If not provided, return all users.", "Filtrar a pesquisa com esta string. Se não informado, retorna todos os usuários.", "pt_BR");
-i18n_add ( "Get a system user information.", "Requisita informações de um usuário do sistema.", "pt_BR");
+i18n_add ( "Filter search with this string. If not provided, return all users.", "Filtrar a pesquisa com esta string. Se omitido, retorna todos os usuários.", "pt_BR");
+i18n_add ( "Get system user information.", "Obtém informações de um usuário do sistema.", "pt_BR");
 i18n_add ( "john.doe", "zé.ninguém", "pt_BR");
 i18n_add ( "john.doe@voipdomain.io", "ze.ninguem@voipdomain.io", "pt_BR");
 i18n_add ( "johndoe@voipdomain.io", "zeninguem@voipdomain.io", "pt_BR");
-i18n_add ( "New system user added successfully.", "Novo usuário do sistema adicionado com sucesso.", "pt_BR");
-i18n_add ( "Remove a user from system.", "Remover um usuário do sistema.", "pt_BR");
+i18n_add ( "A new system user was added successfully.", "Um novo usuário do sistema foi adicionado com sucesso.", "pt_BR");
+i18n_add ( "Remove a user from the system.", "Remover um usuário do sistema.", "pt_BR");
 i18n_add ( "Search for system users.", "Pesquisar por usuários do sistema.", "pt_BR");
 i18n_add ( "The date and time of user creation.", "A data e hora de criação do usuário.", "pt_BR");
 i18n_add ( "The e-mail of the user.", "O email do usuário.", "pt_BR");
@@ -243,11 +243,11 @@ i18n_add ( "Activate", "Ativar", "pt_BR");
 i18n_add ( "Warning", "Aviso", "pt_BR");
 i18n_add ( "Disabling second factor authentication will destroy your key. You will need to set up another key to re-enable it.", "Desabilitar a autenticação de dois fatores irá destruir a sua chave. Você terá que configurar outra chave para habilitar novamente.", "pt_BR");
 i18n_add ( "Disable", "Desabilitado", "pt_BR");
-i18n_add ( "Error fetching second factor authentication data!", "Erro requisitando dados da autenticação de dois fatores!", "pt_BR");
+i18n_add ( "Error fetching second factor authentication data!", "Erro ao obter dados da autenticação de dois fatores!", "pt_BR");
 i18n_add ( "Second factor authentication activated!", "Autenticação de dois fatores ativada!", "pt_BR");
 i18n_add ( "Invalid second factor authentication code!", "Código de autenticação de dois fatores inválido!", "pt_BR");
 i18n_add ( "Second factor authentication disabled!", "Autenticação de dois fatores desabilitada!", "pt_BR");
 i18n_add ( "Error disabling second factor authentication!", "Erro ao desabilitar a autenticação de dois fatores!", "pt_BR");
 i18n_add ( "Invalid user ID.", "ID de usuário inválido.", "pt_BR");
-i18n_add ( "Clone user", "Clonagem de usuário", "pt_BR");
+i18n_add ( "Clone user", "Clonar usuário", "pt_BR");
 ?>

@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Ranges
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -50,25 +50,25 @@ i18n_add ( "Values overlap an existing range.");
 i18n_add ( "Edit ranges");
 i18n_add ( "Remove ranges");
 i18n_add ( "Ranges");
-i18n_add ( "ranges searching");
+i18n_add ( "Search ranges");
 i18n_add ( "In use");
 i18n_add ( "Are you sure you want to remove range %s (from %s to %s)?");
 i18n_add ( "Range removal");
-i18n_add ( "Range successfully removed!");
+i18n_add ( "Range removed successfully!");
 i18n_add ( "Error removing range!");
-i18n_add ( "ranges addition");
+i18n_add ( "Add ranges");
 i18n_add ( "Range description");
 i18n_add ( "Range server");
 i18n_add ( "Range start");
 i18n_add ( "Range finish");
-i18n_add ( "Range addition");
+i18n_add ( "Add range");
 i18n_add ( "Error adding range!");
 i18n_add ( "Range added successfully!");
-i18n_add ( "ranges visualization");
-i18n_add ( "Range visualization");
+i18n_add ( "View ranges");
+i18n_add ( "View range");
 i18n_add ( "Error viewing range!");
-i18n_add ( "ranges edition");
-i18n_add ( "Range edition");
+i18n_add ( "Edit ranges");
+i18n_add ( "Edit range");
 i18n_add ( "Error retrieving range data!");
 i18n_add ( "Error changing range!");
 i18n_add ( "Range changed successfully!");
@@ -85,24 +85,24 @@ i18n_add ( "The number of extensions using this range.");
 i18n_add ( "Search for system ranges.");
 i18n_add ( "An object containing information about the system range.");
 i18n_add ( "The internal unique identification number of the range.");
-i18n_add ( "The system server unique identifier where this range is allocated to.");
-i18n_add ( "The system server name where this range is allocated to.");
+i18n_add ( "The system server unique identifier where this range is allocated.");
+i18n_add ( "The system server name where this range is allocated.");
 i18n_add ( "The start allocation number for this range.");
 i18n_add ( "The finish allocation number for this range.");
 i18n_add ( "View ranges");
-i18n_add ( "Get a system range information.");
+i18n_add ( "Get system range information.");
 i18n_add ( "The system range internal system unique identifier.");
 i18n_add ( "The system server unique identifier where the range will be allocated.");
 i18n_add ( "The start allocation number of the range.");
 i18n_add ( "The finish allocation number of the range.");
-i18n_add ( "New system range was added successfully.");
+i18n_add ( "A new system range was added successfully.");
 i18n_add ( "Add a new system range.");
 i18n_add ( "The system range was successfully updated.");
-i18n_add ( "Change a system range information.");
+i18n_add ( "Change system range information.");
 i18n_add ( "The system range was removed.");
 i18n_add ( "Remove a system range.");
 i18n_add ( "Invalid range ID.");
-i18n_add ( "Range cloning");
+i18n_add ( "Clone range");
 i18n_add ( "The number length must have %d digits.");
 
 /**
@@ -121,29 +121,29 @@ i18n_add ( "Values overlap an existing range.", "Valores sobrepõe faixa já exi
 i18n_add ( "Edit ranges", "Editar faixas", "pt_BR");
 i18n_add ( "Remove ranges", "Remover faixas", "pt_BR");
 i18n_add ( "Ranges", "Faixas", "pt_BR");
-i18n_add ( "ranges searching", "pesquisa de faixas", "pt_BR");
+i18n_add ( "Search ranges", "Pesquisar faixas", "pt_BR");
 i18n_add ( "In use", "Em uso", "pt_BR");
-i18n_add ( "Are you sure you want to remove range %s (from %s to %s)?", "Você tem certeza que deseja remover a faixa %s (de %s a %s)?", "pt_BR");
-i18n_add ( "Range removal", "Remoção de faixa", "pt_BR");
-i18n_add ( "Range successfully removed!", "Faixa removida com sucesso!", "pt_BR");
+i18n_add ( "Are you sure you want to remove range %s (from %s to %s)?", "Você tem certeza de que deseja remover a faixa %s (de %s a %s)?", "pt_BR");
+i18n_add ( "Range removal", "Remover faixa", "pt_BR");
+i18n_add ( "Range removed successfully!", "Faixa removida com sucesso!", "pt_BR");
 i18n_add ( "Error removing range!", "Erro ao remover faixa!", "pt_BR");
-i18n_add ( "ranges addition", "adição de faixas", "pt_BR");
+i18n_add ( "Add ranges", "adicionar faixas", "pt_BR");
 i18n_add ( "Range description", "Descrição da faixa", "pt_BR");
 i18n_add ( "Range server", "Servidor da faixa", "pt_BR");
 i18n_add ( "Range start", "Início da faixa", "pt_BR");
 i18n_add ( "Range finish", "Término da faixa", "pt_BR");
-i18n_add ( "Range addition", "Adição de faixa", "pt_BR");
+i18n_add ( "Add range", "Adicionar faixa", "pt_BR");
 i18n_add ( "Error adding range!", "Erro ao adicionar faixa!", "pt_BR");
 i18n_add ( "Range added successfully!", "Faixa adicionada com sucesso!", "pt_BR");
-i18n_add ( "ranges visualization", "visualização de faixas", "pt_BR");
-i18n_add ( "Range visualization", "Visualização de faixa", "pt_BR");
+i18n_add ( "View ranges", "visualizar faixas", "pt_BR");
+i18n_add ( "View range", "Visualizar faixa", "pt_BR");
 i18n_add ( "Error viewing range!", "Erro ao visualizar faixa!", "pt_BR");
-i18n_add ( "ranges edition", "edição de faixas", "pt_BR");
-i18n_add ( "Range edition", "Edição de faixa", "pt_BR");
-i18n_add ( "Error retrieving range data!", "Erro ao requisitar dados do faixa!", "pt_BR");
+i18n_add ( "Edit ranges", "editar faixas", "pt_BR");
+i18n_add ( "Edit range", "Editar faixa", "pt_BR");
+i18n_add ( "Error retrieving range data!", "Erro ao obter dados do faixa!", "pt_BR");
 i18n_add ( "Error changing range!", "Erro ao alterar faixa!", "pt_BR");
 i18n_add ( "Range changed successfully!", "Faixa alterada com sucesso!", "pt_BR");
-i18n_add ( "Filter search with this string. If not provided, return all ranges.", "Filtrar a pesquisa com esta string. Se não informado, retorna todas as faixas.", "pt_BR");
+i18n_add ( "Filter search with this string. If not provided, return all ranges.", "Filtrar a pesquisa com esta string. Se omitido, retorna todas as faixas.", "pt_BR");
 i18n_add ( "An array containing the system ranges.", "Um array contendo todas as faixas do sistema.", "pt_BR");
 i18n_add ( "The internal unique identification number of the ranges.", "O número único interno do sistema de identificação da faixa.", "pt_BR");
 i18n_add ( "The description of the range.", "A descrição da faixa.", "pt_BR");
@@ -156,23 +156,23 @@ i18n_add ( "The number of extensions using this range.", "O número de extensõe
 i18n_add ( "Search for system ranges.", "Pesquisar por faixas do sistema.", "pt_BR");
 i18n_add ( "An object containing information about the system range.", "Um array contendo informações sobre uma faixa do sistema.", "pt_BR");
 i18n_add ( "The internal unique identification number of the range.", "O número de identificação interna única da faixa no sistema.", "pt_BR");
-i18n_add ( "The system server unique identifier where this range is allocated to.", "O número identificador do servidor do sistema onde esta faixa está alocada.", "pt_BR");
-i18n_add ( "The system server name where this range is allocated to.", "O nome do servidor do sistema onde esta faixa está alocada.", "pt_BR");
+i18n_add ( "The system server unique identifier where this range is allocated.", "O número identificador do servidor do sistema onde esta faixa está alocada.", "pt_BR");
+i18n_add ( "The system server name where this range is allocated.", "O nome do servidor do sistema onde esta faixa está alocada.", "pt_BR");
 i18n_add ( "The start allocation number for this range.", "O número de alocação inicial desta faixa.", "pt_BR");
 i18n_add ( "The finish allocation number for this range.", "O número de alocação final desta faixa.", "pt_BR");
 i18n_add ( "View ranges", "Visualizar faixas", "pt_BR");
-i18n_add ( "Get a system range information.", "Requisitar informações de uma faixa.", "pt_BR");
+i18n_add ( "Get system range information.", "Obter informações de uma faixa.", "pt_BR");
 i18n_add ( "The system range internal system unique identifier.", "O identificador interno único da faixa no sistema.", "pt_BR");
 i18n_add ( "The system server unique identifier where the range will be allocated.", "O identificador único do servidor do sistema onde esta faixa está alocada.", "pt_BR");
 i18n_add ( "The start allocation number of the range.", "O número de alocação inicial desta faixa.", "pt_BR");
 i18n_add ( "The finish allocation number of the range.", "O número de alocação final desta faixa.", "pt_BR");
-i18n_add ( "New system range was added successfully.", "A faixa do sistema foi adicionada com sucesso.", "pt_BR");
+i18n_add ( "A new system range was added successfully.", "Uma nova faixa do sistema foi adicionada com sucesso.", "pt_BR");
 i18n_add ( "Add a new system range.", "Adicionar uma nova faixa do sistema.", "pt_BR");
 i18n_add ( "The system range was successfully updated.", "A faixa do sistema foi atualizada com sucesso.", "pt_BR");
-i18n_add ( "Change a system range information.", "Altera informações de uma faixa do sistema.", "pt_BR");
+i18n_add ( "Change system range information.", "Altera informações de uma faixa do sistema.", "pt_BR");
 i18n_add ( "The system range was removed.", "A faixa do sistema foi removida.", "pt_BR");
 i18n_add ( "Remove a system range.", "Remover uma faixa do sistema.", "pt_BR");
 i18n_add ( "Invalid range ID.", "ID de faixa inválido.", "pt_BR");
-i18n_add ( "Range cloning", "Clonagem de faixa", "pt_BR");
+i18n_add ( "Clone range", "Clonar faixa", "pt_BR");
 i18n_add ( "The number length must have %d digits.", "O tamanho do número deve ter %d dígitos.", "pt_BR");
 ?>

@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Core
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -1398,6 +1398,48 @@ function notify_capture_send ( $serverid, $event = "", $data = array ())
 }
 
 /**
+ * Gearman function name for the client daemon task worker on a server.
+ *
+ * @param int $serverid Server ID
+ * @return string
+ */
+function gearman_client_task_name ( $serverid)
+{
+  return "vd_client_" . (int) $serverid . "_task";
+}
+
+/**
+ * Gearman function name for the backup client daemon task worker.
+ *
+ * @param int $serverid Primary server ID
+ * @return string
+ */
+function gearman_backup_task_name ( $serverid)
+{
+  return "vd_backup_server_" . (int) $serverid . "_task";
+}
+
+/**
+ * Ask the message router daemon to reload its in-memory caches.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param array $parameters Optional parameters (e.g. ServerID)
+ * @return boolean
+ */
+function router_request_cache_reload ( $parameters = array ())
+{
+  global $_in;
+
+  if ( ! array_key_exists ( "socket", $_in["gearman"]) || ! $_in["gearman"]["socket"])
+  {
+    $_in["gearman"]["socket"] = new GearmanClient ();
+    $_in["gearman"]["socket"]->addServer ( $_in["gearman"]["servers"]);
+  }
+
+  return $_in["gearman"]["socket"]->doBackground ( "router_reload_cache", json_encode ( $parameters));
+}
+
+/**
  * Function to send notifications to servers (using gearman).
  *
  * @global array $_in Framework global configuration variable
@@ -1421,12 +1463,12 @@ function notify_server ( $serverid, $event, $data = array (), $handler = null)
   }
 
   /**
-   * Get server configuration cryptography key
+   * Get server configuration and tenant private key for signing
    */
   $where = "";
   if ( $serverid != 0)
   {
-    $where .= " WHERE `ID` ";
+    $where .= " WHERE `Servers`.`ID` ";
     if ( $serverid < 0)
     {
       $where .= "!= " . $_in["mysql"]["id"]->real_escape_string ( (int) $serverid * -1);
@@ -1434,7 +1476,7 @@ function notify_server ( $serverid, $event, $data = array (), $handler = null)
       $where .= "= " . $_in["mysql"]["id"]->real_escape_string ( (int) $serverid);
     }
   }
-  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Servers`" . $where))
+  if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Servers`.*, `Tenants`.`PrivateKey` AS `TenantPrivateKey` FROM `Servers` LEFT JOIN `Tenants` ON `Servers`.`Tenant` = `Tenants`.`ID`" . $where))
   {
     return false;
   }
@@ -1444,20 +1486,22 @@ function notify_server ( $serverid, $event, $data = array (), $handler = null)
   }
 
   /**
-   * Check for the interface private key (to sign the data)
-   */
-  if ( ! array_key_exists ( "privateKey", $_in["general"]))
-  {
-    $_in["general"]["privateKey"] = file_get_contents ( "/etc/voipdomain/master-certificate.key");
-  }
-
-  /**
    * Connect to Gearman if not connected
    */
+  $gearman_available = true;
   if ( ! array_key_exists ( "socket", $_in["gearman"]) || ! $_in["gearman"]["socket"])
   {
-    $_in["gearman"]["socket"] = new GearmanClient ();
-    $_in["gearman"]["socket"]->addServer ( $_in["gearman"]["servers"]);
+    try
+    {
+      $_in["gearman"]["socket"] = new GearmanClient ();
+      $_in["gearman"]["socket"]->addServer ( $_in["gearman"]["servers"]);
+    }
+    catch ( Exception $e)
+    {
+      error_log ( "VoIP Domain: Failed to connect to Gearman server (" . $_in["gearman"]["servers"] . "): " . $e->getMessage () . " - Commands will be queued in database for later processing.");
+      $gearman_available = false;
+      $_in["gearman"]["socket"] = null;
+    }
   }
 
   /**
@@ -1483,9 +1527,17 @@ function notify_server ( $serverid, $event, $data = array (), $handler = null)
     }
 
     /**
-     * Skip if server still doesn't have a configured public key
+     * Skip if server still doesn't have a configured public key or tenant private key
      */
-    if ( empty ( $server["PublicKey"]))
+    if ( empty ( $server["PublicKey"]) || empty ( $server["TenantPrivateKey"]))
+    {
+      continue;
+    }
+
+    /**
+     * Skip Gearman send if not available (command is already queued in database)
+     */
+    if ( ! $gearman_available || ! $_in["gearman"]["socket"])
     {
       continue;
     }
@@ -1494,17 +1546,21 @@ function notify_server ( $serverid, $event, $data = array (), $handler = null)
      * Prepare payload
      */
     $payload = json_encode ( array ( "event" => $event, "id" => $command, "data" => $data, "group" => $handler));
-    $iv = secure_rand ( 16, true);
-    $key = secure_rand ( 256, true);
-    $encrypted = openssl_encrypt ( $payload, "aes-256-cbc", $key, OPENSSL_RAW_DATA, $iv);
-    $hmac = hash_hmac ( "sha256", $encrypted, $key, true);
-    openssl_public_encrypt ( $key, $encryptedkey, $server["PublicKey"]);
-    openssl_sign ( $key . $iv . $hmac . $encrypted, $sign, $_in["general"]["privateKey"], OPENSSL_ALGO_SHA1);
 
     /**
-     * Send event data
+     * Send event data to main server (skip if filtered out)
      */
-    $_in["gearman"]["socket"]->doBackground ( "vd_server_" . $server["ID"] . "_task", json_encode ( array ( "payload" => base64_encode ( $encrypted), "iv" => base64_encode ( $iv), "key" => base64_encode ( $encryptedkey), "hmac" => base64_encode ( $hmac), "sign" => base64_encode ( $sign))));
+    if ( ! array_key_exists ( "notify_backup_filter", $_in) || $_in["notify_backup_filter"]["server"] != $server["ID"] || $_in["notify_backup_filter"]["main"])
+    {
+      $iv = secure_rand ( 16, true);
+      $key = secure_rand ( 256, true);
+      $encrypted = openssl_encrypt ( $payload, "aes-256-cbc", $key, OPENSSL_RAW_DATA, $iv);
+      $hmac = hash_hmac ( "sha256", $encrypted, $key, true);
+      openssl_public_encrypt ( $key, $encryptedkey, $server["PublicKey"]);
+      openssl_sign ( $key . $iv . $hmac . $encrypted, $sign, $server["TenantPrivateKey"], OPENSSL_ALGO_SHA256);
+
+      $_in["gearman"]["socket"]->doBackground ( gearman_client_task_name ( $server["ID"]), json_encode ( array ( "payload" => base64_encode ( $encrypted), "iv" => base64_encode ( $iv), "key" => base64_encode ( $encryptedkey), "hmac" => base64_encode ( $hmac), "sign" => base64_encode ( $sign))));
+    }
 
     /**
      * Check for backup servers
@@ -1516,6 +1572,14 @@ function notify_server ( $serverid, $event, $data = array (), $handler = null)
     while ( $backup = $result2->fetch_assoc ())
     {
       /**
+       * Skip backup if filtered out by notify_backup_filter
+       */
+      if ( array_key_exists ( "notify_backup_filter", $_in) && $_in["notify_backup_filter"]["server"] == $server["ID"] && $_in["notify_backup_filter"]["backups"] !== null && ! in_array ( (int) $backup["ID"], $_in["notify_backup_filter"]["backups"]))
+      {
+        continue;
+      }
+
+      /**
        * Prepare payload
        */
       $iv = secure_rand ( 16, true);
@@ -1523,12 +1587,12 @@ function notify_server ( $serverid, $event, $data = array (), $handler = null)
       $encrypted = openssl_encrypt ( $payload, "aes-256-cbc", $key, OPENSSL_RAW_DATA, $iv);
       $hmac = hash_hmac ( "sha256", $encrypted, $key, true);
       openssl_public_encrypt ( $key, $encryptedkey, $backup["PublicKey"]);
-      openssl_sign ( $key . $iv . $hmac . $encrypted, $sign, $_in["general"]["privateKey"], OPENSSL_ALGO_SHA1);
+      openssl_sign ( $key . $iv . $hmac . $encrypted, $sign, $server["TenantPrivateKey"], OPENSSL_ALGO_SHA256);
 
       /**
        * Send event data
        */
-      $_in["gearman"]["socket"]->doBackground ( "vd_backup_server_" . $server["ID"] . "_task", json_encode ( array ( "payload" => base64_encode ( $crypted), "iv" => base64_encode ( $iv), "key" => base64_encode ( $encryptedkey), "hmac" => base64_encode ( $hmac), "sign" => base64_encode ( $sign))));
+      $_in["gearman"]["socket"]->doBackground ( gearman_backup_task_name ( $server["ID"]), json_encode ( array ( "payload" => base64_encode ( $encrypted), "iv" => base64_encode ( $iv), "key" => base64_encode ( $encryptedkey), "hmac" => base64_encode ( $hmac), "sign" => base64_encode ( $sign))));
     }
   }
 
@@ -1657,7 +1721,7 @@ function array_compare_with_keys ( $array1, $array2, $strict = false)
 
 /**
  * Function to explode a string into an array, respecting key and value of each
- * field. Usefull with Asterisk QOS fields.
+ * field. Useful with Asterisk QOS fields.
  *
  * @param $string string String to be processed.
  * @return array
@@ -1873,7 +1937,7 @@ function hex2str ( $hex)
 }
 
 /**
- * For PHP versions <= 7.3.0, we doesn't have array_key_last function, so, implement it if needed.
+ * For PHP versions <= 7.3.0, we don't have array_key_last function, so, implement it if needed.
  */
 if ( ! function_exists ( "array_key_last"))
 {
@@ -1889,7 +1953,7 @@ if ( ! function_exists ( "array_key_last"))
 }
 
 /**
- * For PHP versions <= 5.5.0, we doesn't have hash_pbkdf2 function, so, implement it if needed.
+ * For PHP versions <= 5.5.0, we don't have hash_pbkdf2 function, so, implement it if needed.
  */
 if ( ! function_exists ( "hash_pbkdf2"))
 {
@@ -1948,6 +2012,323 @@ if ( ! function_exists ( "hash_pbkdf2"))
 }
 
 /**
+ * Build an absolute URL for HTTP Location headers from an application path.
+ *
+ * Paths starting with http:// or https:// are returned unchanged. Relative paths
+ * are prefixed with the request scheme and configured host (general.baseurl).
+ *
+ * @param string $path Application path (e.g. "/api/users/1") or absolute URL
+ * @return string
+ */
+function voipdomain_location_url ( $path)
+{
+  global $_in;
+
+  if ( $path === "" || $path === null)
+  {
+    return $path;
+  }
+  if ( preg_match ( '#^https?://#i', $path))
+  {
+    return $path;
+  }
+  if ( $path[0] !== "/")
+  {
+    $path = "/" . $path;
+  }
+  if ( ! empty ( $_SERVER["HTTP_X_FORWARDED_PROTO"]))
+  {
+    $scheme = $_SERVER["HTTP_X_FORWARDED_PROTO"];
+  } elseif ( ! empty ( $_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off")
+  {
+    $scheme = "https";
+  } else {
+    $scheme = "http";
+  }
+  if ( ! empty ( $_in["general"]["baseurl"]))
+  {
+    $host = $_in["general"]["baseurl"];
+  } elseif ( ! empty ( $_SERVER["HTTP_HOST"]))
+  {
+    $host = $_SERVER["HTTP_HOST"];
+  } else {
+    $host = $_SERVER["SERVER_NAME"];
+  }
+
+  return $scheme . "://" . $host . $path;
+}
+
+/**
+ * Return whether VoIP Domain web configuration still requires the web installer.
+ *
+ * @param array|null $conf Parsed webinterface.conf (sections as arrays)
+ * @return boolean
+ */
+function voipdomain_config_requires_install ( $conf)
+{
+  if ( ! is_array ( $conf))
+  {
+    return true;
+  }
+  if ( array_key_exists ( "general", $conf) && is_array ( $conf["general"]) && array_key_exists ( "installed", $conf["general"]))
+  {
+    if ( ! filter_var ( $conf["general"]["installed"], FILTER_VALIDATE_BOOLEAN))
+    {
+      return true;
+    }
+  }
+  if ( ! array_key_exists ( "mysql", $conf) || ! is_array ( $conf["mysql"]) || empty ( $conf["mysql"]["database"]))
+  {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Human-readable owner, group, and mode for a path (for install diagnostics).
+ *
+ * @param string $path Filesystem path
+ * @return string
+ */
+function voipdomain_path_permissions_text ( $path)
+{
+  if ( ! file_exists ( $path))
+  {
+    return __ ( "path does not exist");
+  }
+  $mode = substr ( sprintf ( "%o", fileperms ( $path)), -4);
+  $owner = (string) fileowner ( $path);
+  $group = (string) filegroup ( $path);
+  if ( function_exists ( "posix_getpwuid"))
+  {
+    $pw = @posix_getpwuid ( fileowner ( $path));
+    if ( is_array ( $pw) && ! empty ( $pw["name"]))
+    {
+      $owner = $pw["name"];
+    }
+    $gr = @posix_getgrgid ( filegroup ( $path));
+    if ( is_array ( $gr) && ! empty ( $gr["name"]))
+    {
+      $group = $gr["name"];
+    }
+  }
+  return $owner . ":" . $group . " " . __ ( "mode") . " " . $mode;
+}
+
+/**
+ * PHP-FPM / CLI process username when POSIX is available.
+ *
+ * @return string
+ */
+function voipdomain_php_process_user ()
+{
+  if ( function_exists ( "posix_geteuid"))
+  {
+    $pw = @posix_getpwuid ( posix_geteuid ());
+    if ( is_array ( $pw) && ! empty ( $pw["name"]))
+    {
+      return $pw["name"];
+    }
+  }
+  return "php-fpm";
+}
+
+/**
+ * Verify PHP can create and remove a file in a directory (POSIX + SELinux).
+ *
+ * @param string $dir Directory path
+ * @return bool
+ */
+function voipdomain_install_dir_write_probe ( $dir)
+{
+  $probe = $dir . "/.voipdomain-install-probe-" . getmypid ();
+  $ok = @file_put_contents ( $probe, "ok\n", LOCK_EX) !== false;
+  if ( $ok)
+  {
+    @unlink ( $probe);
+  }
+  return $ok;
+}
+
+/**
+ * Verify PHP can open an existing path for read/write (installer overwrite).
+ *
+ * @param string $path File path
+ * @return bool
+ */
+function voipdomain_install_file_write_probe ( $path)
+{
+  if ( ! file_exists ( $path))
+  {
+    return true;
+  }
+  $handle = @fopen ( $path, "c+");
+  if ( $handle === false)
+  {
+    return false;
+  }
+  fclose ( $handle);
+  return true;
+}
+
+/**
+ * Detailed filesystem / config checks for the web installer (GET /api/install/check).
+ *
+ * @return array Result, Description, Checks[]
+ */
+function voipdomain_install_check_status ()
+{
+  $conf_dir = "/etc/voipdomain";
+  $conf_path = $conf_dir . "/webinterface.conf";
+  $php_user = voipdomain_php_process_user ();
+  $checks = array ();
+  $description = "";
+
+  $dir_exists = is_dir ( $conf_dir);
+  $dir_mode = $dir_exists ? substr ( sprintf ( "%o", fileperms ( $conf_dir)), -4) : "";
+  $dir_writable = $dir_exists && is_writable ( $conf_dir);
+  $dir_write_probe = $dir_exists && voipdomain_install_dir_write_probe ( $conf_dir);
+  $checks[] = array (
+    "Name" => "ConfigDirectory",
+    "Result" => $dir_exists,
+    "Detail" => $dir_exists ? voipdomain_path_permissions_text ( $conf_dir) : __ ( "Directory missing")
+  );
+
+  $checks[] = array (
+    "Name" => "ConfigDirectoryWritable",
+    "Result" => $dir_write_probe,
+    "Detail" => $dir_write_probe ? __ ( "Writable by PHP") : ( $dir_writable ? __ ( "Access denied (check SELinux)") : ( $dir_mode !== "" ? __ ( "mode") . " " . $dir_mode : __ ( "Not writable")))
+  );
+  if ( ! $dir_write_probe)
+  {
+    if ( ! $dir_exists)
+    {
+      $description = __ ( "Configuration directory /etc/voipdomain is missing.");
+    } elseif ( $dir_mode === "0770")
+    {
+      $description = sprintf ( __ ( "PHP (%s) cannot write to /etc/voipdomain. Check that the pool user is in group nginx and SELinux allows writes."), $php_user);
+    } else {
+      $description = sprintf ( __ ( "PHP (%s) cannot write to /etc/voipdomain (expected root:nginx mode 0770)."), $php_user);
+    }
+  }
+
+  $conf_exists = file_exists ( $conf_path);
+  $conf_mode = $conf_exists ? substr ( sprintf ( "%o", fileperms ( $conf_path)), -4) : "";
+  $conf_readable = ! $conf_exists || is_readable ( $conf_path);
+  $conf_writable = voipdomain_install_file_write_probe ( $conf_path);
+  $checks[] = array (
+    "Name" => "ConfigFile",
+    "Result" => $conf_readable,
+    "Detail" => ! $conf_exists ? __ ( "Will be created by installer") : ( $conf_readable ? __ ( "Readable") : voipdomain_path_permissions_text ( $conf_path))
+  );
+  $checks[] = array (
+    "Name" => "ConfigFileWritable",
+    "Result" => $conf_writable,
+    "Detail" => ! $conf_exists ? __ ( "Will be created by installer") : ( $conf_writable ? __ ( "Writable by PHP") : ( is_writable ( $conf_path) ? __ ( "Access denied (check SELinux)") : voipdomain_path_permissions_text ( $conf_path)))
+  );
+  if ( $description === "" && $conf_exists && ! is_readable ( $conf_path))
+  {
+    $description = __ ( "PHP cannot read /etc/voipdomain/webinterface.conf.");
+  }
+  if ( $description === "" && $conf_exists && ! $conf_writable)
+  {
+    if ( $conf_mode === "0640")
+    {
+      $description = sprintf ( __ ( "PHP (%s) cannot overwrite /etc/voipdomain/webinterface.conf: mode 0640 gives group nginx read-only. Use chmod 0660 root:nginx."), $php_user);
+    } elseif ( $conf_mode === "0660")
+    {
+      $description = sprintf ( __ ( "PHP (%s) cannot overwrite /etc/voipdomain/webinterface.conf. Check group membership and SELinux context httpd_sys_rw_content_t on the file."), $php_user);
+    } else {
+      $description = sprintf ( __ ( "PHP (%s) cannot overwrite /etc/voipdomain/webinterface.conf (expected root:nginx mode 0660)."), $php_user);
+    }
+  }
+
+  $conf = $conf_exists && is_readable ( $conf_path) ? @parse_ini_file ( $conf_path, true) : false;
+  $parse_ok = ! $conf_exists || is_array ( $conf);
+  $checks[] = array (
+    "Name" => "ConfigParse",
+    "Result" => $parse_ok,
+    "Detail" => $parse_ok ? __ ( "OK") : __ ( "Syntax error")
+  );
+  if ( $description === "" && ! $parse_ok)
+  {
+    $description = __ ( "Cannot parse /etc/voipdomain/webinterface.conf.");
+  }
+
+  $install_pending = voipdomain_config_requires_install ( $conf);
+  $checks[] = array (
+    "Name" => "InstallPending",
+    "Result" => $install_pending,
+    "Detail" => $install_pending ? __ ( "Installer required") : __ ( "Already configured")
+  );
+  if ( $description === "" && ! $install_pending)
+  {
+    $description = __ ( "System is already installed. Open the login page or reset webinterface.conf to run the installer again.");
+  }
+
+  $ok = $dir_write_probe && $conf_writable && $parse_ok && $install_pending && $conf_readable;
+
+  return array (
+    "Result" => $ok,
+    "Description" => $ok ? __ ( "All permissions are okay.") : ( $description !== "" ? $description : __ ( "Installation check failed.")),
+    "Checks" => $checks
+  );
+}
+
+/**
+ * Open a MySQL connection without throwing on PHP 8+ (mysqli_sql_exception).
+ *
+ * @param string $hostname Database host (optionally host:port)
+ * @param string $username Database username
+ * @param string $password Database password
+ * @param string $database Database name
+ * @return array Keys: id (mysqli|null), errno (int), error (string|null)
+ */
+function voipdomain_mysqli_connect ( $hostname, $username, $password, $database)
+{
+  mysqli_report ( MYSQLI_REPORT_OFF);
+  $link = mysqli_init ();
+  if ( ! $link)
+  {
+    return array ( "id" => NULL, "errno" => -1, "error" => "mysqli_init failed");
+  }
+
+  // Parse hostname:port if present
+  $port = null;
+  $socket = null;
+  if ( strpos ( $hostname, ":") !== false)
+  {
+    list ( $hostname, $port) = explode ( ":", $hostname, 2);
+    $port = (int) $port;
+  }
+
+  // Use socket for localhost connections (same behavior as mysql CLI)
+  if ( $hostname === "localhost")
+  {
+    $socket = ini_get ( "mysqli.default_socket");
+    if ( empty ( $socket))
+    {
+      // Common socket paths
+      foreach ( array ( "/var/lib/mysql/mysql.sock", "/var/run/mysqld/mysqld.sock", "/tmp/mysql.sock") as $path)
+      {
+        if ( file_exists ( $path))
+        {
+          $socket = $path;
+          break;
+        }
+      }
+    }
+  }
+
+  $result = @mysqli_real_connect ( $link, $hostname, $username, ( $password === "" ? null : $password), ( $database === "" ? null : $database), $port, $socket);
+  if ( ! $result)
+  {
+    return array ( "id" => NULL, "errno" => mysqli_connect_errno (), "error" => mysqli_connect_error ());
+  }
+  return array ( "id" => $link, "errno" => 0, "error" => NULL);
+}
+
+/**
  * Function to return a system translation to current user language.
  *
  * @global array $_in Framework global configuration variable
@@ -1960,6 +2341,20 @@ if ( ! function_exists ( "hash_pbkdf2"))
 function __ ( $text, $strip = true, $slashes = true, $context = "")
 {
   global $_in;
+
+  if ( ! is_array ( $_in))
+  {
+    $return = $text;
+    if ( $strip)
+    {
+      $return = strip_tags ( $return ? $return : "");
+    }
+    if ( $slashes)
+    {
+      $return = addslashes ( $return);
+    }
+    return $return;
+  }
 
   if ( empty ( $context) && array_key_exists ( "module", $_in))
   {
@@ -2097,6 +2492,10 @@ function i18n_add ( $text, $translation = "", $language = "", $context = "")
 {
   global $_in;
 
+  if ( ! is_array ( $_in["i18n"] ?? null))
+  {
+    $_in["i18n"] = array ();
+  }
   if ( empty ( $context))
   {
     $context = $_in["module"];
@@ -2576,306 +2975,6 @@ if ( ! function_exists ( "array_key_first"))
     }
     return NULL;
   }
-}
-
-/**
- * Function to generate graceful internal server error pages.
- *
- * @global array $_in Framework global configuration variable
- * @param $errno int The error number (from 500 to 599).
- * @param $message string The error message.
- * @return null
- */
-function error_5xx ( $errno, $message)
-{
-  global $_in;
-
-  switch ( $errno)
-  {
-    case 501:
-      header ( $_SERVER["SERVER_PROTOCOL"] . " " . $errno . " Not Implemented");
-      break;
-    case 502:
-      header ( $_SERVER["SERVER_PROTOCOL"] . " " . $errno . " Bad Gateway");
-      break;
-    case 503:
-      header ( $_SERVER["SERVER_PROTOCOL"] . " " . $errno . " Service Unavailable");
-      break;
-    case 504:
-      header ( $_SERVER["SERVER_PROTOCOL"] . " " . $errno . " Gateway Timeout");
-      break;
-    case 505:
-      header ( $_SERVER["SERVER_PROTOCOL"] . " " . $errno . " HTTP Version Not Supported");
-      break;
-    case 506:
-      header ( $_SERVER["SERVER_PROTOCOL"] . " " . $errno . " Variant Also Negotiates");
-      break;
-    case 507:
-      header ( $_SERVER["SERVER_PROTOCOL"] . " " . $errno . " Insufficient Storage");
-      break;
-    case 508:
-      header ( $_SERVER["SERVER_PROTOCOL"] . " " . $errno . " Loop Detected");
-      break;
-    case 509:
-      header ( $_SERVER["SERVER_PROTOCOL"] . " " . $errno . " Bandwidth Limit Exceeded");
-      break;
-    case 510:
-      header ( $_SERVER["SERVER_PROTOCOL"] . " " . $errno . " Not Extended");
-      break;
-    case 511:
-      header ( $_SERVER["SERVER_PROTOCOL"] . " " . $errno . " Network Authentication Required");
-      break;
-    case 599:
-      header ( $_SERVER["SERVER_PROTOCOL"] . " " . $errno . " Network Connection Timeout Error");
-      break;
-    default:
-      $errno = 500;
-      header ( $_SERVER["SERVER_PROTOCOL"] . " 500 Internal Server Error");
-      break;
-  }
-  if ( array_key_exists ( "HTTP_X_INFRAMEWORK", $_SERVER) && $_in["general"]["debug"] === true)
-  {
-    echo json_encode ( array ( "result" => false, "message" => $message, "error" => $errono));
-  } else {
-    echo "<!DOCTYPE html>\n";
-    echo generate_html_banner ();
-    echo "<html lang=\"" . ( ! empty ( $_in["general"]["language"]) ? $_in["general"]["language"] : "en_US") . "\">\n";
-    echo "<head>\n";
-    echo "  <meta charset=\"" . ( ! empty ( $_in["general"]["charset"]) ? strtolower ( $_in["general"]["charset"]) : "utf-8") . "\">\n";
-    echo "  <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n";
-    echo "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no\">\n";
-    echo "  <meta name=\"application-name\" content=\"VoIP Domain\">\n";
-    echo "  <meta name=\"description\" content=\"" . __ ( "VoIP PBX management system.") . "\">\n";
-    echo "  <meta name=\"author\" content=\"Ernani José Camargo Azevedo\">\n";
-    if ( ! empty ( $_in["general"]["version"]))
-    {
-      echo "  <meta name=\"version\" content=\"" . addslashes ( strip_tags ( $_in["general"]["version"])) . "\">\n";
-    }
-    if ( ! empty ( $_in["general"]["favicon"]))
-    {
-      echo "  <link rel=\"icon\" type=\"" . mime_content_type ( strip_tags ( dirname ( __FILE__) . "/../.." . $_in["general"]["favicon"])) . "\" href=\"" . addslashes ( strip_tags ( ( substr ( $_in["general"]["favicon"], 0, 1) != "/" ? "/" : "") . $_in["general"]["favicon"])) . "\">\n";
-    }
-    if ( ! empty ( $_in["general"]["title"]))
-    {
-      echo "  <title>" . addslashes ( strip_tags ( $_in["general"]["title"])) . " - " . __ ( "Error") . " " . $errno . "</title>\n";
-    } else {
-      echo "  <title>" . __ ( "Error") . " " . $errno . "</title>\n";
-    }
-    echo "  <link type=\"text/css\" rel=\"stylesheet\" href=\"/css/error" . ( $_in["general"]["debug"] === false ? ".min" : "") . ".css\" />\n";
-    echo "</head>\n";
-    echo "\n";
-    echo "<body>\n";
-    echo "  <div class=\"container\">\n";
-    echo "    <div class=\"error\">\n";
-    echo "      <h1>" . $errno . "</h1>\n";
-    echo "      <h2>" . __ ( "error") . "</h2>\n";
-    echo "      <p>" . htmlspecialchars ( $message) . "</p>\n";
-    echo "    </div>\n";
-    echo "    <div class=\"stack-container\">\n";
-    echo "      <div class=\"card-container\">\n";
-    echo "        <div class=\"perspec\" style=\"--spreaddist: 125px; --scaledist: .75; --vertdist: -25px;\">\n";
-    echo "          <div class=\"card\">\n";
-    echo "            <div class=\"writing\">\n";
-    echo "              <div class=\"topbar\">\n";
-    echo "                <div class=\"red\"></div>\n";
-    echo "                <div class=\"yellow\"></div>\n";
-    echo "                <div class=\"green\"></div>\n";
-    echo "              </div>\n";
-    echo "              <div class=\"code\"><ul></ul></div>\n";
-    echo "            </div>\n";
-    echo "          </div>\n";
-    echo "        </div>\n";
-    echo "      </div>\n";
-    echo "      <div class=\"card-container\">\n";
-    echo "        <div class=\"perspec\" style=\"--spreaddist: 100px; --scaledist: .8; --vertdist: -20px;\">\n";
-    echo "          <div class=\"card\">\n";
-    echo "            <div class=\"writing\">\n";
-    echo "              <div class=\"topbar\">\n";
-    echo "                <div class=\"red\"></div>\n";
-    echo "                <div class=\"yellow\"></div>\n";
-    echo "                <div class=\"green\"></div>\n";
-    echo "              </div>\n";
-    echo "              <div class=\"code\"><ul></ul></div>\n";
-    echo "            </div>\n";
-    echo "          </div>\n";
-    echo "        </div>\n";
-    echo "      </div>\n";
-    echo "      <div class=\"card-container\">\n";
-    echo "        <div class=\"perspec\" style=\"--spreaddist:75px; --scaledist: .85; --vertdist: -15px;\">\n";
-    echo "          <div class=\"card\">\n";
-    echo "            <div class=\"writing\">\n";
-    echo "              <div class=\"topbar\">\n";
-    echo "                <div class=\"red\"></div>\n";
-    echo "                <div class=\"yellow\"></div>\n";
-    echo "                <div class=\"green\"></div>\n";
-    echo "              </div>\n";
-    echo "              <div class=\"code\"><ul></ul></div>\n";
-    echo "            </div>\n";
-    echo "          </div>\n";
-    echo "        </div>\n";
-    echo "      </div>\n";
-    echo "      <div class=\"card-container\">\n";
-    echo "        <div class=\"perspec\" style=\"--spreaddist: 50px; --scaledist: .9; --vertdist: -10px;\">\n";
-    echo "          <div class=\"card\">\n";
-    echo "            <div class=\"writing\">\n";
-    echo "              <div class=\"topbar\">\n";
-    echo "                <div class=\"red\"></div>\n";
-    echo "                <div class=\"yellow\"></div>\n";
-    echo "                <div class=\"green\"></div>\n";
-    echo "              </div>\n";
-    echo "              <div class=\"code\"><ul></ul></div>\n";
-    echo "            </div>\n";
-    echo "          </div>\n";
-    echo "        </div>\n";
-    echo "      </div>\n";
-    echo "      <div class=\"card-container\">\n";
-    echo "        <div class=\"perspec\" style=\"--spreaddist: 25px; --scaledist: .95; --vertdist: -5px;\">\n";
-    echo "          <div class=\"card\">\n";
-    echo "            <div class=\"writing\">\n";
-    echo "              <div class=\"topbar\">\n";
-    echo "                <div class=\"red\"></div>\n";
-    echo "                <div class=\"yellow\"></div>\n";
-    echo "                <div class=\"green\"></div>\n";
-    echo "              </div>\n";
-    echo "              <div class=\"code\"><ul></ul></div>\n";
-    echo "            </div>\n";
-    echo "          </div>\n";
-    echo "        </div>\n";
-    echo "      </div>\n";
-    echo "      <div class=\"card-container\">\n";
-    echo "        <div class=\"perspec\" style=\"--spreaddist: 0px; --scaledist: 1; --vertdist: 0px;\">\n";
-    echo "          <div class=\"card\">\n";
-    echo "            <div class=\"writing\">\n";
-    echo "              <div class=\"topbar\">\n";
-    echo "                <div class=\"red\"></div>\n";
-    echo "                <div class=\"yellow\"></div>\n";
-    echo "                <div class=\"green\"></div>\n";
-    echo "              </div>\n";
-    echo "              <div class=\"code\"><ul></ul></div>\n";
-    echo "            </div>\n";
-    echo "          </div>\n";
-    echo "        </div>\n";
-    echo "      </div>\n";
-    echo "    </div>\n";
-    echo "  </div>\n";
-    echo "\n";
-    echo "  <script type=\"text/javascript\">\n";
-    echo "    const stackContainer = document.querySelector ( '.stack-container');\n";
-    echo "    const cardNodes = document.querySelectorAll ( '.card-container');\n";
-    echo "    const perspecNodes = document.querySelectorAll ( '.perspec');\n";
-    echo "    const perspec = document.querySelector ( '.perspec');\n";
-    echo "    const card = document.querySelector ( '.card');\n";
-    echo "\n";
-    echo "    let counter = stackContainer.children.length;\n";
-    echo "\n";
-    echo "    // function to generate random number\n";
-    echo "    function randomIntFromInterval ( min, max)\n";
-    echo "    {\n";
-    echo "      return Math.floor ( Math.random () * ( max - min + 1) + min);\n";
-    echo "    }\n";
-    echo "\n";
-    echo "    // after tilt animation, fire the explode animation\n";
-    echo "    card.addEventListener ( 'animationend', function ()\n";
-    echo "    {\n";
-    echo "      perspecNodes.forEach ( function ( elem, index)\n";
-    echo "      {\n";
-    echo "        elem.classList.add ( 'explode');\n";
-    echo "      });\n";
-    echo "    });\n";
-    echo "\n";
-    echo "    // after explode animation do a bunch of stuff\n";
-    echo "    perspec.addEventListener ( 'animationend', function ( e)\n";
-    echo "    {\n";
-    echo "      if ( e.animationName === 'explode')\n";
-    echo "      {\n";
-    echo "        cardNodes.forEach ( function ( elem, index)\n";
-    echo "        {\n";
-    echo "          // add hover animation class\n";
-    echo "          elem.classList.add ( 'pokeup');\n";
-    echo "\n";
-    echo "          //add event listner to throw card on click\n";
-    echo "          elem.addEventListener ( 'click', function ()\n";
-    echo "          {\n";
-    echo "            let updown = [800, -800];\n";
-    echo "            let randomY = updown[Math.floor ( Math.random () * updown.length)];\n";
-    echo "            let randomX = Math.floor ( Math.random () * 1000) - 1000;\n";
-    echo "            elem.style.transform = 'translate(\${randomX}px, \${randomY}px) rotate(-540deg)';\n";
-    echo "            elem.style.transition = 'transform 1s ease, opacity 2s';\n";
-    echo "            elem.style.opacity = '0';\n";
-    echo "            counter--;\n";
-    echo "            if ( counter === 0)\n";
-    echo "            {\n";
-    echo "              stackContainer.style.width = '0';\n";
-    echo "              stackContainer.style.height = '0';\n";
-    echo "            }\n";
-    echo "          });\n";
-    echo "\n";
-    echo "          // generate random number of lines of code between 4 and 10 and add to each card\n";
-    echo "          let numLines = randomIntFromInterval ( 5, 10);\n";
-    echo "\n";
-    echo "          // loop through the lines and add them to the DOM\n";
-    echo "          for ( let index = 0; index < numLines; index++)\n";
-    echo "          {\n";
-    echo "            let lineLength = randomIntFromInterval ( 25, 97);\n";
-    echo "            var node = document.createElement ( 'li');\n";
-    echo "            node.classList.add ( 'node-' + index);\n";
-    echo "            elem.querySelector ( '.code ul').appendChild ( node).setAttribute ( 'style', '--linelength: ' + lineLength + '%;');\n";
-    echo "\n";
-    echo "            // draw lines of code 1 by 1\n";
-    echo "            if ( index == 0)\n";
-    echo "            {\n";
-    echo "              elem.querySelector ( '.code ul .node-' + index).classList.add ( 'writeLine');\n";
-    echo "            } else {\n";
-    echo "              elem.querySelector ( '.code ul .node-' + ( index - 1)).addEventListener ( 'animationend', function ( e)\n";
-    echo "              {\n";
-    echo "                elem.querySelector ( '.code ul .node-' + index).classList.add ( 'writeLine');\n";
-    echo "              });\n";
-    echo "            }\n";
-    echo "          }\n";
-    echo "        });\n";
-    echo "      }\n";
-    echo "    });\n";
-    echo "  </script>\n";
-    echo "\n";
-    echo "</body>\n";
-    echo "</html>\n";
-  }
-  exit ( 1);
-}
-
-/**
- * Function to generate system HTML head banner.
- *
- * @return string The system HTML head banner.
- */
-function generate_html_banner ()
-{
-  return "\n" .
-         "<!--\n" .
-         "   ___ ___       ___ _______     ______                        __\n" .
-         "  |   Y   .‑‑‑‑‑|   |   _   |   |   _  \ .‑‑‑‑‑.‑‑‑‑‑‑‑‑.‑‑‑.-|__.‑‑‑‑‑.\n" .
-         "  |.  |   |  _  |.  |.  1   |   |.  |   \|  _  |        |  _  |  |     |\n" .
-         "  |.  |   |_____|.  |.  ____|   |.  |    |_____|__|__|__|___._|__|__|__|\n" .
-         "  |:  1   |     |:  |:  |       |:  1    /\n" .
-         "   \:.. ./      |::.|::.|       |::.. . /\n" .
-         "    `‑‑‑'       `‑‑‑`‑‑‑'       `‑‑‑‑‑‑'\n" .
-         "\n" .
-         "Copyright (C) 2016-2025 Ernani José Camargo Azevedo\n" .
-         "\n" .
-         "This program is free software: you can redistribute it and/or modify\n" .
-         "it under the terms of the GNU General Public License as published by\n" .
-         "the Free Software Foundation, either version 3 of the License, or\n" .
-         "(at your option) any later version.\n" .
-         "\n" .
-         "This program is distributed in the hope that it will be useful,\n" .
-         "but WITHOUT ANY WARRANTY; without even the implied warranty of\n" .
-         "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n" .
-         "GNU General Public License for more details.\n" .
-         "\n" .
-         "You should have received a copy of the GNU General Public License\n" .
-         "along with this program.  If not, see <https://www.gnu.org/licenses/>.\n" .
-         "-->\n" .
-         "\n";
 }
 
 /**

@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Configuration
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "configs_language", "configs_language");
 framework_add_hook ( "configs_operator", "configs_operator");
@@ -51,7 +51,7 @@ framework_add_hook ( "config_wipe", "config_wipe");
 cleanup_register ( "Configs", "config_wipe");
 
 /**
- * Function to configurate system default language.
+ * Function to configure system default language.
  * Required parameters are: (string) Language
  * Possible results:
  *   - 200: OK, configuration created
@@ -159,7 +159,7 @@ function configs_language ( $buffer, $parameters)
 }
 
 /**
- * Function to configurate system default operator.
+ * Function to configure system default operator.
  * Required parameters are: (integer) Operator
  * Possible results:
  *   - 200: OK, configuration created
@@ -267,7 +267,7 @@ function configs_operator ( $buffer, $parameters)
 }
 
 /**
- * Function to configurate system default music on hold (MOH).
+ * Function to configure system default music on hold (MOH).
  * Required parameters are: (integer) MOH
  * Possible results:
  *   - 200: OK, configuration created
@@ -375,7 +375,7 @@ function configs_moh ( $buffer, $parameters)
 }
 
 /**
- * Function to configurate system default NTP servers.
+ * Function to configure system default NTP servers.
  * Required parameters are: (array (string)) NTP[]
  * Possible results:
  *   - 200: OK, configuration created
@@ -493,7 +493,7 @@ function configs_ntp ( $buffer, $parameters)
 }
 
 /**
- * Function to configurate system default permissions.
+ * Function to configure system default permissions.
  * Required parameters are: (array (enum['y','n','p'] Local, enum['y','n','p'] Interstate, enum['y','n','p'] International)) Landline[], (array (enum['y','n','p'] Local, enum['y','n','p'] Interstate, enum['y','n','p'] International)) Mobile[], (array (enum['y','n','p'] Local, enum['y','n','p'] Interstate, enum['y','n','p'] International)) Marine[], (array (enum['y','n','p'] Local, enum['y','n','p'] International)) Tollfree[], (array (enum['y','n','p'] Local, enum['y','n','p'] International)) PRN[], (array (enum['y','n','p'] Local, enum['y','n','p'] International)) Satellite[]
  * Possible results:
  *   - 200: OK, configuration created

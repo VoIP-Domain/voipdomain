@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage AMI Interface
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -60,7 +60,7 @@ class asterisk
    * @param $options[optional] array Array with desired options.
    * @return [mixed] Null if auto_connect off or result of $this->connect () if on.
    */
-  function asterisk ( $options)
+  function __construct ( $options)
   {
     $this->hostname = array_key_exists ( "hostname", $options) ? $options["hostname"] : "127.0.0.1";
     $this->port = array_key_exists ( "port", $options) ? (int) $options["port"] : 5038;
@@ -154,7 +154,7 @@ class asterisk
    *                                event.
    * @param $timeout[optional] integer How many time to wait for a response.
    * @return [mixed] Event result (false if error or array with content if
-   *                 successfull).
+   *                 successful).
    */
   function request ( $action, $params = null, $timeout = -1)
   {
@@ -182,7 +182,7 @@ class asterisk
    * @param $action string Action to be sent.
    * @param $params[optional] array Array with attributes to be appended to the
    *                                event.
-   * @return [mixed] ID of event if successfull or false on error.
+   * @return [mixed] ID of event if successful or false on error.
    */
   private function post ( $action, $params = null)
   {
@@ -354,7 +354,9 @@ class asterisk
   function checkbuffer ()
   {
     $pArr = array ( $this->socket);
-    if ( false === ( $num_changed_streams = stream_select ( $pArr, $write = NULL, $except = NULL, 0)))
+    $write = NULL;
+    $except = NULL;
+    if ( false === ( $num_changed_streams = stream_select ( $pArr, $write, $except, 0)))
     {
       return false;
     } else {

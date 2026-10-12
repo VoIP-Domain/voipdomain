@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Groups
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -46,30 +46,30 @@ i18n_add ( "Invalid cost center.");
 i18n_add ( "Edit groups");
 i18n_add ( "Remove groups");
 i18n_add ( "Groups");
-i18n_add ( "groups search");
+i18n_add ( "Search groups");
 i18n_add ( "Cost Center");
 i18n_add ( "Extensions");
-i18n_add ( "Group remove");
+i18n_add ( "Remove group");
 i18n_add ( "Are you sure you want to remove the group %s (%s)?");
 i18n_add ( "Group removal");
 i18n_add ( "Group removed successfully!");
 i18n_add ( "Error removing group!");
-i18n_add ( "groups addition");
+i18n_add ( "Add groups");
 i18n_add ( "Group description");
 i18n_add ( "Group cost center");
-i18n_add ( "Group edition");
+i18n_add ( "Edit group");
 i18n_add ( "Error retrieving group data!");
 i18n_add ( "Error changing group!");
 i18n_add ( "Group changed successfully!");
-i18n_add ( "groups edition");
-i18n_add ( "Group addition");
+i18n_add ( "Edit groups");
+i18n_add ( "Add group");
 i18n_add ( "Error adding group!");
 i18n_add ( "Group added successfully!");
-i18n_add ( "groups visualization");
-i18n_add ( "Group view");
+i18n_add ( "View groups");
+i18n_add ( "View group");
 i18n_add ( "Error viewing group!");
-i18n_add ( "groups report");
-i18n_add ( "Groups use report");
+i18n_add ( "Groups report");
+i18n_add ( "Group usage report");
 i18n_add ( "Filter search with this string. If not provided, return all groups.");
 i18n_add ( "An array containing the system groups.");
 i18n_add ( "The internal unique identification number of the group.");
@@ -82,20 +82,20 @@ i18n_add ( "The cost center system internal identified for this group.");
 i18n_add ( "The cost center description for this group.");
 i18n_add ( "The cost center code for this group.");
 i18n_add ( "View groups");
-i18n_add ( "Get a system group information.");
+i18n_add ( "Get system group information.");
 i18n_add ( "The system group internal system unique identifier.");
 i18n_add ( "The system cost center unique identifier of the group.");
-i18n_add ( "New system group was added successfully.");
+i18n_add ( "A new system group was added successfully.");
 i18n_add ( "Add a new system group.");
 i18n_add ( "The system group was successfully updated.");
-i18n_add ( "Change a system group information.");
+i18n_add ( "Change system group information.");
 i18n_add ( "The system group was removed.");
 i18n_add ( "Remove a system group.");
 i18n_add ( "The date and time of report start calls.");
 i18n_add ( "The date and time of report end calls.");
 i18n_add ( "An array containing the call records made by the required group.");
 i18n_add ( "Group report");
-i18n_add ( "Generate a group call's usage report.");
+i18n_add ( "Generate a group call usage report.");
 i18n_add ( "The profile used on this group.");
 i18n_add ( "The profile internal system unique identifier of the group.");
 i18n_add ( "The description of the profile of the group.");
@@ -111,7 +111,7 @@ i18n_add ( "Invalid start date.");
 i18n_add ( "Invalid end date.");
 i18n_add ( "Missing start date.");
 i18n_add ( "Missing end date.");
-i18n_add ( "Group cloning");
+i18n_add ( "Clone group");
 
 /**
  * Add Brazilian Portuguese support
@@ -125,31 +125,31 @@ i18n_add ( "Invalid cost center.", "Centro de custo inválido.", "pt_BR");
 i18n_add ( "Edit groups", "Editar grupos", "pt_BR");
 i18n_add ( "Remove groups", "Remover grupos", "pt_BR");
 i18n_add ( "Groups", "Grupos", "pt_BR");
-i18n_add ( "groups search", "pesquisa de grupos", "pt_BR");
+i18n_add ( "Search groups", "Pesquisar grupos", "pt_BR");
 i18n_add ( "Cost Center", "Centro de Custo", "pt_BR");
 i18n_add ( "Extensions", "Ramais", "pt_BR");
-i18n_add ( "Group remove", "Remover grupo", "pt_BR");
-i18n_add ( "Are you sure you want to remove the group %s (%s)?", "Você tem certeza que deseja remover o grupo %s (%s)?", "pt_BR");
-i18n_add ( "Group removal", "Remoção de grupo", "pt_BR");
+i18n_add ( "Remove group", "Remover grupo", "pt_BR");
+i18n_add ( "Are you sure you want to remove the group %s (%s)?", "Você tem certeza de que deseja remover o grupo %s (%s)?", "pt_BR");
+i18n_add ( "Group removal", "Remover grupo", "pt_BR");
 i18n_add ( "Group removed successfully!", "Grupo removido com sucesso!", "pt_BR");
 i18n_add ( "Error removing group!", "Erro ao remover grupo!", "pt_BR");
-i18n_add ( "groups addition", "adição de grupos", "pt_BR");
+i18n_add ( "Add groups", "adicionar grupos", "pt_BR");
 i18n_add ( "Group description", "Descrição do grupo", "pt_BR");
 i18n_add ( "Group cost center", "Centro de custo do grupo", "pt_BR");
-i18n_add ( "Group edition", "Edição de grupo", "pt_BR");
-i18n_add ( "Error retrieving group data!", "Erro ao requisitar dados do grupo!", "pt_BR");
+i18n_add ( "Edit group", "Editar grupo", "pt_BR");
+i18n_add ( "Error retrieving group data!", "Erro ao obter dados do grupo!", "pt_BR");
 i18n_add ( "Error changing group!", "Erro ao alterar grupo!", "pt_BR");
 i18n_add ( "Group changed successfully!", "Grupo alterado com sucesso!", "pt_BR");
-i18n_add ( "groups edition", "edição de grupos", "pt_BR");
-i18n_add ( "Group addition", "Adição de grupo", "pt_BR");
+i18n_add ( "Edit groups", "editar grupos", "pt_BR");
+i18n_add ( "Add group", "Adicionar grupo", "pt_BR");
 i18n_add ( "Error adding group!", "Erro ao adicionar grupo!", "pt_BR");
 i18n_add ( "Group added successfully!", "Grupo adicionado com sucesso!", "pt_BR");
-i18n_add ( "groups visualization", "visualização de grupos", "pt_BR");
-i18n_add ( "Group view", "Visualização de grupo", "pt_BR");
+i18n_add ( "View groups", "visualizar grupos", "pt_BR");
+i18n_add ( "View group", "Visualizar grupo", "pt_BR");
 i18n_add ( "Error viewing group!", "Erro ao visualizar grupo!", "pt_BR");
-i18n_add ( "groups report", "relatório de grupos", "pt_BR");
-i18n_add ( "Groups use report", "Relatório de uso por grupos", "pt_BR");
-i18n_add ( "Filter search with this string. If not provided, return all groups.", "Filtrar a pesquisa com esta string. Se não informado, retorna todos os grupos.", "pt_BR");
+i18n_add ( "Groups report", "relatório de grupos", "pt_BR");
+i18n_add ( "Group usage report", "Relatório de uso por grupos", "pt_BR");
+i18n_add ( "Filter search with this string. If not provided, return all groups.", "Filtrar a pesquisa com esta string. Se omitido, retorna todos os grupos.", "pt_BR");
 i18n_add ( "An array containing the system groups.", "Um array contendo os grupos do sistema.", "pt_BR");
 i18n_add ( "The internal unique identification number of the group.", "O número único interno identificador do grupo.", "pt_BR");
 i18n_add ( "The description of the group.", "A descrição do grupo.", "pt_BR");
@@ -161,20 +161,20 @@ i18n_add ( "The cost center system internal identified for this group.", "O iden
 i18n_add ( "The cost center description for this group.", "A descrição do centro de custo para este grupo.", "pt_BR");
 i18n_add ( "The cost center code for this group.", "O código do centro de custo para este grupo.", "pt_BR");
 i18n_add ( "View groups", "Visualizar grupos", "pt_BR");
-i18n_add ( "Get a system group information.", "Requisitar informações de grupo do sistema.", "pt_BR");
+i18n_add ( "Get system group information.", "Obter informações do grupo do sistema.", "pt_BR");
 i18n_add ( "The system group internal system unique identifier.", "O identificador único do grupo do sistema.", "pt_BR");
 i18n_add ( "The system cost center unique identifier of the group.", "O identificador único do centro de custo do sistema para o grupo.", "pt_BR");
-i18n_add ( "New system group was added successfully.", "Novo grupo do sistema adicionado com sucesso.", "pt_BR");
+i18n_add ( "A new system group was added successfully.", "Um novo grupo do sistema foi adicionado com sucesso.", "pt_BR");
 i18n_add ( "Add a new system group.", "Adicionar um novo grupo no sistema.", "pt_BR");
 i18n_add ( "The system group was successfully updated.", "O grupo do sistema foi atualizado com sucesso.", "pt_BR");
-i18n_add ( "Change a system group information.", "Alterar informações de grupo do sistema.", "pt_BR");
+i18n_add ( "Change system group information.", "Alterar informações de grupo do sistema.", "pt_BR");
 i18n_add ( "The system group was removed.", "O grupo do sistema foi removido.", "pt_BR");
 i18n_add ( "Remove a system group.", "Remover um grupo do sistema.", "pt_BR");
 i18n_add ( "The date and time of report start calls.", "A data e hora inicial do relatório de chamadas.", "pt_BR");
 i18n_add ( "The date and time of report end calls.", "A data e hora do término do relatório de chamadas.", "pt_BR");
-i18n_add ( "An array containing the call records made by the required group.", "Um array contendo os registros de chamadas realizadas pelo grupo requisitado.", "pt_BR");
+i18n_add ( "An array containing the call records made by the required group.", "Um array contendo os registros de chamadas realizadas pelo grupo solicitado.", "pt_BR");
 i18n_add ( "Group report", "Relatório de grupo", "pt_BR");
-i18n_add ( "Generate a group call's usage report.", "Gerar um relatório de uso de chamadas do grupo.", "pt_BR");
+i18n_add ( "Generate a group call usage report.", "Gerar um relatório de uso de chamadas do grupo.", "pt_BR");
 i18n_add ( "The profile used on this group.", "O perfil utilizado neste grupo.", "pt_BR");
 i18n_add ( "The profile internal system unique identifier of the group.", "O identificador interno único do perfil do sistema para o grupo.", "pt_BR");
 i18n_add ( "The description of the profile of the group.", "A descrição do perfil do grupo.", "pt_BR");
@@ -190,5 +190,5 @@ i18n_add ( "Invalid start date.", "Data de início inválida.", "pt_BR");
 i18n_add ( "Invalid end date.", "Data de término inválida.", "pt_BR");
 i18n_add ( "Missing start date.", "Data de início vazia.", "pt_BR");
 i18n_add ( "Missing end date.", "Data de término vazia.", "pt_BR");
-i18n_add ( "Group cloning", "Clonagem de grupo", "pt_BR");
+i18n_add ( "Clone group", "Clonar grupo", "pt_BR");
 ?>

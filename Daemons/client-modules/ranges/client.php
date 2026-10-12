@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Ranges
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "range_add", "range_add");
 framework_add_hook ( "range_change", "range_change");
@@ -154,7 +154,7 @@ function range_add ( $buffer, $parameters)
     // Verify if range exist
     if ( check_config ( "config", "range-" . $parameters["ID"]))
     {
-      return array ( "code" => 400, "message" => "Range already exist.");
+      return array ( "code" => 400, "message" => "Range already exists.");
     }
 
     // Create file structure
@@ -506,10 +506,14 @@ function range_wipe ( $buffer, $parameters)
     framework_call ( "range_wipe_pre", $parameters, false, true);
   }
 
-  // Remove all files
+  // Remove all config files by glob pattern
+  foreach ( list_config ( "config", "dialplan-range-*") as $filename)
+  {
+    unlink_config ( "config", $filename);
+  }
+  // Remove all datafiles
   foreach ( list_config ( "datafile", "range") as $filename)
   {
-    unlink_config ( "config", "dialplan-range-" . (int) substr ( $filename, strrpos ( $filename, "-") + 1));
     unlink_config ( "datafile", $filename);
   }
 
@@ -570,7 +574,7 @@ function range_dialplan_generate ( $buffer, $parameters)
   foreach ( $ranges as $range)
   {
     $entries = parse_dialplan ( $range["Start"], $range["Finish"]);
-    foreach ( $entires as $pattern)
+    foreach ( $entries as $pattern)
     {
       $data[] = array ( "Pattern" => $pattern, "Label" => "Extensions", "Kind" => "Extensions", "Emergency" => false);
     }

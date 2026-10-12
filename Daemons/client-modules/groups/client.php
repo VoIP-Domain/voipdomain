@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Groups
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "group_add", "group_add");
 framework_add_hook ( "group_change", "group_change");
@@ -140,7 +140,7 @@ function group_add ( $buffer, $parameters)
   {
     if ( ! check_overwrite ())
     {
-      return array ( "code" => 400, "message" => "Group already exist.");
+      return array ( "code" => 400, "message" => "Group already exists.");
     } else {
       $overwritten = true;
     }
@@ -323,7 +323,7 @@ function group_change ( $buffer, $parameters)
   // Create group data file
   if ( ! write_config ( "datafile", "group-" . $parameters["ID"], $parameters))
   {
-    return array ( "code" => 501, "message" => "Error writing file.");
+    return array ( "code" => 500, "message" => "Error writing file.");
   }
 
   /**
@@ -483,11 +483,16 @@ function group_wipe ( $buffer, $parameters)
   }
 
   // Remove all files
+  foreach ( list_config ( "config", "sip-group-*") as $filename)
+  {
+    unlink_config ( "config", $filename);
+  }
+  foreach ( list_config ( "configdb", "group-*") as $filename)
+  {
+    unlink_config ( "configdb", $filename);
+  }
   foreach ( list_config ( "datafile", "group") as $filename)
   {
-    $entryid = (int) substr ( $filename, strrpos ( $filename, "-") + 1);
-    unlink_config ( "config", "sip-group-" . $entryid);
-    unlink_config ( "configdb", "group-" . $entryid);
     unlink_config ( "datafile", $filename);
   }
 

@@ -1,0 +1,7 @@
+[VoIPDomain]
+name=VoIP Domain RPM repository
+baseurl=https://rhel.voipdomain.io/
+enabled=1
+gpgcheck=1
+gpgkey=https://rhel.voipdomain.io/azevedo@voipdomain.io.key
+metadata_expire=6h

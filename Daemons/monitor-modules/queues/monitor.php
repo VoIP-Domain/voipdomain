@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Queues
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "FullyBooted", "queues_bootup");
 framework_add_hook ( "Load", "queues_load");
@@ -256,7 +256,7 @@ function queues_member ( $buffer, $parameters)
     return $buffer;
   }
 
-  // Abort if queue doesn't exists:
+  // Abort if queue doesn't exist:
   if ( ! array_key_exists ( $parameters["Queue"], $_in["Queues"]))
   {
     writeLog ( "Queue member received for unexisting queue \"" . $parameters["Queue"] . "\"!", VoIP_LOG_WARNING);
@@ -302,7 +302,7 @@ function queues_entry ( $buffer, $parameters)
     return $buffer;
   }
 
-  // Abort if queue doesn't exists:
+  // Abort if queue doesn't exist:
   if ( ! array_key_exists ( $parameters["Queue"], $_in["Queues"]))
   {
     writeLog ( "Queue entry received for unexisting queue \"" . $parameters["Queue"] . "\"!", VoIP_LOG_WARNING);
@@ -321,6 +321,95 @@ function queues_entry ( $buffer, $parameters)
 }
 
 /**
+ * Emit queue delta events after an AMI reload resync.
+ *
+ * @global object $gm Gearman client object
+ * @param array $backup Queue state before reload
+ * @param array $current Queue state after reload
+ * @param int $serverid Server identifier
+ * @return void
+ */
+function queues_sync_reload ( $backup, $current, $serverid)
+{
+  global $gm;
+
+  if ( ! is_array ( $backup))
+  {
+    $backup = array ();
+  }
+  if ( ! is_array ( $current))
+  {
+    $current = array ();
+  }
+
+  $queues = array_unique ( array_merge ( array_keys ( $backup), array_keys ( $current)));
+
+  foreach ( $queues as $queue)
+  {
+    if ( substr ( $queue, 0, 5) != "vd_q_")
+    {
+      continue;
+    }
+
+    $oldqueue = array_key_exists ( $queue, $backup) ? $backup[$queue] : array ( "Members" => array (), "Entries" => array ());
+    $newqueue = array_key_exists ( $queue, $current) ? $current[$queue] : array ( "Members" => array (), "Entries" => array ());
+    $oldmembers = array_key_exists ( "Members", $oldqueue) && is_array ( $oldqueue["Members"]) ? $oldqueue["Members"] : array ();
+    $newmembers = array_key_exists ( "Members", $newqueue) && is_array ( $newqueue["Members"]) ? $newqueue["Members"] : array ();
+    $oldentries = array_key_exists ( "Entries", $oldqueue) && is_array ( $oldqueue["Entries"]) ? $oldqueue["Entries"] : array ();
+    $newentries = array_key_exists ( "Entries", $newqueue) && is_array ( $newqueue["Entries"]) ? $newqueue["Entries"] : array ();
+
+    foreach ( $oldmembers as $member => $data)
+    {
+      if ( ! array_key_exists ( $member, $newmembers))
+      {
+        $gm->doBackground ( "queues_member_remove", json_encode ( array ( "ServerID" => $serverid, "Queue" => $queue, "Member" => $member)));
+      }
+    }
+
+    foreach ( $newmembers as $member => $data)
+    {
+      if ( ! array_key_exists ( $member, $oldmembers))
+      {
+        $gm->doBackground ( "queues_member_add", json_encode ( array_merge_recursive ( array ( "ServerID" => $serverid, "Queue" => $queue), $data)));
+        continue;
+      }
+      $update = array ( "ServerID" => $serverid, "Queue" => $queue, "Member" => $member);
+      $changed = false;
+      foreach ( array ( "Penalty", "CallsTaken", "LastCall", "LastPause", "InCall", "Status", "Paused", "PauseReason", "RingInUse", "WrapUpTime") as $field)
+      {
+        $oldvalue = array_key_exists ( $field, $oldmembers[$member]) ? $oldmembers[$member][$field] : null;
+        $newvalue = array_key_exists ( $field, $data) ? $data[$field] : null;
+        if ( $oldvalue != $newvalue)
+        {
+          $update[$field] = $newvalue;
+          $changed = true;
+        }
+      }
+      if ( $changed)
+      {
+        $gm->doBackground ( "queues_member_update", json_encode ( $update));
+      }
+    }
+
+    foreach ( $oldentries as $channel => $data)
+    {
+      if ( ! array_key_exists ( $channel, $newentries))
+      {
+        $gm->doBackground ( "queues_caller_remove", json_encode ( array ( "ServerID" => $serverid, "Queue" => $queue, "Channel" => $channel)));
+      }
+    }
+
+    foreach ( $newentries as $channel => $data)
+    {
+      if ( ! array_key_exists ( $channel, $oldentries))
+      {
+        $gm->doBackground ( "queues_caller_add", json_encode ( array ( "ServerID" => $serverid, "Queue" => $queue, "Caller" => $data)));
+      }
+    }
+  }
+}
+
+/**
  * Function to process queue status complete response to action "QueueStatus".
  *
  * @global array $_in Framework global configuration variable
@@ -334,16 +423,22 @@ function queues_status_complete ( $buffer, $parameters)
 {
   global $_in, $gm;
 
+  $bootup = false;
   if ( $_in["Status"]["Queues"]["BootUp"] == true)
   {
     $_in["Status"]["Queues"]["BootUp"] = false;
+    $bootup = true;
     $gm->doBackground ( "queues_bootup", json_encode ( array ( "ServerID" => $_in["daemon"]["serverid"], "Queues" => $_in["Queues"])));
   }
   if ( $_in["Status"]["Queues"]["Reload"] == true)
   {
+    $backup = $_in["Status"]["Queues"]["Backup"];
     $_in["Status"]["Queues"]["Reload"] = false;
     unset ( $_in["Status"]["Queues"]["Backup"]);
-// TODO: Tem que comparar o backup com o resultado atual e enviar "diferenças"...
+    if ( ! $bootup)
+    {
+      queues_sync_reload ( $backup, $_in["Queues"], $_in["daemon"]["serverid"]);
+    }
   }
 
   // End event:
@@ -370,7 +465,7 @@ function queues_caller_join ( $buffer, $parameters)
     return $buffer;
   }
 
-  // Abort if queue doesn't exists:
+  // Abort if queue doesn't exist:
   if ( ! array_key_exists ( $parameters["Queue"], $_in["Queues"]))
   {
     writeLog ( "Queue channel add received for unexisting queue \"" . $parameters["Queue"] . "\"!", VoIP_LOG_WARNING);
@@ -411,14 +506,14 @@ function queues_caller_abandon ( $buffer, $parameters)
     return $buffer;
   }
 
-  // Abort if queue doesn't exists:
+  // Abort if queue doesn't exist:
   if ( ! array_key_exists ( $parameters["Queue"], $_in["Queues"]))
   {
     writeLog ( "Queue channel abandon received for unexisting queue \"" . $parameters["Queue"] . "\"!", VoIP_LOG_WARNING);
     return $buffer;
   }
 
-  // Abort if queue channel doesn't exists:
+  // Abort if queue channel doesn't exist:
   if ( ! array_key_exists ( $parameters["Channel"], $_in["Queues"][$parameters["Queue"]]["Entries"]))
   {
     writeLog ( "Queue caller abandon received for unexisting caller \"" . $parameters["Channel"] . "\" at queue \"" . $parameters["Queue"] . "\"!", VoIP_LOG_WARNING);
@@ -455,14 +550,14 @@ function queues_caller_leave ( $buffer, $parameters)
     return $buffer;
   }
 
-  // Abort if queue doesn't exists:
+  // Abort if queue doesn't exist:
   if ( ! array_key_exists ( $parameters["Queue"], $_in["Queues"]))
   {
     writeLog ( "Queue channel remove received for unexisting queue \"" . $parameters["Queue"] . "\"!", VoIP_LOG_WARNING);
     return $buffer;
   }
 
-  // Abort if queue channel doesn't exists:
+  // Abort if queue channel doesn't exist:
   if ( ! array_key_exists ( $parameters["Channel"], $_in["Queues"][$parameters["Queue"]]["Entries"]))
   {
     writeLog ( "Queue caller remove received for unexisting caller \"" . $parameters["Channel"] . "\" at queue \"" . $parameters["Queue"] . "\"!", VoIP_LOG_WARNING);
@@ -499,7 +594,7 @@ function queues_member_add ( $buffer, $parameters)
     return $buffer;
   }
 
-  // Abort if queue doesn't exists:
+  // Abort if queue doesn't exist:
   if ( ! array_key_exists ( $parameters["Queue"], $_in["Queues"]))
   {
     writeLog ( "Queue member add received for unexisting queue \"" . $parameters["Queue"] . "\"!", VoIP_LOG_WARNING);
@@ -549,14 +644,14 @@ function queues_member_status ( $buffer, $parameters)
     return $buffer;
   }
 
-  // Abort if queue doesn't exists:
+  // Abort if queue doesn't exist:
   if ( ! array_key_exists ( $parameters["Queue"], $_in["Queues"]))
   {
     writeLog ( "Queue member update received for unexisting queue \"" . $parameters["Queue"] . "\"!", VoIP_LOG_WARNING);
     return $buffer;
   }
 
-  // Abort if queue member doesn't exists:
+  // Abort if queue member doesn't exist:
   if ( ! array_key_exists ( $parameters["MemberName"], $_in["Queues"][$parameters["Queue"]]["Members"]))
   {
     writeLog ( "Queue member update received for unexisting member \"" . $parameters["MemberName"] . "\" at queue \"" . $parameters["Queue"] . "\"!", VoIP_LOG_WARNING);
@@ -600,14 +695,14 @@ function queues_member_pause ( $buffer, $parameters)
     return $buffer;
   }
 
-  // Abort if queue doesn't exists:
+  // Abort if queue doesn't exist:
   if ( ! array_key_exists ( $parameters["Queue"], $_in["Queues"]))
   {
     writeLog ( "Queue member pause received for unexisting queue \"" . $parameters["Queue"] . "\"!", VoIP_LOG_WARNING);
     return $buffer;
   }
 
-  // Abort if queue member doesn't exists:
+  // Abort if queue member doesn't exist:
   if ( ! array_key_exists ( $parameters["MemberName"], $_in["Queues"][$parameters["Queue"]]["Members"]))
   {
     writeLog ( "Queue member pause received for unexisting member \"" . $parameters["MemberName"] . "\" at queue \"" . $parameters["Queue"] . "\"!", VoIP_LOG_WARNING);
@@ -645,14 +740,14 @@ function queues_member_penalty ( $buffer, $parameters)
     return $buffer;
   }
 
-  // Abort if queue doesn't exists:
+  // Abort if queue doesn't exist:
   if ( ! array_key_exists ( $parameters["Queue"], $_in["Queues"]))
   {
     writeLog ( "Queue member penalty change received for unexisting queue \"" . $parameters["Queue"] . "\"!", VoIP_LOG_WARNING);
     return $buffer;
   }
 
-  // Abort if queue member doesn't exists:
+  // Abort if queue member doesn't exist:
   if ( ! array_key_exists ( $parameters["MemberName"], $_in["Queues"][$parameters["Queue"]]["Members"]))
   {
     writeLog ( "Queue member penalty change received for unexisting member \"" . $parameters["MemberName"] . "\" at queue \"" . $parameters["Queue"] . "\"!", VoIP_LOG_WARNING);
@@ -689,14 +784,14 @@ function queues_member_ringinuse ( $buffer, $parameters)
     return $buffer;
   }
 
-  // Abort if queue doesn't exists:
+  // Abort if queue doesn't exist:
   if ( ! array_key_exists ( $parameters["Queue"], $_in["Queues"]))
   {
     writeLog ( "Queue member ring in use change received for unexisting queue \"" . $parameters["Queue"] . "\"!", VoIP_LOG_WARNING);
     return $buffer;
   }
 
-  // Abort if queue member doesn't exists:
+  // Abort if queue member doesn't exist:
   if ( ! array_key_exists ( $parameters["MemberName"], $_in["Queues"][$parameters["Queue"]]["Members"]))
   {
     writeLog ( "Queue member ring in use change received for unexisting member \"" . $parameters["MemberName"] . "\" at queue \"" . $parameters["Queue"] . "\"!", VoIP_LOG_WARNING);
@@ -733,14 +828,14 @@ function queues_member_remove ( $buffer, $parameters)
     return $buffer;
   }
 
-  // Abort if queue doesn't exists:
+  // Abort if queue doesn't exist:
   if ( ! array_key_exists ( $parameters["Queue"], $_in["Queues"]))
   {
     writeLog ( "Queue member remove received for unexisting queue \"" . $parameters["Queue"] . "\"!", VoIP_LOG_WARNING);
     return $buffer;
   }
 
-  // Abort if queue member doesn't exists:
+  // Abort if queue member doesn't exist:
   if ( ! array_key_exists ( $parameters["MemberName"], $_in["Queues"][$parameters["Queue"]]["Members"]))
   {
     writeLog ( "Queue member remove received for unexisting member \"" . $parameters["MemberName"] . "\" at queue \"" . $parameters["Queue"] . "\"!", VoIP_LOG_WARNING);

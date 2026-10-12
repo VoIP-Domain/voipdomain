@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Gateways
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "gateway_add", "gateway_add");
 framework_add_hook ( "gateway_change", "gateway_change");
@@ -66,6 +66,8 @@ cleanup_register ( "Gateways", "gateway_wipe");
  */
 function gateway_add ( $buffer, $parameters)
 {
+  global $_in;
+
   /**
    * Call start hook if exist
    */
@@ -280,7 +282,7 @@ function gateway_add ( $buffer, $parameters)
   {
     if ( ! check_overwrite ())
     {
-      return array ( "code" => 400, "message" => "Gateway already exist.");
+      return array ( "code" => 400, "message" => "Gateway already exists.");
     } else {
       $overwritten = true;
     }
@@ -325,12 +327,15 @@ function gateway_add ( $buffer, $parameters)
               "force_rport=" . ( $parameters["NAT"] ? "yes" : "no") . "\n" .
               "rewrite_contact=" . ( $parameters["NAT"] ? "yes" : "no") . "\n" .
               "direct_media=" . ( $parameters["NAT"] ? "no" : "yes") . "\n" .
-              "send_rpid=" . ( $parameters["RPID"] ? "yes" : "no") . "\n" .
-              "\n" .
-              "[vd_gateway_" . $parameters["ID"] . "]\n" .
-              "type=identify\n" .
-              "endpoint=vd_gateway_" . $parameters["ID"] . "\n" .
-              "match=" . $parameters["Address"] . "\n";
+              "send_rpid=" . ( $parameters["RPID"] ? "yes" : "no") . "\n";
+  if ( $parameters["Inbound"])
+  {
+    $gateway .= "\n" .
+                "[vd_gateway_" . $parameters["ID"] . "]\n" .
+                "type=identify\n" .
+                "endpoint=vd_gateway_" . $parameters["ID"] . "\n" .
+                "match=" . $parameters["Address"] . "\n";
+  }
 
   // Write gateway file structure
   if ( ! write_config ( "config", "sip-gateway-" . $parameters["ID"], $gateway))
@@ -339,9 +344,14 @@ function gateway_add ( $buffer, $parameters)
   }
 
   // Create dialplan file structure
+  $publiccontext = fetch_config ( "contexts", "public");
+  if ( empty ( $publiccontext))
+  {
+    $publiccontext = "VoIPDomain-public";
+  }
   $dialplan = "[VoIPDomain-Gateway-" . $parameters["ID"] . "_inbound]\n" .
-              "exten => _.X,1,Set(CDR(Gateway)=" . $parameters["ID"] . ")\n" .
-              " same => n,GoTo(${EXTEN}," . fetch_config ( "contexts", "public") . ")\n";
+              "exten => _X.,1,Set(CDR(Gateway)=" . $parameters["ID"] . ")\n" .
+              " same => n,Goto(" . $publiccontext . ",\${EXTEN},1)\n";
 
   // Write dialplan file
   if ( ! write_config ( "config", "dialplan-gateway-" . $parameters["ID"], $dialplan))
@@ -402,6 +412,8 @@ function gateway_add ( $buffer, $parameters)
  */
 function gateway_change ( $buffer, $parameters)
 {
+  global $_in;
+
   /**
    * Call start hook if exist
    */
@@ -654,12 +666,15 @@ function gateway_change ( $buffer, $parameters)
               "force_rport=" . ( $parameters["NAT"] ? "yes" : "no") . "\n" .
               "rewrite_contact=" . ( $parameters["NAT"] ? "yes" : "no") . "\n" .
               "direct_media=" . ( $parameters["NAT"] ? "no" : "yes") . "\n" .
-              "send_rpid=" . ( $parameters["RPID"] ? "yes" : "no") . "\n" .
-              "\n" .
-              "[vd_gateway_" . $parameters["ID"] . "]\n" .
-              "type=identify\n" .
-              "endpoint=vd_gateway_" . $parameters["ID"] . "\n" .
-              "match=" . $parameters["Address"] . "\n";
+              "send_rpid=" . ( $parameters["RPID"] ? "yes" : "no") . "\n";
+  if ( $parameters["Inbound"])
+  {
+    $gateway .= "\n" .
+                "[vd_gateway_" . $parameters["ID"] . "]\n" .
+                "type=identify\n" .
+                "endpoint=vd_gateway_" . $parameters["ID"] . "\n" .
+                "match=" . $parameters["Address"] . "\n";
+  }
 
   // Write gateway file structure
   if ( ! write_config ( "config", "sip-gateway-" . $parameters["ID"], $gateway))
@@ -668,9 +683,14 @@ function gateway_change ( $buffer, $parameters)
   }
 
   // Create dialplan file structure
+  $publiccontext = fetch_config ( "contexts", "public");
+  if ( empty ( $publiccontext))
+  {
+    $publiccontext = "VoIPDomain-public";
+  }
   $dialplan = "[VoIPDomain-Gateway-" . $parameters["ID"] . "_inbound]\n" .
-              "exten => _.X,1,Set(CDR(Gateway)=" . $parameters["ID"] . ")\n" .
-              " same => n,GoTo(${EXTEN}," . $_in["contexts"]["public"] . ")\n";
+              "exten => _X.,1,Set(CDR(Gateway)=" . $parameters["ID"] . ")\n" .
+              " same => n,Goto(" . $publiccontext . ",\${EXTEN},1)\n";
 
   // Write dialplan file
   if ( ! write_config ( "config", "dialplan-gateway-" . $parameters["ID"], $dialplan))
@@ -681,7 +701,7 @@ function gateway_change ( $buffer, $parameters)
   // Create gateway data file
   if ( ! write_config ( "datafile", "gateway-" . $parameters["ID"], $parameters))
   {
-    return array ( "code" => 501, "message" => "Error writing file.");
+    return array ( "code" => 500, "message" => "Error writing file.");
   }
 
   /**
@@ -840,12 +860,18 @@ function gateway_wipe ( $buffer, $parameters)
     framework_call ( "gateway_wipe_pre", $parameters, false, true);
   }
 
-  // Remove all files
+  // Remove all config files by glob pattern
+  foreach ( list_config ( "config", "sip-gateway-*") as $filename)
+  {
+    unlink_config ( "config", $filename);
+  }
+  foreach ( list_config ( "config", "dialplan-gateway-*") as $filename)
+  {
+    unlink_config ( "config", $filename);
+  }
+  // Remove all datafiles
   foreach ( list_config ( "datafile", "gateway") as $filename)
   {
-    $entryid = (int) substr ( $filename, strrpos ( $filename, "-") + 1);
-    unlink_config ( "config", "sip-gateway-" . $entryid);
-    unlink_config ( "config", "dialplan-gateway-" . $entryid);
     unlink_config ( "datafile", $filename);
   }
 

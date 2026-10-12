@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,36 +30,36 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments Cisco
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "equipment_model_3905_configure", "equipment_model_cisco_basic_configure");
-framework_add_hook ( "equipment_model_3905_firmware_add", "equipment_model_cisco_add_firmare");
+framework_add_hook ( "equipment_model_3905_firmware_add", "equipment_model_cisco_add_firmware");
 framework_add_hook ( "equipment_model_3905_firmware_remove", "equipment_model_cisco_remove_firmware");
 framework_add_hook ( "ap_type_3905", "ap_type_cisco_3905");
 framework_add_hook ( "ap_type_3905_remove", "ap_type_cisco_remove");
 framework_add_hook ( "account_type_3905", "account_type_cisco_3905");
 
 framework_add_hook ( "equipment_model_7811_configure", "equipment_model_cisco_basic_configure");
-framework_add_hook ( "equipment_model_7811_firmware_add", "equipment_model_cisco_add_firmare");
+framework_add_hook ( "equipment_model_7811_firmware_add", "equipment_model_cisco_add_firmware");
 framework_add_hook ( "equipment_model_7811_firmware_remove", "equipment_model_cisco_remove_firmware");
 framework_add_hook ( "ap_type_7811", "ap_type_cisco_7811");
 framework_add_hook ( "ap_type_7811_remove", "ap_type_cisco_remove");
 framework_add_hook ( "account_type_7811", "account_type_cisco_7811");
 
 framework_add_hook ( "equipment_model_7942_configure", "equipment_model_cisco_basic_configure");
-framework_add_hook ( "equipment_model_7942_firmware_add", "equipment_model_cisco_add_firmare");
+framework_add_hook ( "equipment_model_7942_firmware_add", "equipment_model_cisco_add_firmware");
 framework_add_hook ( "equipment_model_7942_firmware_remove", "equipment_model_cisco_remove_firmware");
 framework_add_hook ( "ap_type_7942", "ap_type_cisco_79xx");
 framework_add_hook ( "ap_type_7942_remove", "ap_type_cisco_remove");
 framework_add_hook ( "account_type_7942", "account_type_cisco_7942");
 
 framework_add_hook ( "equipment_model_8961_configure", "equipment_model_cisco_basic_configure");
-framework_add_hook ( "equipment_model_8961_firmware_add", "equipment_model_cisco_add_firmare");
+framework_add_hook ( "equipment_model_8961_firmware_add", "equipment_model_cisco_add_firmware");
 framework_add_hook ( "equipment_model_8961_firmware_remove", "equipment_model_cisco_remove_firmware");
 framework_add_hook ( "ap_type_8961", "ap_type_cisco_8961");
 framework_add_hook ( "ap_type_8961_remove", "ap_type_cisco_remove");
@@ -85,14 +85,14 @@ cleanup_register ( "Firmwares-Cisco", "firmware_cisco_wipe", array ( "Before" =>
 function ap_cisco_wipe ( $buffer, $parameters)
 {
   // Remove auto provisioning configuration files:
-  foreach ( list_config ( "datafile", "ap") as $ap)
+  foreach ( list_config ( "datafile", "ap") as $filename)
   {
-    $data = read_config ( "datafile", $ap);
-    if ( equipment_model_exists ( $ap["Type"], "Cisco"))
+    $data = read_config ( "datafile", $filename);
+    if ( equipment_model_exists ( $data["Type"], "Cisco"))
     {
       unlink_config ( "ap", "SEP" . strtoupper ( $data["MAC"]) . ".cnf.xml");
       unlink_config ( "ap", "SEP" . strtoupper ( $data["MAC"]) . ".dpt.xml.gz");
-      unlink_config ( "datafile", $ap);
+      unlink_config ( "datafile", $filename);
     }
   }
 
@@ -134,10 +134,13 @@ function firmware_cisco_wipe ( $buffer, $parameters)
   unlink_config ( "ap", "Cisco/8961/softkeys.xml");
   unlink_config ( "apdir", "Cisco/8961");
 
+  // Cisco Locale (extracted firmware + archive)
+  global $_in;
+  equipment_model_cisco_clear_firmware_directory ( $_in["general"]["tftpdir"] . "/Cisco/Locale");
+  @rmdir ( $_in["general"]["tftpdir"] . "/Cisco/Locale");
+
   // Cisco vendor directory
   unlink_config ( "apdir", "Cisco");
-
-  // **TODO**: Remover diretório Locale da Cisco!!!
 
   return $buffer;
 }
@@ -188,6 +191,180 @@ function equipment_model_cisco_basic_configure ( $buffer, $parameters)
 }
 
 /**
+ * Flatten a single nested directory after archive extraction.
+ *
+ * @param string $destdir Destination directory
+ * @return void
+ */
+function equipment_model_cisco_flatten_extract ( $destdir)
+{
+  for ( $depth = 0; $depth < 5; $depth++)
+  {
+    if ( ! is_dir ( $destdir))
+    {
+      return;
+    }
+    $entries = array_diff ( scandir ( $destdir), array ( ".", ".."));
+    $dirs = array ();
+    $files = array ();
+    foreach ( $entries as $entry)
+    {
+      if ( is_dir ( $destdir . "/" . $entry))
+      {
+        $dirs[] = $entry;
+      } else {
+        $files[] = $entry;
+      }
+    }
+    if ( sizeof ( $files) > 0 || sizeof ( $dirs) != 1)
+    {
+      return;
+    }
+    $subdir = $destdir . "/" . $dirs[0];
+    foreach ( array_diff ( scandir ( $subdir), array ( ".", "..")) as $item)
+    {
+      @rename ( $subdir . "/" . $item, $destdir . "/" . $item);
+    }
+    @rmdir ( $subdir);
+  }
+}
+
+/**
+ * Extract a zip archive into a directory, keeping the archive file.
+ *
+ * @param string $archivepath Zip archive path
+ * @param string $destdir Destination directory
+ * @return boolean
+ */
+function equipment_model_cisco_extract_zip ( $archivepath, $destdir)
+{
+  if ( ! is_readable ( $archivepath) || ! is_dir ( $destdir))
+  {
+    return false;
+  }
+  if ( class_exists ( "ZipArchive"))
+  {
+    $zip = new ZipArchive ();
+    if ( $zip->open ( $archivepath) !== true)
+    {
+      return false;
+    }
+    if ( ! $zip->extractTo ( $destdir))
+    {
+      $zip->close ();
+      return false;
+    }
+    $zip->close ();
+    equipment_model_cisco_flatten_extract ( $destdir);
+    return true;
+  }
+  $command = "unzip -o " . escapeshellarg ( $archivepath) . " -d " . escapeshellarg ( $destdir);
+  exec ( $command, $output, $exitcode);
+  if ( $exitcode !== 0)
+  {
+    return false;
+  }
+  equipment_model_cisco_flatten_extract ( $destdir);
+  return true;
+}
+
+/**
+ * Extract a tar archive into a directory, keeping the archive file.
+ *
+ * @param string $archivepath Tar archive path
+ * @param string $destdir Destination directory
+ * @return boolean
+ */
+function equipment_model_cisco_extract_tar ( $archivepath, $destdir)
+{
+  if ( ! is_readable ( $archivepath) || ! is_dir ( $destdir))
+  {
+    return false;
+  }
+  if ( class_exists ( "PharData"))
+  {
+    try {
+      $phar = new PharData ( $archivepath);
+      $phar->extractTo ( $destdir, null, true);
+      equipment_model_cisco_flatten_extract ( $destdir);
+      return true;
+    } catch ( Exception $exception) {
+    }
+  }
+  $command = "tar -xf " . escapeshellarg ( $archivepath) . " -C " . escapeshellarg ( $destdir);
+  exec ( $command, $output, $exitcode);
+  if ( $exitcode !== 0)
+  {
+    return false;
+  }
+  equipment_model_cisco_flatten_extract ( $destdir);
+  return true;
+}
+
+/**
+ * Write and extract a Cisco firmware archive.
+ *
+ * @global array $_in Framework global configuration variable
+ * @param array $parameters Firmware parameters
+ * @param string $subdir Cisco model subdirectory (e.g. 3905, Locale)
+ * @param string $extracttype zip or tar
+ * @return array
+ */
+function equipment_model_cisco_deploy_firmware_archive ( $parameters, $subdir, $extracttype)
+{
+  global $_in;
+
+  $destdir = rtrim ( $_in["general"]["tftpdir"], "/") . "/Cisco/" . $subdir;
+  if ( ! is_dir ( $destdir) && ! mkdir ( $destdir, 0777, true))
+  {
+    return array ( "code" => 500, "message" => "Error creating directory structure.");
+  }
+  $archivepath = $destdir . "/" . $parameters["Filename"];
+  if ( ! write_payload_to_file ( $archivepath, $parameters))
+  {
+    return array ( "code" => 500, "message" => "Error writing file.");
+  }
+  if ( $extracttype == "zip")
+  {
+    if ( ! equipment_model_cisco_extract_zip ( $archivepath, $destdir))
+    {
+      return array ( "code" => 500, "message" => "Error extracting firmware archive.");
+    }
+  } else {
+    if ( ! equipment_model_cisco_extract_tar ( $archivepath, $destdir))
+    {
+      return array ( "code" => 500, "message" => "Error extracting firmware archive.");
+    }
+  }
+  return array ( "code" => 200, "message" => "Firmware file added.");
+}
+
+/**
+ * Remove all files from a Cisco firmware directory.
+ *
+ * @param string $dir Directory path
+ * @return void
+ */
+function equipment_model_cisco_clear_firmware_directory ( $dir)
+{
+  if ( ! is_dir ( $dir))
+  {
+    return;
+  }
+  foreach ( array_diff ( scandir ( $dir), array ( ".", "..")) as $entry)
+  {
+    $path = $dir . "/" . $entry;
+    if ( is_dir ( $path))
+    {
+      equipment_model_cisco_clear_firmware_directory ( $path);
+      @rmdir ( $path);
+    } else {
+      @unlink ( $path);
+    }
+  }
+}
+
+/**
  * Function to add a Cisco firmware file.
  *
  * @global array $_in Framework global configuration variable
@@ -198,67 +375,19 @@ function equipment_model_cisco_basic_configure ( $buffer, $parameters)
  */
 function equipment_model_cisco_add_firmware ( $buffer, $parameters)
 {
-  global $_in;
-
-  // Process the file based on the filename:
   switch ( $parameters["Filename"])
   {
-    case "cmterm-3905.9-4-1SR3.zip":		// Cisco 3905
-      if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Cisco/3905") && ! mkdir ( $_in["general"]["tftpdir"] . "/Cisco/3905", 0777, true))
-      {
-        return array ( "code" => 500, "message" => "Error creating directory structure.");
-      }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Cisco/3905/" . $parameters["Filename"], $parameters["Data"]) === false)
-      {
-        return array ( "code" => 500, "message" => "Error writing file.");
-      }
-      // **TODO**: Need to explode file, extracting firmware files (and keeping zip file after)
-
-      return array ( "code" => 200, "message" => "Firmware file added.");
-      break;
-    case "cmterm-78xx.11-7-1-17.zip":		// Cisco 7811
-      if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Cisco/7811") && ! mkdir ( $_in["general"]["tftpdir"] . "/Cisco/7811", 0777, true))
-      {
-        return array ( "code" => 500, "message" => "Error creating directory structure.");
-      }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Cisco/7811/" . $parameters["Filename"], $parameters["Data"]) === false)
-      {
-        return array ( "code" => 500, "message" => "Error writing file.");
-      }
-      // **TODO**: Need to explode file, extracting firmware files (and keeping zip file after)
-
-      return array ( "code" => 200, "message" => "Firmware file added.");
-      break;
-    case "cmterm-8961.9-4-1-9_REL.zip":		// Cisco 8961
-      if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Cisco/8961") && ! mkdir ( $_in["general"]["tftpdir"] . "/Cisco/8961", 0777, true))
-      {
-        return array ( "code" => 500, "message" => "Error creating directory structure.");
-      }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Cisco/8961/" . $parameters["Filename"], $parameters["Data"]) === false)
-      {
-        return array ( "code" => 500, "message" => "Error writing file.");
-      }
-      // **TODO**: Need to explode file, extracting firmware files (and keeping zip file after)
-
-      return array ( "code" => 200, "message" => "Firmware file added.");
-      break;
-    case "po-locale-pt_BR-14.2.1.4001-1.tar":	// Cisco locale language files to Brazilian Portuguese
-    case "po-locale-en_GB-14.2.1.4001-1.tar":	// Cisco locale language files to British English
-      if ( ! is_dir ( $_in["general"]["tftpdir"] . "/Cisco/Locale") && ! mkdir ( $_in["general"]["tftpdir"] . "/Cisco/Locale", 0777, true))
-      {
-        return array ( "code" => 500, "message" => "Error creating directory structure.");
-      }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Cisco/Locale/" . $parameters["Filename"], $parameters["Data"]) === false)
-      {
-        return array ( "code" => 500, "message" => "Error writing file.");
-      }
-      // **TODO**: Need to explode file, extracting firmware files (and keeping tar file after)
-
-      return array ( "code" => 200, "message" => "Firmware file added.");
-      break;
+    case "cmterm-3905.9-4-1SR3.zip":
+      return equipment_model_cisco_deploy_firmware_archive ( $parameters, "3905", "zip");
+    case "cmterm-78xx.11-7-1-17.zip":
+      return equipment_model_cisco_deploy_firmware_archive ( $parameters, "7811", "zip");
+    case "cmterm-8961.9-4-1-9_REL.zip":
+      return equipment_model_cisco_deploy_firmware_archive ( $parameters, "8961", "zip");
+    case "po-locale-pt_BR-14.2.1.4001-1.tar":
+    case "po-locale-en_GB-14.2.1.4001-1.tar":
+      return equipment_model_cisco_deploy_firmware_archive ( $parameters, "Locale", "tar");
   }
 
-  // If reached here, firmware file was not recognized!
   return array ( "code" => 400, "message" => "Invalid firmware file!");
 }
 
@@ -275,37 +404,27 @@ function equipment_model_cisco_remove_firmware ( $buffer, $parameters)
 {
   global $_in;
 
-  // Process the file based on the filename:
   switch ( $parameters["Filename"])
   {
-    case "cmterm-3905.9-4-1SR3.zip":		// Cisco 3905
-      @unlink ( $_in["general"]["tftpdir"] . "/Cisco/3905/" . $parameters["Filename"]);
+    case "cmterm-3905.9-4-1SR3.zip":
+      equipment_model_cisco_clear_firmware_directory ( $_in["general"]["tftpdir"] . "/Cisco/3905");
       @rmdir ( $_in["general"]["tftpdir"] . "/Cisco/3905");
-
       return array ( "code" => 200, "message" => "Firmware file removed.");
-      break;
-    case "cmterm-78xx.11-7-1-17.zip":		// Cisco 7811
-      @unlink ( $_in["general"]["tftpdir"] . "/Cisco/7811/" . $parameters["Filename"]);
+    case "cmterm-78xx.11-7-1-17.zip":
+      equipment_model_cisco_clear_firmware_directory ( $_in["general"]["tftpdir"] . "/Cisco/7811");
       @rmdir ( $_in["general"]["tftpdir"] . "/Cisco/7811");
-
       return array ( "code" => 200, "message" => "Firmware file removed.");
-      break;
-    case "cmterm-8961.9-4-1-9_REL.zip":		// Cisco 8961
-      @unlink ( $_in["general"]["tftpdir"] . "/Cisco/8961/" . $parameters["Filename"]);
+    case "cmterm-8961.9-4-1-9_REL.zip":
+      equipment_model_cisco_clear_firmware_directory ( $_in["general"]["tftpdir"] . "/Cisco/8961");
       @rmdir ( $_in["general"]["tftpdir"] . "/Cisco/8961");
-
       return array ( "code" => 200, "message" => "Firmware file removed.");
-      break;
-    case "po-locale-pt_BR-14.2.1.4001-1.tar":	// Cisco locale language files to Brazilian Portuguese
-    case "po-locale-en_GB-14.2.1.4001-1.tar":	// Cisco locale language files to British English
-      @unlink ( $_in["general"]["tftpdir"] . "/Cisco/Locale/" . $parameters["Filename"]);
+    case "po-locale-pt_BR-14.2.1.4001-1.tar":
+    case "po-locale-en_GB-14.2.1.4001-1.tar":
+      equipment_model_cisco_clear_firmware_directory ( $_in["general"]["tftpdir"] . "/Cisco/Locale");
       @rmdir ( $_in["general"]["tftpdir"] . "/Cisco/Locale");
-
       return array ( "code" => 200, "message" => "Firmware file removed.");
-      break;
   }
 
-  // If reached here, firmware file was not recognized!
   return array ( "code" => 400, "message" => "Invalid firmware file!");
 }
 
@@ -383,7 +502,7 @@ function ap_type_cisco_3905 ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $content = str_replace ( "{{{g722support}}}", in_array ( "G722", $equipmentconfig["AudioCodecs"]) ? "2" : "1", $content);
   $content = str_replace ( "{{{advertiseg722}}}", in_array ( "G722", $equipmentconfig["AudioCodecs"]) ? "1" : "0", $content);
 
@@ -1643,7 +1762,7 @@ function ap_type_cisco_7811 ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $content = str_replace ( "{{{g722support}}}", in_array ( "G722", $equipmentconfig["AudioCodecs"]) ? "2" : "1", $content);
   $content = str_replace ( "{{{advertiseg722}}}", in_array ( "G722", $equipmentconfig["AudioCodecs"]) ? "1" : "0", $content);
 
@@ -2895,7 +3014,7 @@ function ap_type_cisco_8961 ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $content = str_replace ( "{{{g722support}}}", in_array ( "G722", $equipmentconfig["AudioCodecs"]) ? "2" : "1", $content);
   $content = str_replace ( "{{{advertiseg722}}}", in_array ( "G722", $equipmentconfig["AudioCodecs"]) ? "1" : "0", $content);
 

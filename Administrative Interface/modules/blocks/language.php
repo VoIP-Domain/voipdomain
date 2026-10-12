@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Blocks
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -54,17 +54,17 @@ i18n_add ( "Are you sure you want to remove the block %s (%s)?");
 i18n_add ( "Block removal");
 i18n_add ( "Block removed successfully!");
 i18n_add ( "Error removing block!");
-i18n_add ( "blocks addition");
+i18n_add ( "Add blocks");
 i18n_add ( "Block description");
 i18n_add ( "Block number (E.164 format)");
-i18n_add ( "Block addition");
+i18n_add ( "Add block");
 i18n_add ( "Error adding block!");
 i18n_add ( "Block added successfully!");
-i18n_add ( "blocks visualization");
+i18n_add ( "View blocks");
 i18n_add ( "Block view");
 i18n_add ( "Error viewing block!");
-i18n_add ( "blocks editing");
-i18n_add ( "Block edition");
+i18n_add ( "Edit blocks");
+i18n_add ( "Edit block");
 i18n_add ( "Error retrieving block data!");
 i18n_add ( "Error changing block!");
 i18n_add ( "Block changed successfully!");
@@ -75,9 +75,9 @@ i18n_add ( "An E.164 formatted number.");
 i18n_add ( "An object containing information about the blocked number.");
 i18n_add ( "Edit a system blocked number.");
 i18n_add ( "Filter search with this string. If not provided, return all blocks.");
-i18n_add ( "Get a blocked number information.");
-i18n_add ( "New system blocked number added successfully.");
-i18n_add ( "Remove a blocked number from system.");
+i18n_add ( "Get blocked number information.");
+i18n_add ( "A new system blocked number was added successfully.");
+i18n_add ( "Remove a blocked number from the system.");
 i18n_add ( "Search for system blocked numbers.");
 i18n_add ( "SPAM");
 i18n_add ( "The blocked number in E.164 format.");
@@ -88,7 +88,7 @@ i18n_add ( "The system blocked number was removed.");
 i18n_add ( "The system blocked number was successfully updated.");
 i18n_add ( "View blocks");
 i18n_add ( "Invalid block ID.");
-i18n_add ( "Block cloning");
+i18n_add ( "Clone block");
 
 /**
  * Add Brazilian Portuguese support
@@ -98,30 +98,30 @@ i18n_add ( "View block information", "Visualizar informações de bloqueio", "pt
 i18n_add ( "Add blocks", "Adicionar bloqueios", "pt_BR");
 i18n_add ( "The block description is required.", "A descrição do bloqueio é obrigatória.", "pt_BR");
 i18n_add ( "The block number is required.", "O número do bloqueio é obrigatório.", "pt_BR");
-i18n_add ( "The number must be in E.164 format, including the prefix +.", "O número deve estar no format E.164, incluindo o prefixo +.", "pt_BR");
+i18n_add ( "The number must be in E.164 format, including the prefix +.", "O número deve estar no formato E.164, incluindo o prefixo +.", "pt_BR");
 i18n_add ( "The provided number was already in use.", "O número informado já está em uso.", "pt_BR");
 i18n_add ( "Edit blocks", "Editar bloqueios", "pt_BR");
 i18n_add ( "Remove blocks", "Remover bloqueios", "pt_BR");
 i18n_add ( "Block", "Bloqueio", "pt_BR");
 i18n_add ( "Blocks", "Bloqueios", "pt_BR");
-i18n_add ( "blocks search", "pesquisa de bloqueios", "pt_BR");
+i18n_add ( "blocks search", "Pesquisar bloqueios", "pt_BR");
 i18n_add ( "Remove block", "Remover bloqueio", "pt_BR");
-i18n_add ( "Are you sure you want to remove the block %s (%s)?", "Você tem certeza que deseja remover o bloqueio %s (%s)?", "pt_BR");
-i18n_add ( "Block removal", "Remoção de bloqueio", "pt_BR");
+i18n_add ( "Are you sure you want to remove the block %s (%s)?", "Você tem certeza de que deseja remover o bloqueio %s (%s)?", "pt_BR");
+i18n_add ( "Block removal", "Remover bloqueio", "pt_BR");
 i18n_add ( "Block removed successfully!", "Bloqueio removido com sucesso!", "pt_BR");
 i18n_add ( "Error removing block!", "Erro ao remover bloqueio!", "pt_BR");
-i18n_add ( "blocks addition", "adição de bloqueios", "pt_BR");
+i18n_add ( "Add blocks", "adicionar bloqueios", "pt_BR");
 i18n_add ( "Block description", "Descrição do bloqueio", "pt_BR");
 i18n_add ( "Block number (E.164 format)", "Número do bloqueio (padrão E.164)", "pt_BR");
-i18n_add ( "Block addition", "Adição de bloqueio", "pt_BR");
+i18n_add ( "Add block", "Adicionar bloqueio", "pt_BR");
 i18n_add ( "Error adding block!", "Erro ao adicionar bloqueio!", "pt_BR");
 i18n_add ( "Block added successfully!", "Bloqueio adicionado com sucesso!", "pt_BR");
-i18n_add ( "blocks visualization", "visualização de bloqueios", "pt_BR");
-i18n_add ( "Block view", "Visualização de bloqueio", "pt_BR");
+i18n_add ( "View blocks", "visualizar bloqueios", "pt_BR");
+i18n_add ( "Block view", "Visualizar bloqueio", "pt_BR");
 i18n_add ( "Error viewing block!", "Erro ao visualizar bloqueio!", "pt_BR");
-i18n_add ( "blocks editing", "edição de bloqueios", "pt_BR");
-i18n_add ( "Block edition", "Edição de bloqueio", "pt_BR");
-i18n_add ( "Error retrieving block data!", "Erro ao requisitar dados do bloqueio!", "pt_BR");
+i18n_add ( "Edit blocks", "editar bloqueios", "pt_BR");
+i18n_add ( "Edit block", "Editar bloqueio", "pt_BR");
+i18n_add ( "Error retrieving block data!", "Erro ao obter dados do bloqueio!", "pt_BR");
 i18n_add ( "Error changing block!", "Erro ao alterar bloqueio!", "pt_BR");
 i18n_add ( "Block changed successfully!", "Bloqueio alterado com sucesso!", "pt_BR");
 i18n_add ( "+1 123 5551212", "+1 123 5551212", "pt_BR");
@@ -130,10 +130,10 @@ i18n_add ( "An array containing the system blocked numbers.", "Um array contendo
 i18n_add ( "An E.164 formatted number.", "Um número no formato E.164.", "pt_BR");
 i18n_add ( "An object containing information about the blocked number.", "Um objeto contendo informações sobre o número bloqueado.", "pt_BR");
 i18n_add ( "Edit a system blocked number.", "Editar um número de bloqueio do sistema.", "pt_BR");
-i18n_add ( "Filter search with this string. If not provided, return all blocks.", "Filtrar a pesquisa com esta string. Se não informado, retorna todos os bloqueios.", "pt_BR");
-i18n_add ( "Get a blocked number information.", "Requisitar informações de um número bloqueado.", "pt_BR");
-i18n_add ( "New system blocked number added successfully.", "Novo número de bloqueio do sistema adicionado com sucesso.", "pt_BR");
-i18n_add ( "Remove a blocked number from system.", "Remover um número bloqueado do sistema.", "pt_BR");
+i18n_add ( "Filter search with this string. If not provided, return all blocks.", "Filtrar a pesquisa com esta string. Se omitido, retorna todos os bloqueios.", "pt_BR");
+i18n_add ( "Get blocked number information.", "Obter informações de um número bloqueado.", "pt_BR");
+i18n_add ( "A new system blocked number was added successfully.", "Um novo número de bloqueio do sistema foi adicionado com sucesso.", "pt_BR");
+i18n_add ( "Remove a blocked number from the system.", "Remover um número bloqueado do sistema.", "pt_BR");
 i18n_add ( "Search for system blocked numbers.", "Pesquisar por números bloqueados no sistema.", "pt_BR");
 i18n_add ( "SPAM", "SPAM", "pt_BR");
 i18n_add ( "The blocked number in E.164 format.", "O número bloqueado no formato E.164.", "pt_BR");
@@ -144,5 +144,5 @@ i18n_add ( "The system blocked number was removed.", "O número bloqueado no sis
 i18n_add ( "The system blocked number was successfully updated.", "O número bloqueado no sistema foi atualizado com sucesso.", "pt_BR");
 i18n_add ( "View blocks", "Visualizar bloqueios", "pt_BR");
 i18n_add ( "Invalid block ID.", "ID de bloco inválido.", "pt_BR");
-i18n_add ( "Block cloning", "Clonagem de bloco", "pt_BR");
+i18n_add ( "Clone block", "Clonar bloco", "pt_BR");
 ?>

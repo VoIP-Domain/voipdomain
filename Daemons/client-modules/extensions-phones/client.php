@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,16 +31,17 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Extensions Phones
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "extension_phone_add", "extension_phone_add");
 framework_add_hook ( "extension_phone_change", "extension_phone_change");
 framework_add_hook ( "extension_phone_remove", "extension_phone_remove");
+framework_add_hook ( "extension_number_migrate", "extension_phone_migrate_asterisk_database");
 framework_add_hook ( "account_add", "account_add");
 framework_add_hook ( "account_change", "account_change");
 framework_add_hook ( "account_remove", "account_remove");
@@ -49,6 +50,7 @@ framework_add_hook ( "hint_remove", "hint_remove");
 framework_add_hook ( "ap_add", "ap_add");
 framework_add_hook ( "ap_change", "ap_change");
 framework_add_hook ( "ap_remove", "ap_remove");
+framework_add_hook ( "transhipment_change", "transhipment_change");
 
 /**
  * Cleanup functions
@@ -130,11 +132,11 @@ function extension_phone_add ( $buffer, $parameters)
   }
   if ( ! array_key_exists ( "Group", $data) && ! preg_match ( "/^[0-9]+$/", $parameters["Group"]))
   {
-    $data["Group"] = "Invalid content";
+    $data["Group"] = "Invalid format";
   }
   if ( ! array_key_exists ( "Group", $data) && ! check_config ( "config", "sip-group-" . $parameters["Group"]))
   {
-    $data["Group"] = "Invalid content";
+    $data["Group"] = "Group not found";
   }
   if ( ! array_key_exists ( "Captures", $parameters))
   {
@@ -270,7 +272,7 @@ function extension_phone_add ( $buffer, $parameters)
   {
     if ( ! check_overwrite ())
     {
-      return array ( "code" => 400, "message" => "Extension already exist.");
+      return array ( "code" => 400, "message" => "Extension already exists.");
     } else {
       $overwritten = true;
     }
@@ -281,7 +283,7 @@ function extension_phone_add ( $buffer, $parameters)
   // Verify if voicemail exist
   if ( $parameters["VoiceMail"] == true && config_check ( "config", "voicemail-" . $parameters["Number"]) && ! check_overwrite ())
   {
-    return array ( "code" => 400, "message" => "Voicemail already exist.");
+    return array ( "code" => 400, "message" => "Voicemail already exists.");
   }
 
   // Create file structure
@@ -319,8 +321,8 @@ function extension_phone_add ( $buffer, $parameters)
 
   // Create extension file
   $dialplan = "; VoIP Domain - Extension " . $parameters["Number"] . " - " . $parameters["Name"] . "\n" .
-              "exten => " . $parameters["Number"] . ",1,GoSub(VoIPDomain-Tools,call_extension,1(\${EXTEN})\n" .
-              "exten => t_" . $parameters["Number"] . ",1,GoSub(VoIPDomain-Tools,call_transhipment,1(\${EXTEN:2}))\n";
+              "exten => " . $parameters["Number"] . ",1,GoSub(VoIPDomain-Tools,call_extension,1(\${EXTEN}))\n" .
+              "exten => t_" . $parameters["Number"] . ",1,GoSub(VoIPDomain-Tools,call_transfer,1(\${EXTEN:2}))\n";
   if ( ! write_config ( "config", "dialplan-extension-" . $parameters["Number"], $dialplan))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
@@ -353,7 +355,7 @@ function extension_phone_add ( $buffer, $parameters)
   );
   if ( sizeof ( $parameters["Transhipments"]) != 0)
   {
-    $vars["transhipment"] = implode ( ",", $parameters["Transhipments"]);
+    $vars["transfer"] = implode ( ",", $parameters["Transhipments"]);
   }
   if ( ! write_config ( "configdb", "extension-" . $parameters["Number"], array ( "name" => "extension_" . $parameters["Number"], "data" => $vars)))
   {
@@ -398,6 +400,191 @@ function extension_phone_add ( $buffer, $parameters)
     return array ( "code" => 200, "message" => "Extension created (overwritten).");
   } else {
     return array ( "code" => 201, "message" => "Extension created.");
+  }
+}
+
+/**
+ * Run an Asterisk CLI command and return its output.
+ *
+ * @param string $command Asterisk CLI command
+ * @return string
+ */
+function extension_phone_asterisk_cli ( $command)
+{
+  $output = array ();
+  exec ( "/sbin/asterisk -r -x " . escapeshellarg ( $command), $output);
+  return implode ( "\n", $output);
+}
+
+/**
+ * Read an Asterisk database entry.
+ *
+ * @param string $family Database family
+ * @param string $key Database key
+ * @return string|false
+ */
+function extension_phone_database_get ( $family, $key)
+{
+  $result = extension_phone_asterisk_cli ( "database get " . $family . " " . $key);
+  if ( preg_match ( "/Value: (.*)/", $result, $matches))
+  {
+    return $matches[1];
+  }
+  return false;
+}
+
+/**
+ * Write an Asterisk database entry.
+ *
+ * @param string $family Database family
+ * @param string $key Database key
+ * @param string $value Database value
+ * @return void
+ */
+function extension_phone_database_put ( $family, $key, $value)
+{
+  asterisk_exec ( "database put " . $family . " " . $key . " " . $value);
+}
+
+/**
+ * Delete an Asterisk database entry.
+ *
+ * @param string $family Database family
+ * @param string $key Database key
+ * @return void
+ */
+function extension_phone_database_del ( $family, $key)
+{
+  asterisk_exec ( "database del " . $family . " " . $key);
+}
+
+/**
+ * List Asterisk database entries matching a filter.
+ *
+ * @param string $filter Database show filter
+ * @return array
+ */
+function extension_phone_database_list ( $filter = "")
+{
+  $entries = array ();
+  $result = extension_phone_asterisk_cli ( "database show " . $filter);
+  foreach ( explode ( "\n", $result) as $line)
+  {
+    if ( preg_match ( "#^/([^/]+)/([^:]+): (.*)$#", trim ( $line), $matches))
+    {
+      $entries[] = array ( "family" => $matches[1], "key" => $matches[2], "value" => $matches[3]);
+    }
+  }
+  return $entries;
+}
+
+/**
+ * Move an Asterisk database key to a new key within the same family.
+ *
+ * @param string $family Database family
+ * @param string $oldkey Old key
+ * @param string $newkey New key
+ * @return void
+ */
+function extension_phone_database_migrate_key ( $family, $oldkey, $newkey)
+{
+  if ( $oldkey == $newkey)
+  {
+    return;
+  }
+  $value = extension_phone_database_get ( $family, $oldkey);
+  if ( $value !== false)
+  {
+    extension_phone_database_put ( $family, $newkey, $value);
+    extension_phone_database_del ( $family, $oldkey);
+  }
+}
+
+/**
+ * Migrate Asterisk database variables when an extension number changes.
+ *
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters OldNumber, NewNumber and optional UID
+ * @return string
+ */
+function extension_phone_migrate_asterisk_database ( $buffer, $parameters)
+{
+  if ( ! array_key_exists ( "OldNumber", $parameters) || ! array_key_exists ( "NewNumber", $parameters) || $parameters["OldNumber"] == $parameters["NewNumber"])
+  {
+    return $buffer;
+  }
+  $old = $parameters["OldNumber"];
+  $new = $parameters["NewNumber"];
+
+  foreach ( array ( "lastcallerid", "CFBS", "CIDA", "VoIPDomain-counter") as $family)
+  {
+    extension_phone_database_migrate_key ( $family, $old, $new);
+  }
+
+  // Remove legacy typo family if present.
+  extension_phone_database_del ( "lastcalledid", $old);
+
+  foreach ( extension_phone_database_list ( "denylist-" . $old) as $entry)
+  {
+    if ( $entry["family"] != "denylist-" . $old)
+    {
+      continue;
+    }
+    extension_phone_database_put ( "denylist-" . $new, $entry["key"], $entry["value"]);
+    extension_phone_database_del ( $entry["family"], $entry["key"]);
+  }
+
+  foreach ( extension_phone_database_list ( "lastcalled") as $entry)
+  {
+    if ( $entry["family"] != "lastcalled")
+    {
+      continue;
+    }
+    if ( $entry["key"] == $old)
+    {
+      extension_phone_database_put ( "lastcalled", $new, $entry["value"]);
+      extension_phone_database_del ( "lastcalled", $old);
+    } elseif ( $entry["value"] == $old)
+    {
+      extension_phone_database_put ( "lastcalled", $entry["key"], $new);
+    }
+  }
+
+  return $buffer;
+}
+
+/**
+ * Remove Asterisk database variables associated with an extension number.
+ *
+ * @param string $number Extension number
+ * @return void
+ */
+function extension_phone_clear_asterisk_database ( $number)
+{
+  foreach ( array ( "lastcallerid", "lastcalledid", "CFBS", "CIDA", "VoIPDomain-counter") as $family)
+  {
+    extension_phone_database_del ( $family, $number);
+  }
+
+  foreach ( extension_phone_database_list ( "denylist-" . $number) as $entry)
+  {
+    if ( $entry["family"] == "denylist-" . $number)
+    {
+      extension_phone_database_del ( $entry["family"], $entry["key"]);
+    }
+  }
+
+  foreach ( extension_phone_database_list ( "lastcalled") as $entry)
+  {
+    if ( $entry["family"] != "lastcalled")
+    {
+      continue;
+    }
+    if ( $entry["key"] == $number || $entry["value"] == $number)
+    {
+      extension_phone_database_del ( "lastcalled", $entry["key"]);
+    }
   }
 }
 
@@ -462,11 +649,11 @@ function extension_phone_change ( $buffer, $parameters)
   }
   if ( ! array_key_exists ( "Group", $data) && ! preg_match ( "/^[0-9]+$/", $parameters["Group"]))
   {
-    $data["Group"] = "Invalid content";
+    $data["Group"] = "Invalid format";
   }
   if ( ! array_key_exists ( "Group", $data) && ! check_config ( "config", "sip-group-" . $parameters["Group"]))
   {
-    $data["Group"] = "Invalid content";
+    $data["Group"] = "Group not found";
   }
   if ( ! array_key_exists ( "Captures", $parameters))
   {
@@ -606,14 +793,21 @@ function extension_phone_change ( $buffer, $parameters)
   // Verify if new extension exist
   if ( $parameters["Number"] != $parameters["NewNumber"] && ( check_config ( "config", "sip-extension-" . $parameters["NewNumber"]) || check_config ( "datafile", "extension-" . $parameters["NewNumber"]) || check_config ( "config", "voicemail-" . $parameters["NewNumber"])))
   {
-    return array ( "code" => 409, "message" => "Extension new number already exist.");
+    return array ( "code" => 409, "message" => "Extension new number already exists.");
   }
 
   // Set hint variable
   $hashint = check_config ( "config", "dialplan-hint-" . $parameters["Number"]);
 
+  // Read extension data before removing files
+  $extensiondata = read_config ( "datafile", "extension-" . $parameters["Number"]);
+  if ( $extensiondata === false)
+  {
+    return array ( "code" => 404, "message" => "Extension doesn't exist.");
+  }
+
   // Remove old extension files first
-  if ( ! unlink_config ( "config", "sip-extension-" . $parameters["Number"]) || ! unlink_config ( "config", "dialplan-extension-" . $parameters["Number"]) || ! unlink_config ( "configdb", "extension-" . $parameters["Number"]) || ( check_config ( "config", "voicemail-" . $parameters["Number"]) && ( ! unlink_config ( "config", "voicemail-" . $parameters["Number"]) || ! unlink_config ( "datafile", "voicemail-" . $parameters["Number"]))) || ( check_config ( "config", "dialplan-hint-" . $parameters["Number"]) && ! unlink_config ( "config", "dialplan-hint-" . $parameters["Number"])) || ! rename_config ( "datafile", "extension-" . $parameters["Number"], "extension-" . $parameters["NewNumber"]))
+  if ( ! unlink_config ( "config", "sip-extension-" . $parameters["Number"]) || ! unlink_config ( "config", "dialplan-extension-" . $parameters["Number"]) || ! unlink_config ( "configdb", "extension-" . $parameters["Number"]) || ( check_config ( "config", "voicemail-" . $parameters["Number"]) && ( ! unlink_config ( "config", "voicemail-" . $parameters["Number"]) || ! unlink_config ( "datafile", "voicemail-" . $parameters["Number"]))) || ( $parameters["Number"] != $parameters["NewNumber"] && check_config ( "config", "dialplan-hint-" . $parameters["Number"]) && ! unlink_config ( "config", "dialplan-hint-" . $parameters["Number"])) || ( $parameters["Number"] != $parameters["NewNumber"] && ! rename_config ( "datafile", "extension-" . $parameters["Number"], "extension-" . $parameters["NewNumber"])))
   {
     return array ( "code" => 500, "message" => "Error removing file.");
   }
@@ -638,13 +832,10 @@ function extension_phone_change ( $buffer, $parameters)
     return array ( "code" => 500, "message" => "Error writing file.");
   }
 
-  // Read extension data
-  $extension = read_config ( "datafile", "extension-" . $parameters["NewNumber"]);
-
   // If number changed, replace number at each extension account file and account data file
-  if ( $parameters["Number"] != $parameters["NewNumber"] && sizeof ( $extension["Accounts"]))
+  if ( $parameters["Number"] != $parameters["NewNumber"] && sizeof ( $extensiondata["Accounts"]))
   {
-    foreach ( $extension["Accounts"] as $account)
+    foreach ( $extensiondata["Accounts"] as $account)
     {
       $content = read_config ( "config", "sip-account-" . str_replace ( "PJSIP/", "", $account));
       write_config ( "config", "sip-account-" . str_replace ( "PJSIP/", "", $account), str_replace ( "vd_extension_" . $parameters["Number"], "vd_extension_" . $parameters["NewNumber"], $content));
@@ -670,9 +861,9 @@ function extension_phone_change ( $buffer, $parameters)
 
   // Create extension dialplan file
   $dialplan = "; VoIP Domain - Extension " . $parameters["NewNumber"] . " - " . $parameters["Name"] . "\n" .
-              "exten => " . $parameters["NewNumber"] . ",1,GoSub(VoIPDomain-Tools,call_extension,1(\${EXTEN})\n" .
-              "exten => t_" . $parameters["NewNumber"] . ",1,GoSub(VoIPDomain-Tools,call_transhipment,1(\${EXTEN:2}))\n";
-  if ( ! write_config ( "config", "dialplan-extension-" . $parameters["NewNumber"], $content))
+              "exten => " . $parameters["NewNumber"] . ",1,GoSub(VoIPDomain-Tools,call_extension,1(\${EXTEN}))\n" .
+              "exten => t_" . $parameters["NewNumber"] . ",1,GoSub(VoIPDomain-Tools,call_transfer,1(\${EXTEN:2}))\n";
+  if ( ! write_config ( "config", "dialplan-extension-" . $parameters["NewNumber"], $dialplan))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -704,7 +895,7 @@ function extension_phone_change ( $buffer, $parameters)
   );
   if ( sizeof ( $parameters["Transhipments"]) != 0)
   {
-    $vars["transhipment"] = implode ( ",", $parameters["Transhipments"]);
+    $vars["transfer"] = implode ( ",", $parameters["Transhipments"]);
   }
   if ( ! write_config ( "configdb", "extension-" . $parameters["NewNumber"], array ( "name" => "extension_" . $parameters["NewNumber"], "data" => $vars)))
   {
@@ -714,7 +905,7 @@ function extension_phone_change ( $buffer, $parameters)
   // Rebuild extension hint (if required)
   if ( $hashint)
   {
-    if ( ! write_config ( "config", "dialplan-hint-" . $parameters["NewNumber"], "exten => " . $parameters["NewNumber"] . ",hint," . implode ( "&", $extension["Accounts"]) . "\n"))
+    if ( ! write_config ( "config", "dialplan-hint-" . $parameters["NewNumber"], "exten => " . $parameters["NewNumber"] . ",hint," . implode ( "&", $extensiondata["Accounts"]) . "\n"))
     {
       return array ( "code" => 500, "message" => "Error writing file.");
     }
@@ -723,17 +914,17 @@ function extension_phone_change ( $buffer, $parameters)
   // Update database if number changed
   if ( $parameters["Number"] != $parameters["NewNumber"])
   {
-    // **TODO**: Need to migrate used variables to the new number. This could be implemented through a filter, so the modules implements the handle of their variables.
-
-    // Remove Last CalledID from database
-    asterisk_exec ( "database del lastcalledid " . $parameters["Number"]);
+    if ( framework_has_hook ( "extension_number_migrate"))
+    {
+      framework_call ( "extension_number_migrate", array ( "OldNumber" => $parameters["Number"], "NewNumber" => $parameters["NewNumber"], "UID" => $parameters["UID"]));
+    }
   }
 
   // Create extension data file
   unlink_config ( "datafile", "extension-" . $parameters["Number"]);
   $parameters["Number"] = $parameters["NewNumber"];
   unset ( $parameters["NewNumber"]);
-  if ( ! write_config ( "datafile", "extension-" . $parameters["Number"], array_merge_recursive ( $parameters, array ( "Type" => "phone", "Accounts" => $extension["Accounts"]))))
+  if ( ! write_config ( "datafile", "extension-" . $parameters["Number"], array_merge_recursive ( $parameters, array ( "Type" => "phone", "Accounts" => $extensiondata["Accounts"]))))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -874,8 +1065,8 @@ function extension_phone_remove ( $buffer, $parameters)
   // Reload Asterisk voicemail configuration
   asterisk_exec ( "voicemail reload");
 
-  // Remove Last CalledID from database
-  asterisk_exec ( "database del lastcalledid " . $parameters["Number"]);
+  // Remove extension database variables
+  extension_phone_clear_asterisk_database ( $parameters["Number"]);
 
   /**
    * Execute finish hook if exist
@@ -990,7 +1181,7 @@ function account_add ( $buffer, $parameters)
   {
     if ( ! check_overwrite ())
     {
-      return array ( "code" => 400, "message" => "Account already exist.");
+      return array ( "code" => 400, "message" => "Account already exists.");
     } else {
       $overwritten = true;
     }
@@ -1030,7 +1221,7 @@ function account_add ( $buffer, $parameters)
 
   // Create extension file
   $content = "exten => " . $parameters["Number"] . ",1,GoSub(VoIPDomain-Tools,call_extension,1(\${EXTEN},\${CALLERID(num)}," . implode ( "&", $extension["Accounts"]) . "))\n";
-  $content .= "exten => t_" . $parameters["Number"] . ",1,GoSub(VoIPDomain-Tools,call_transhipment,1(\${EXTEN:2},\${CALLERID(num)}," . implode ( "&", $extension["Accounts"]) . "))\n";
+  $content .= "exten => t_" . $parameters["Number"] . ",1,GoSub(VoIPDomain-Tools,call_transfer,1(\${EXTEN:2},\${CALLERID(num)}," . implode ( "&", $extension["Accounts"]) . "))\n";
   if ( ! write_config ( "config", "dialplan-extension-" . $parameters["Number"], $content))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
@@ -1197,7 +1388,7 @@ function account_change ( $buffer, $parameters)
   // Verify if new account exists
   if ( $parameters["Username"] != $parameters["NewUsername"] && check_config ( "config", "sip-account-" . $parameters["NewUsername"]))
   {
-    return array ( "code" => 409, "message" => "New account already exist.");
+    return array ( "code" => 409, "message" => "New account already exists.");
   }
 
   // Verify if extension exist
@@ -1239,7 +1430,7 @@ function account_change ( $buffer, $parameters)
     // Remove old account
     if ( ( $key = array_search ( "PJSIP/" . $parameters["Username"], $extension["Accounts"])) !== false)
     {
-      unset ( $extensions["Accounts"][$key]);
+      unset ( $extension["Accounts"][$key]);
     }
     $extension["Accounts"][] = "PJSIP/" . $parameters["NewUsername"];
 
@@ -1251,8 +1442,8 @@ function account_change ( $buffer, $parameters)
     }
 
     // Create extension file
-    $content = "exten => " . $parameters["NewNumber"] . ",1,GoSub(VoIPDomain-Tools,call_extension,1(\${EXTEN},\${CALLERID(num)},\"" . implode ( "&", $extension["Accounts"]) . "\"))\n";
-    $content .= "exten => t_" . $parameters["NewNumber"] . ",1,GoSub(VoIPDomain-Tools,call_transhipment,1(\${EXTEN:2},\${CALLERID(num)},\"" . implode ( "&", $extension["Accounts"]) . "\"))\n";
+    $content = "exten => " . $parameters["Number"] . ",1,GoSub(VoIPDomain-Tools,call_extension,1(\${EXTEN},\${CALLERID(num)}," . implode ( "&", $extension["Accounts"]) . "))\n";
+    $content .= "exten => t_" . $parameters["Number"] . ",1,GoSub(VoIPDomain-Tools,call_transfer,1(\${EXTEN:2},\${CALLERID(num)}," . implode ( "&", $extension["Accounts"]) . "))\n";
     if ( ! write_config ( "config", "dialplan-extension-" . $parameters["Number"], $content))
     {
       return array ( "code" => 500, "message" => "Error writing file.");
@@ -1401,7 +1592,7 @@ function account_remove ( $buffer, $parameters)
   // Remove old account
   if ( ( $key = array_search ( "PJSIP/" . $parameters["Username"], $extension["Accounts"])) !== false)
   {
-    unset ( $extensions["Accounts"][$key]);
+    unset ( $extension["Accounts"][$key]);
   }
 
   // Write extesion accounts
@@ -1414,10 +1605,10 @@ function account_remove ( $buffer, $parameters)
   // Create extension file
   if ( sizeof ( $extension["Accounts"]))
   {
-    $content = "exten => " . $parameters["NewNumber"] . ",1,GoSub(VoIPDomain-Tools,call_extension,1(\${EXTEN},\${CALLERID(num)},\"" . implode ( "&", $extension["Accounts"]) . "\"))\n";
-    $content .= "exten => t_" . $parameters["NewNumber"] . ",1,GoSub(VoIPDomain-Tools,call_transhipment,1(\${EXTEN:2},\${CALLERID(num)},\"" . implode ( "&", $extension["Accounts"]) . "\"))\n";
+    $content = "exten => " . $parameters["Number"] . ",1,GoSub(VoIPDomain-Tools,call_extension,1(\${EXTEN},\${CALLERID(num)}," . implode ( "&", $extension["Accounts"]) . "))\n";
+    $content .= "exten => t_" . $parameters["Number"] . ",1,GoSub(VoIPDomain-Tools,call_transfer,1(\${EXTEN:2},\${CALLERID(num)}," . implode ( "&", $extension["Accounts"]) . "))\n";
   } else {
-    $content = "exten => " . $parameters["NewNumber"] . ",1,Verbose(1,\${STRFTIME(\${EPOCH},,%c)}: VoIPDomain extension - Call to extension \${EXTEN} without configured account\")\n";
+    $content = "exten => " . $parameters["Number"] . ",1,Verbose(1,\${STRFTIME(\${EPOCH},,%c)}: VoIPDomain extension - Call to extension \${EXTEN} without configured account\")\n";
   }
   if ( ! write_config ( "config", "dialplan-extension-" . $parameters["Number"], $content))
   {
@@ -1543,7 +1734,7 @@ function hint_add ( $buffer, $parameters)
   {
     if ( ! check_overwrite ())
     {
-      return array ( "code" => 400, "message" => "Hint already exist.");
+      return array ( "code" => 400, "message" => "Hint already exists.");
     } else {
       $overwritten = true;
     }
@@ -1624,9 +1815,9 @@ function hint_remove ( $buffer, $parameters)
   /**
    * Call start hook if exist
    */
-  if ( framework_has_hook ( "hint_change_start"))
+  if ( framework_has_hook ( "hint_remove_start"))
   {
-    $parameters = framework_call ( "hint_change_start", $parameters);
+    $parameters = framework_call ( "hint_remove_start", $parameters);
   }
 
   /**
@@ -1645,9 +1836,9 @@ function hint_remove ( $buffer, $parameters)
   /**
    * Call validate hook if exist
    */
-  if ( framework_has_hook ( "hint_change_validate"))
+  if ( framework_has_hook ( "hint_remove_validate"))
   {
-    $data = framework_call ( "hint_change_validate", $parameters, false, $data);
+    $data = framework_call ( "hint_remove_validate", $parameters, false, $data);
   }
 
   /**
@@ -1661,17 +1852,17 @@ function hint_remove ( $buffer, $parameters)
   /**
    * Call sanitize hook if exist
    */
-  if ( framework_has_hook ( "hint_change_sanitize"))
+  if ( framework_has_hook ( "hint_remove_sanitize"))
   {
-    $parameters = framework_call ( "hint_change_sanitize", $parameters, false, $parameters);
+    $parameters = framework_call ( "hint_remove_sanitize", $parameters, false, $parameters);
   }
 
   /**
    * Call pre hook if exist
    */
-  if ( framework_has_hook ( "hint_change_pre"))
+  if ( framework_has_hook ( "hint_remove_pre"))
   {
-    $parameters = framework_call ( "hint_change_pre", $parameters, false, $parameters);
+    $parameters = framework_call ( "hint_remove_pre", $parameters, false, $parameters);
   }
 
   // Verify if hint exist
@@ -1689,7 +1880,7 @@ function hint_remove ( $buffer, $parameters)
   /**
    * Call post hook if exist
    */
-  if ( framework_has_hook ( "hint_change_post") && ! framework_call ( "hint_change_post", $parameters, false, true))
+  if ( framework_has_hook ( "hint_remove_post") && ! framework_call ( "hint_remove_post", $parameters, false, true))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
   }
@@ -1700,13 +1891,158 @@ function hint_remove ( $buffer, $parameters)
   /**
    * Execute finish hook if exist
    */
-  if ( framework_has_hook ( "hint_change_finish"))
+  if ( framework_has_hook ( "hint_remove_finish"))
   {
-    framework_call ( "hint_change_finish", $parameters);
+    framework_call ( "hint_remove_finish", $parameters);
   }
 
   // Finish event
   return array ( "code" => 200, "message" => "Hint removed.");
+}
+
+/**
+ * Function to change an extension transhipment list.
+ * Required parameters are: (int) Number, (array (int)) Transhipments[]
+ * Possible results:
+ *   - 200: OK, transhipment list changed
+ *   - 404: Extension doesn't exist
+ *   - 406: Invalid parameters
+ *   - 500: Error writing file
+ *
+ * @param string $buffer Buffer from plugin system if processed by other function
+ *                       before
+ * @param array $parameters Optional parameters to the function
+ * @return array Result of the operation array ( "code" => _CODE_, "message" =>
+ *               _MESSAGE_)
+ */
+function transhipment_change ( $buffer, $parameters)
+{
+  /**
+   * Call start hook if exist
+   */
+  if ( framework_has_hook ( "transhipment_change_start"))
+  {
+    $parameters = framework_call ( "transhipment_change_start", $parameters);
+  }
+
+  /**
+   * Validate received parameters
+   */
+  $data = array ();
+  if ( ! array_key_exists ( "Number", $parameters))
+  {
+    $data["Number"] = "Missing parameter";
+  }
+  if ( ! array_key_exists ( "Number", $data) && ! preg_match ( "/^[0-9]+$/", $parameters["Number"]))
+  {
+    $data["Number"] = "Invalid content";
+  }
+  if ( ! array_key_exists ( "Transhipments", $parameters))
+  {
+    $data["Transhipments"] = "Missing parameter";
+  }
+  if ( ! array_key_exists ( "Transhipments", $data) && ! is_array ( $parameters["Transhipments"]))
+  {
+    $data["Transhipments"] = "Invalid content";
+  }
+  if ( ! array_key_exists ( "Transhipments", $data))
+  {
+    foreach ( $parameters["Transhipments"] as $transfer)
+    {
+      if ( ! preg_match ( "/^[0-9]+$/", $transfer))
+      {
+        $data["Transhipments"] = "Invalid content";
+      }
+    }
+  }
+
+  /**
+   * Call validate hook if exist
+   */
+  if ( framework_has_hook ( "transhipment_change_validate"))
+  {
+    $data = framework_call ( "transhipment_change_validate", $parameters, false, $data);
+  }
+
+  /**
+   * Return error data if some error occurred
+   */
+  if ( sizeof ( $data) != 0)
+  {
+    return array ( "code" => 406, "message" => "Invalid parameters.", "content" => $data);
+  }
+
+  /**
+   * Call sanitize hook if exist
+   */
+  if ( framework_has_hook ( "transhipment_change_sanitize"))
+  {
+    $parameters = framework_call ( "transhipment_change_sanitize", $parameters, false, $parameters);
+  }
+
+  /**
+   * Call pre hook if exist
+   */
+  if ( framework_has_hook ( "transhipment_change_pre"))
+  {
+    $parameters = framework_call ( "transhipment_change_pre", $parameters, false, $parameters);
+  }
+
+  // Verify if extension exist
+  if ( ! check_config ( "configdb", "extension-" . $parameters["Number"]))
+  {
+    return array ( "code" => 404, "message" => "Extension doesn't exist.");
+  }
+
+  // Load extension dialplan database
+  $configdb = read_config ( "configdb", "extension-" . $parameters["Number"]);
+
+  // Update transhipment list
+  if ( sizeof ( $parameters["Transhipments"]) != 0)
+  {
+    $configdb["data"]["transfer"] = implode ( ",", $parameters["Transhipments"]);
+  } else {
+    unset ( $configdb["data"]["transfer"]);
+  }
+
+  // Write dialplan database file
+  if ( ! write_config ( "configdb", "extension-" . $parameters["Number"], $configdb))
+  {
+    return array ( "code" => 500, "message" => "Error writing file.");
+  }
+
+  // Update extension data file if exist
+  if ( check_config ( "datafile", "extension-" . $parameters["Number"]))
+  {
+    $extension = read_config ( "datafile", "extension-" . $parameters["Number"]);
+    $extension["Transhipments"] = $parameters["Transhipments"];
+    if ( ! write_config ( "datafile", "extension-" . $parameters["Number"], $extension))
+    {
+      return array ( "code" => 500, "message" => "Error writing file.");
+    }
+  }
+
+  /**
+   * Call post hook if exist
+   */
+  if ( framework_has_hook ( "transhipment_change_post") && ! framework_call ( "transhipment_change_post", $parameters, false, true))
+  {
+    return array ( "code" => 500, "message" => "Error writing file.");
+  }
+
+  // Reload Asterisk dialplan configuration
+  asterisk_exec ( "dialplan reload");
+
+  /**
+   * Execute finish hook if exist
+   */
+  if ( framework_has_hook ( "transhipment_change_finish"))
+  {
+    framework_call ( "transhipment_change_finish", $parameters);
+  }
+
+  // Finish event
+  return array ( "code" => 200, "message" => "Transhipment list changed.");
 }
 
 /**
@@ -1919,7 +2255,7 @@ function ap_change ( $buffer, $parameters)
   // Add internal extensions range:
   $dialplan[] = array ( "Pattern" => "1XXX", "Label" => "Internal", "Type" => "Internal", "Kind" => "Extensions", "Emergency" => false);
 
-  // Check if there's dialplan generate hook's:
+  // Check if there's dialplan generate hooks:
   if ( framework_has_hook ( "dialplan_generate"))
   {
     $dialplan = framework_call ( "dialplan_generate", $parameters, false, $dialplan);
@@ -2174,7 +2510,7 @@ function ap_add ( $buffer, $parameters)
   // Add internal extensions range:
   $dialplan[] = array ( "Pattern" => "1XXX", "Label" => "Internal", "Type" => "Internal", "Kind" => "Extensions", "Emergency" => false);
 
-  // Check if there's dialplan generate hook's:
+  // Check if there's dialplan generate hooks:
   if ( framework_has_hook ( "dialplan_generate"))
   {
     $dialplan = framework_call ( "dialplan_generate", $parameters, false, $dialplan);
@@ -2343,7 +2679,26 @@ function ap_remove ( $buffer, $parameters)
  */
 function extension_wipe ( $buffer, $parameters)
 {
-  // There's nothing to do here. All extensions will be removed by the type wipe handler.
+  foreach ( list_config ( "config", "dialplan-extension-*") as $filename)
+  {
+    unlink_config ( "config", $filename);
+  }
+  foreach ( list_config ( "config", "sip-extension-*") as $filename)
+  {
+    unlink_config ( "config", $filename);
+  }
+  foreach ( list_config ( "configdb", "extension-*") as $filename)
+  {
+    unlink_config ( "configdb", $filename);
+  }
+  foreach ( list_config ( "config", "voicemail-*") as $filename)
+  {
+    unlink_config ( "config", $filename);
+  }
+  foreach ( list_config ( "datafile", "extension") as $filename)
+  {
+    unlink_config ( "datafile", $filename);
+  }
 }
 
 /**
@@ -2437,10 +2792,12 @@ function hint_wipe ( $buffer, $parameters)
   }
 
   // Remove all files
+  foreach ( list_config ( "config", "dialplan-hint-*") as $filename)
+  {
+    unlink_config ( "config", $filename);
+  }
   foreach ( list_config ( "datafile", "hint") as $filename)
   {
-    $data = read_config ( "datafile", $filename);
-    unlink_config ( "config", "dialplan-hint-" . $data["Number"]);
     unlink_config ( "datafile", $filename);
   }
 
@@ -2491,10 +2848,12 @@ function account_wipe ( $buffer, $parameters)
   }
 
   // Remove all files
+  foreach ( list_config ( "config", "sip-account-*") as $filename)
+  {
+    unlink_config ( "config", $filename);
+  }
   foreach ( list_config ( "datafile", "account") as $filename)
   {
-    $data = read_config ( "datafile", $filename);
-    unlink_config ( "config", "sip-account-" . $data["Username"]);
     unlink_config ( "datafile", $filename);
   }
 

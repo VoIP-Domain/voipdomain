@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Debug
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -363,7 +363,7 @@ framework_add_hook (
             ),
             "Type" => array (
               "type" => "integer",
-              "description" => __ ( "The type of number, if available. The types could be:<br />0 - Unknown;<br />1 - Land line;<br />2 - Mobile;<br />4 - VoIP;<br />8 - Fixed-Mobile Convergence (FMC);<br />16 - Premium Rate Number (PRN);<br />32 - Very-Small-Aperture Terminal (VSAT);<br />64 - Toll free;<br />128 - Pay phone;<br />256 - Audiotext terminal;<br />512 - Marine radio telephone;<br />1024 - Paging;<br />2048 - VPN access;<br />4096 - Terrestrial Trunked Radio (TETRA);<br />8192 - Faximile (FAX);<br />16384 - Voicemail box;<br />32768 - Special charge number;<br />65535 - Services.", false, false),
+              "description" => __ ( "The type of number, if available. The types could be:<br />0 - Unknown;<br />1 - Land line;<br />2 - Mobile;<br />4 - VoIP;<br />8 - Fixed-Mobile Convergence (FMC);<br />16 - Premium Rate Number (PRN);<br />32 - Very-Small-Aperture Terminal (VSAT);<br />64 - Toll free;<br />128 - Pay phone;<br />256 - Audiotext terminal;<br />512 - Marine radio telephone;<br />1024 - Paging;<br />2048 - VPN access;<br />4096 - Terrestrial Trunked Radio (TETRA);<br />8192 - Facsimile (FAX);<br />16384 - Voicemail box;<br />32768 - Special charge number;<br />65535 - Services.", false, false),
               "example" => 2
             )
           )
@@ -490,7 +490,7 @@ framework_add_hook (
   array (
     "response" => array (
       200 => array (
-        "description" => __ ( "An object containing a large three with internal system API information."),
+        "description" => __ ( "An object containing a large tree with internal system API information."),
         "schema" => array (
           "type" => "object",
           "additionalProperties" => array (
@@ -1025,7 +1025,7 @@ function debug_api_export ( $buffer, $parameters)
       if ( sizeof ( $requests) != 0)
       {
         $paths[$newpath][$method]["requestBody"] = array ();
-        $paths[$newpath][$method]["requestBody"]["description"] = __ ( "Object request body available parameters.");
+        $paths[$newpath][$method]["requestBody"]["description"] = __ ( "Available object request body parameters.");
         $paths[$newpath][$method]["requestBody"]["required"] = $required;
         $paths[$newpath][$method]["requestBody"]["content"] = array (
           "application/json" => array ( "schema" => $requests),
@@ -1043,22 +1043,22 @@ function debug_api_export ( $buffer, $parameters)
       }
       if ( $method == "post")
       {
-        $paths[$newpath][$method]["responses"]["201"] = array ( "description" => __ ( "Object successfully created."), "headers" => array ( "Location" => array ( "schema" => array ( "type" => "string"), "description" => __ ( "The URL location of the created object."))));
+        $paths[$newpath][$method]["responses"]["201"] = array ( "description" => __ ( "Object created successfully."), "headers" => array ( "Location" => array ( "schema" => array ( "type" => "string"), "description" => __ ( "The URL location of the created object."))));
       }
       if ( $method == "delete")
       {
-        $paths[$newpath][$method]["responses"]["204"] = array ( "description" => __ ( "Object successfully removed."));
+        $paths[$newpath][$method]["responses"]["204"] = array ( "description" => __ ( "Object removed successfully."));
       }
       $paths[$newpath][$method]["responses"]["400"] = array ( "description" => __ ( "Object not found."));
       $paths[$newpath][$method]["responses"]["401"] = array ( "description" => __ ( "Invalid authentication used."));
-      $paths[$newpath][$method]["responses"]["403"] = array ( "description" => __ ( "Access privileges doesn't fit request."));
+      $paths[$newpath][$method]["responses"]["403"] = array ( "description" => __ ( "Access privileges do not match the request."));
       $paths[$newpath][$method]["responses"]["404"] = array ( "description" => __ ( "Requested endpoint not found."));
       $paths[$newpath][$method]["responses"]["405"] = array ( "description" => __ ( "Method not allowed to requested path. See `Allow` response header for valid methods."));
       $paths[$newpath][$method]["responses"]["406"] = array ( "description" => __ ( "Invalid response parameters content type."));
       $paths[$newpath][$method]["responses"]["415"] = array ( "description" => __ ( "Invalid parameters content type."));
       if ( $method == "post")
       {
-        $paths[$newpath][$method]["responses"]["422"] = array ( "description" => __ ( "Error processing object creating parameters."));
+        $paths[$newpath][$method]["responses"]["422"] = array ( "description" => __ ( "Error processing object creation parameters."));
       }
       $paths[$newpath][$method]["responses"]["500"] = array ( "description" => __ ( "Internal server error."));
       $paths[$newpath][$method]["responses"]["503"] = array ( "description" => __ ( "Internal server communication error."));
@@ -1128,7 +1128,7 @@ function debug_api_export ( $buffer, $parameters)
     $data["info"] = array ();
     $data["info"]["title"] = "VoIP Domain";
     $data["info"]["version"] = $_in["version"];
-    $data["info"]["description"] = __ ( "This is the VoIP Domain REST API documentation. You can find more about VoIP Domain at [https://voipdomain.io/](https://voipdomain.io/). You can always access this documentation at your local VoIP Domain installation, logged into system or importing this Swagger documentation json file to an external viewer.") . "<br /><br />**" . __ ( "Definitions") . "**<br /><br />" . __ ( "*Variables*: All variables will be [UpperCamelCase](https://en.wikipedia.org/wiki/CamelCase) (also knows as PascalCase);<br />*Date/Time*: The date and time values will **always** be in GMT-0 using ISO-8601 format \"YYYY-MM-DD'T'HH:MM:SS'Z'\", with milliseconds optional (.sss after seconds) (you need to convert to your localtime).", false, false) . "<br /><br />**" . __ ( "Languages") . "**<br /><br />" . __ ( "This documentation is available in the following languages:") . "<br />" . $languages;
+    $data["info"]["description"] = __ ( "This is the VoIP Domain REST API documentation. You can find more about VoIP Domain at [https://voipdomain.io/](https://voipdomain.io/). You can always access this documentation at your local VoIP Domain installation, logged into the system or importing this Swagger documentation json file to an external viewer.") . "<br /><br />**" . __ ( "Definitions") . "**<br /><br />" . __ ( "*Variables*: All variables will be [UpperCamelCase](https://en.wikipedia.org/wiki/CamelCase) (also known as PascalCase);<br />*Date/Time*: The date and time values will **always** be in GMT-0 using ISO-8601 format \"YYYY-MM-DD'T'HH:MM:SS'Z'\", with milliseconds optional (.sss after seconds) (you need to convert to your localtime).", false, false) . "<br /><br />**" . __ ( "Languages") . "**<br /><br />" . __ ( "This documentation is available in the following languages:") . "<br />" . $languages;
     $data["info"]["version"] = $_in["version"];
     $data["info"]["termsOfService"] = "https://voipdomain.io/terms";
     $data["info"]["contact"] = array ( "name" => "Ernani José Camargo Azevedo", "url" => "https://voipdomain.io/", "email" => "azevedo@voipdomain.io");
@@ -1278,7 +1278,7 @@ function format_parameters ( $parameters, $in = "query")
     $result["required"] = true;
   }
 
-  // Proccess typed or subschema:
+  // Process typed or subschema:
   if ( array_key_exists ( "schema", $parameters) && ! array_key_exists ( "type", $parameters))
   {
     $result["schema"] = format_schema ( $parameters["schema"]);

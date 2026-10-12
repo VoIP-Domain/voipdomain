@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Tellows Score
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -57,16 +57,16 @@ i18n_add ( "Inactive");
  */
 i18n_add ( "Tellows Score system global configuration variables.", "Variáveis globais do Tellows Score para configurações do sistema.", "pt_BR");
 i18n_add ( "Tellows API MD5 key.", "Chave da API Tellows em formato MD5.", "pt_BR");
-i18n_add ( "If the system should drop calls with score equal or higher than the Score variable value.", "Se o sistema deve descartar ligações com escore igual ou superior ao valor da variável Score.", "pt_BR");
-i18n_add ( "If selected to drop calls based on score, set the minimum score to drop. Recommended value is 9.", "Se habilitado para descartar ligações baseadas no escore, configura o escore mínimo para descarte. Recomendado valor de 9.", "pt_BR");
+i18n_add ( "If the system should drop calls with score equal or higher than the Score variable value.", "Se o sistema deve descartar ligações com pontuação igual ou superior ao valor da variável Score.", "pt_BR");
+i18n_add ( "If selected to drop calls based on score, set the minimum score to drop. Recommended value is 9.", "Se habilitado para descartar ligações com base na pontuação, define a pontuação mínima para descarte. Valor recomendado: 9.", "pt_BR");
 i18n_add ( "Invalid Tellows MD5 key.", "Chave MD5 do Tellows inválida.", "pt_BR");
 i18n_add ( "Tellows AntiSpam cannot be enabled without a valid key.", "O AntiSpam do Tellows não pode ser habilitado sem uma chave válida.", "pt_BR");
-i18n_add ( "Tellows score must be between 6 and 10.", "O escore do Tellows deve ser entre 6 e 10.", "pt_BR");
-i18n_add ( "Tellows Score", "Escore Tellows", "pt_BR");
+i18n_add ( "Tellows score must be between 6 and 10.", "A pontuação do Tellows deve estar entre 6 e 10.", "pt_BR");
+i18n_add ( "Tellows Score", "Pontuação Tellows", "pt_BR");
 i18n_add ( "API Key (MD5)", "Chave API (MD5)", "pt_BR");
 i18n_add ( "Tellows API key in MD5 format", "Chave da API do Tellows em formato MD5", "pt_BR");
 i18n_add ( "Anti-spam", "Anti-spam", "pt_BR");
-i18n_add ( "Minimum score", "Escore mínimo", "pt_BR");
+i18n_add ( "Minimum score", "Pontuação mínima", "pt_BR");
 i18n_add ( "Active", "Ativo", "pt_BR");
 i18n_add ( "Inactive", "Inativo", "pt_BR");
 ?>

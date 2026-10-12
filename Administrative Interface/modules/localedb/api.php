@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage LocaleDB
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -86,7 +86,7 @@ framework_add_hook (
               ),
               "NameEN" => array (
                 "type" => "string",
-                "description" => __ ( "The original english description of the locale."),
+                "description" => __ ( "The original English description of the locale."),
                 "example" => "English (United States)"
               )
             )
@@ -94,14 +94,14 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Fields" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -165,7 +165,7 @@ function locales_search ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
 
   /**
@@ -219,7 +219,7 @@ function locales_search ( $buffer, $parameters)
   while ( $result = $results->fetch_assoc ())
   {
     $result["NameEN"] = $result["Name"];
-    $result["Name"] = ( array_key_exists ( $result["Code"], $_in["locales"][$_in["general"]["language"]]) ? $_in["locales"][$_in["general"]["language"]][$result["Code"]] : $result["Name"]);
+    $result["Name"] = ( isset ( $_in["locales"][$_in["general"]["language"]]) && is_array ( $_in["locales"][$_in["general"]["language"]]) && array_key_exists ( $result["Code"], $_in["locales"][$_in["general"]["language"]]) ? $_in["locales"][$_in["general"]["language"]][$result["Code"]] : $result["Name"]);
     $data[] = api_filter_entry ( $fields, $result);
   }
 
@@ -279,14 +279,14 @@ framework_add_hook (
             ),
             "NameEN" => array (
               "type" => "string",
-              "description" => __ ( "The original english description of the locale."),
+              "description" => __ ( "The original English description of the locale."),
               "example" => "English (United States)"
             )
           )
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -309,7 +309,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "User", "Administrator", "Super-Administrator", "Token", "locales_view"),
     "title" => __ ( "View locales"),
-    "description" => __ ( "Get a locale information."),
+    "description" => __ ( "Get locale information."),
     "parameters" => array (
       array (
         "name" => "Code",
@@ -399,7 +399,7 @@ function locales_view ( $buffer, $parameters)
     exit ();
   }
   $data["NameEN"] = $data["Name"];
-  $data["Name"] = ( array_key_exists ( $data["Code"], $_in["locales"][$_in["general"]["language"]]) ? $_in["locales"][$_in["general"]["language"]][$data["Code"]] : $data["NameEN"]);
+  $data["Name"] = ( isset ( $_in["locales"][$_in["general"]["language"]]) && is_array ( $_in["locales"][$_in["general"]["language"]]) && array_key_exists ( $data["Code"], $_in["locales"][$_in["general"]["language"]]) ? $_in["locales"][$_in["general"]["language"]][$data["Code"]] : $data["NameEN"]);
 
   /**
    * Call post hook if exist

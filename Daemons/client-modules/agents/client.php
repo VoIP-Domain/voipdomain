@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Agents
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "agent_add", "agent_add");
 framework_add_hook ( "agent_change", "agent_change");
@@ -140,7 +140,7 @@ function agent_add ( $buffer, $parameters)
   {
     if ( ! check_overwrite ())
     {
-      return array ( "code" => 400, "message" => "Agent already exist.");
+      return array ( "code" => 400, "message" => "Agent already exists.");
     } else {
       $overwritten = true;
     }
@@ -304,7 +304,7 @@ function agent_change ( $buffer, $parameters)
   // Verify if new agent exist
   if ( $parameters["Code"] != $parameters["NewCode"] && check_config ( "config", "agent-" . $parameters["NewCode"]))
   {
-    return array ( "code" => 409, "message" => "Agent new code already exist.");
+    return array ( "code" => 409, "message" => "Agent new code already exists.");
   }
 
   // Remove agent files
@@ -494,12 +494,18 @@ function agent_wipe ( $buffer, $parameters)
     framework_call ( "agent_wipe_pre", $parameters, false, true);
   }
 
-  // Remove all files
+  // Remove all config files by glob pattern
+  foreach ( list_config ( "config", "agent-*") as $filename)
+  {
+    unlink_config ( "config", $filename);
+  }
+  foreach ( list_config ( "configdb", "agent-*") as $filename)
+  {
+    unlink_config ( "configdb", $filename);
+  }
+  // Remove all datafiles
   foreach ( list_config ( "datafile", "agent") as $filename)
   {
-    $entryid = substr ( $filename, strrpos ( $filename, "-") + 1);
-    unlink_config ( "config", "agent-" . $entryid);
-    unlink_config ( "configdb", "agent-" . $entryid);
     unlink_config ( "datafile", $filename);
   }
 

@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Extensions IVRs
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "extension_ivr_add", "extension_ivr_add");
 framework_add_hook ( "extension_ivr_change", "extension_ivr_change");
@@ -90,7 +90,7 @@ function extension_ivr_add ( $buffer, $parameters)
   {
     $data["IVR"] = "Missing parameter";
   }
-  if ( ! array_key_exists ( "IVR", $data) && ! preg_match ( "/^a-z0-9\-\.]$/", $parameters["Name"]))
+  if ( ! array_key_exists ( "IVR", $data) && ! preg_match ( "/^[a-z0-9\-\.]+$/", $parameters["IVR"]))
   {
     $data["IVR"] = "Invalid content";
   }
@@ -143,7 +143,7 @@ function extension_ivr_add ( $buffer, $parameters)
   // Write extension IVR file
   $ivr = "exten => " . $parameters["Number"] . ",1,Verbose(1,\${STRFTIME(\${EPOCH},,%c)}: New call from \${CALLERID(num)} to \${EXTEN} (IVR: " . $parameters["IVR"] . "))\n" .
          " same => n,Set(CDR(userfield)=ivr)\n" .
-         " same => n,GoTo(vd_ivr_" . $parameters["IVR"] . ")\n";
+         " same => n,GoTo(vd_ivr_" . $parameters["IVR"] . ",\${EXTEN},1)\n";
   if ( ! write_config ( "config", "dialplan-extension-" . $parameters["Number"], $ivr))
   {
     return array ( "code" => 500, "message" => "Error writing file.");
@@ -234,7 +234,7 @@ function extension_ivr_change ( $buffer, $parameters)
   {
     $data["IVR"] = "Missing parameter";
   }
-  if ( ! array_key_exists ( "IVR", $data) && ! preg_match ( "/^a-z0-9\-\.]$/", $parameters["Name"]))
+  if ( ! array_key_exists ( "IVR", $data) && ! preg_match ( "/^[a-z0-9\-\.]+$/", $parameters["IVR"]))
   {
     $data["IVR"] = "Invalid content";
   }
@@ -280,7 +280,7 @@ function extension_ivr_change ( $buffer, $parameters)
   // Verify if new extension IVR number is in use
   if ( $parameters["Number"] != $parameters["NewNumber"] && check_config ( "config", "dialplan-extension-" . $parameters["NewNumber"]))
   {
-    return array ( "code" => 409, "message" => "New number already exist.");
+    return array ( "code" => 409, "message" => "New number already exists.");
   }
 
   // Remove extension IVR files
@@ -292,7 +292,7 @@ function extension_ivr_change ( $buffer, $parameters)
   // Write extension IVR file
   $ivr = "exten => " . $parameters["NewNumber"] . ",1,Verbose(1,\${STRFTIME(\${EPOCH},,%c)}: New call from \${CALLERID(num)} to \${EXTEN} (IVR: " . $parameters["IVR"] . "))\n" .
          " same => n,Set(CDR(userfield)=ivr)\n" .
-         " same => n,GoTo(vd_ivr_" . $parameters["IVR"] . ")\n";
+         " same => n,GoTo(vd_ivr_" . $parameters["IVR"] . ",\${EXTEN},1)\n";
   if ( ! write_config ( "config", "dialplan-extension-" . $parameters["NewNumber"], $ivr))
   {
     return array ( "code" => 500, "message" => "Error writing file.");

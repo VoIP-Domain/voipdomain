@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Queues
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -51,16 +51,16 @@ i18n_add ( "Are you sure you want to remove the queue %s (%s)?");
 i18n_add ( "Queue removal");
 i18n_add ( "Queue removed successfully!");
 i18n_add ( "Error removing queue!");
-i18n_add ( "queues addition");
+i18n_add ( "Add queues");
 i18n_add ( "Queue description");
-i18n_add ( "Queue addition");
+i18n_add ( "Add queue");
 i18n_add ( "Error adding queue!");
 i18n_add ( "Queue added successfully!");
-i18n_add ( "queues visualization");
+i18n_add ( "View queues");
 i18n_add ( "Queue view");
 i18n_add ( "Error viewing queue!");
-i18n_add ( "queues editing");
-i18n_add ( "Queue edition");
+i18n_add ( "Edit queues");
+i18n_add ( "Edit queue");
 i18n_add ( "Error retrieving queue data!");
 i18n_add ( "Error changing queue!");
 i18n_add ( "Queue changed successfully!");
@@ -101,28 +101,28 @@ i18n_add ( "Search for system queues.");
 i18n_add ( "An object containing information about the queue.");
 i18n_add ( "The ring strategy description of the queue in English.");
 i18n_add ( "View queues");
-i18n_add ( "Get a queue information.");
+i18n_add ( "Get queue information.");
 i18n_add ( "The queue internal system unique identifier.");
-i18n_add ( "New queue added successfully.");
+i18n_add ( "A new queue was added successfully.");
 i18n_add ( "Add a new queue.");
 i18n_add ( "The queue was successfully updated.");
 i18n_add ( "Change queue information.");
 i18n_add ( "The queue was removed.");
-i18n_add ( "Remove a queue from system.");
+i18n_add ( "Remove a queue from the system.");
 i18n_add ( "The agent was successfully added to the queue.");
 i18n_add ( "Join a system agent member to a queue.");
 i18n_add ( "The agent internal system unique identifier.");
 i18n_add ( "The agent was successfully removed from the queue.");
 i18n_add ( "Remove member from queues");
 i18n_add ( "Remove a system agent member from a queue.");
-i18n_add ( "The agent was successfully paused at the queue.");
-i18n_add ( "Pause member at queues");
-i18n_add ( "Pause a system agent member at a queue.");
-i18n_add ( "The agent was successfully resumed at the queue.");
-i18n_add ( "Resume a paused member at queues");
-i18n_add ( "Resume a paused system agent member at a queue.");
+i18n_add ( "The agent was successfully paused in the queue.");
+i18n_add ( "Pause member in queues");
+i18n_add ( "Pause a system agent member in a queue.");
+i18n_add ( "The agent was successfully resumed in the queue.");
+i18n_add ( "Resume a paused member in queues");
+i18n_add ( "Resume a paused system agent member in a queue.");
 i18n_add ( "Invalid queue ID.");
-i18n_add ( "Queue cloning");
+i18n_add ( "Clone queue");
 
 /**
  * Add Brazilian Portuguese support
@@ -135,23 +135,23 @@ i18n_add ( "Edit queues", "Editar filas", "pt_BR");
 i18n_add ( "Remove queues", "Remover filas", "pt_BR");
 i18n_add ( "Queues", "Filas", "pt_BR");
 i18n_add ( "Queue", "Fila", "pt_BR");
-i18n_add ( "queues search", "pesquisa de filas", "pt_BR");
+i18n_add ( "queues search", "Pesquisar filas", "pt_BR");
 i18n_add ( "Remove queue", "Remover fila", "pt_BR");
-i18n_add ( "Are you sure you want to remove the queue %s (%s)?", "Você tem certeza que deseja remover a fila %s (%s)?", "pt_BR");
-i18n_add ( "Queue removal", "Remoção de fila", "pt_BR");
+i18n_add ( "Are you sure you want to remove the queue %s (%s)?", "Você tem certeza de que deseja remover a fila %s (%s)?", "pt_BR");
+i18n_add ( "Queue removal", "Remover fila", "pt_BR");
 i18n_add ( "Queue removed successfully!", "Fila removida com sucesso!", "pt_BR");
 i18n_add ( "Error removing queue!", "Erro ao remover fila!", "pt_BR");
-i18n_add ( "queues addition", "adição de filas", "pt_BR");
+i18n_add ( "Add queues", "adicionar filas", "pt_BR");
 i18n_add ( "Queue description", "Descrição da fila", "pt_BR");
-i18n_add ( "Queue addition", "Adição de fila", "pt_BR");
+i18n_add ( "Add queue", "Adicionar fila", "pt_BR");
 i18n_add ( "Error adding queue!", "Erro ao adicionar fila!", "pt_BR");
 i18n_add ( "Queue added successfully!", "Fila adicionada com sucesso!", "pt_BR");
-i18n_add ( "queues visualization", "visualização de filas", "pt_BR");
-i18n_add ( "Queue view", "Visualização de fila", "pt_BR");
+i18n_add ( "View queues", "visualizar filas", "pt_BR");
+i18n_add ( "Queue view", "Visualizar fila", "pt_BR");
 i18n_add ( "Error viewing queue!", "Erro ao visualizar fila!", "pt_BR");
-i18n_add ( "queues editing", "edição de filas", "pt_BR");
-i18n_add ( "Queue edition", "Edição de fila", "pt_BR");
-i18n_add ( "Error retrieving queue data!", "Erro ao requisitar dados da fila!", "pt_BR");
+i18n_add ( "Edit queues", "editar filas", "pt_BR");
+i18n_add ( "Edit queue", "Editar fila", "pt_BR");
+i18n_add ( "Error retrieving queue data!", "Erro ao obter dados da fila!", "pt_BR");
 i18n_add ( "Error changing queue!", "Erro ao alterar fila!", "pt_BR");
 i18n_add ( "Queue changed successfully!", "Fila alterada com sucesso!", "pt_BR");
 i18n_add ( "The provided queue doesn't exist.", "A fila informada não existe.", "pt_BR");
@@ -178,7 +178,7 @@ i18n_add ( "Join member to queues", "Incluir membros em filas", "pt_BR");
 i18n_add ( "Member leave from queues", "Remover membros de filas", "pt_BR");
 i18n_add ( "Member pause from queues", "Pausar membros em filas", "pt_BR");
 i18n_add ( "Member resume from queues", "Resumir membros em filas", "pt_BR");
-i18n_add ( "Filter search with this string. If not provided, return all queues.", "Filtrar a pesquisa com esta string. Se não informado, retorna todas as filas.", "pt_BR");
+i18n_add ( "Filter search with this string. If not provided, return all queues.", "Filtrar a pesquisa com esta string. Se omitido, retorna todas as filas.", "pt_BR");
 i18n_add ( "An array containing the system queues.", "Um array contendo todas filas do sistema.", "pt_BR");
 i18n_add ( "The internal unique identification number of the queue.", "O número de identificação único interno da fila.", "pt_BR");
 i18n_add ( "The description of the queue.", "A descrição da fila.", "pt_BR");
@@ -191,26 +191,26 @@ i18n_add ( "Search for system queues.", "Pesquisar por filas do sistema.", "pt_B
 i18n_add ( "An object containing information about the queue.", "Um objeto contendo informações sobre a fila.", "pt_BR");
 i18n_add ( "The ring strategy description of the queue in English.", "A descrição da estratégia de toque da fila em inglês.", "pt_BR");
 i18n_add ( "View queues", "Visualizar filas", "pt_BR");
-i18n_add ( "Get a queue information.", "Requisitar informações de fila.", "pt_BR");
+i18n_add ( "Get queue information.", "Obter informações da fila.", "pt_BR");
 i18n_add ( "The queue internal system unique identifier.", "O identificador interno único da fila.", "pt_BR");
-i18n_add ( "New queue added successfully.", "Nova fila adicionada com sucesso.", "pt_BR");
+i18n_add ( "A new queue was added successfully.", "Uma nova fila foi adicionada com sucesso.", "pt_BR");
 i18n_add ( "Add a new queue.", "Adicionar uma nova fila.", "pt_BR");
 i18n_add ( "The queue was successfully updated.", "A fila foi atualizada com sucesso.", "pt_BR");
 i18n_add ( "Change queue information.", "Alterar informações de uma fila.", "pt_BR");
 i18n_add ( "The queue was removed.", "A fila foi removida.", "pt_BR");
-i18n_add ( "Remove a queue from system.", "Remover uma fila do sistema.", "pt_BR");
+i18n_add ( "Remove a queue from the system.", "Remover uma fila do sistema.", "pt_BR");
 i18n_add ( "The agent was successfully added to the queue.", "O agente foi adicionado com sucesso à fila.", "pt_BR");
 i18n_add ( "Join a system agent member to a queue.", "Inserir um agente do sistema em uma fila.", "pt_BR");
 i18n_add ( "The agent internal system unique identifier.", "O identificador único do agente no sistema.", "pt_BR");
 i18n_add ( "The agent was successfully removed from the queue.", "O agente foi removido com sucesso da fila.", "pt_BR");
 i18n_add ( "Remove member from queues", "Remover membros de filas", "pt_BR");
 i18n_add ( "Remove a system agent member from a queue.", "Remover um agente do sistema de uma fila.", "pt_BR");
-i18n_add ( "The agent was successfully paused at the queue.", "O agente foi pausado com sucesso na fila.", "pt_BR");
-i18n_add ( "Pause member at queues", "Pausar um membro nas filas", "pt_BR");
-i18n_add ( "Pause a system agent member at a queue.", "Pausar um membro do sistema de uma fila.", "pt_BR");
-i18n_add ( "The agent was successfully resumed at the queue.", "O agente foi retornado com sucesso à fila.", "pt_BR");
-i18n_add ( "Resume a paused member at queues", "Retornar de pausa um membro nas filas", "pt_BR");
-i18n_add ( "Resume a paused system agent member at a queue.", "Remover a pausa de um agente do sistema em uma fila.", "pt_BR");
+i18n_add ( "The agent was successfully paused in the queue.", "O agente foi pausado com sucesso na fila.", "pt_BR");
+i18n_add ( "Pause member in queues", "Pausar um membro nas filas", "pt_BR");
+i18n_add ( "Pause a system agent member in a queue.", "Pausar um membro do sistema de uma fila.", "pt_BR");
+i18n_add ( "The agent was successfully resumed in the queue.", "O agente foi retornado com sucesso à fila.", "pt_BR");
+i18n_add ( "Resume a paused member in queues", "Retornar de pausa um membro nas filas", "pt_BR");
+i18n_add ( "Resume a paused system agent member in a queue.", "Remover a pausa de um agente do sistema em uma fila.", "pt_BR");
 i18n_add ( "Invalid queue ID.", "ID de fila inválido.", "pt_BR");
-i18n_add ( "Queue cloning", "Clonagem de fila", "pt_BR");
+i18n_add ( "Clone queue", "Clonar fila", "pt_BR");
 ?>

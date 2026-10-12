@@ -1,0 +1,11 @@
+[Unit]
+Description=VoIP Domain %i daemon reload trigger
+After=voipdomain-%i.service
+PartOf=voipdomain-%i.service
+
+[Path]
+PathExists=/run/voipdomain/reload/%i
+Unit=voipdomain-daemon-reload@%i.service
+
+[Install]
+WantedBy=voipdomain-%i.service

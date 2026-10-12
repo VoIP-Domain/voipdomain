@@ -8,7 +8,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage AMI Interface
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -477,9 +477,10 @@ while ( true)
   /**
    * Read stdin
    */
+  $r = array ( STDIN);
   $w = NULL;
   $e = NULL;
-  $n = stream_select ( $r = array ( STDIN), $w, $e, 0, 0);
+  $n = stream_select ( $r, $w, $e, 0, 0);
   if ( $n && in_array ( STDIN, $r))
   {
     // read a character, will call the callback when a newline is entered

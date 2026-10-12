@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments Fanvil
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -45,5 +45,5 @@ if ( ! array_key_exists ( "vendors", $_in["equipments"]))
 {
   $_in["equipments"]["vendors"] = array ();
 }
-$_in["equipments"]["vendors"]["Fanvil"] = array ( "X1SP", "X3SP");
+$_in["equipments"]["vendors"]["Fanvil"] = array ( "x1sp", "x3sp");
 ?>

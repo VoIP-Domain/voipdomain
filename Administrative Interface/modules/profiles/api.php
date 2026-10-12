@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Profiles
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -109,14 +109,14 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
             "Fields" => array (
               "type" => "string",
               "description" => __ ( "The text description of this field error."),
-              "example" => __ ( "Fields contains invalid values.")
+              "example" => __ ( "Fields contain invalid values.")
             )
           )
         )
@@ -180,7 +180,7 @@ function profiles_search ( $buffer, $parameters)
   }
   if ( ! api_filter_validate ( $parameters["Fields"], $parameters["function"]["PermittedFields"]))
   {
-    $data["Fields"] = __ ( "Fields contains invalid values.");
+    $data["Fields"] = __ ( "Fields contain invalid values.");
   }
 
   /**
@@ -293,7 +293,7 @@ framework_add_hook (
                 ),
                 "NameEN" => array (
                   "type" => "string",
-                  "description" => __ ( "The english name of the country."),
+                  "description" => __ ( "The English name of the country."),
                   "example" => "United States of America"
                 ),
                 "Name" => array (
@@ -451,7 +451,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -474,7 +474,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "profiles_view"),
     "title" => __ ( "View profiles"),
-    "description" => __ ( "Get a profile information."),
+    "description" => __ ( "Get profile information."),
     "parameters" => array (
       array (
         "name" => "ID",
@@ -719,10 +719,10 @@ framework_add_hook (
     ),
     "response" => array (
       201 => array (
-        "description" => __ ( "New system profile added successfully.")
+        "description" => __ ( "A new system profile was added successfully.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -840,11 +840,15 @@ function profiles_add ( $buffer, $parameters)
   {
     $data["TimeZone"] = __ ( "The profile time zone is invalid.");
   }
-  if ( empty ( $parameters["Offset"]))
+  if ( ! array_key_exists ( "TimeZone", $data))
+  {
+    voipdomain_timezonepicker_apply_parameters ( $parameters);
+  }
+  if ( ! array_key_exists ( "Offset", $data) && ( ! isset ( $parameters["Offset"]) || $parameters["Offset"] === ""))
   {
     $data["Offset"] = __ ( "The profile time offset is required.");
   }
-  if ( ! array_key_exists ( "Offset", $data) && ( $parameters["Offset"] < -13 || $parameters["Offset"] > 13))
+  if ( ! array_key_exists ( "Offset", $data) && ( $parameters["Offset"] < -12 || $parameters["Offset"] > 14))
   {
     $data["Offset"] = __ ( "The profile time offset is invalid.");
   }
@@ -1072,7 +1076,7 @@ function profiles_add ( $buffer, $parameters)
    * Return OK to user
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: " . $_in["api"]["baseurl"] . "/profiles/" . $parameters["ID"]);
+  header ( "Location: " . voipdomain_location_url ( "/api/profiles/" . $parameters["ID"]));
   return array_merge_recursive ( ( is_array ( $buffer) ? $buffer : array ()), $data);
 }
 
@@ -1186,7 +1190,7 @@ framework_add_hook (
         "description" => __ ( "The system profile was successfully updated.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1249,7 +1253,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "profiles_edit"),
     "title" => __ ( "Edit profiles"),
-    "description" => __ ( "Change a system profile information.")
+    "description" => __ ( "Change system profile information.")
   )
 );
 
@@ -1304,11 +1308,15 @@ function profiles_edit ( $buffer, $parameters)
   {
     $data["TimeZone"] = __ ( "The profile time zone is invalid.");
   }
-  if ( empty ( $parameters["Offset"]))
+  if ( ! array_key_exists ( "TimeZone", $data))
+  {
+    voipdomain_timezonepicker_apply_parameters ( $parameters);
+  }
+  if ( ! array_key_exists ( "Offset", $data) && ( ! isset ( $parameters["Offset"]) || $parameters["Offset"] === ""))
   {
     $data["Offset"] = __ ( "The profile time offset is required.");
   }
-  if ( ! array_key_exists ( "Offset", $data) && ( $parameters["Offset"] < -13 || $parameters["Offset"] > 13))
+  if ( ! array_key_exists ( "Offset", $data) && ( $parameters["Offset"] < -12 || $parameters["Offset"] > 14))
   {
     $data["Offset"] = __ ( "The profile time offset is invalid.");
   }
@@ -1529,7 +1537,7 @@ function profiles_edit ( $buffer, $parameters)
   {
     $notify = framework_call ( "profiles_edit_notify", $parameters, false, $notify);
   }
-  notify_server ( 0, "profile_edit", $notify);
+  notify_server ( 0, "profile_change", $notify);
 
   /**
    * Execute finish hook if exist
@@ -1558,7 +1566,7 @@ framework_add_hook (
         "description" => __ ( "The system profile was removed.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -1581,7 +1589,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "Administrator", "profiles_remove"),
     "title" => __ ( "Remove profiles"),
-    "description" => __ ( "Remove a profile from system.")
+    "description" => __ ( "Remove a profile from the system.")
   )
 );
 
@@ -1722,7 +1730,7 @@ function profiles_remove ( $buffer, $parameters)
  * API call to intercept new server and server rebuild
  */
 framework_add_hook ( "servers_add_post", "profiles_server_reconfig");
-framework_add_hook ( "servers_rebuild_config", "profiles_server_reconfig");
+framework_add_hook_at ( "servers_rebuild_config", "profiles_server_reconfig", "groups_server_reconfig", IN_HOOK_INSERT_AFTER);
 
 /**
  * Function to notify server to include all profiles.

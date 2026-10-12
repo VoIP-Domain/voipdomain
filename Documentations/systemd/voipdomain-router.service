@@ -3,7 +3,8 @@ Description=VoIP Domain Message Router Service
 After=rc-local.service
 
 [Service]
-ExecStart=/usr/libexec/voipdomain/daemons/router.php -d
+ExecStart=/var/lib/voipdomain/daemons/router.php -d
+ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 TimeoutStopSec=3
 Restart=always

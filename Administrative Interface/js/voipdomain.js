@@ -6,7 +6,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Core
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -838,7 +838,7 @@ var VoIP = ( function ()
      */
     VoIP.rest ( options.path, options.route, options.data).done ( function ( data, textStatus, jqXHR)
     {
-      if ( data.length == 0)
+      if ( ! data || ! Array.isArray ( data) || data.length == 0)
       {
         dt.clear ();
         dt.rows.add ( data);
@@ -972,10 +972,16 @@ var VoIP = ( function ()
                    if ( this.type == 'POST' && this.headers['X-HTTP-Method-Override'] == 'GET')
                    {
                      var cachekey = this.url + ( this.data ? this.data : '');
-                     if ( jqXHR.status == '304')
+                     if ( jqXHR.status == '304' || ( ! data && cache[cachekey] && cache[cachekey]['Data'] !== undefined))
                      {
-                       data = cache[cachekey]['Data'];
-                       console.log ( 'Cached data used on request.');
+                       if ( cache[cachekey] && cache[cachekey]['Data'] !== undefined)
+                       {
+                         data = cache[cachekey]['Data'];
+                         console.log ( 'Cached data used on request.');
+                       } else {
+                         data = [];
+                         console.log ( 'Cache miss on 304 response - returning empty array.');
+                       }
                      }
                      if ( jqXHR.status == '200' && jqXHR.getResponseHeader ( 'Last-Modified'))
                      {
@@ -984,6 +990,12 @@ var VoIP = ( function ()
                        cache[cachekey]['DateTime'] = jqXHR.getResponseHeader ( 'Last-Modified');
                        console.log ( 'Request cached.');
                      }
+                   }
+
+                   // Ensure data is never undefined
+                   if ( data === undefined || data === null)
+                   {
+                     data = [];
                    }
 
                    result = {
@@ -1040,9 +1052,12 @@ var VoIP = ( function ()
     }
 
     /**
-     * Asynchronous call
+     * Asynchronous call with cache support
      */
-    return $.ajax (
+    var deferred = $.Deferred ();
+    var cachekey = apiurl + path + ( data ? JSON.stringify ( data) : '');
+    
+    var xhr = $.ajax (
     {
       type: 'POST',
       url: apiurl + path,
@@ -1082,28 +1097,38 @@ var VoIP = ( function ()
                {
                  document.dump_vd_debug ( { endpoint: path, route: route, data: data, sentHeaders: sentHeaders, result: { result: jsonresult, API: { status: 'error', content: jqXHR.responseText, statusCode: jqXHR.statusCode ().status, statusText: jqXHR.statusCode ().statusText, headers: jqXHR.getAllResponseHeaders ()}}});
                }
+               deferred.reject ( jqXHR, textStatus, errorThrown);
              }
-    }).then ( function ( data, statusText, jqXHR)
+    });
+    xhr.done ( function ( responseData, statusText, jqXHR)
     {
-      if ( this.type == 'POST' && this.headers['X-HTTP-Method-Override'] == 'GET')
+      var finalData = responseData;
+      
+      if ( myheaders['X-HTTP-Method-Override'] == 'GET')
       {
-        var cachekey = this.url + ( this.data ? this.data : '');
-        if ( jqXHR.status == '304')
+        if ( jqXHR.status == 304 || ( ! finalData && cache[cachekey] && cache[cachekey]['Data'] !== undefined))
         {
-          data = cache[cachekey]['Data'];
+          finalData = cache[cachekey]['Data'];
           console.log ( 'Cached data used on request.');
         }
-        if ( jqXHR.status == '200' && jqXHR.getResponseHeader ( 'Last-Modified'))
+        if ( jqXHR.status == 200 && jqXHR.getResponseHeader ( 'Last-Modified'))
         {
           cache[cachekey] = new Array ();
-          cache[cachekey]['Data'] = data;
+          cache[cachekey]['Data'] = finalData;
           cache[cachekey]['DateTime'] = jqXHR.getResponseHeader ( 'Last-Modified');
           console.log ( 'Request cached.');
         }
       }
-
-      return data;
+      
+      // Ensure we always have a valid data object (empty array if nothing)
+      if ( finalData === undefined || finalData === null)
+      {
+        finalData = [];
+      }
+      
+      deferred.resolve ( finalData, statusText, jqXHR);
     });
+    return deferred.promise ();
   }
 
   /**
@@ -1777,6 +1802,19 @@ function format_secs_to_string ( time)
 }
 
 /**
+ * Correct rounding for toFixed() across browsers (avoids IE 0.55 -> 0 bug).
+ *
+ * @param {number} number Number to format
+ * @param {number} precision Decimal places
+ * @return {string} Fixed-point string
+ */
+function voipdomain_toFixed ( number, precision)
+{
+  var k = Math.pow ( 10, precision);
+  return ( Math.round ( number * k) / k).toFixed ( precision);
+}
+
+/**
  * sprintf() JS implementation
  * Source from: http://locutus.io/php/strings/sprintf/
  */
@@ -1953,7 +1991,7 @@ function sprintf () {
         return justify(value, prefix, leftJustify, minWidth, padChar)
       case 'e':
       case 'E':
-      case 'f': // @todo: Should handle locales (as per setlocale)
+      case 'f':
       case 'F':
       case 'g':
       case 'G':
@@ -1961,7 +1999,12 @@ function sprintf () {
         prefix = number < 0 ? '-' : positiveNumberPrefix
         method = ['toExponential', 'toFixed', 'toPrecision']['efg'.indexOf(specifier.toLowerCase())]
         textTransform = ['toString', 'toUpperCase']['eEfFgG'.indexOf(specifier) % 2]
-        value = prefix + Math.abs(number)[method](precision)
+        if (method === 'toFixed') {
+          var fixedPrecision = (precision !== null && precision !== undefined && precision !== '') ? +precision : 0
+          value = prefix + voipdomain_toFixed(Math.abs(number), fixedPrecision)
+        } else {
+          value = prefix + Math.abs(number)[method](precision)
+        }
         return justify(value, prefix, leftJustify, minWidth, padChar)[textTransform]()
       default:
         // unknown specifier, consume that char and return empty
@@ -2040,14 +2083,7 @@ function number_format ( number, decimals, decPoint, thousandsSep)
   var dec = ( typeof decPoint === 'undefined') ? '.' : decPoint;
   var s = '';
 
-  var toFixedFix = function ( n, prec)
-  {
-    var k = Math.pow ( 10, prec);
-    return '' + ( Math.round ( n * k) / k).toFixed ( prec);
-  }
-
-  // @todo: for IE parseFloat(0.55).toFixed(0) = 0;
-  s = ( prec ? toFixedFix ( n, prec) : '' + Math.round ( n)).split ( '.');
+  s = ( prec ? voipdomain_toFixed ( n, prec) : '' + Math.round ( n)).split ( '.');
   if ( s[0].length > 3)
   {
     s[0] = s[0].replace ( /\B(?=(?:\d{3})+(?!\d))/g, sep);

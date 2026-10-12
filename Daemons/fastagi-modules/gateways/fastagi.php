@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,12 +30,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Asterisk FastAGI Agents Application
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * Update gateway list
+ * Update gateway list from local data files
  *
  * @global array $_in Framework global configuration variable
  * @return null
@@ -44,16 +44,27 @@ function update_gateways ()
 {
   global $_in;
 
-  if ( ! $_in["db"]["gateway"] || sizeof ( $_in["db"]["gateway"]) == 0)
+  if ( ! isset ( $_in["db"]["gateway"]) || ! is_array ( $_in["db"]["gateway"]) || sizeof ( $_in["db"]["gateway"]) == 0)
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `Gateways`"))
+    $_in["db"]["gateway"] = array ();
+    foreach ( list_config ( "datafile", "gateway") as $filename)
     {
-      writelog ( "Cannot fetch gateway list from database.", VoIP_LOG_WARNING);
-      return;
-    }
-    while ( $data = $result->fetch_assoc ())
-    {
+      $data = read_config ( "datafile", $filename);
+      if ( $data === false || ! is_array ( $data))
+      {
+        writeLog ( "Cannot read gateway data file: " . $filename, VoIP_LOG_WARNING);
+        continue;
+      }
+      if ( ! array_key_exists ( "ID", $data))
+      {
+        writeLog ( "Gateway data file missing ID: " . $filename, VoIP_LOG_WARNING);
+        continue;
+      }
       $_in["db"]["gateway"][$data["ID"]] = $data;
+    }
+    if ( sizeof ( $_in["db"]["gateway"]) == 0)
+    {
+      writeLog ( "No gateways found in local data files.", VoIP_LOG_NOTICE);
     }
   }
 }

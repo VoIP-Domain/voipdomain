@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Authentication
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -60,7 +60,7 @@ i18n_add ( "Author");
 i18n_add ( "Enabled");
 i18n_add ( "Disabled");
 i18n_add ( "Error changing configurations!");
-i18n_add ( "Authentication successfully changed!");
+i18n_add ( "Authentication changed successfully!");
 i18n_add ( "Error retrieving configurations!");
 i18n_add ( "OR AUTHENTICATE USING");
 i18n_add ( "Username of the user to be authenticated.");
@@ -81,7 +81,7 @@ i18n_add ( "Tenant domain of the user to be authenticated. If omitted, the serve
 /**
  * Add Brazilian Portuguese support
  */
-i18n_add ( "An object containing system authentication information.", "Um objeto contento informações de autenticação do sistema.", "pt_BR");
+i18n_add ( "An object containing system authentication information.", "Um objeto contendo informações de autenticação do sistema.", "pt_BR");
 i18n_add ( "Whether the authentication endpoint is enabled.", "Se o endpoint de autenticação está habilitado.", "pt_BR");
 i18n_add ( "Background image for the authentication page.", "A imagem de fundo da página de autenticação.", "pt_BR");
 i18n_add ( "Whether the extension password may be used to authenticate the user.", "Se a senha da extensão será aceita para autenticar o usuário.", "pt_BR");
@@ -92,7 +92,7 @@ i18n_add ( "View system authentication information.", "Visualizar informações 
 i18n_add ( "System authentication updated successfully.", "Autenticação do sistema atualizada com sucesso.", "pt_BR");
 i18n_add ( "The provided status is not valid.", "O estado informado não é válido.", "pt_BR");
 i18n_add ( "The provided background is not valid.", "A imagem de fundo informada não é válida.", "pt_BR");
-i18n_add ( "The provided password-enabled field is not valid.", "O habilitador de senha não é válido.", "pt_BR");
+i18n_add ( "The provided password-enabled field is not valid.", "O valor informado para habilitação de senha não é válido.", "pt_BR");
 i18n_add ( "Change authentication", "Alterar autenticação", "pt_BR");
 i18n_add ( "Change system authentication.", "Alterar autenticação do sistema.", "pt_BR");
 i18n_add ( "global authentication", "autenticação global", "pt_BR");
@@ -104,7 +104,7 @@ i18n_add ( "Author", "Autor", "pt_BR");
 i18n_add ( "Enabled", "Habilitado", "pt_BR");
 i18n_add ( "Disabled", "Desabilitado", "pt_BR");
 i18n_add ( "Error changing configurations!", "Erro alterando configurações!", "pt_BR");
-i18n_add ( "Authentication successfully changed!", "Autenticação alterada com sucesso!", "pt_BR");
+i18n_add ( "Authentication changed successfully!", "Autenticação alterada com sucesso!", "pt_BR");
 i18n_add ( "Error retrieving configurations!", "Erro recuperando informações!", "pt_BR");
 i18n_add ( "OR AUTHENTICATE USING", "OU AUTENTIQUE UTILIZANDO", "pt_BR");
 i18n_add ( "Username of the user to be authenticated.", "O nome do usuário a ser autenticado.", "pt_BR");
@@ -120,5 +120,5 @@ i18n_add ( "Error authenticating user.", "Erro autenticando usuário.", "pt_BR")
 i18n_add ( "User authenticated!", "Usuário autenticado!", "pt_BR");
 i18n_add ( "AUTHENTICATE USING", "AUTENTIQUE UTILIZANDO", "pt_BR");
 i18n_add ( "Loading", "Carregando", "pt_BR");
-i18n_add ( "Tenant domain of the user to be authenticated. If omitted, the server hostname is used.", "O domínio do tenant do usuário a ser autenticado. Se não informado, o nome do servidor será utilizado.", "pt_BR");
+i18n_add ( "Tenant domain of the user to be authenticated. If omitted, the server hostname is used.", "O domínio do locatário do usuário a ser autenticado. Se omitido, será usado o nome do servidor.", "pt_BR");
 ?>

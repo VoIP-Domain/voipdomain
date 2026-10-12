@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Extensions
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -186,7 +186,7 @@ function extensions_add_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Extensions"));
-  sys_set_subtitle ( __ ( "extensions addition"));
+  sys_set_subtitle ( __ ( "Add extensions"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Extensions"), "link" => "/extensions"),
     2 => array ( "title" => __ ( "Add"))
@@ -204,7 +204,7 @@ function extensions_add_page ( $buffer, $parameters)
   sys_addjs ( array ( "name" => "bootstrap-toggle", "src" => "/vendors/bootstrap-toggle/js/bootstrap-toggle.js", "dep" => array ()));
 
   /**
-   * First, we call sub extension add hook's to populate tabs
+   * First, we call sub extension add hooks to populate tabs
    */
   $subpages = filters_call ( "extensions_add_subpages", array (), array ( "tabs" => array (), "js" => array ( "init" => array (), "onshow" => array ()), "html" => ""));
 
@@ -383,7 +383,7 @@ function extensions_add_page ( $buffer, $parameters)
               "    URL: '/extensions',\n" .
               "    method: 'POST',\n" .
               "    button: $('button.add'),\n" .
-              "    title: '" . __ ( "Extension addition") . "',\n" .
+              "    title: '" . __ ( "Add extension") . "',\n" .
               "    fail: '" . __ ( "Error adding extension!") . "',\n" .
               "    success: '" . __ ( "Extension added successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
@@ -423,7 +423,7 @@ function extensions_clone_function ( $buffer, $parameters)
   $_in["page"]["type"] = "function";
 
   /**
-   * First, we call sub extension clone hook's to populate tabs
+   * First, we call sub extension clone hooks to populate tabs
    */
   $subpages = filters_call ( "extensions_clone_subpages", array (), array ( "tabs" => array (), "js" => array ( "init" => array (), "onshow" => array ()), "html" => ""));
 
@@ -459,7 +459,7 @@ function extensions_clone_function ( $buffer, $parameters)
               "  });\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Extension cloning") . "', text: '" . __ ( "Error retrieving extension data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Clone extension") . "', text: '" . __ ( "Error retrieving extension data!") . "', type: 'error'});\n" .
               "});\n");
 }
 
@@ -484,7 +484,7 @@ function extensions_view_page ( $buffer, $parameters)
   ));
 
   /**
-   * First, we call sub extension view hook's to populate tabs
+   * First, we call sub extension view hooks to populate tabs
    */
   $subpages = filters_call ( "extensions_view_subpages", array (), array ( "tabs" => array (), "js" => array ( "init" => array (), "onshow" => array ()), "html" => ""));
 
@@ -590,7 +590,7 @@ function extensions_view_page ( $buffer, $parameters)
               "  $('#extension_view_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Extension view") . "', text: '" . __ ( "Error viewing extension!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "View extension") . "', text: '" . __ ( "Error viewing extension!") . "', type: 'error'});\n" .
               "});\n");
 
   /**
@@ -618,7 +618,7 @@ function extensions_edit_page ( $buffer, $parameters)
    * Set page title
    */
   sys_set_title ( __ ( "Extensions"));
-  sys_set_subtitle ( __ ( "extensions edition"));
+  sys_set_subtitle ( __ ( "Edit extensions"));
   sys_set_path ( array (
     1 => array ( "title" => __ ( "Extensions"), "link" => "/extensions"),
     2 => array ( "title" => __ ( "Edit"))
@@ -636,7 +636,7 @@ function extensions_edit_page ( $buffer, $parameters)
   sys_addjs ( array ( "name" => "bootstrap-toggle", "src" => "/vendors/bootstrap-toggle/js/bootstrap-toggle.js", "dep" => array ()));
 
   /**
-   * First, we call sub extension edit hook's to populate tabs
+   * First, we call sub extension edit hooks to populate tabs
    */
   $subpages = filters_call ( "extensions_edit_subpages", array (), array ( "tabs" => array (), "js" => array ( "init" => array (), "onshow" => array ()), "html" => ""));
 
@@ -768,7 +768,7 @@ function extensions_edit_page ( $buffer, $parameters)
               "  $('#extension_edit_form').trigger ( 'fill', data);\n" .
               "}).fail ( function ( jqXHR, textStatus, errorThrown)\n" .
               "{\n" .
-              "  new PNotify ( { title: '" . __ ( "Extension edition") . "', text: '" . __ ( "Error retrieving extension data!") . "', type: 'error'});\n" .
+              "  new PNotify ( { title: '" . __ ( "Edit extension") . "', text: '" . __ ( "Error retrieving extension data!") . "', type: 'error'});\n" .
               "});\n" .
               "$('#extension_edit_form').alerts ( 'form',\n" .
               "{\n" .
@@ -777,9 +777,9 @@ function extensions_edit_page ( $buffer, $parameters)
               "    URL: '/extensions/' + VoIP.parameters.id,\n" .
               "    method: 'PATCH',\n" .
               "    button: $('button.edit'),\n" .
-              "    title: '" . __ ( "Extension edition") . "',\n" .
+              "    title: '" . __ ( "Edit extension") . "',\n" .
               "    fail: '" . __ ( "Error changing extension!") . "',\n" .
-              "    success: '" . __ ( "Extension successfully changed!") . "',\n" .
+              "    success: '" . __ ( "Extension changed successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
               "               {\n" .
               "                 VoIP.path.call ( '/extensions', true);\n" .

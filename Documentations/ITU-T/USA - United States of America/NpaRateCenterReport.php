@@ -8,7 +8,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 /**
  * United States of America telephony system standard has many data that can be
  * processed from many places. The location of a central office exchange station
- * uses an abbreviated name. This script get the database from
+ * uses an abbreviated name. This script gets the database from
  * https://www.nationalpooling.com/reports/NPA-RateCenterReports/index.htm
  * converted to CSV and extract the translated abbreviations to complete
  * location name.
@@ -36,7 +36,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Core
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -51,7 +51,7 @@ ini_set ( "display_errors", "false");
  */
 if ( ! defined ( "STDIN"))
 {
-  echo "This script must be executed into CLI!\n";
+  echo "This script must be run from the CLI!\n";
   exit ( 1);
 }
 
@@ -72,7 +72,7 @@ if ( ! is_readable ( "NpaRateCenterReport.csv"))
 }
 if ( ! $fp = @fopen ( "NpaRateCenterReport.csv", "r"))
 {
-  echo "Error: Cannot open file \"NpaRateCenterReport.csv\" for read!\n";
+  echo "Error: Cannot open file \"NpaRateCenterReport.csv\" for reading!\n";
   exit ( 2);
 }
 
@@ -88,7 +88,7 @@ $output .= " *   |:  1   |     |:  |:  |       |:  1    /\n";
 $output .= " *    \\:.. ./      |::.|::.|       |::.. . /\n";
 $output .= " *     `---'       `---`---'       `------'\n";
 $output .= " *\n";
-$output .= " * Copyright (C) 2016-2025 Ernani José Camargo Azevedo\n";
+$output .= " * Copyright (C) 2016-2026 Ernani José Camargo Azevedo\n";
 $output .= " *\n";
 $output .= " * This program is free software: you can redistribute it and/or modify\n";
 $output .= " * it under the terms of the GNU General Public License as published by\n";

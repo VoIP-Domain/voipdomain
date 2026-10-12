@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Authentication
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -243,7 +243,7 @@ framework_add_hook (
         "description" => __ ( "System authentication updated successfully.")
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -436,7 +436,7 @@ framework_add_hook (
         )
       ),
       422 => array (
-        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned to all inconsistency found."),
+        "description" => __ ( "An error occurred while processing the request. An object with field name and a text error message will be returned for each inconsistency found."),
         "schema" => array (
           "type" => "object",
           "properties" => array (
@@ -578,7 +578,7 @@ function authentication_password ( $buffer, $parameters)
   /**
    * Validate user into database
    */
-  if ( ! $result = $_in["mysql"]["id"]->query ( "SELECT `ExtensionPhone`.* FROM `ExtensionPhone` LEFT JOIN `Extensions` ON `Extensions`.`ID` = `ExtensionPhone`.`Extension` WHERE `Extension`.`Tenant` = " . (int) $tenantid . " AND `ExtensionPhone`.`Email` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "' AND `ExtensionPhone`.`Password` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "'"))
+  if ( ! $result = $_in["mysql"]["id"]->query ( "SELECT `ExtensionPhone`.* FROM `ExtensionPhone` LEFT JOIN `Extensions` ON `Extensions`.`ID` = `ExtensionPhone`.`Extension` WHERE `Extensions`.`Tenant` = " . (int) $tenantid . " AND `ExtensionPhone`.`Email` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Username"]) . "' AND `ExtensionPhone`.`Password` = '" . $_in["mysql"]["id"]->real_escape_string ( $parameters["Password"]) . "'"))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
@@ -635,7 +635,7 @@ function authentication_password ( $buffer, $parameters)
    * Return OK
    */
   header ( $_SERVER["SERVER_PROTOCOL"] . " 201 Created");
-  header ( "Location: /auth?Message=" . urlencode ( __ ( "User authenticated!")) . "&MessageType=info");
+  header ( "Location: " . voipdomain_location_url ( "/auth?Message=" . urlencode ( __ ( "User authenticated!")) . "&MessageType=info"));
   return $buffer;
 }
 

@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Asterisk FastAGI LCR Application
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -218,7 +218,7 @@ framework_add_hook ( "lcr", "lcr");
  *
  * Expected parameters:
  * Arg 1: Destination (E.164 standard number)
- * Arg 2: Comma separated preffered gateway list
+ * Arg 2: Comma separated preferred gateway list
  * Arg 3: Comma separated blocked gateway list
  *
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -245,7 +245,7 @@ function lcr ( $buffer, $parameters)
   // Update gateways:
   update_gateways ();
 
-  // Proccess each system gateway:
+  // Process each system gateway:
   foreach ( fetch_config ( "db", "gateway") as $gateway)
   {
     // Avoid blocked gateways:
@@ -254,7 +254,7 @@ function lcr ( $buffer, $parameters)
       continue;
     }
 
-    // Proccess "manual" gateways:
+    // Process "manual" gateways:
     if ( $gateway["Config"] == "manual")
     {
       // Check if gateway has route to requested number:

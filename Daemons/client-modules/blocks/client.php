@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Blocks
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "block_add", "block_add");
 framework_add_hook ( "block_change", "block_change");
@@ -132,7 +132,7 @@ function block_add ( $buffer, $parameters)
   {
     if ( ! check_overwrite ())
     {
-      return array ( "code" => 400, "message" => "Block already exist.");
+      return array ( "code" => 400, "message" => "Block already exists.");
     } else {
       $overwritten = true;
     }
@@ -281,7 +281,7 @@ function block_change ( $buffer, $parameters)
   // Verify if new block exist
   if ( $parameters["Number"] != $parameters["NewNumber"] && check_config ( "config", "dialplan-block-" . substr ( $parameters["NewNumber"], 1)))
   {
-    return array ( "code" => 409, "message" => "Block new number already exist.");
+    return array ( "code" => 409, "message" => "Block new number already exists.");
   }
 
   // Remove block files
@@ -305,7 +305,7 @@ function block_change ( $buffer, $parameters)
   unset ( $parameters["NewNumber"]);
   if ( ! write_config ( "datafile", "block-" . substr ( $parameters["Number"], 1), $parameters))
   {
-    return array ( "code" => 501, "message" => "Error writing file.");
+    return array ( "code" => 500, "message" => "Error writing file.");
   }
 
   /**
@@ -449,32 +449,36 @@ function block_wipe ( $buffer, $parameters)
   /**
    * Call start hook if exist
    */
-  if ( framework_has_hook ( "agent_wipe_start"))
+  if ( framework_has_hook ( "block_wipe_start"))
   {
-    $parameters = framework_call ( "agent_wipe_start", $parameters);
+    $parameters = framework_call ( "block_wipe_start", $parameters);
   }
 
   /**
    * Call pre hook if exist
    */
-  if ( framework_has_hook ( "agent_wipe_pre"))
+  if ( framework_has_hook ( "block_wipe_pre"))
   {
-    framework_call ( "agent_wipe_pre", $parameters, false, true);
+    framework_call ( "block_wipe_pre", $parameters, false, true);
   }
 
-  // Remove all files
+  // Remove all config files by glob pattern
+  foreach ( list_config ( "config", "dialplan-block-*") as $filename)
+  {
+    unlink_config ( "config", $filename);
+  }
+  // Remove all datafiles
   foreach ( list_config ( "datafile", "block") as $filename)
   {
-    unlink_config ( "config", "dialplan-block-" . (int) substr ( $filename, strrpos ( $filename, "-") + 1));
     unlink_config ( "datafile", $filename);
   }
 
   /**
    * Call post hook if exist
    */
-  if ( framework_has_hook ( "agent_wipe_post"))
+  if ( framework_has_hook ( "block_wipe_post"))
   {
-    framework_call ( "agent_wipe_post", $parameters, false, true);
+    framework_call ( "block_wipe_post", $parameters, false, true);
   }
 
   // Reload Asterisk dialplan
@@ -483,9 +487,9 @@ function block_wipe ( $buffer, $parameters)
   /**
    * Execute finish hook if exist
    */
-  if ( framework_has_hook ( "agent_wipe_finish"))
+  if ( framework_has_hook ( "block_wipe_finish"))
   {
-    framework_call ( "agent_wipe_finish", $parameters);
+    framework_call ( "block_wipe_finish", $parameters);
   }
 }
 ?>

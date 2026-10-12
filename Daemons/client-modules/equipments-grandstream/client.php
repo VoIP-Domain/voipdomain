@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,12 +30,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Equipments Grandstream
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API call's hook's
+ * API call hooks
  */
 framework_add_hook ( "equipment_model_gxp1160_configure", "equipment_model_grandstream_basic_configure");
 framework_add_hook ( "equipment_model_gxp1160_firmware_add", "equipment_model_grandstream_add_firmware");
@@ -544,7 +544,7 @@ function equipment_model_grandstream_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Grandstream/GXP116X/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Grandstream/GXP116X/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -554,7 +554,7 @@ function equipment_model_grandstream_add_firmware ( $buffer, $parameters)
       {
         return array ( "code" => 500, "message" => "Error creating directory structure.");
       }
-      if ( ! file_put_contents ( $_in["general"]["tftpdir"] . "/Grandstream/GXP16XX/" . $parameters["Filename"], $parameters["Data"]) === false)
+      if ( ! write_payload_to_file($_in["general"]["tftpdir"] . "/Grandstream/GXP16XX/" . $parameters["Filename"], $parameters))
       {
         return array ( "code" => 500, "message" => "Error writing file.");
       }
@@ -649,7 +649,7 @@ function ap_type_grandstream_gxp16xx ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     "ULAW" => 0,
@@ -2046,7 +2046,7 @@ function ap_type_grandstream_gxp116x ( $buffer, $parameters)
   $content = str_replace ( "{{{server1addr}}}", $_in["general"]["address"], $content);
   $content = str_replace ( "{{{server1port}}}", $_in["general"]["port"], $content);
 
-  // Configure equipment CODEC's:
+  // Configure equipment codecs:
   $codecconfig = "";
   $codecs = array (
     "ULAW" => 0,

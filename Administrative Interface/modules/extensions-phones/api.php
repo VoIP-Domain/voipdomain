@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Extensions Phones
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
 /**
- * API hook to extend extensions addition of phone type
+ * API hook to extend Add extensions of phone type
  */
 framework_add_function_documentation (
   "extensions_search",
@@ -87,7 +87,7 @@ framework_add_function_documentation (
                 "properties" => array (
                   "Email" => array (
                     "type" => "string",
-                    "description" => __ ( "The email associated to extension phone."),
+                    "description" => __ ( "The email associated with the extension phone."),
                     "example" => "johndoe@example.com"
                   ),
                   "Group" => array (
@@ -258,7 +258,7 @@ framework_add_function_documentation (
                   ),
                   "VoiceMail" => array (
                     "type" => "boolean",
-                    "description" => __ ( "If the extension phone has a voicemail activated."),
+                    "description" => __ ( "Whether the extension phone has voicemail enabled."),
                     "example" => true
                   ),
                   "Password" => array (
@@ -269,23 +269,23 @@ framework_add_function_documentation (
                   ),
                   "Transhipments" => array (
                     "type" => "array",
-                    "description" => __ ( "An array containing the extensions that should tranship this extension phone."),
+                    "description" => __ ( "An array containing the extensions that should transfer this extension phone."),
                     "items" => array (
                       "type" => "object",
                       "properties" => array (
                         "ID" => array (
                           "type" => "integer",
-                          "description" => __ ( "The system unique identifier of transhipment extension."),
+                          "description" => __ ( "The system unique identifier of transfer extension."),
                           "example" => 1
                         ),
                         "Number" => array (
                           "type" => "integer",
-                          "description" => __ ( "The number of the transhipment extension."),
+                          "description" => __ ( "The number of the transfer extension."),
                           "example" => 1000
                         ),
                         "Description" => array (
                           "type" => "string",
-                          "description" => __ ( "The description of the transhipment extension."),
+                          "description" => __ ( "The description of the transfer extension."),
                           "example" => __ ( "John Doe")
                         )
                       )
@@ -459,12 +459,12 @@ framework_add_function_documentation (
             "properties" => array (
               "Email" => array (
                 "type" => "email",
-                "description" => __ ( "The email associated to this extension phone. **Note**: This field is required only when `voicemail` are enabled."),
+                "description" => __ ( "The email associated with this extension phone. **Note**: This field is required only when `voicemail` is enabled."),
                 "required" => false
               ),
               "Group" => array (
                 "type" => "integer",
-                "description" => __ ( "The system group unique identifier associated to this extension phone."),
+                "description" => __ ( "The system group unique identifier associated with this extension phone."),
                 "required" => true
               ),
               "Captures" => array (
@@ -484,7 +484,7 @@ framework_add_function_documentation (
               ),
               "Transhipments" => array (
                 "type" => "array",
-                "description" => __ ( "An array with the system extension unique identifier that will be transhipped when extension phone didn't answer the call.", true, false),
+                "description" => __ ( "An array with the system extension unique identifier that will be transferred when the extension phone does not answer the call.", true, false),
                 "items" => array (
                   "type" => "integer"
                 )
@@ -629,7 +629,7 @@ framework_add_function_documentation (
                   "properties" => array (
                     "Reference" => array (
                       "type" => "integer",
-                      "description" => __ ( "The reference number to phone account. This is used to report any account type/MAC error."),
+                      "description" => __ ( "The reference number for the phone account. This is used to report any account type/MAC error."),
                       "required" => true
                     ),
                     "Type" => array (
@@ -653,12 +653,12 @@ framework_add_function_documentation (
               ),
               "VoiceMail" => array (
                 "type" => "boolean",
-                "description" => __ ( "If the extension phone will have voice mail if didn't answer calls.", true, false),
+                "description" => __ ( "Whether the extension phone will have voicemail if it does not answer calls.", true, false),
                 "required" => true
               ),
               "Monitor" => array (
                 "type" => "boolean",
-                "description" => __ ( "If the calls to this extension phone are recoreded or not."),
+                "description" => __ ( "If the calls to this extension phone are recorded or not."),
                 "required" => true
               ),
               "VolTX" => array (
@@ -697,7 +697,7 @@ framework_add_function_documentation (
                   "Email" => array (
                     "type" => "string",
                     "description" => __ ( "The text description of this field error."),
-                    "example" => __ ( "The email is required when voice mail selected.")
+                    "example" => __ ( "The email is required when voicemail is selected.")
                   ),
                   "Password" => array (
                     "type" => "string",
@@ -782,12 +782,12 @@ framework_add_function_documentation (
                   "Transhipments" => array (
                     "type" => "string",
                     "description" => __ ( "The text description of this field error."),
-                    "example" => __ ( "One or more informed transhipment is invalid.")
+                    "example" => __ ( "One or more provided transfer destinations are invalid.")
                   ),
                   "Hints" => array (
                     "type" => "string",
                     "description" => __ ( "The text description of this field error."),
-                    "example" => __ ( "One or more informed hint is invalid.")
+                    "example" => __ ( "One or more provided hints are invalid.")
                   ),
                   "Account_X_Type" => array (
                     "type" => "string",
@@ -824,12 +824,12 @@ framework_add_function_documentation (
             "properties" => array (
               "Email" => array (
                 "type" => "email",
-                "description" => __ ( "The email associated to this extension phone. **Note**: This field is required only when `voicemail` are enabled."),
+                "description" => __ ( "The email associated with this extension phone. **Note**: This field is required only when `voicemail` is enabled."),
                 "required" => false
               ),
               "Group" => array (
                 "type" => "integer",
-                "description" => __ ( "The system group unique identifier associated to this extension phone."),
+                "description" => __ ( "The system group unique identifier associated with this extension phone."),
                 "required" => true
               ),
               "Captures" => array (
@@ -849,7 +849,7 @@ framework_add_function_documentation (
               ),
               "Transhipments" => array (
                 "type" => "array",
-                "description" => __ ( "An array with the system extension unique identifier that will be transhipped when extension phone didn't answer the call.", true, false),
+                "description" => __ ( "An array with the system extension unique identifier that will be transferred when the extension phone does not answer the call.", true, false),
                 "items" => array (
                   "type" => "integer"
                 )
@@ -994,7 +994,7 @@ framework_add_function_documentation (
                   "properties" => array (
                     "Reference" => array (
                       "type" => "integer",
-                      "description" => __ ( "The reference number to phone account. This is used to report any account type/MAC error."),
+                      "description" => __ ( "The reference number for the phone account. This is used to report any account type/MAC error."),
                       "required" => true
                     ),
                     "Type" => array (
@@ -1018,12 +1018,12 @@ framework_add_function_documentation (
               ),
               "VoiceMail" => array (
                 "type" => "boolean",
-                "description" => __ ( "If the extension phone will have voice mail if didn't answer calls.", true, false),
+                "description" => __ ( "Whether the extension phone will have voicemail if it does not answer calls.", true, false),
                 "required" => true
               ),
               "Monitor" => array (
                 "type" => "boolean",
-                "description" => __ ( "If the calls to this extension phone are recoreded or not."),
+                "description" => __ ( "If the calls to this extension phone are recorded or not."),
                 "required" => true
               ),
               "VolTX" => array (
@@ -1062,7 +1062,7 @@ framework_add_function_documentation (
                   "Email" => array (
                     "type" => "string",
                     "description" => __ ( "The text description of this field error."),
-                    "example" => __ ( "The email is required when voice mail selected.")
+                    "example" => __ ( "The email is required when voicemail is selected.")
                   ),
                   "Password" => array (
                     "type" => "string",
@@ -1147,12 +1147,12 @@ framework_add_function_documentation (
                   "Transhipments" => array (
                     "type" => "string",
                     "description" => __ ( "The text description of this field error."),
-                    "example" => __ ( "One or more informed transhipment is invalid.")
+                    "example" => __ ( "One or more provided transfer destinations are invalid.")
                   ),
                   "Hints" => array (
                     "type" => "string",
                     "description" => __ ( "The text description of this field error."),
-                    "example" => __ ( "One or more informed hint is invalid.")
+                    "example" => __ ( "One or more provided hints are invalid.")
                   ),
                   "Account_X_Type" => array (
                     "type" => "string",
@@ -1235,17 +1235,17 @@ function extensions_view_phone ( $buffer, $parameters)
   }
 
   /**
-   * Search transhipments for the extension
+   * Search transfers for the extension
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`ID`, `Extensions`.`Description`, `Extensions`.`Number` FROM `PhoneTranshipment` LEFT JOIN `Extensions` ON `PhoneTranshipment`.`Transhipment` = `Extensions`.`ID`  WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneTranshipment`.`Extension` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  $transhipments = array ();
-  while ( $transhipment = $result->fetch_assoc ())
+  $transfers = array ();
+  while ( $transfer = $result->fetch_assoc ())
   {
-    $transhipments[] = array ( "ID" => $transhipment["ID"], "Description" => $transhipment["Description"], "Number" => $transhipment["Number"]);
+    $transfers[] = array ( "ID" => $transfer["ID"], "Description" => $transfer["Description"], "Number" => $transfer["Number"]);
   }
 
   /**
@@ -1290,7 +1290,7 @@ function extensions_view_phone ( $buffer, $parameters)
   $buffer["Permissions"] = json_decode ( $phone["Permissions"], true);
   $buffer["VoiceMail"] = $options["VoiceMail"];
   $buffer["Password"] = $phone["Password"];
-  $buffer["Transhipments"] = $transhipments;
+  $buffer["Transhipments"] = $transfers;
   $buffer["Accounts"] = $accounts;
   $buffer["CostCenter"] = array ( "ID" => $phone["CostCenter"], "Description" => $phone["CostCenterDescription"], "Code" => $phone["CostCenterCode"]);
   $buffer["Monitor"] = $options["Monitor"];
@@ -1305,7 +1305,7 @@ function extensions_view_phone ( $buffer, $parameters)
 }
 
 /**
- * Function to extend extensions addition/edition sanitize of phone type.
+ * Function to extend Add extensions/edit sanitize of phone type.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -1386,19 +1386,19 @@ function extensions_phone_sanitize ( $buffer, $parameters)
   }
 
   /**
-   * Check for provided transhipment extensions
+   * Check for provided transfer extensions
    */
   $buffer["TranshipmentsNumbers"] = array ();
-  foreach ( $buffer["Transhipments"] as $transhipment)
+  foreach ( $buffer["Transhipments"] as $transfer)
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Number` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $transhipment))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Number` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $transfer))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
     }
     if ( $result->num_rows != 0)
     {
-      $buffer["TranshipmentsNumbers"][$transhipment] = $result->fetch_assoc ()["Number"];
+      $buffer["TranshipmentsNumbers"][$transfer] = $result->fetch_assoc ()["Number"];
     }
   }
 
@@ -1430,7 +1430,7 @@ function extensions_phone_sanitize ( $buffer, $parameters)
   );
 
   /**
-   * If it's an edition, fetch old extension
+   * If it's an edit, fetch old extension
    */
   if ( array_key_exists ( "ORIGINAL", $buffer))
   {
@@ -1482,9 +1482,9 @@ function extensions_phone_sanitize ( $buffer, $parameters)
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
     }
-    while ( $transhipment = $result->fetch_assoc ())
+    while ( $transfer = $result->fetch_assoc ())
     {
-      $data["Transhipments"][] = $transhipment["Transhipment"];
+      $data["Transhipments"][] = $transfer["Transhipment"];
     }
     $buffer["ORIGINAL"] = array_merge_recursive ( ( is_array ( $buffer["ORIGINAL"]) ? $buffer["ORIGINAL"]: array ()), $data);
 
@@ -1546,7 +1546,7 @@ function extensions_phone_sanitize ( $buffer, $parameters)
 }
 
 /**
- * Function to extend extensions addition/edition validate of phone type.
+ * Function to extend Add extensions/edit validate of phone type.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -1575,11 +1575,11 @@ function extensions_phone_validate ( $buffer, $parameters)
   }
   if ( ! empty ( $parameters["Email"]) && ! validate_email ( $parameters["Email"]))
   {
-    $buffer["Email"] = __ ( "The informed email is invalid.");
+    $buffer["Email"] = __ ( "The provided email is invalid.");
   }
   if ( $parameters["Options"]["VoiceMail"] == true && empty ( $parameters["Email"]))
   {
-    $buffer["Email"] = __ ( "The email is required when voice mail selected.");
+    $buffer["Email"] = __ ( "The email is required when voicemail is selected.");
   }
   if ( empty ( $parameters["Password"]))
   {
@@ -1706,7 +1706,7 @@ function extensions_phone_validate ( $buffer, $parameters)
     }
     if ( $result->num_rows == 0)
     {
-      $buffer["Group"] = __ ( "The informed group is invalid.");
+      $buffer["Group"] = __ ( "The provided group is invalid.");
     }
   }
 
@@ -1724,25 +1724,25 @@ function extensions_phone_validate ( $buffer, $parameters)
       }
       if ( $result->num_rows != 1)
       {
-        $buffer["Captures"] = __ ( "One or more informed capture groups is invalid.");
+        $buffer["Captures"] = __ ( "One or more provided capture groups are invalid.");
         break;
       }
     }
   }
 
   /**
-   * Check if transhipment extensions exists
+   * Check if transfer extensions exists
    */
-  foreach ( $parameters["Transhipments"] as $transhipment)
+  foreach ( $parameters["Transhipments"] as $transfer)
   {
-    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Number` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $transhipment))
+    if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Number` FROM `Extensions` WHERE `Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `ID` = " . (int) $transfer))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
     }
     if ( $result->num_rows == 0)
     {
-      $buffer["Transhipments"] = __ ( "One or more informed transhipment is invalid.");
+      $buffer["Transhipments"] = __ ( "One or more provided transfer destinations are invalid.");
     }
   }
 
@@ -1758,7 +1758,7 @@ function extensions_phone_validate ( $buffer, $parameters)
     }
     if ( $result->num_rows == 0)
     {
-      $buffer["Hints"] = __ ( "One or more informed hint is invalid.");
+      $buffer["Hints"] = __ ( "One or more provided hints are invalid.");
     }
   }
 
@@ -1810,7 +1810,7 @@ function extensions_phone_validate ( $buffer, $parameters)
   /**
    * Check number of accounts
    */
-  if ( sizeof ( $parameters["Accounts"] > 10))
+  if ( sizeof ( $parameters["Accounts"]) > 10)
   {
     $x = 0;
     foreach ( $parameters["Accounts"] as $account)
@@ -1822,7 +1822,7 @@ function extensions_phone_validate ( $buffer, $parameters)
         {
           $buffer["Account_" . $account["Reference"] . "_Type"] .= "<br />";
         }
-        $buffer["Account_" . $account["Reference"] . "_Type"] .= __ ( "An extension can not have more than 10 accounts.");
+        $buffer["Account_" . $account["Reference"] . "_Type"] .= __ ( "An extension cannot have more than 10 accounts.");
       }
     }
   }
@@ -1879,11 +1879,11 @@ function extensions_add_phone_post ( $buffer, $parameters)
   }
 
   /**
-   * Add each extension transhipment extensions
+   * Add each extension transfer extensions
    */
-  foreach ( $parameters["Transhipments"] as $transhipment)
+  foreach ( $parameters["Transhipments"] as $transfer)
   {
-    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `PhoneTranshipment` (`Extension`, `Transhipment`) VALUES (" . (int) $parameters["ID"] . ", " . (int) $transhipment . ")"))
+    if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `PhoneTranshipment` (`Extension`, `Transhipment`) VALUES (" . (int) $parameters["ID"] . ", " . (int) $transfer . ")"))
     {
       @$_in["mysql"]["id"]->query ( "ROLLBACK");
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
@@ -2068,7 +2068,7 @@ framework_add_api_call (
   array (
     "permissions" => array ( "User", "extensions_phones_account_view"),
     "title" => __ ( "View extension accounts"),
-    "description" => __ ( "Get a system extension account information."),
+    "description" => __ ( "Get system extension account information."),
     "parameters" => array (
       array (
         "name" => "EID",
@@ -2141,7 +2141,7 @@ function extensions_phones_account_view ( $buffer, $parameters)
 }
 
 /**
- * Function to extend extensions post edition of phone type.
+ * Function to extend extensions post edit of phone type.
  *
  * @global array $_in Framework global configuration variable
  * @param string $buffer Buffer from plugin system if processed by other function
@@ -2181,6 +2181,11 @@ function extensions_edit_phone_post ( $buffer, $parameters)
   }
 
   /**
+   * Check if extension is moving to another Asterisk server
+   */
+  $serverChanged = (int) $parameters["ORIGINAL"]["Range"]["Server"] != (int) $parameters["Range"]["Server"];
+
+  /**
    * Update extension database record if something changed
    */
   if ( $parameters["Password"] != $parameters["ORIGINAL"]["Password"] || $parameters["Email"] != $parameters["ORIGINAL"]["Email"] || $parameters["Group"] != $parameters["ORIGINAL"]["Group"] || ! array_compare_with_keys ( $parameters["Permissions"], $parameters["ORIGINAL"]["Permissions"]) || ! array_compare_with_keys ( $parameters["Options"], $parameters["ORIGINAL"]["Options"])|| $parameters["CostCenter"] != $parameters["ORIGINAL"]["CostCenter"])
@@ -2213,7 +2218,7 @@ function extensions_edit_phone_post ( $buffer, $parameters)
   }
 
   /**
-   * Update extension transhipment records if something changed
+   * Update extension transfer records if something changed
    */
   if ( ! array_compare ( $parameters["ORIGINAL"]["Transhipments"], $parameters["Transhipments"]))
   {
@@ -2222,9 +2227,9 @@ function extensions_edit_phone_post ( $buffer, $parameters)
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
     }
-    foreach ( $parameters["Transhipments"] as $transhipment)
+    foreach ( $parameters["Transhipments"] as $transfer)
     {
-      if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `PhoneTranshipment` (`Extension`, `Transhipment`) VALUES (" . (int) $parameters["ID"] . ", " . (int) $transhipment . ")"))
+      if ( ! @$_in["mysql"]["id"]->query ( "INSERT INTO `PhoneTranshipment` (`Extension`, `Transhipment`) VALUES (" . (int) $parameters["ID"] . ", " . (int) $transfer . ")"))
       {
         header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
         exit ();
@@ -2275,7 +2280,7 @@ function extensions_edit_phone_post ( $buffer, $parameters)
         {
           $notify = framework_call ( "extensions_phone_ap_remove_notify", $parameters, false, $notify);
         }
-        notify_server ( $parameters["RangeReg"]["Server"], "ap_remove", $notify);
+        notify_server ( $parameters["ORIGINAL"]["Range"]["Server"], "ap_remove", $notify);
       }
 
       /**
@@ -2309,24 +2314,27 @@ function extensions_edit_phone_post ( $buffer, $parameters)
       /**
        * Add new account to Asterisk server
        */
-      $notify = array ( "Number" => $parameters["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Type" => $account["Type"]);
-      if ( framework_has_hook ( "extensions_phone_account_add_notify"))
+      if ( ! $serverChanged)
       {
-        $notify = framework_call ( "extensions_phone_account_add_notify", $parameters, false, $notify);
-      }
-      notify_server ( $parameters["RangeReg"]["Server"], "account_add", $notify);
-
-      /**
-       * Add auto provisioning file if supported
-       */
-      if ( ! empty ( $account["MAC"]))
-      {
-        $notify = array ( "Number" => $parameters["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Name" => $parameters["Description"], "MAC" => $account["MAC"], "Type" => $account["UID"], "Domain" => $parameters["ProfileReg"]["Domain"], "NTP" => $parameters["Range"]["NTP"], "Country" => $parameters["ProfileReg"]["ISO3166-2"], "TimeZone" => $parameters["ProfileReg"]["TimeZone"], "Offset" => $parameters["ProfileReg"]["Offset"], "Prefix" => $parameters["ProfileReg"]["Prefix"], "EmergencyShortcut" => (boolean) $parameters["ProfileReg"]["EmergencyShortcut"], "Hints" => array_values ( $parameters["HintsNumbers"]));
-        if ( framework_has_hook ( "extensions_phone_ap_add_notify"))
+        $notify = array ( "Number" => $parameters["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Type" => $account["Type"]);
+        if ( framework_has_hook ( "extensions_phone_account_add_notify"))
         {
-          $notify = framework_call ( "extensions_phone_ap_add_notify", $parameters, false, $notify);
+          $notify = framework_call ( "extensions_phone_account_add_notify", $parameters, false, $notify);
         }
-        notify_server ( $parameters["RangeReg"]["Server"], "ap_add", $notify);
+        notify_server ( $parameters["Range"]["Server"], "account_add", $notify);
+
+        /**
+         * Add auto provisioning file if supported
+         */
+        if ( ! empty ( $account["MAC"]))
+        {
+          $notify = array ( "Number" => $parameters["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Name" => $parameters["Description"], "MAC" => $account["MAC"], "Type" => $account["UID"], "Domain" => $parameters["ProfileReg"]["Domain"], "NTP" => $parameters["Range"]["NTP"], "Country" => $parameters["ProfileReg"]["ISO3166-2"], "TimeZone" => $parameters["ProfileReg"]["TimeZone"], "Offset" => $parameters["ProfileReg"]["Offset"], "Prefix" => $parameters["ProfileReg"]["Prefix"], "EmergencyShortcut" => (boolean) $parameters["ProfileReg"]["EmergencyShortcut"], "Hints" => array_values ( $parameters["HintsNumbers"]));
+          if ( framework_has_hook ( "extensions_phone_ap_add_notify"))
+          {
+            $notify = framework_call ( "extensions_phone_ap_add_notify", $parameters, false, $notify);
+          }
+          notify_server ( $parameters["Range"]["Server"], "ap_add", $notify);
+        }
       }
     }
   }
@@ -2334,7 +2342,7 @@ function extensions_edit_phone_post ( $buffer, $parameters)
   /**
    * Check if there's any change with hints
    */
-  if ( ! array_compare ( $parameters["ORIGINAL"]["Hints"], $parameters["Hints"]))
+  if ( ! $serverChanged && ! array_compare ( $parameters["ORIGINAL"]["Hints"], $parameters["Hints"]))
   {
     /**
      * Check if need to remove a hint
@@ -2354,7 +2362,7 @@ function extensions_edit_phone_post ( $buffer, $parameters)
         {
           $notify = framework_call ( "extensions_phone_hint_remove_notify", $parameters, false, $notify);
         }
-        notify_server ( $parameters["RangeReg"]["Server"], "hint_remove", $notify);
+        notify_server ( $parameters["Range"]["Server"], "hint_remove", $notify);
       }
     }
 
@@ -2376,7 +2384,7 @@ function extensions_edit_phone_post ( $buffer, $parameters)
         {
           $notify = framework_call ( "extensions_phone_hint_add_notify", $parameters, false, $notify);
         }
-        notify_server ( $parameters["RangeReg"]["Server"], "hint_add", $notify);
+        notify_server ( $parameters["Range"]["Server"], "hint_add", $notify);
       }
     }
   }
@@ -2384,20 +2392,161 @@ function extensions_edit_phone_post ( $buffer, $parameters)
   /**
    * Check if any auto provision need to be updated
    */
-  foreach ( $accountskeep as $id => $account)
+  if ( ! $serverChanged)
   {
-    if ( $account["MAC"] && ( $parameters["Description"] != $parameters["ORIGINAL"]["Description"] || ! array_compare ( $parameters["ORIGINAL"]["Hints"], $parameters["Hints"])))
+    foreach ( $accountskeep as $id => $account)
     {
-      $notify = array ( "Number" => $parameters["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Name" => $parameters["Description"], "MAC" => $account["MAC"], "Type" => $account["UID"], "Domain" => $parameters["ProfileReg"]["Domain"], "NTP" => $parameters["Range"]["NTP"], "Country" => $parameters["ProfileReg"]["ISO3166-2"], "TimeZone" => $parameters["ProfileReg"]["TimeZone"], "Offset" => $parameters["ProfileReg"]["Offset"], "Prefix" => $parameters["ProfileReg"]["Prefix"], "EmergencyShortcut" => (boolean) $parameters["ProfileReg"]["EmergencyShortcut"], "Hints" => array_values ( $parameters["HintsNumbers"]));
-      if ( framework_has_hook ( "extensions_phone_ap_change_notify"))
+      if ( $account["MAC"] && ( $parameters["Description"] != $parameters["ORIGINAL"]["Description"] || ! array_compare ( $parameters["ORIGINAL"]["Hints"], $parameters["Hints"])))
       {
-        $notify = framework_call ( "extensions_phone_ap_change_notify", $parameters, false, $notify);
+        $notify = array ( "Number" => $parameters["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Name" => $parameters["Description"], "MAC" => $account["MAC"], "Type" => $account["UID"], "Domain" => $parameters["ProfileReg"]["Domain"], "NTP" => $parameters["Range"]["NTP"], "Country" => $parameters["ProfileReg"]["ISO3166-2"], "TimeZone" => $parameters["ProfileReg"]["TimeZone"], "Offset" => $parameters["ProfileReg"]["Offset"], "Prefix" => $parameters["ProfileReg"]["Prefix"], "EmergencyShortcut" => (boolean) $parameters["ProfileReg"]["EmergencyShortcut"], "Hints" => array_values ( $parameters["HintsNumbers"]));
+        if ( framework_has_hook ( "extensions_phone_ap_change_notify"))
+        {
+          $notify = framework_call ( "extensions_phone_ap_change_notify", $parameters, false, $notify);
+        }
+        notify_server ( $parameters["Range"]["Server"], "ap_change", $notify);
       }
-      notify_server ( $parameters["RangeReg"]["Server"], "ap_change", $notify);
     }
   }
 
-// **TODO**: Check if anything changed at the phone that need to request task "extension_phone_change"
+  /**
+   * Check if anything changed at the phone that need to request task "extension_phone_change"
+   */
+  $phoneChanged = $parameters["Number"] != $parameters["ORIGINAL"]["Number"] || $parameters["Description"] != $parameters["ORIGINAL"]["Description"] || $parameters["Password"] != $parameters["ORIGINAL"]["Password"] || $parameters["Email"] != $parameters["ORIGINAL"]["Email"] || $parameters["Group"] != $parameters["ORIGINAL"]["Group"] || $parameters["CostCenter"] != $parameters["ORIGINAL"]["CostCenter"] || ! array_compare_with_keys ( $parameters["Permissions"], $parameters["ORIGINAL"]["Permissions"]) || ! array_compare_with_keys ( $parameters["Options"], $parameters["ORIGINAL"]["Options"]) || ! array_compare ( $parameters["ORIGINAL"]["Captures"], $parameters["Captures"]) || ! array_compare ( $parameters["ORIGINAL"]["Transhipments"], $parameters["Transhipments"]);
+
+  if ( $serverChanged)
+  {
+    $oldServer = (int) $parameters["ORIGINAL"]["Range"]["Server"];
+    $newServer = (int) $parameters["Range"]["Server"];
+
+    /**
+     * Remove auto provisioning from old server
+     */
+    foreach ( $parameters["ORIGINAL"]["Accounts"] as $account)
+    {
+      if ( ! empty ( $account["MAC"]))
+      {
+        $notify = array ( "MAC" => $account["MAC"], "Type" => $account["UID"]);
+        if ( framework_has_hook ( "extensions_phone_ap_remove_notify"))
+        {
+          $notify = framework_call ( "extensions_phone_ap_remove_notify", $parameters, false, $notify);
+        }
+        notify_server ( $oldServer, "ap_remove", $notify);
+      }
+    }
+
+    /**
+     * Remove exclusive hints watched by this extension on old server
+     */
+    foreach ( $parameters["ORIGINAL"]["Hints"] as $hint)
+    {
+      if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Number`, COUNT(*) AS `Total` FROM `PhoneHint` LEFT JOIN `Extensions` ON `PhoneHint`.`Hint` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `Extensions`.`ID` = " . (int) $hint))
+      {
+        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+        exit ();
+      }
+      $tmp = $result->fetch_assoc ();
+      if ( $tmp["Total"] == 0)
+      {
+        $notify = array ( "Number" => $tmp["Number"]);
+        if ( framework_has_hook ( "extensions_phone_hint_remove_notify"))
+        {
+          $notify = framework_call ( "extensions_phone_hint_remove_notify", $parameters, false, $notify);
+        }
+        notify_server ( $oldServer, "hint_remove", $notify);
+      }
+    }
+
+    /**
+     * Remove extension from old server
+     */
+    $notify = array ( "Number" => $parameters["ORIGINAL"]["Number"]);
+    if ( framework_has_hook ( "extensions_phone_remove_notify"))
+    {
+      $notify = framework_call ( "extensions_phone_remove_notify", $parameters, false, $notify);
+    }
+    notify_server ( $oldServer, "extension_phone_remove", $notify);
+
+    /**
+     * Add extension on new server
+     */
+    $notify = array ( "Number" => $parameters["Number"], "UID" => $parameters["ID"], "Password" => $parameters["Password"], "Group" => $parameters["GroupReg"]["ID"], "Captures" => $parameters["Captures"], "Name" => $parameters["Description"], "Transhipments" => $parameters["TranshipmentsNumbers"], "CostCenter" => ( $parameters["CostCenter"] != "" ? $parameters["CostCenter"] : $parameters["GroupReg"]["CostCenter"]), "Permissions" => $parameters["Permissions"], "VoiceMail" => $parameters["Options"]["VoiceMail"], "Email" => $parameters["Email"], "VolTX" => $parameters["Options"]["VolTX"], "VolRX" => $parameters["Options"]["VolRX"], "Monitor" => $parameters["Options"]["Monitor"]);
+    if ( framework_has_hook ( "extensions_phone_add_notify"))
+    {
+      $notify = framework_call ( "extensions_phone_add_notify", $parameters, false, $notify);
+    }
+    notify_server ( $newServer, "extension_phone_add", $notify);
+
+    /**
+     * Add accounts on new server
+     */
+    foreach ( $accountskeep as $account)
+    {
+      $notify = array ( "Number" => $parameters["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Type" => $account["Type"]);
+      if ( framework_has_hook ( "extensions_phone_account_add_notify"))
+      {
+        $notify = framework_call ( "extensions_phone_account_add_notify", $parameters, false, $notify);
+      }
+      notify_server ( $newServer, "account_add", $notify);
+
+      if ( ! empty ( $account["MAC"]))
+      {
+        $notify = array ( "Number" => $parameters["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Name" => $parameters["Description"], "MAC" => $account["MAC"], "Type" => $account["Type"], "Domain" => $parameters["ProfileReg"]["Domain"], "NTP" => $parameters["Range"]["NTP"], "Country" => $parameters["ProfileReg"]["ISO3166-2"], "TimeZone" => $parameters["ProfileReg"]["TimeZone"], "Offset" => $parameters["ProfileReg"]["Offset"], "Prefix" => $parameters["ProfileReg"]["Prefix"], "EmergencyShortcut" => (boolean) $parameters["ProfileReg"]["EmergencyShortcut"], "Hints" => array_values ( $parameters["HintsNumbers"]));
+        if ( framework_has_hook ( "extensions_phone_ap_add_notify"))
+        {
+          $notify = framework_call ( "extensions_phone_ap_add_notify", $parameters, false, $notify);
+        }
+        notify_server ( $newServer, "ap_add", $notify);
+      }
+    }
+    foreach ( $accountsadd as $account)
+    {
+      $notify = array ( "Number" => $parameters["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Type" => $account["UID"]);
+      if ( framework_has_hook ( "extensions_phone_account_add_notify"))
+      {
+        $notify = framework_call ( "extensions_phone_account_add_notify", $parameters, false, $notify);
+      }
+      notify_server ( $newServer, "account_add", $notify);
+
+      if ( ! empty ( $account["MAC"]))
+      {
+        $notify = array ( "Number" => $parameters["Number"], "Username" => $account["Username"], "Password" => $account["Password"], "Name" => $parameters["Description"], "MAC" => $account["MAC"], "Type" => $account["UID"], "Domain" => $parameters["ProfileReg"]["Domain"], "NTP" => $parameters["Range"]["NTP"], "Country" => $parameters["ProfileReg"]["ISO3166-2"], "TimeZone" => $parameters["ProfileReg"]["TimeZone"], "Offset" => $parameters["ProfileReg"]["Offset"], "Prefix" => $parameters["ProfileReg"]["Prefix"], "EmergencyShortcut" => (boolean) $parameters["ProfileReg"]["EmergencyShortcut"], "Hints" => array_values ( $parameters["HintsNumbers"]));
+        if ( framework_has_hook ( "extensions_phone_ap_add_notify"))
+        {
+          $notify = framework_call ( "extensions_phone_ap_add_notify", $parameters, false, $notify);
+        }
+        notify_server ( $newServer, "ap_add", $notify);
+      }
+    }
+
+    /**
+     * Create hint configuration on new server if needed
+     */
+    foreach ( $parameters["Hints"] as $hint)
+    {
+      if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Number`, COUNT(*) AS `Total` FROM `PhoneHint` LEFT JOIN `Extensions` ON `PhoneHint`.`Hint` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneHint`.`Hint` = " . (int) $hint))
+      {
+        header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
+        exit ();
+      }
+      $tmp = $result->fetch_assoc ();
+      if ( $tmp["Total"] == 1)
+      {
+        $notify = array ( "Number" => $tmp["Number"]);
+        if ( framework_has_hook ( "extensions_phone_hint_add_notify"))
+        {
+          $notify = framework_call ( "extensions_phone_hint_add_notify", $parameters, false, $notify);
+        }
+        notify_server ( $newServer, "hint_add", $notify);
+      }
+    }
+  } elseif ( $phoneChanged) {
+    $notify = array ( "Number" => $parameters["ORIGINAL"]["Number"], "NewNumber" => $parameters["Number"], "UID" => $parameters["ID"], "Password" => $parameters["Password"], "Group" => $parameters["GroupReg"]["ID"], "Captures" => $parameters["Captures"], "Name" => $parameters["Description"], "Transhipments" => $parameters["TranshipmentsNumbers"], "CostCenter" => ( $parameters["CostCenter"] != "" ? $parameters["CostCenter"] : $parameters["GroupReg"]["CostCenter"]), "Permissions" => $parameters["Permissions"], "VoiceMail" => $parameters["Options"]["VoiceMail"], "Email" => $parameters["Email"], "VolTX" => $parameters["Options"]["VolTX"], "VolRX" => $parameters["Options"]["VolRX"], "Monitor" => $parameters["Options"]["Monitor"]);
+    if ( framework_has_hook ( "extensions_phone_change_notify"))
+    {
+      $notify = framework_call ( "extensions_phone_change_notify", $parameters, false, $notify);
+    }
+    notify_server ( $parameters["Range"]["Server"], "extension_phone_change", $notify);
+  }
 
   /**
    * Check if any other extension need to update Asterisk configurations
@@ -2405,7 +2554,7 @@ function extensions_edit_phone_post ( $buffer, $parameters)
   if ( $parameters["Number"] != $parameters["ORIGINAL"]["Number"])
   {
     /**
-     * First, check if extension exist at any other extension transhipment
+     * First, check if extension exist at any other extension transfer
      */
     if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Number`, `Extensions`.`ID`, `Ranges`.`Server` FROM `PhoneTranshipment` LEFT JOIN `Extensions` ON `PhoneTranshipment`.`Extension` = `Extensions`.`ID` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneTranshipment`.`Transhipment` = " . (int) $parameters["ID"]))
     {
@@ -2427,7 +2576,6 @@ function extensions_edit_phone_post ( $buffer, $parameters)
         $notify["Transhipments"][] = $tmp["Number"];
       }
       notify_server ( $data["Server"], "transhipment_change", $notify);
-// **TODO**: Precisa implementar esta tarefa!
     }
 
     /**
@@ -2440,9 +2588,18 @@ function extensions_edit_phone_post ( $buffer, $parameters)
     }
     if ( $result->num_rows != 0)
     {
-// **TODO**: Adicionar chamada de hook de notify!!!
-      notify_server ( $parameters["ORIGINAL"]["RangeReg"]["Server"], "hint_remove", array ( "Number" => $extension["Number"]));
-      notify_server ( $parameters["RangeReg"]["Server"], "hint_add", array ( "Number" => $parameters["Number"]));
+      $notify = array ( "Number" => $parameters["ORIGINAL"]["Number"]);
+      if ( framework_has_hook ( "extensions_phone_hint_remove_notify"))
+      {
+        $notify = framework_call ( "extensions_phone_hint_remove_notify", $parameters, false, $notify);
+      }
+      notify_server ( $parameters["ORIGINAL"]["Range"]["Server"], "hint_remove", $notify);
+      $notify = array ( "Number" => $parameters["Number"]);
+      if ( framework_has_hook ( "extensions_phone_hint_add_notify"))
+      {
+        $notify = framework_call ( "extensions_phone_hint_add_notify", $parameters, false, $notify);
+      }
+      notify_server ( $parameters["Range"]["Server"], "hint_add", $notify);
     }
   }
 
@@ -2502,7 +2659,7 @@ function extensions_remove_phone_pre ( $buffer, $parameters)
   }
 
   /**
-   * Get extension transhipment extensions
+   * Get extension transfer extensions
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT * FROM `PhoneTranshipment` WHERE `Extension` = " . (int) $parameters["ID"]))
   {
@@ -2510,9 +2667,9 @@ function extensions_remove_phone_pre ( $buffer, $parameters)
     exit ();
   }
   $buffer["ORIGINAL"]["Transhipments"] = array ();
-  while ( $transhipment = $result->fetch_assoc ())
+  while ( $transfer = $result->fetch_assoc ())
   {
-    $buffer["ORIGINAL"]["Transhipments"][] = $transhipment["Transhipment"];
+    $buffer["ORIGINAL"]["Transhipments"][] = $transfer["Transhipment"];
   }
 
   /**
@@ -2563,7 +2720,7 @@ function extensions_remove_phone_pre ( $buffer, $parameters)
     {
       $notify = framework_call ( "extensions_phone_hint_remove_notify", $parameters, false, $notify);
     }
-    notify_server ( $parameters["ORIGINAL"]["Server"], "hint_remove", $notify);
+    notify_server ( $parameters["ORIGINAL"]["Range"]["Server"], "hint_remove", $notify);
   }
 
   /**
@@ -2594,31 +2751,31 @@ function extensions_remove_phone_pre ( $buffer, $parameters)
   }
 
   /**
-   * Remove extension from other extensions transhipment
+   * Remove extension from other extensions transfer
    */
   if ( ! $result = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Number`, `Extensions`.`ID`, `Ranges`.`Server` FROM `PhoneTranshipment` LEFT JOIN `Extensions` ON `Extensions`.`ID` = `PhoneTranshipment`.`Extension` LEFT JOIN `Ranges` ON `Extensions`.`Range` = `Ranges`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneTranshipment`.`Transhipment` = " . (int) $parameters["ID"]))
   {
     header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
     exit ();
   }
-  while ( $transhipment = $result->fetch_assoc ())
+  while ( $transfer = $result->fetch_assoc ())
   {
-    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Number` FROM `PhoneTranshipment` LEFT JOIN `Extensions` ON `PhoneTranshipment`.`Transhipment` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneTranshipment`.`Extension` = " . (int) $transhipment["ID"]))
+    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT `Extensions`.`Number` FROM `PhoneTranshipment` LEFT JOIN `Extensions` ON `PhoneTranshipment`.`Transhipment` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneTranshipment`.`Extension` = " . (int) $transfer["ID"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();
     }
-    $transhipmentdata = array ();
+    $transferdata = array ();
     while ( $tmp = $result2->fetch_assoc ())
     {
-      $transhipmentdata[] = $tmp["Number"];
+      $transferdata[] = $tmp["Number"];
     }
-    $notify = array ( "Number" => $transhipment["Number"], "Transhipments" => $transhipmentdata);
-    if ( framework_has_hook ( "extensions_phone_transhipment_change_notify"))
+    $notify = array ( "Number" => $transfer["Number"], "Transhipments" => $transferdata);
+    if ( framework_has_hook ( "extensions_phone_transfer_change_notify"))
     {
-      $notify = framework_call ( "extensions_phone_transhipment_change_notify", $parameters, false, $notify);
+      $notify = framework_call ( "extensions_phone_transfer_change_notify", $parameters, false, $notify);
     }
-    notify_server ( $transhipment["Server"], "transhipment_change", $notify);
+    notify_server ( $transfer["Server"], "transhipment_change", $notify);
     if ( ! @$_in["mysql"]["id"]->query ( "DELETE FROM `PhoneTranshipment` WHERE `Transhipment` = " . (int) $parameters["ID"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
@@ -2673,7 +2830,7 @@ function extensions_remove_phone_post ( $buffer, $parameters)
   {
     $notify = framework_call ( "extensions_phone_remove_notify", $parameters, false, $notify);
   }
-  notify_server ( $parameters["ORIGINAL"]["Server"], "extension_phone_remove", $notify);
+  notify_server ( $parameters["ORIGINAL"]["Range"]["Server"], "extension_phone_remove", $notify);
 
   /**
    * Return data
@@ -2685,7 +2842,7 @@ function extensions_remove_phone_post ( $buffer, $parameters)
  * Hook call to intercept new server and server rebuild
  */
 framework_add_hook ( "servers_add_post", "extensions_phones_server_reconfig");
-framework_add_hook ( "servers_rebuild_config", "extensions_phones_server_reconfig");
+framework_add_hook_at ( "servers_rebuild_config", "extensions_phones_server_reconfig", "profiles_server_reconfig", IN_HOOK_INSERT_AFTER);
 
 /**
  * Function to notify server to include all extensions phones.
@@ -2724,7 +2881,7 @@ function extensions_phones_server_reconfig ( $buffer, $parameters)
     $extension["NTP"] = json_decode ( $extension["NTP"], true);
 
     /**
-     * Fetch extension transhipments
+     * Fetch extension transfers
      */
     if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT GROUP_CONCAT(`Extensions`.`Number` SEPARATOR ',') AS `Transhipments` FROM `PhoneTranshipment` LEFT JOIN `Extensions` ON `PhoneTranshipment`.`Transhipment` = `Extensions`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneTranshipment`.`Extension` = " . (int) $extension["ID"]))
     {
@@ -2777,7 +2934,7 @@ function extensions_phones_server_reconfig ( $buffer, $parameters)
     /**
      * Fetch all accounts from extension
      */
-    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT `PhoneAccounts`.`ID`, `PhoneAccounts`.`Username`, `PhoneAccounts`.`Password`, `PhoneAccounts`.`MAC`, `Equipments`.`UID`, `Equipments`.`Type`, `Equipments`.`AutoProvision` FROM `PhoneAccounts` LEFT JOIN `Equipments` ON `PhoneAccounts`.`Equipment` = `Equipments`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneAccounts`.`Extension` = " . (int) $extension["ID"]))
+    if ( ! $result2 = @$_in["mysql"]["id"]->query ( "SELECT `PhoneAccounts`.`ID`, `PhoneAccounts`.`Username`, `PhoneAccounts`.`Password`, `PhoneAccounts`.`MAC`, `Equipments`.`UID`, `Equipments`.`Type`, `Equipments`.`AutoProvision` FROM `PhoneAccounts` LEFT JOIN `Extensions` ON `PhoneAccounts`.`Extension` = `Extensions`.`ID` LEFT JOIN `Equipments` ON `PhoneAccounts`.`Equipment` = `Equipments`.`ID` WHERE `Extensions`.`Tenant` = " . (int) $_in["session"]["Tenant"] . " AND `PhoneAccounts`.`Extension` = " . (int) $extension["ID"]))
     {
       header ( $_SERVER["SERVER_PROTOCOL"] . " 503 Service Unavailable");
       exit ();

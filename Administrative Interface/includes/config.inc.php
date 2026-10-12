@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,19 +34,9 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Core
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
-
-/**
- * Load miscelaneous function library
- */
-require_once ( dirname ( __FILE__) . "/functions.inc.php");
-
-/**
- * Load modular plugin library
- */
-require_once ( dirname ( __FILE__) . "/plugins.inc.php");
 
 /**
  * Check for required PHP modules
@@ -68,6 +58,7 @@ if ( ! file_exists ( "/etc/voipdomain/webinterface.conf"))
   $_in = array ();
   $_in["mode"] = "install";
   $_in["general"] = array ();
+  $_in["i18n"] = array ();
 } else {
   /**
    * Parse configuration file. You should put your configuration file OUTSIDE
@@ -75,11 +66,25 @@ if ( ! file_exists ( "/etc/voipdomain/webinterface.conf"))
    * web server configuration. Your configuration would contain passwords and
    * other sensitive configurations.
    */
-  if ( ! $_in = parse_ini_file ( "/etc/voipdomain/webinterface.conf", true))
+  if ( ! is_readable ( "/etc/voipdomain/webinterface.conf"))
   {
-    error_5xx ( 503, "Cannot parse configuration file \"/etc/voipdomain/webinterface.conf\".");
+    error_5xx ( 503, "Cannot read configuration file \"/etc/voipdomain/webinterface.conf\" (PHP-FPM must be able to read it, e.g. mode 0660 root:nginx or 0640 with group nginx).");
+  } else {
+    if ( ! $_in = parse_ini_file ( "/etc/voipdomain/webinterface.conf", true))
+    {
+      error_5xx ( 503, "Cannot parse configuration file \"/etc/voipdomain/webinterface.conf\".");
+    }
   }
-  $_in["mode"] = "normal";
+  if ( ! is_array ( $_in["i18n"] ?? null))
+  {
+    $_in["i18n"] = array ();
+  }
+  if ( voipdomain_config_requires_install ( $_in))
+  {
+    $_in["mode"] = "install";
+  } else {
+    $_in["mode"] = "normal";
+  }
 }
 
 /**
@@ -148,6 +153,10 @@ if ( ! array_key_exists ( "title", $_in["general"]))
  */
 $_in["languages"] = array ( "en_US" => "English (United States)", "pt_BR" => "Portuguese (Brazil)");
 $_in["i18n"] = array ();
+$_api = array ();
+$_api["permissions"] = array ();
+$_paths = array ();
+$_filters = array ();
 
 /**
  * Configure locale and encoding
@@ -312,11 +321,17 @@ if ( $_in["mode"] == "normal")
   /**
    * Connect to database server
    */
-  $_in["mysql"]["id"] = @new mysqli ( $_in["mysql"]["hostname"] . ( ! empty ( $_in["mysql"]["port"]) ? ":" . $_in["mysql"]["port"] : ""), $_in["mysql"]["username"], $_in["mysql"]["password"], $_in["mysql"]["database"]);
-  if ( $_in["mysql"]["id"]->connect_errno)
+  $db = voipdomain_mysqli_connect ( $_in["mysql"]["hostname"] . ( ! empty ( $_in["mysql"]["port"]) ? ":" . $_in["mysql"]["port"] : ""), $_in["mysql"]["username"], $_in["mysql"]["password"], $_in["mysql"]["database"]);
+  if ( ! $db["id"])
   {
-    error_5xx ( 503, "Cannot connect to MySQL server.");
+    $message = "Cannot connect to MySQL server.";
+    if ( ! empty ( $_in["general"]["debug"]) && filter_var ( $_in["general"]["debug"], FILTER_VALIDATE_BOOLEAN))
+    {
+      $message .= " " . $db["error"];
+    }
+    error_5xx ( 503, $message);
   }
+  $_in["mysql"]["id"] = $db["id"];
 }
 
 /**
@@ -547,20 +562,39 @@ function sys_set_startevent ( $id, $event, $data = array ())
 }
 
 /**
- * Initialize framework API call variable
+ * Restore module cache globals from cache.json (ignore null / invalid keys).
+ *
+ * @param array $cache Decoded modules/cache.json
+ * @return void
  */
-$_api = array ();
-$_api["permissions"] = array ();
+function voipdomain_apply_modules_cache ( $cache)
+{
+  global $_plugins, $_paths, $_in, $_filters;
 
-/**
- * Initialize framework path variable
- */
-$_paths = array ();
+  if ( ! is_array ( $_plugins))
+  {
+    $_plugins = array ();
+  }
+  $_plugins["map"] = is_array ( $cache["map"] ?? null) ? $cache["map"] : array ();
+  $_plugins["hooks"] = is_array ( $cache["hooks"] ?? null) ? $cache["hooks"] : array ();
+  $_plugins["functions"] = is_array ( $cache["functions"] ?? null) ? $cache["functions"] : array ();
+  if ( ! is_array ( $_plugins["hooksdocs"] ?? null))
+  {
+    $_plugins["hooksdocs"] = array ();
+  }
+  if ( ! is_array ( $_plugins["buffers"] ?? null))
+  {
+    $_plugins["buffers"] = array ();
+  }
+  if ( ! is_array ( $_plugins["components"] ?? null))
+  {
+    $_plugins["components"] = array ();
+  }
 
-/**
- * Initialize framework filter variable
- */
-$_filters = array ();
+  $_paths = is_array ( $cache["paths"] ?? null) ? $cache["paths"] : array ();
+  $_in["i18n"] = is_array ( $cache["i18n"] ?? null) ? $cache["i18n"] : array ();
+  $_filters = is_array ( $cache["filters"] ?? null) ? $cache["filters"] : array ();
+}
 
 /**
  * Function to add filter call to function's. This basically add a chain of
@@ -576,6 +610,11 @@ $_filters = array ();
 function framework_add_filter ( $filter, $function)
 {
   global $_filters, $_in;
+
+  if ( ! is_array ( $_filters ?? null))
+  {
+    $_filters = array ();
+  }
 
   /**
    * Add filter if not exist
@@ -616,6 +655,11 @@ function framework_add_filter ( $filter, $function)
 function filters_call ( $filter, $parameters = array (), $buffer = array ())
 {
   global $_filters, $_in;
+
+  if ( ! is_array ( $_filters ?? null))
+  {
+    $_filters = array ();
+  }
 
   /**
    * If there's no filter, return false
@@ -663,9 +707,9 @@ function filters_call ( $filter, $parameters = array (), $buffer = array ())
 }
 
 /**
- * Function to add path call to hook's. This basically check for framework call
- * path (like friendly URL call's to your system) using preg_match, check for
- * permissions and call hook's if needed. Path use "/" (slash) as separator.
+ * Function to add path call to hooks. This basically checks for framework call
+ * path (like friendly URL calls to your system) using preg_match, check for
+ * permissions and call hooks if needed. Path uses "/" (slash) as separator.
  *
  * This function accept's options, that can be:
  *   boolean "unauthenticated"   -> Allow or disallow execution of the path for
@@ -686,6 +730,11 @@ function filters_call ( $filter, $parameters = array (), $buffer = array ())
 function framework_add_path ( $path, $hook, $options = array ())
 {
   global $_paths;
+
+  if ( ! is_array ( $_paths ?? null))
+  {
+    $_paths = array ();
+  }
 
   /**
    * Check if path start with slash
@@ -778,9 +827,9 @@ function framework_add_permission ( $permission, $description)
 }
 
 /**
- * Function to add API call to hook's. This basically check for framework API
- * call path (like friendly URL call's to your system) using preg_match, check
- * for route, permissions and call hook's if needed. Path use "/" (slash) as
+ * Function to add API call to hooks. This basically checks for framework API
+ * call path (like friendly URL calls to your system) using preg_match, check
+ * for route, permissions and call hooks if needed. Path uses "/" (slash) as
  * separator. The path can't have the version, it's managed by API internally.
  * The route parameter must be an array with every accepted route to the path,
  * the corresponding hook to the route path and the options if needed. The
@@ -1245,8 +1294,9 @@ function check_table_modification ( $table)
 
   /**
    * Check if If-Modified-Since HTTP header was provided
+   * Only return 304 if we have a valid cache timestamp (not 0)
    */
-  if ( array_key_exists ( "HTTP_IF_MODIFIED_SINCE", $_SERVER))
+  if ( $last > 0 && array_key_exists ( "HTTP_IF_MODIFIED_SINCE", $_SERVER))
   {
     if ( $last <= strtotime ( $_SERVER["HTTP_IF_MODIFIED_SINCE"]))
     {

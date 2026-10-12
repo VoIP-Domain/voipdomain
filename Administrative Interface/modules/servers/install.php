@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Servers
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -58,6 +58,7 @@ function servers_install_db ( $buffer, $parameters)
                                     "  `Description` varchar(255) NOT NULL,\n" .
                                     "  `Address` varchar(255) NOT NULL,\n" .
                                     "  `Port` int(2) unsigned NOT NULL,\n" .
+                                    "  `Country` char(2) NOT NULL DEFAULT 'US',\n" .
                                     "  `NTP` varchar(255),\n" .
                                     "  `TransfStart` time DEFAULT NULL,\n" .
                                     "  `TransfEnd` time DEFAULT NULL,\n" .

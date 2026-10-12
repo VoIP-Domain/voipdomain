@@ -1,6 +1,6 @@
 # VoIP Domain
 
-[![GitHub release](https://img.shields.io/github/release/VoIP-Domain/voipdomain.svg?maxAge=2592000)](https://github.com/VoIP-Domain/voipdomain)
+[![GitHub release](https://img.shields.io/github/v/release/VoIP-Domain/voipdomain)](https://github.com/VoIP-Domain/voipdomain)
 [![GitHub license](https://img.shields.io/github/license/VoIP-Domain/voipdomain.svg)](https://github.com/VoIP-Domain/voipdomain)
 
 **VoIP Domain – The new era of VoIP management**
@@ -40,7 +40,7 @@ A live demo will be available soon.
 - RESTful API
 - Code documentation
 - Modular code with plugin support
-- Multi language
+- Multilingual
   - English (native language)
   - Brazilian Portuguese
 - Easy to use
@@ -48,20 +48,30 @@ A live demo will be available soon.
 ## Links
 
 - Project homepage: https://voipdomain.io/
-- RPM repository (RHEL): http://rhel.voipdomain.io:8081/
+- RPM repository (RHEL): https://rhel.voipdomain.io/
 
 ## Project Status
 
-The project is currently in pre-release. Stay tuned for updates as we approach the first stable release.
+**v1.0** — first stable release; production-ready for multi-tenant enterprise VoIP deployments.
 
-## Documentations
+## Documentation
 
-- [Install guide](Documentations/INSTALL.md)
-- [F.A.Q.](Documentations/FAQ.md)
-- [Security Tips](Documentations/SECURITY-TIPS.md)
-- [Developer guide](Documentations/DEVELOPER-GUIDE.md)
-- [Developer F.A.Q.](Documentations/DEVELOPER-FAQ.md)
-- [Misc documentations](Documentations/)
+Full documentation index: [Documentations/README.md](Documentations/README.md) (EN) · [Documentations/pt_BR/README.md](Documentations/pt_BR/README.md) (PT-BR)
+
+| Document | English | Português (BR) |
+|----------|---------|----------------|
+| **Quick start (30 min)** | [en/QUICK-START.md](Documentations/en/QUICK-START.md) | [pt_BR/QUICK-START.md](Documentations/pt_BR/QUICK-START.md) |
+| **Developer manual (complete)** | [en/DEVELOPER-MANUAL.md](Documentations/en/DEVELOPER-MANUAL.md) | [pt_BR/MANUAL-DO-DESENVOLVEDOR.md](Documentations/pt_BR/MANUAL-DO-DESENVOLVEDOR.md) |
+| Architecture | [en/ARCHITECTURE.md](Documentations/en/ARCHITECTURE.md) | [pt_BR/ARQUITETURA.md](Documentations/pt_BR/ARQUITETURA.md) |
+| Install guide (full) | [en/INSTALL.md](Documentations/en/INSTALL.md) | [pt_BR/INSTALL.md](Documentations/pt_BR/INSTALL.md) |
+| Deployment planning | [en/DEPLOYMENT-PLANNING.md](Documentations/en/DEPLOYMENT-PLANNING.md) | [pt_BR/PLANEJAMENTO-DE-IMPLANTACAO.md](Documentations/pt_BR/PLANEJAMENTO-DE-IMPLANTACAO.md) |
+| Dialplan (Asterisk) | [en/DIALPLAN.md](Documentations/en/DIALPLAN.md) | [pt_BR/DIALPLAN.md](Documentations/pt_BR/DIALPLAN.md) |
+| RPM packaging | [rpm/README.md](Documentations/rpm/README.md) | — |
+| Testing | [en/TESTING-METHODOLOGY.md](Documentations/en/TESTING-METHODOLOGY.md) | [pt_BR/METODOLOGIA-DE-TESTES.md](Documentations/pt_BR/METODOLOGIA-DE-TESTES.md) |
+| FAQ | [en/FAQ.md](Documentations/en/FAQ.md) | [pt_BR/FAQ.md](Documentations/pt_BR/FAQ.md) |
+| Security | [en/SECURITY.md](Documentations/en/SECURITY.md) | [pt_BR/SEGURANCA.md](Documentations/pt_BR/SEGURANCA.md) |
+| Recent features | [en/IMPLEMENTED-FEATURES.md](Documentations/en/IMPLEMENTED-FEATURES.md) | [pt_BR/RECURSOS-IMPLEMENTADOS.md](Documentations/pt_BR/RECURSOS-IMPLEMENTADOS.md) |
+| Sample plugin | [Plugins/sampleitems/README.md](Plugins/sampleitems/README.md) | — |
 
 ## Release History
 
@@ -75,7 +85,21 @@ The project is currently in pre-release. Stay tuned for updates as we approach t
 - After years of development and several rewrites, this version marks the first pre-release
 
 **v0.2 – July 21, 2025**
-- A major system refactory to add Multi-Tenant support and some minor optimizations
+- A major system refactoring to add Multi-Tenant support and some minor optimizations
+
+**v0.3 RC1 – June 5, 2026**
+- Dynamic timezone picker driven by host IANA/tzdata (replaces hardcoded map and offsets)
+- Documentation reorganized by language (`Documentations/en/`, `Documentations/pt_BR/`)
+- Rewritten installation and security guides; RPM `%doc` aligned with new layout
+- Platform features: VDFT file transfer, plugin lifecycle and remote sync, monitor delta sync, inter-server PJSIP trunks, extension number migration, and related daemon hooks
+
+**v1.0 – July 21, 2026**
+- First stable release — production-ready for multi-tenant enterprise VoIP deployments
+- Server rebuild logic overhauled (selective main/backup rebuild, per-server crypto keys)
+- Router cryptographic isolation: per-tenant key management, pre-privilege-drop key caching
+- Command lifecycle cleanup: executed commands properly removed from database
+- Comprehensive bug fix sweep (~30 issues across 16 files)
+- Full documentation refresh for 1.0
 
 ## License
 

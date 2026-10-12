@@ -7,7 +7,7 @@
  *    \:.. ./      |::.|::.|       |::.. . /
  *     `---'       `---`---'       `------'
  *
- * Copyright (C) 2016-2025 Ernani José Camargo Azevedo
+ * Copyright (C) 2016-2026 Ernani José Camargo Azevedo
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
  * @version    1.0
  * @package    VoIP Domain
  * @subpackage Authentication
- * @copyright  2016-2025 Ernani José Camargo Azevedo. All rights reserved.
+ * @copyright  2016-2026 Ernani José Camargo Azevedo. All rights reserved.
  * @license    https://www.gnu.org/licenses/gpl-3.0.en.html
  */
 
@@ -77,7 +77,7 @@ function authentication_page ( $output, $parameters)
   sys_addjs ( array ( "name" => "sortable", "src" => "/vendors/Sortable/Sortable.js", "dep" => array ()));
 
   /**
-   * First, we call sub authentication add hook's to populate tabs
+   * First, we call sub authentication add hooks to populate tabs
    */
   $subpages = filters_call ( "authentication_subpages", array (), array ( "tabs" => array (), "js" => array ( "init" => array (), "onshow" => array (), "onfilter" => array ()), "html" => ""));
 
@@ -248,7 +248,7 @@ function authentication_page ( $output, $parameters)
               "    button: $('button.edit'),\n" .
               "    title: '" . __ ( "Authentication") . "',\n" .
               "    fail: '" . __ ( "Error changing configurations!") . "',\n" .
-              "    success: '" . __ ( "Authentication successfully changed!") . "',\n" .
+              "    success: '" . __ ( "Authentication changed successfully!") . "',\n" .
               "    onsuccess: function ()\n" .
               "               {\n" .
               "                 VoIP.path.call ( '/', true);\n" .
